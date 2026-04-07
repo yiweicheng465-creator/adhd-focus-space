@@ -68,9 +68,9 @@ const SECTION_META: Record<Section, { title: string; subtitle: string; icon: Rea
 
 // Sample initial tasks
 const INITIAL_TASKS: Task[] = [
-  { id: "1", text: "Review project proposal", priority: "urgent", done: false, createdAt: new Date() },
-  { id: "2", text: "Reply to important emails", priority: "focus", done: false, createdAt: new Date() },
-  { id: "3", text: "Take a 10-minute walk", priority: "normal", done: false, createdAt: new Date() },
+  { id: "1", text: "Review project proposal", priority: "urgent", context: "work", done: false, createdAt: new Date() },
+  { id: "2", text: "Reply to important emails", priority: "focus", context: "work", done: false, createdAt: new Date() },
+  { id: "3", text: "Take a 10-minute walk", priority: "normal", context: "personal", done: false, createdAt: new Date() },
 ];
 
 export default function Home() {
@@ -78,8 +78,8 @@ export default function Home() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [wins, setWins] = useState<Win[]>([]);
   const [goals, setGoals] = useState<Goal[]>([
-    { id: "g1", text: "Complete the project proposal", progress: 30, createdAt: new Date() },
-    { id: "g2", text: "Exercise 3 times this week", progress: 0, createdAt: new Date() },
+    { id: "g1", text: "Complete the project proposal", progress: 30, context: "work", createdAt: new Date() },
+    { id: "g2", text: "Exercise 3 times this week", progress: 0, context: "personal", createdAt: new Date() },
   ]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [mood, setMood] = useState<number | null>(null);

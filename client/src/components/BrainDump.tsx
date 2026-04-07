@@ -46,6 +46,7 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
       id: nanoid(),
       text: entry.text,
       priority: "focus",
+      context: "work",
       done: false,
       createdAt: new Date(),
     };
