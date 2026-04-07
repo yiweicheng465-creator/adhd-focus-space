@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  Bot,
   Brain,
   CheckSquare,
   Clock,
@@ -29,6 +30,7 @@ const navItems = [
   { id: "wins", label: "Daily Wins", icon: Sparkles },
   { id: "braindump", label: "Brain Dump", icon: Brain },
   { id: "goals", label: "Goals", icon: Target },
+  { id: "agents", label: "AI Agents", icon: Bot },
 ];
 
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {

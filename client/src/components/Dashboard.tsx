@@ -10,13 +10,15 @@ import { FocusTimer } from "./FocusTimer";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
-import { CheckCircle2, Clock, Flame, Sparkles, Target, Zap } from "lucide-react";
+import { Bot, CheckCircle2, Clock, Cpu, Flame, Sparkles, Target, Zap } from "lucide-react";
+import type { Agent } from "./AgentTracker";
 import { Button } from "@/components/ui/button";
 
 interface DashboardProps {
   tasks: Task[];
   wins: Win[];
   goals: Goal[];
+  agents: Agent[];
   mood: number | null;
   onMoodChange: (mood: number) => void;
   onNavigate: (section: string) => void;
@@ -51,6 +53,7 @@ export function Dashboard({
   tasks,
   wins,
   goals,
+  agents,
   mood,
   onMoodChange,
   onNavigate,
@@ -66,6 +69,13 @@ export function Dashboard({
   const avgGoalProgress = goals.length > 0
     ? Math.round(goals.reduce((sum, g) => sum + g.progress, 0) / goals.length)
     : 0;
+
+  const today = now.toDateString();
+  const todayAgents = agents.filter((a) => new Date(a.startedAt).toDateString() === today);
+  const runningAgents = agents.filter((a) => a.status === "running");
+  const uncoveredTasks = activeTasks.filter(
+    (t) => !agents.some((a) => a.linkedTaskId === t.id && (a.status === "running" || a.status === "paused"))
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -127,6 +137,85 @@ export function Dashboard({
           border="oklch(0.6 0.12 145 / 0.2)"
           onClick={() => onNavigate("goals")}
         />
+      </div>
+
+      {/* AI Agent mini-panel */}
+      <div
+        className="p-4 rounded-2xl border cursor-pointer hover:shadow-sm transition-all"
+        style={{
+          background: runningAgents.length > 0 ? "oklch(0.65 0.14 185 / 0.05)" : "oklch(0.98 0.004 90)",
+          borderColor: runningAgents.length > 0 ? "oklch(0.65 0.14 185 / 0.3)" : "oklch(0.9 0.006 90)",
+        }}
+        onClick={() => onNavigate("agents")}
+      >
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <Cpu className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
+            <h2 className="text-sm font-display font-semibold text-foreground">AI Agents Today</h2>
+            {runningAgents.length > 0 && (
+              <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[oklch(0.65_0.14_185_/_0.1)] text-[oklch(0.45_0.14_185)] border border-[oklch(0.65_0.14_185_/_0.25)]">
+                <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.65_0.14_185)] animate-pulse" />
+                {runningAgents.length} running
+              </span>
+            )}
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-xs text-[oklch(0.55_0.14_185)] hover:text-[oklch(0.45_0.14_185)]"
+            onClick={(e) => { e.stopPropagation(); onNavigate("agents"); }}
+          >
+            Manage →
+          </Button>
+        </div>
+
+        {todayAgents.length === 0 ? (
+          <div className="flex items-center gap-3 py-2">
+            <Bot className="w-8 h-8 text-muted-foreground/30" />
+            <div>
+              <p className="text-sm text-muted-foreground">No agents logged today.</p>
+              <p className="text-xs text-muted-foreground/70">Track which AI agents you've deployed and what they're handling.</p>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {todayAgents.slice(0, 3).map((agent) => {
+              const statusColors: Record<string, string> = {
+                running: "oklch(0.65 0.14 185)",
+                paused: "oklch(0.75 0.15 75)",
+                done: "oklch(0.6 0.12 145)",
+                failed: "oklch(0.65 0.22 15)",
+              };
+              return (
+                <div key={agent.id} className="flex items-center gap-3 p-2 rounded-lg bg-white border border-border">
+                  <div
+                    className="w-2 h-2 rounded-full shrink-0"
+                    style={{ background: statusColors[agent.status] }}
+                  />
+                  <span className="text-sm font-medium text-foreground shrink-0">{agent.name}</span>
+                  <span className="text-sm text-muted-foreground truncate flex-1">{agent.task}</span>
+                  <span
+                    className="text-xs shrink-0 capitalize font-medium"
+                    style={{ color: statusColors[agent.status] }}
+                  >
+                    {agent.status}
+                  </span>
+                </div>
+              );
+            })}
+            {todayAgents.length > 3 && (
+              <p className="text-xs text-muted-foreground text-center pt-1">+{todayAgents.length - 3} more agents</p>
+            )}
+            {uncoveredTasks.length > 0 && (
+              <div className="flex items-center gap-2 mt-1 p-2 rounded-lg bg-[oklch(0.65_0.22_15_/_0.06)] border border-[oklch(0.65_0.22_15_/_0.2)]">
+                <Flame className="w-3.5 h-3.5 text-[oklch(0.6_0.22_15)] shrink-0" />
+                <p className="text-xs text-[oklch(0.5_0.2_15)]">
+                  {uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated to an agent
+                </p>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Main content: Focus timer + Quick tasks */}

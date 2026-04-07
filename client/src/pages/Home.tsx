@@ -13,11 +13,20 @@ import { TaskManager, type Task } from "@/components/TaskManager";
 import { DailyWins, type Win } from "@/components/DailyWins";
 import { BrainDump } from "@/components/BrainDump";
 import { Goals, type Goal } from "@/components/Goals";
+import { AgentTracker, type Agent } from "@/components/AgentTracker";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Brain, Clock, CheckSquare, Sparkles, Target, LayoutDashboard } from "lucide-react";
+import {
+  Bot,
+  Brain,
+  CheckSquare,
+  Clock,
+  LayoutDashboard,
+  Sparkles,
+  Target,
+} from "lucide-react";
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
 const SECTION_META: Record<Section, { title: string; subtitle: string; icon: React.ElementType }> = {
   dashboard: {
@@ -50,9 +59,14 @@ const SECTION_META: Record<Section, { title: string; subtitle: string; icon: Rea
     subtitle: "Keep the big picture in sight",
     icon: Target,
   },
+  agents: {
+    title: "AI Agents",
+    subtitle: "Track every agent you've deployed today",
+    icon: Bot,
+  },
 };
 
-// Sample initial tasks to show the app in action
+// Sample initial tasks
 const INITIAL_TASKS: Task[] = [
   { id: "1", text: "Review project proposal", priority: "urgent", done: false, createdAt: new Date() },
   { id: "2", text: "Reply to important emails", priority: "focus", done: false, createdAt: new Date() },
@@ -67,12 +81,12 @@ export default function Home() {
     { id: "g1", text: "Complete the project proposal", progress: 30, createdAt: new Date() },
     { id: "g2", text: "Exercise 3 times this week", progress: 0, createdAt: new Date() },
   ]);
+  const [agents, setAgents] = useState<Agent[]>([]);
   const [mood, setMood] = useState<number | null>(null);
   const [focusSessions, setFocusSessions] = useState(0);
 
   const handleSessionComplete = () => {
     setFocusSessions((s) => s + 1);
-    // Auto-log a win for completing a focus session
     const win: Win = {
       id: `session-${Date.now()}`,
       text: `Completed focus session #${focusSessions + 1}`,
@@ -90,12 +104,18 @@ export default function Home() {
   const meta = SECTION_META[activeSection];
   const Icon = meta.icon;
 
+  // Running agent count for header badge
+  const runningAgents = agents.filter((a) => a.status === "running").length;
+
   return (
     <div className="min-h-screen bg-background flex">
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={(s) => setActiveSection(s as Section)} />
+      <Sidebar
+        activeSection={activeSection}
+        onSectionChange={(s) => setActiveSection(s as Section)}
+      />
 
-      {/* Main content — offset by sidebar width */}
+      {/* Main content */}
       <main className="flex-1 ml-16 min-h-screen flex flex-col">
         {/* Top header bar */}
         <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center gap-3">
@@ -120,26 +140,39 @@ export default function Home() {
             </div>
             <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="w-2 h-2 rounded-full bg-[oklch(0.75_0.15_75)]" />
-              {wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins today
+              {wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins
             </div>
             <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
               <span className="w-2 h-2 rounded-full bg-[oklch(0.65_0.22_15)]" />
               {focusSessions} sessions
             </div>
+            {/* Agent running badge */}
+            {runningAgents > 0 && (
+              <button
+                onClick={() => setActiveSection("agents")}
+                className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-[oklch(0.65_0.14_185_/_0.3)] bg-[oklch(0.65_0.14_185_/_0.08)] text-[oklch(0.45_0.14_185)] hover:bg-[oklch(0.65_0.14_185_/_0.15)] transition-colors"
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.65_0.14_185)] animate-pulse" />
+                {runningAgents} agent{runningAgents > 1 ? "s" : ""} running
+              </button>
+            )}
           </div>
         </header>
 
         {/* Page content */}
         <div className="flex-1 p-6 overflow-y-auto">
-          <div className={cn(
-            "mx-auto",
-            activeSection === "dashboard" ? "max-w-5xl" : "max-w-3xl"
-          )}>
+          <div
+            className={cn(
+              "mx-auto",
+              activeSection === "dashboard" ? "max-w-5xl" : "max-w-3xl"
+            )}
+          >
             {activeSection === "dashboard" && (
               <Dashboard
                 tasks={tasks}
                 wins={wins}
                 goals={goals}
+                agents={agents}
                 mood={mood}
                 onMoodChange={setMood}
                 onNavigate={(s) => setActiveSection(s as Section)}
@@ -149,7 +182,6 @@ export default function Home() {
 
             {activeSection === "focus" && (
               <div className="flex flex-col items-center gap-8 py-8">
-                {/* Focus visual */}
                 <div className="relative">
                   <img
                     src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-focus-visual-RZxfAktQKAhRr5QkGCzrDY.webp"
@@ -158,12 +190,9 @@ export default function Home() {
                   />
                   <div className="absolute inset-0 rounded-full bg-gradient-to-t from-background/40 to-transparent" />
                 </div>
-
                 <div className="w-full max-w-md p-8 rounded-2xl bg-white border border-border shadow-sm">
                   <FocusTimer onSessionComplete={handleSessionComplete} />
                 </div>
-
-                {/* Tips */}
                 <div className="w-full max-w-md p-4 rounded-xl bg-[oklch(0.65_0.14_185_/_0.06)] border border-[oklch(0.65_0.14_185_/_0.15)]">
                   <p className="text-sm font-medium text-foreground mb-2">Focus Tips</p>
                   <ul className="space-y-1.5 text-sm text-muted-foreground">
@@ -198,6 +227,14 @@ export default function Home() {
               <div className="bg-white rounded-2xl border border-border shadow-sm p-6 min-h-[600px] flex flex-col">
                 <Goals goals={goals} onGoalsChange={setGoals} />
               </div>
+            )}
+
+            {activeSection === "agents" && (
+              <AgentTracker
+                agents={agents}
+                onAgentsChange={setAgents}
+                tasks={tasks}
+              />
             )}
           </div>
         </div>
