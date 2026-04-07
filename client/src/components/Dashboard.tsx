@@ -15,6 +15,7 @@ import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
 import { Bot, Briefcase, CheckCircle2, Clock, Cpu, Flame, Sparkles, Target, User, Zap } from "lucide-react";
+import { WeeklyResetNudge } from "./WeeklyResetNudge";
 import { Button } from "@/components/ui/button";
 
 interface DashboardProps {
@@ -54,6 +55,7 @@ function getTip() {
 
 export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNavigate, onSessionComplete }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
+  const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
 
   // Context-filtered data
@@ -97,6 +99,29 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
 
         {/* Context switcher in header */}
         <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={contextCounts} />
+      </div>
+
+      {/* Quick capture bar — 即时捕获，0步骤 */}
+      <div
+        className="flex items-center gap-3 p-3 rounded-2xl border bg-white shadow-sm"
+        style={{ borderColor: "oklch(0.65 0.14 185 / 0.2)" }}
+      >
+        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "oklch(0.65 0.14 185 / 0.1)" }}>
+          <Zap className="w-3.5 h-3.5 text-[oklch(0.55_0.14_185)]" />
+        </div>
+        <input
+          value={quickCapture}
+          onChange={(e) => setQuickCapture(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && quickCapture.trim()) {
+              onNavigate("braindump");
+              setQuickCapture("");
+            }
+          }}
+          placeholder="脑子里冒出什么了？随手记下来… (Enter 存入 Brain Dump)"
+          className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-muted-foreground/60 text-foreground"
+        />
+        <kbd className="hidden sm:inline text-xs text-muted-foreground/50 border border-border rounded px-1.5 py-0.5">↵</kbd>
       </div>
 
       {/* Mood check-in */}
