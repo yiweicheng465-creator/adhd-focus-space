@@ -1,12 +1,9 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Main Page
-   Design: Focused Modernism — navy sidebar + warm white canvas
-   State: All app state lives here, passed down to components
-   ADHD improvements v1.3:
-     - GlobalQuickAdd: floating ⌘K one-sentence task capture
-     - ConfettiCelebration: instant visual feedback on task done
-     - DailyWrapUp: end-of-day digest modal
-     - WeeklyResetNudge: Monday environment reset checklist
+   ADHD FOCUS SPACE — Home Page v2.0
+   Design: Warm Editorial Minimalism
+   - Cream background, Playfair Display serif, DM Sans body
+   - Thin 1px borders, generous whitespace
+   - Daily check-in modal auto-opens once per day
    ============================================================ */
 
 import { useState } from "react";
@@ -22,18 +19,10 @@ import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
+import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import {
-  Bot,
-  Brain,
-  CheckSquare,
-  Clock,
-  LayoutDashboard,
-  Moon,
-  Sparkles,
-  Target,
-} from "lucide-react";
+import { Bot, Brain, CheckSquare, Clock, LayoutDashboard, Moon, Sparkles, Target } from "lucide-react";
 
 type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
@@ -64,22 +53,28 @@ export default function Home() {
   const [agents, setAgents] = useState<Agent[]>([]);
   const [mood, setMood] = useState<number | null>(null);
   const [focusSessions, setFocusSessions] = useState(0);
-
-  // Confetti state
   const [confettiTrigger, setConfettiTrigger] = useState(false);
-
-  // Wrap-up modal
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
+
+  // Daily check-in
+  const { show: showCheckIn, dismiss: dismissCheckIn } = useDailyCheckIn();
+
+  const handleCheckInComplete = (data: CheckInResult) => {
+    if (data.mood) setMood(data.mood);
+    if (data.newTasks.length) setTasks((p) => [...data.newTasks, ...p]);
+    if (data.newWins.length) setWins((p) => [...data.newWins, ...p]);
+    if (data.newAgents.length) setAgents((p) => [...data.newAgents, ...p]);
+    dismissCheckIn();
+    toast.success("Welcome! Your workspace is ready.", { duration: 3000 });
+  };
 
   /* ── Task completion with confetti ── */
   const handleTasksChange = (newTasks: Task[]) => {
-    // Detect newly completed tasks
     const newlyDone = newTasks.filter(
       (t) => t.done && !tasks.find((old) => old.id === t.id)?.done
     );
     if (newlyDone.length > 0) {
       setConfettiTrigger(true);
-      // Auto-log win for task completion
       const win: Win = {
         id: `task-${Date.now()}`,
         text: newlyDone[0].text.length > 40 ? newlyDone[0].text.slice(0, 40) + "…" : newlyDone[0].text,
@@ -108,73 +103,80 @@ export default function Home() {
     toast.success("Added to tasks!", { duration: 2000 });
   };
 
-  const handleQuickAddTask = (task: Task) => {
-    setTasks((prev) => [task, ...prev]);
-  };
-
   const meta = SECTION_META[activeSection];
   const Icon = meta.icon;
   const runningAgents = agents.filter((a) => a.status === "running").length;
 
   return (
-    <div className="min-h-screen bg-background flex">
+    <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
       {/* Sidebar */}
-      <Sidebar
-        activeSection={activeSection}
-        onSectionChange={(s) => setActiveSection(s as Section)}
-      />
+      <Sidebar activeSection={activeSection} onSectionChange={(s) => setActiveSection(s as Section)} />
 
       {/* Main content */}
-      <main className="flex-1 ml-16 min-h-screen flex flex-col">
-        {/* Top header bar */}
-        <header className="sticky top-0 z-30 bg-background/80 backdrop-blur-sm border-b border-border px-6 py-4 flex items-center gap-3">
-          <div
-            className="w-8 h-8 rounded-lg flex items-center justify-center"
-            style={{ background: "oklch(0.65 0.14 185 / 0.1)" }}
-          >
-            <Icon className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-          </div>
-          <div>
-            <h1 className="text-base font-display font-semibold text-foreground leading-tight">{meta.title}</h1>
-            <p className="text-xs text-muted-foreground">{meta.subtitle}</p>
+      <main className="flex-1 ml-14 min-h-screen flex flex-col">
+        {/* Top header bar — editorial style */}
+        <header
+          className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
+          style={{
+            background: "oklch(0.975 0.012 80 / 0.9)",
+            backdropFilter: "blur(8px)",
+            borderBottom: "1px solid oklch(0.88 0.012 75)",
+          }}
+        >
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <Icon className="w-4 h-4 shrink-0" style={{ color: "oklch(0.52 0.14 35)" }} />
+            <div className="min-w-0">
+              <h1
+                className="text-base font-bold italic leading-tight truncate"
+                style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+              >
+                {meta.title}
+              </h1>
+              <p className="editorial-label truncate">{meta.subtitle}</p>
+            </div>
           </div>
 
-          <div className="ml-auto flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="w-2 h-2 rounded-full bg-[oklch(0.65_0.14_185)]" />
-              {tasks.filter((t) => !t.done).length} tasks
+          <div className="flex items-center gap-4 shrink-0">
+            {/* Stats */}
+            <div className="hidden sm:flex items-center gap-4 text-xs" style={{ color: "oklch(0.55 0.015 70)" }}>
+              <span>{tasks.filter((t) => !t.done).length} tasks</span>
+              <span style={{ color: "oklch(0.82 0.012 75)" }}>·</span>
+              <span>{wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins</span>
+              {runningAgents > 0 && (
+                <>
+                  <span style={{ color: "oklch(0.82 0.012 75)" }}>·</span>
+                  <button
+                    onClick={() => setActiveSection("agents")}
+                    className="flex items-center gap-1 hover:text-foreground transition-colors"
+                  >
+                    <span
+                      className="w-1.5 h-1.5 rounded-full animate-pulse"
+                      style={{ background: "oklch(0.52 0.14 35)" }}
+                    />
+                    {runningAgents} agent{runningAgents > 1 ? "s" : ""}
+                  </button>
+                </>
+              )}
             </div>
-            <div className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="w-2 h-2 rounded-full bg-[oklch(0.75_0.15_75)]" />
-              {wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins
-            </div>
-            {runningAgents > 0 && (
-              <button
-                onClick={() => setActiveSection("agents")}
-                className="hidden sm:flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-[oklch(0.65_0.14_185_/_0.3)] bg-[oklch(0.65_0.14_185_/_0.08)] text-[oklch(0.45_0.14_185)] hover:bg-[oklch(0.65_0.14_185_/_0.15)] transition-colors"
-              >
-                <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.65_0.14_185)] animate-pulse" />
-                {runningAgents} running
-              </button>
-            )}
-            {/* Daily wrap-up button */}
+
+            {/* Wrap-up */}
             <button
               onClick={() => setWrapUpOpen(true)}
-              title="今日复盘"
-              className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border border-border text-muted-foreground hover:border-[oklch(0.65_0.14_185_/_0.4)] hover:text-[oklch(0.55_0.14_185)] transition-colors"
+              className="flex items-center gap-1.5 text-xs transition-colors hover:text-foreground"
+              style={{ color: "oklch(0.55 0.015 70)" }}
             >
               <Moon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">今日复盘</span>
+              <span className="hidden sm:inline">Wrap up</span>
             </button>
           </div>
         </header>
 
         {/* Page content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex-1 px-8 py-8 overflow-y-auto">
           <div className={cn("mx-auto", activeSection === "dashboard" ? "max-w-5xl" : "max-w-3xl")}>
 
-            {/* Weekly reset nudge — shown at top of all pages on Mondays */}
-            <div className="mb-4">
+            {/* Weekly reset nudge */}
+            <div className="mb-6">
               <WeeklyResetNudge />
             </div>
 
@@ -192,75 +194,99 @@ export default function Home() {
             )}
 
             {activeSection === "focus" && (
-              <div className="flex flex-col items-center gap-8 py-8">
-                <div className="w-full max-w-md p-8 rounded-2xl bg-white border border-border shadow-sm">
+              <div className="flex flex-col items-center gap-8 py-4">
+                <div
+                  className="w-full max-w-md p-10"
+                  style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+                >
+                  {/* Editorial header */}
+                  <div className="mb-8 text-center">
+                    <img
+                      src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-timer-SpuVNoS38pX9SRh3kmwiCK.webp"
+                      alt="timer illustration"
+                      className="w-16 mx-auto mb-4 opacity-70"
+                    />
+                    <h2
+                      className="text-xl font-bold italic"
+                      style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+                    >
+                      Deep Work
+                    </h2>
+                    <p className="editorial-label mt-1">One session at a time</p>
+                  </div>
                   <FocusTimer onSessionComplete={handleSessionComplete} />
                 </div>
-                <div className="w-full max-w-md p-4 rounded-xl bg-[oklch(0.65_0.14_185_/_0.06)] border border-[oklch(0.65_0.14_185_/_0.15)]">
-                  <p className="text-sm font-medium text-foreground mb-2">Focus Tips</p>
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
-                    <li>• Put your phone face-down or in another room</li>
-                    <li>• Close all browser tabs except what you need</li>
-                    <li>• Tell others you're in a focus session</li>
-                    <li>• Use the Brain Dump for distracting thoughts</li>
+                <div
+                  className="w-full max-w-md p-5"
+                  style={{ border: "1px solid oklch(0.87 0.014 75)" }}
+                >
+                  <p className="editorial-label mb-3">Focus tips</p>
+                  <ul className="space-y-2 text-sm" style={{ color: "oklch(0.45 0.01 60)" }}>
+                    <li>— Put your phone face-down or in another room</li>
+                    <li>— Close all browser tabs except what you need</li>
+                    <li>— Tell others you're in a focus session</li>
+                    <li>— Use the Brain Dump for distracting thoughts</li>
                   </ul>
                 </div>
               </div>
             )}
 
             {activeSection === "tasks" && (
-              <div className="bg-white rounded-2xl border border-border shadow-sm p-6 min-h-[600px] flex flex-col">
+              <div
+                className="p-8 min-h-[600px] flex flex-col"
+                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+              >
                 <TaskManager tasks={tasks} onTasksChange={handleTasksChange} />
               </div>
             )}
 
             {activeSection === "wins" && (
-              <div className="bg-white rounded-2xl border border-border shadow-sm p-6 min-h-[600px] flex flex-col">
+              <div
+                className="p-8 min-h-[600px] flex flex-col"
+                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+              >
                 <DailyWins wins={wins} onWinsChange={setWins} />
               </div>
             )}
 
             {activeSection === "braindump" && (
-              <div className="bg-white rounded-2xl border border-border shadow-sm p-6 min-h-[600px] flex flex-col">
+              <div
+                className="p-8 min-h-[600px] flex flex-col"
+                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+              >
                 <BrainDump onConvertToTask={handleConvertToTask} />
               </div>
             )}
 
             {activeSection === "goals" && (
-              <div className="bg-white rounded-2xl border border-border shadow-sm p-6 min-h-[600px] flex flex-col">
+              <div
+                className="p-8 min-h-[600px] flex flex-col"
+                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+              >
                 <Goals goals={goals} onGoalsChange={setGoals} />
               </div>
             )}
 
             {activeSection === "agents" && (
-              <AgentTracker
-                agents={agents}
-                onAgentsChange={setAgents}
-                tasks={tasks}
-              />
+              <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} />
             )}
           </div>
         </div>
       </main>
 
       {/* ── Global overlays ── */}
+      <GlobalQuickAdd onAddTask={(t) => setTasks((p) => [t, ...p])} />
+      <ConfettiCelebration trigger={confettiTrigger} onComplete={() => setConfettiTrigger(false)} />
 
-      {/* Floating quick-add button + modal */}
-      <GlobalQuickAdd onAddTask={handleQuickAddTask} />
-
-      {/* Confetti on task/session completion */}
-      <ConfettiCelebration
-        trigger={confettiTrigger}
-        onComplete={() => setConfettiTrigger(false)}
-      />
-
-      {/* Daily wrap-up modal */}
       {wrapUpOpen && (
-        <DailyWrapUp
-          tasks={tasks}
-          wins={wins}
-          agents={agents}
-          onClose={() => setWrapUpOpen(false)}
+        <DailyWrapUp tasks={tasks} wins={wins} agents={agents} onClose={() => setWrapUpOpen(false)} />
+      )}
+
+      {/* Daily check-in — auto-opens once per day */}
+      {showCheckIn && (
+        <DailyCheckIn
+          onComplete={handleCheckInComplete}
+          onSkip={dismissCheckIn}
         />
       )}
     </div>

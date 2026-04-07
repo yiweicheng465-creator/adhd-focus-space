@@ -1,11 +1,10 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Sidebar Navigation
-   Design: Deep navy (#0F172A) fixed sidebar, icon rail + labels
-   Expands on hover, collapses to icon-only on small screens
+   ADHD FOCUS SPACE — Editorial Sidebar v2.0
+   Design: Warm cream, thin 1px borders, serif logo mark
+   Layout: Narrow 56px column, icon + tiny caps label
    ============================================================ */
 
-import { useState } from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import React, { useEffect, useState } from "react";
 import {
   Bot,
   Brain,
@@ -14,7 +13,6 @@ import {
   LayoutDashboard,
   Sparkles,
   Target,
-  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,104 +21,112 @@ interface SidebarProps {
   onSectionChange: (section: string) => void;
 }
 
-const navItems = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "focus", label: "Focus Timer", icon: Clock },
-  { id: "tasks", label: "My Tasks", icon: CheckSquare },
-  { id: "wins", label: "Daily Wins", icon: Sparkles },
-  { id: "braindump", label: "Brain Dump", icon: Brain },
-  { id: "goals", label: "Goals", icon: Target },
-  { id: "agents", label: "AI Agents", icon: Bot },
+const NAV_ITEMS = [
+  { id: "dashboard",  shortLabel: "HOME",   icon: LayoutDashboard, title: "Dashboard"  },
+  { id: "focus",      shortLabel: "FOCUS",  icon: Clock,           title: "Focus Timer" },
+  { id: "tasks",      shortLabel: "TASKS",  icon: CheckSquare,     title: "My Tasks"   },
+  { id: "wins",       shortLabel: "WINS",   icon: Sparkles,        title: "Daily Wins" },
+  { id: "braindump",  shortLabel: "DUMP",   icon: Brain,           title: "Brain Dump" },
+  { id: "goals",      shortLabel: "GOALS",  icon: Target,          title: "Goals"      },
+  { id: "agents",     shortLabel: "AGENTS", icon: Bot,             title: "AI Agents"  },
 ];
 
-export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
-  const [expanded, setExpanded] = useState(false);
+function LiveTime() {
+  const fmt = () =>
+    new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false });
+  const [t, setT] = useState(fmt);
+  useEffect(() => {
+    const id = setInterval(() => setT(fmt()), 30000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <span
+      className="text-[8px] tracking-widest"
+      style={{ color: "oklch(0.62 0.015 70)", fontFamily: "'DM Sans', sans-serif" }}
+    >
+      {t}
+    </span>
+  );
+}
 
+export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   return (
     <aside
-      className={cn(
-        "fixed left-0 top-0 h-full z-40 flex flex-col sidebar-transition",
-        "bg-[oklch(0.18_0.04_255)] border-r border-[oklch(0.28_0.04_255)]",
-        expanded ? "w-56" : "w-16"
-      )}
-      onMouseEnter={() => setExpanded(true)}
-      onMouseLeave={() => setExpanded(false)}
+      className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-5 gap-0"
+      style={{
+        background: "oklch(0.955 0.018 78)",
+        borderRight: "1px solid oklch(0.87 0.014 75)",
+      }}
     >
-      {/* Logo */}
-      <div className="flex items-center h-16 px-4 border-b border-[oklch(0.28_0.04_255)] overflow-hidden">
-        <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-[oklch(0.65_0.14_185)] flex items-center justify-center glow-teal">
-          <Zap className="w-4 h-4 text-white" />
-        </div>
-        {expanded && (
-          <span className="ml-3 font-display font-bold text-white text-sm whitespace-nowrap opacity-0 animate-[fadeIn_0.15s_ease-out_0.05s_forwards]">
-            Focus Space
+      {/* Logo mark */}
+      <div className="mb-5 flex flex-col items-center">
+        <div
+          className="w-8 h-8 flex items-center justify-center"
+          style={{
+            border: "1px solid oklch(0.52 0.14 35)",
+            background: "transparent",
+          }}
+        >
+          <span
+            className="text-sm font-bold italic"
+            style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.52 0.14 35)" }}
+          >
+            A
           </span>
-        )}
+        </div>
       </div>
 
+      {/* Thin divider */}
+      <div className="w-6 mb-4" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
+
       {/* Nav items */}
-      <nav className="flex-1 py-4 space-y-1 px-2">
-        {navItems.map(({ id, label, icon: Icon }) => {
+      <nav className="flex flex-col gap-0.5 flex-1 w-full px-2">
+        {NAV_ITEMS.map(({ id, shortLabel, icon: Icon, title }) => {
           const isActive = activeSection === id;
           return (
-            <Tooltip key={id} delayDuration={0}>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={() => onSectionChange(id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-2 py-2.5 rounded-lg transition-all duration-150",
-                    "text-[oklch(0.7_0.02_255)] hover:text-white",
-                    isActive
-                      ? "bg-[oklch(0.65_0.14_185_/_0.2)] text-[oklch(0.65_0.14_185)] border border-[oklch(0.65_0.14_185_/_0.3)]"
-                      : "hover:bg-[oklch(0.25_0.05_255)]"
-                  )}
-                >
-                  <Icon
-                    className={cn(
-                      "flex-shrink-0 w-5 h-5",
-                      isActive && "text-[oklch(0.65_0.14_185)]"
-                    )}
-                  />
-                  {expanded && (
-                    <span className="text-sm font-medium whitespace-nowrap overflow-hidden">
-                      {label}
-                    </span>
-                  )}
-                </button>
-              </TooltipTrigger>
-              {!expanded && (
-                <TooltipContent side="right" className="bg-[oklch(0.25_0.05_255)] text-white border-[oklch(0.35_0.05_255)]">
-                  {label}
-                </TooltipContent>
+            <button
+              key={id}
+              onClick={() => onSectionChange(id)}
+              title={title}
+              className={cn(
+                "relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150 group",
+                isActive ? "" : "hover:bg-[oklch(0.52_0.14_35_/_0.04)]"
               )}
-            </Tooltip>
+              style={{
+                background: isActive ? "oklch(0.52 0.14 35 / 0.08)" : undefined,
+              }}
+            >
+              {/* Active left bar */}
+              {isActive && (
+                <div
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5"
+                  style={{ background: "oklch(0.52 0.14 35)" }}
+                />
+              )}
+              <Icon
+                className="w-[15px] h-[15px] transition-colors"
+                style={{ color: isActive ? "oklch(0.52 0.14 35)" : "oklch(0.55 0.015 70)" }}
+              />
+              <span
+                className="text-[7px] mt-1 tracking-[0.12em] font-medium"
+                style={{
+                  fontFamily: "'DM Sans', sans-serif",
+                  color: isActive ? "oklch(0.52 0.14 35)" : "oklch(0.65 0.015 70)",
+                }}
+              >
+                {shortLabel}
+              </span>
+            </button>
           );
         })}
       </nav>
 
-      {/* Bottom streak indicator */}
-      <div className="p-3 border-t border-[oklch(0.28_0.04_255)]">
-        <Tooltip delayDuration={0}>
-          <TooltipTrigger asChild>
-            <div className={cn(
-              "flex items-center gap-3 px-2 py-2 rounded-lg",
-              "bg-[oklch(0.75_0.15_75_/_0.1)] border border-[oklch(0.75_0.15_75_/_0.2)]"
-            )}>
-              <span className="text-lg flex-shrink-0">🔥</span>
-              {expanded && (
-                <div className="overflow-hidden">
-                  <p className="text-xs text-[oklch(0.75_0.15_75)] font-medium whitespace-nowrap">Day Streak</p>
-                  <p className="text-xs text-[oklch(0.6_0.02_255)] whitespace-nowrap">Keep it up!</p>
-                </div>
-              )}
-            </div>
-          </TooltipTrigger>
-          {!expanded && (
-            <TooltipContent side="right" className="bg-[oklch(0.25_0.05_255)] text-white border-[oklch(0.35_0.05_255)]">
-              Day Streak — Keep it up!
-            </TooltipContent>
-          )}
-        </Tooltip>
+      {/* Bottom: live time */}
+      <div className="mt-auto flex flex-col items-center gap-1 pb-1">
+        <div className="w-6" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
+        <div className="mt-2">
+          <LiveTime />
+        </div>
       </div>
     </aside>
   );

@@ -1,8 +1,9 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Dashboard Overview
-   Design: Asymmetric grid, status at a glance, motivational
-   Shows: Today's date, mood, tasks summary, wins, focus sessions
-   Context: Work / Personal split visible in stats
+   ADHD FOCUS SPACE — Editorial Dashboard v2.0
+   Design: Warm Editorial Minimalism
+   - Asymmetric layout: large illustration left, stats right
+   - Playfair Display serif headings, DM Sans body
+   - Thin 1px borders, cream backgrounds, terracotta accents
    ============================================================ */
 
 import { useState } from "react";
@@ -15,7 +16,6 @@ import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
 import { Bot, Briefcase, CheckCircle2, Clock, Cpu, Flame, Sparkles, Target, User, Zap } from "lucide-react";
-import { WeeklyResetNudge } from "./WeeklyResetNudge";
 import { Button } from "@/components/ui/button";
 
 interface DashboardProps {
@@ -29,14 +29,14 @@ interface DashboardProps {
   onSessionComplete: () => void;
 }
 
-const DAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+const DAYS   = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning,";
+  if (h < 17) return "Good afternoon,";
+  return "Good evening,";
 }
 
 function getTip() {
@@ -45,294 +45,330 @@ function getTip() {
     "Break big tasks into 3-step mini-plans.",
     "A 2-minute task? Do it now.",
     "Reward yourself after each focus session.",
-    "Body doubling helps — work alongside someone.",
-    "Set a timer before you start. It makes it real.",
     "Done is better than perfect.",
     "Your brain is not broken — it just works differently.",
+    "Set a timer before you start. It makes it real.",
+    "Body doubling helps — work alongside someone.",
   ];
   return tips[new Date().getDate() % tips.length];
 }
+
+// Terracotta accent color
+const TC = "oklch(0.52 0.14 35)";
+const TC_LIGHT = "oklch(0.52 0.14 35 / 0.08)";
+const TC_BORDER = "oklch(0.52 0.14 35 / 0.25)";
+const CREAM = "oklch(0.985 0.008 80)";
+const BORDER = "oklch(0.87 0.014 75)";
+const INK = "oklch(0.18 0.01 60)";
+const MUTED = "oklch(0.52 0.015 70)";
 
 export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNavigate, onSessionComplete }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
 
-  // Context-filtered data
-  const contextTasks = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
-  const contextGoals = goals.filter((g) => activeContext === "all" ? true : g.context === activeContext);
+  const contextTasks  = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
+  const contextGoals  = goals.filter((g) => activeContext === "all" ? true : g.context === activeContext);
   const contextAgents = agents.filter((a) => activeContext === "all" ? true : a.context === activeContext);
 
-  const activeTasks = contextTasks.filter((t) => !t.done);
-  const urgentTasks = activeTasks.filter((t) => t.priority === "urgent");
-  const todayWins = wins.filter((w) => new Date(w.createdAt).toDateString() === now.toDateString());
-  const avgGoalProgress = contextGoals.length > 0
-    ? Math.round(contextGoals.reduce((sum, g) => sum + g.progress, 0) / contextGoals.length)
+  const activeTasks  = contextTasks.filter((t) => !t.done);
+  const urgentTasks  = activeTasks.filter((t) => t.priority === "urgent");
+  const todayWins    = wins.filter((w) => new Date(w.createdAt).toDateString() === now.toDateString());
+  const avgGoalProg  = contextGoals.length > 0
+    ? Math.round(contextGoals.reduce((s, g) => s + g.progress, 0) / contextGoals.length)
     : 0;
 
-  const today = now.toDateString();
-  const todayAgents = contextAgents.filter((a) => new Date(a.startedAt).toDateString() === today);
+  const today         = now.toDateString();
+  const todayAgents   = contextAgents.filter((a) => new Date(a.startedAt).toDateString() === today);
   const runningAgents = contextAgents.filter((a) => a.status === "running");
-  const uncoveredTasks = activeTasks.filter(
+  const uncovered     = activeTasks.filter(
     (t) => !agents.some((a) => a.linkedTaskId === t.id && (a.status === "running" || a.status === "paused"))
   );
 
-  const contextCounts = {
-    all: tasks.filter((t) => !t.done).length,
-    work: tasks.filter((t) => !t.done && t.context === "work").length,
+  const ctxCounts = {
+    all:      tasks.filter((t) => !t.done).length,
+    work:     tasks.filter((t) => !t.done && t.context === "work").length,
     personal: tasks.filter((t) => !t.done && t.context === "personal").length,
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <p className="text-sm text-muted-foreground font-medium">
+    <div className="flex flex-col gap-8">
+
+      {/* ── Hero row: illustration + greeting ── */}
+      <div
+        className="flex gap-0 overflow-hidden"
+        style={{ border: `1px solid ${BORDER}` }}
+      >
+        {/* Left: illustration panel */}
+        <div
+          className="hidden md:flex w-52 shrink-0 items-end justify-center p-6 pb-0"
+          style={{ background: "oklch(0.96 0.016 78)", borderRight: `1px solid ${BORDER}` }}
+        >
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp"
+            alt="thinking person illustration"
+            className="w-full max-w-[160px] opacity-75 object-contain"
+            style={{ maxHeight: 220 }}
+          />
+        </div>
+
+        {/* Right: greeting + quick capture */}
+        <div className="flex-1 p-7" style={{ background: CREAM }}>
+          <p className="editorial-label mb-1">
             {DAYS[now.getDay()]}, {MONTHS[now.getMonth()]} {now.getDate()}
           </p>
-          <h1 className="text-3xl font-display font-bold text-foreground mt-0.5">
-            {getGreeting()} 👋
+          <h1
+            className="text-3xl font-bold italic leading-tight"
+            style={{ fontFamily: "'Playfair Display', serif", color: INK }}
+          >
+            {getGreeting()}
           </h1>
-          <p className="text-sm text-muted-foreground mt-1 italic">"{getTip()}"</p>
-        </div>
+          <p className="text-sm mt-2 italic" style={{ color: MUTED }}>
+            "{getTip()}"
+          </p>
 
-        {/* Context switcher in header */}
-        <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={contextCounts} />
+          {/* Quick capture */}
+          <div
+            className="flex items-center gap-3 mt-5 px-4 py-3"
+            style={{ border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80)" }}
+          >
+            <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: TC }} />
+            <input
+              value={quickCapture}
+              onChange={(e) => setQuickCapture(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && quickCapture.trim()) {
+                  onNavigate("braindump");
+                  setQuickCapture("");
+                }
+              }}
+              placeholder="What's on your mind? Type and press Enter to save…"
+              className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-muted-foreground/60"
+              style={{ color: INK }}
+            />
+            <kbd className="hidden sm:inline text-[10px] border px-1.5 py-0.5" style={{ color: MUTED, borderColor: BORDER }}>↵</kbd>
+          </div>
+
+          {/* Context switcher */}
+          <div className="mt-4">
+            <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} />
+          </div>
+        </div>
       </div>
 
-      {/* Quick capture bar — 即时捕获，0步骤 */}
-      <div
-        className="flex items-center gap-3 p-3 rounded-2xl border bg-white shadow-sm"
-        style={{ borderColor: "oklch(0.65 0.14 185 / 0.2)" }}
-      >
-        <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: "oklch(0.65 0.14 185 / 0.1)" }}>
-          <Zap className="w-3.5 h-3.5 text-[oklch(0.55_0.14_185)]" />
-        </div>
-        <input
-          value={quickCapture}
-          onChange={(e) => setQuickCapture(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && quickCapture.trim()) {
-              onNavigate("braindump");
-              setQuickCapture("");
-            }
-          }}
-          placeholder="脑子里冒出什么了？随手记下来… (Enter 存入 Brain Dump)"
-          className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-muted-foreground/60 text-foreground"
-        />
-        <kbd className="hidden sm:inline text-xs text-muted-foreground/50 border border-border rounded px-1.5 py-0.5">↵</kbd>
-      </div>
-
-      {/* Mood check-in */}
-      <div className="p-4 rounded-2xl bg-white border border-border shadow-sm">
+      {/* ── Mood check-in ── */}
+      <div className="p-6" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
+        <p className="editorial-label mb-4">How are you feeling today?</p>
         <MoodCheckIn currentMood={mood} onMoodChange={onMoodChange} />
       </div>
 
-      {/* Context breakdown cards */}
+      {/* ── Work / Personal breakdown (only in "all" context) ── */}
       {activeContext === "all" && (
-        <div className="grid grid-cols-2 gap-3">
-          <button
-            onClick={() => setActiveContext("work")}
-            className="p-4 rounded-xl border border-[oklch(0.5_0.18_260_/_0.25)] bg-[oklch(0.5_0.18_260_/_0.05)] hover:bg-[oklch(0.5_0.18_260_/_0.09)] transition-all text-left"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <Briefcase className="w-4 h-4 text-[oklch(0.5_0.18_260)]" />
-              <span className="text-sm font-semibold text-[oklch(0.4_0.18_260)]">Work</span>
-            </div>
-            <div className="flex items-end gap-4">
-              <div>
-                <p className="text-2xl font-display font-bold text-[oklch(0.4_0.18_260)]">
-                  {tasks.filter((t) => !t.done && t.context === "work").length}
-                </p>
-                <p className="text-xs text-muted-foreground">active tasks</p>
+        <div className="grid grid-cols-2 gap-4">
+          {[
+            { ctx: "work",     label: "Work",     icon: Briefcase, color: "oklch(0.5 0.18 260)", bg: "oklch(0.5 0.18 260 / 0.05)", border: "oklch(0.5 0.18 260 / 0.2)" },
+            { ctx: "personal", label: "Personal", icon: User,      color: "oklch(0.55 0.18 310)", bg: "oklch(0.55 0.18 310 / 0.05)", border: "oklch(0.55 0.18 310 / 0.2)" },
+          ].map(({ ctx, label, icon: Icon, color, bg, border }) => (
+            <button
+              key={ctx}
+              onClick={() => setActiveContext(ctx as ActiveContext)}
+              className="p-5 text-left transition-all hover:opacity-90"
+              style={{ background: bg, border: `1px solid ${border}` }}
+            >
+              <div className="flex items-center gap-2 mb-3">
+                <Icon className="w-3.5 h-3.5" style={{ color }} />
+                <span className="editorial-label" style={{ color }}>{label}</span>
               </div>
-              <div>
-                <p className="text-2xl font-display font-bold text-[oklch(0.4_0.18_260)]">
-                  {agents.filter((a) => a.status === "running" && a.context === "work").length}
-                </p>
-                <p className="text-xs text-muted-foreground">agents running</p>
+              <div className="flex items-end gap-6">
+                <div>
+                  <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color }}>
+                    {tasks.filter((t) => !t.done && t.context === ctx).length}
+                  </p>
+                  <p className="editorial-label">tasks</p>
+                </div>
+                <div>
+                  <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color }}>
+                    {agents.filter((a) => a.status === "running" && a.context === ctx).length}
+                  </p>
+                  <p className="editorial-label">agents</p>
+                </div>
               </div>
-            </div>
-          </button>
-
-          <button
-            onClick={() => setActiveContext("personal")}
-            className="p-4 rounded-xl border border-[oklch(0.55_0.18_310_/_0.25)] bg-[oklch(0.55_0.18_310_/_0.05)] hover:bg-[oklch(0.55_0.18_310_/_0.09)] transition-all text-left"
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <User className="w-4 h-4 text-[oklch(0.55_0.18_310)]" />
-              <span className="text-sm font-semibold text-[oklch(0.45_0.18_310)]">Personal</span>
-            </div>
-            <div className="flex items-end gap-4">
-              <div>
-                <p className="text-2xl font-display font-bold text-[oklch(0.45_0.18_310)]">
-                  {tasks.filter((t) => !t.done && t.context === "personal").length}
-                </p>
-                <p className="text-xs text-muted-foreground">active tasks</p>
-              </div>
-              <div>
-                <p className="text-2xl font-display font-bold text-[oklch(0.45_0.18_310)]">
-                  {agents.filter((a) => a.status === "running" && a.context === "personal").length}
-                </p>
-                <p className="text-xs text-muted-foreground">agents running</p>
-              </div>
-            </div>
-          </button>
+            </button>
+          ))}
         </div>
       )}
 
-      {/* Stats grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard icon={<Flame className="w-5 h-5" />}        label="Urgent Tasks"   value={urgentTasks.length}  color="oklch(0.65 0.22 15)"  bg="oklch(0.65 0.22 15 / 0.08)"  border="oklch(0.65 0.22 15 / 0.2)"  onClick={() => onNavigate("tasks")} />
-        <StatCard icon={<CheckCircle2 className="w-5 h-5" />} label="Active Tasks"   value={activeTasks.length}  color="oklch(0.65 0.14 185)" bg="oklch(0.65 0.14 185 / 0.08)" border="oklch(0.65 0.14 185 / 0.2)" onClick={() => onNavigate("tasks")} />
-        <StatCard icon={<Sparkles className="w-5 h-5" />}     label="Today's Wins"   value={todayWins.length}    color="oklch(0.65 0.15 75)"  bg="oklch(0.65 0.15 75 / 0.08)"  border="oklch(0.65 0.15 75 / 0.2)"  onClick={() => onNavigate("wins")}  />
-        <StatCard icon={<Target className="w-5 h-5" />}       label="Goal Progress"  value={`${avgGoalProgress}%`} color="oklch(0.6 0.12 145)" bg="oklch(0.6 0.12 145 / 0.08)"  border="oklch(0.6 0.12 145 / 0.2)"  onClick={() => onNavigate("goals")} />
+      {/* ── Stats row ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { icon: <Flame className="w-4 h-4" />,        label: "Urgent",       value: urgentTasks.length,  section: "tasks" },
+          { icon: <CheckCircle2 className="w-4 h-4" />, label: "Active Tasks", value: activeTasks.length,  section: "tasks" },
+          { icon: <Sparkles className="w-4 h-4" />,     label: "Today's Wins", value: todayWins.length,    section: "wins"  },
+          { icon: <Target className="w-4 h-4" />,       label: "Goal Avg",     value: `${avgGoalProg}%`,   section: "goals" },
+        ].map(({ icon, label, value, section }) => (
+          <button
+            key={label}
+            onClick={() => onNavigate(section)}
+            className="p-5 text-left transition-all hover:opacity-90"
+            style={{ border: `1px solid ${BORDER}`, background: CREAM }}
+          >
+            <div className="flex items-center gap-2 mb-3" style={{ color: TC }}>
+              {icon}
+              <span className="editorial-label">{label}</span>
+            </div>
+            <p
+              className="text-3xl font-bold italic"
+              style={{ fontFamily: "'Playfair Display', serif", color: INK }}
+            >
+              {value}
+            </p>
+          </button>
+        ))}
       </div>
 
-      {/* AI Agent mini-panel */}
+      {/* ── AI Agents panel ── */}
       <div
-        className="p-4 rounded-2xl border cursor-pointer hover:shadow-sm transition-all"
-        style={{
-          background: runningAgents.length > 0 ? "oklch(0.65 0.14 185 / 0.05)" : "oklch(0.98 0.004 90)",
-          borderColor: runningAgents.length > 0 ? "oklch(0.65 0.14 185 / 0.3)" : "oklch(0.9 0.006 90)",
-        }}
+        className="p-6 cursor-pointer transition-all hover:opacity-95"
+        style={{ border: `1px solid ${runningAgents.length > 0 ? TC_BORDER : BORDER}`, background: runningAgents.length > 0 ? TC_LIGHT : CREAM }}
         onClick={() => onNavigate("agents")}
       >
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-            <h2 className="text-sm font-display font-semibold text-foreground">AI Agents Today</h2>
+            <Cpu className="w-3.5 h-3.5" style={{ color: TC }} />
+            <p className="editorial-label">AI Agents Today</p>
             {runningAgents.length > 0 && (
-              <span className="flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full bg-[oklch(0.65_0.14_185_/_0.1)] text-[oklch(0.45_0.14_185)] border border-[oklch(0.65_0.14_185_/_0.25)]">
-                <span className="w-1.5 h-1.5 rounded-full bg-[oklch(0.65_0.14_185)] animate-pulse" />
+              <span
+                className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5"
+                style={{ background: TC_LIGHT, color: TC, border: `1px solid ${TC_BORDER}` }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: TC }} />
                 {runningAgents.length} running
               </span>
             )}
           </div>
-          <Button variant="ghost" size="sm" className="text-xs text-[oklch(0.55_0.14_185)]" onClick={(e) => { e.stopPropagation(); onNavigate("agents"); }}>
-            Manage →
-          </Button>
+          <span className="text-xs" style={{ color: TC }}>Manage →</span>
         </div>
 
         {todayAgents.length === 0 ? (
-          <div className="flex items-center gap-3 py-2">
-            <Bot className="w-8 h-8 text-muted-foreground/30" />
+          <div className="flex items-center gap-4 py-2">
+            <Bot className="w-8 h-8 opacity-20" />
             <div>
-              <p className="text-sm text-muted-foreground">No agents logged today.</p>
-              <p className="text-xs text-muted-foreground/70">Track which AI agents you've deployed and what they're handling.</p>
+              <p className="text-sm" style={{ color: MUTED }}>No agents logged today.</p>
+              <p className="text-xs mt-0.5" style={{ color: "oklch(0.65 0.015 70)" }}>Track which AI agents you've deployed and what they're handling.</p>
             </div>
           </div>
         ) : (
           <div className="space-y-2">
-            {todayAgents.slice(0, 3).map((agent) => {
-              const statusColors: Record<string, string> = { running: "oklch(0.65 0.14 185)", paused: "oklch(0.75 0.15 75)", done: "oklch(0.6 0.12 145)", failed: "oklch(0.65 0.22 15)" };
+            {todayAgents.slice(0, 3).map((a) => {
+              const sc: Record<string, string> = { running: TC, paused: "oklch(0.65 0.12 75)", done: "oklch(0.5 0.12 145)", failed: "oklch(0.6 0.2 15)" };
               return (
-                <div key={agent.id} className="flex items-center gap-3 p-2 rounded-lg bg-white border border-border">
-                  <div className="w-2 h-2 rounded-full shrink-0" style={{ background: statusColors[agent.status] }} />
-                  <span className="text-sm font-medium text-foreground shrink-0">{agent.name}</span>
-                  <span className="text-sm text-muted-foreground truncate flex-1">{agent.task}</span>
-                  <span className="text-xs shrink-0 capitalize font-medium" style={{ color: statusColors[agent.status] }}>{agent.status}</span>
+                <div key={a.id} className="flex items-center gap-3 p-3" style={{ border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80)" }}>
+                  <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sc[a.status] }} />
+                  <span className="text-sm font-medium shrink-0" style={{ color: INK }}>{a.name}</span>
+                  <span className="text-sm truncate flex-1" style={{ color: MUTED }}>{a.task}</span>
+                  <span className="text-xs shrink-0 capitalize" style={{ color: sc[a.status] }}>{a.status}</span>
                 </div>
               );
             })}
-            {todayAgents.length > 3 && <p className="text-xs text-muted-foreground text-center pt-1">+{todayAgents.length - 3} more agents</p>}
-            {uncoveredTasks.length > 0 && (
-              <div className="flex items-center gap-2 mt-1 p-2 rounded-lg bg-[oklch(0.65_0.22_15_/_0.06)] border border-[oklch(0.65_0.22_15_/_0.2)]">
-                <Flame className="w-3.5 h-3.5 text-[oklch(0.6_0.22_15)] shrink-0" />
-                <p className="text-xs text-[oklch(0.5_0.2_15)]">{uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated to an agent</p>
+            {todayAgents.length > 3 && <p className="text-xs text-center pt-1" style={{ color: MUTED }}>+{todayAgents.length - 3} more</p>}
+            {uncovered.length > 0 && (
+              <div className="flex items-center gap-2 p-2.5" style={{ background: "oklch(0.65 0.2 15 / 0.05)", border: "1px solid oklch(0.65 0.2 15 / 0.2)" }}>
+                <Flame className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.55 0.2 15)" }} />
+                <p className="text-xs" style={{ color: "oklch(0.45 0.18 15)" }}>{uncovered.length} task{uncovered.length > 1 ? "s" : ""} not yet delegated to an agent</p>
               </div>
             )}
           </div>
         )}
       </div>
 
-      {/* Main content: Focus timer + Quick tasks */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ── Bottom: Focus timer + Next up ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Focus timer */}
-        <div className="p-6 rounded-2xl bg-white border border-border shadow-sm">
-          <div className="flex items-center gap-2 mb-5">
-            <Clock className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-            <h2 className="text-sm font-display font-semibold text-foreground">Focus Timer</h2>
+        <div className="p-7" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
+          <div className="flex items-center gap-2 mb-6">
+            <Clock className="w-3.5 h-3.5" style={{ color: TC }} />
+            <p className="editorial-label">Focus Timer</p>
           </div>
           <FocusTimer onSessionComplete={onSessionComplete} />
         </div>
 
-        {/* Quick task view */}
-        <div className="p-6 rounded-2xl bg-white border border-border shadow-sm flex flex-col gap-4">
-          <div className="flex items-center justify-between">
+        {/* Next up */}
+        <div className="p-7 flex flex-col" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
+          <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
-              <Zap className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-              <h2 className="text-sm font-display font-semibold text-foreground">Next Up</h2>
+              <Zap className="w-3.5 h-3.5" style={{ color: TC }} />
+              <p className="editorial-label">Next Up</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("tasks")} className="text-xs text-[oklch(0.55_0.14_185)]">
+            <button
+              onClick={() => onNavigate("tasks")}
+              className="text-xs transition-colors hover:opacity-70"
+              style={{ color: TC }}
+            >
               View all →
-            </Button>
+            </button>
           </div>
 
           {activeTasks.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center py-8 text-center">
-              <CheckCircle2 className="w-10 h-10 text-[oklch(0.65_0.14_185_/_0.3)] mb-2" />
-              <p className="text-sm text-muted-foreground">All clear! Add tasks to get started.</p>
-              <Button size="sm" className="mt-3" style={{ background: "oklch(0.65 0.14 185)" }} onClick={() => onNavigate("tasks")}>
+              <CheckCircle2 className="w-8 h-8 mb-3 opacity-20" />
+              <p className="text-sm" style={{ color: MUTED }}>All clear! Add tasks to get started.</p>
+              <button
+                className="mt-4 px-4 py-2 text-sm font-medium transition-all hover:opacity-90"
+                style={{ background: TC, color: "white" }}
+                onClick={() => onNavigate("tasks")}
+              >
                 Add a task
-              </Button>
+              </button>
             </div>
           ) : (
             <div className="space-y-2">
-              {activeTasks.slice(0, 5).map((task) => {
-                const priorityColors: Record<string, string> = { urgent: "oklch(0.65 0.22 15)", focus: "oklch(0.65 0.14 185)", normal: "oklch(0.65 0.15 75)" };
-                const ctxColors: Record<string, string> = { work: "oklch(0.5 0.18 260)", personal: "oklch(0.55 0.18 310)" };
+              {activeTasks.slice(0, 5).map((t) => {
+                const pc: Record<string, string> = { urgent: "oklch(0.6 0.2 15)", focus: TC, normal: "oklch(0.62 0.1 75)" };
+                const cc: Record<string, string> = { work: "oklch(0.5 0.18 260)", personal: "oklch(0.55 0.18 310)" };
                 return (
-                  <div key={task.id} className="flex items-center gap-3 p-2.5 rounded-lg border border-border hover:border-[oklch(0.65_0.14_185_/_0.3)] transition-colors">
-                    <div className="w-2 h-2 rounded-full shrink-0" style={{ background: priorityColors[task.priority] }} />
-                    <p className="text-sm flex-1 truncate">{task.text}</p>
-                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: ctxColors[task.context] }} title={task.context} />
+                  <div
+                    key={t.id}
+                    className="flex items-center gap-3 p-3 transition-all"
+                    style={{ border: `1px solid ${BORDER}` }}
+                  >
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: pc[t.priority] }} />
+                    <p className="text-sm flex-1 truncate" style={{ color: INK }}>{t.text}</p>
+                    <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: cc[t.context] }} />
                   </div>
                 );
               })}
-              {activeTasks.length > 5 && <p className="text-xs text-muted-foreground text-center pt-1">+{activeTasks.length - 5} more tasks</p>}
+              {activeTasks.length > 5 && <p className="text-xs text-center pt-1" style={{ color: MUTED }}>+{activeTasks.length - 5} more</p>}
             </div>
           )}
         </div>
       </div>
 
-      {/* Today's wins preview */}
+      {/* ── Today's wins ── */}
       {todayWins.length > 0 && (
-        <div className="p-4 rounded-2xl bg-[oklch(0.75_0.15_75_/_0.06)] border border-[oklch(0.75_0.15_75_/_0.2)]">
-          <div className="flex items-center justify-between mb-3">
+        <div className="p-6" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>
+          <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-[oklch(0.6_0.15_75)]" />
-              <h2 className="text-sm font-display font-semibold text-foreground">Today's Wins ({todayWins.length})</h2>
+              <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.12 75)" }} />
+              <p className="editorial-label">Today's Wins ({todayWins.length})</p>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("wins")} className="text-xs text-[oklch(0.6_0.15_75)]">Log more →</Button>
+            <button onClick={() => onNavigate("wins")} className="text-xs" style={{ color: "oklch(0.55 0.12 75)" }}>
+              Log more →
+            </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {todayWins.map((win) => (
-              <div key={win.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white border border-[oklch(0.75_0.15_75_/_0.3)] text-sm">
-                <span>{win.emoji}</span>
-                <span className="text-foreground">{win.text}</span>
+            {todayWins.map((w) => (
+              <div
+                key={w.id}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
+                style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.985 0.008 80)", color: INK }}
+              >
+                <span>{w.emoji}</span>
+                <span>{w.text}</span>
               </div>
             ))}
           </div>
         </div>
       )}
     </div>
-  );
-}
-
-/* ── Stat card ── */
-function StatCard({ icon, label, value, color, bg, border, onClick }: {
-  icon: React.ReactNode; label: string; value: string | number;
-  color: string; bg: string; border: string; onClick?: () => void;
-}) {
-  return (
-    <button onClick={onClick} className={cn("p-4 rounded-xl border text-left transition-all hover:scale-[1.02] hover:shadow-sm active:scale-[0.98]")} style={{ background: bg, borderColor: border }}>
-      <div className="flex items-center gap-2 mb-2" style={{ color }}>
-        {icon}
-        <span className="text-xs font-medium">{label}</span>
-      </div>
-      <p className="text-2xl font-display font-bold" style={{ color }}>{value}</p>
-    </button>
   );
 }

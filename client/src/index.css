@@ -1,14 +1,21 @@
+/* ============================================================
+   ADHD FOCUS SPACE — Editorial Design System v2.0
+   Design Movement: Warm Editorial Minimalism
+   Inspired by: Portfolio/zine layouts, hand-drawn line art,
+   warm cream paper, editorial serif typography
+   
+   Core Principles:
+   1. Cream/parchment background — warm, not clinical white
+   2. Serif display type (Playfair Display) + clean body (DM Sans)
+   3. Thin 1px borders, no heavy shadows, lots of breathing room
+   4. Ink-black text on warm cream — high contrast, easy to scan
+   5. Accent: single warm terracotta/rust for interactive elements
+   ============================================================ */
+
 @import "tailwindcss";
 @import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
-
-/* ============================================================
-   ADHD FOCUS SPACE — Design System
-   Philosophy: Focused Modernism
-   Colors: Navy sidebar, warm white canvas, teal/coral/gold signals
-   Typography: Space Grotesk (headings) + Inter (body) + JetBrains Mono (timer)
-   ============================================================ */
 
 @theme inline {
   --radius-sm: calc(var(--radius) - 4px);
@@ -47,67 +54,64 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-
-  /* ADHD custom tokens */
-  --color-teal: var(--teal);
-  --color-teal-light: var(--teal-light);
-  --color-coral: var(--coral);
-  --color-gold: var(--gold);
-  --color-navy: var(--navy);
-  --color-navy-light: var(--navy-light);
-  --color-canvas: var(--canvas);
 }
 
 :root {
-  --radius: 0.75rem;
+  /* ── Warm Editorial Palette ── */
+  --radius: 0.25rem;  /* Very subtle rounding — editorial feel */
 
-  /* ADHD brand colors */
-  --teal: oklch(0.65 0.14 185);
-  --teal-light: oklch(0.82 0.08 185);
-  --coral: oklch(0.65 0.22 15);
-  --gold: oklch(0.75 0.15 75);
-  --navy: oklch(0.18 0.04 255);
-  --navy-light: oklch(0.25 0.05 255);
-  --canvas: oklch(0.99 0.002 90);
+  /* Background: warm parchment cream */
+  --background: oklch(0.975 0.012 80);
+  --foreground: oklch(0.18 0.01 60);
 
-  /* Semantic tokens — light mode (main canvas is warm white) */
-  --background: oklch(0.98 0.004 90);
-  --foreground: oklch(0.15 0.02 255);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.15 0.02 255);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.15 0.02 255);
-  --primary: oklch(0.65 0.14 185);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.005 90);
-  --secondary-foreground: oklch(0.3 0.02 255);
-  --muted: oklch(0.94 0.005 90);
-  --muted-foreground: oklch(0.55 0.015 255);
-  --accent: oklch(0.96 0.005 90);
-  --accent-foreground: oklch(0.15 0.02 255);
-  --destructive: oklch(0.65 0.22 15);
-  --destructive-foreground: oklch(0.99 0 0);
-  --border: oklch(0.9 0.006 90);
-  --input: oklch(0.92 0.006 90);
-  --ring: oklch(0.65 0.14 185);
+  /* Card: slightly warmer cream */
+  --card: oklch(0.985 0.008 80);
+  --card-foreground: oklch(0.18 0.01 60);
 
-  /* Sidebar — deep navy */
-  --sidebar: oklch(0.18 0.04 255);
-  --sidebar-foreground: oklch(0.9 0.01 255);
-  --sidebar-primary: oklch(0.65 0.14 185);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.25 0.05 255);
-  --sidebar-accent-foreground: oklch(0.9 0.01 255);
-  --sidebar-border: oklch(0.28 0.04 255);
-  --sidebar-ring: oklch(0.65 0.14 185);
+  --popover: oklch(0.985 0.008 80);
+  --popover-foreground: oklch(0.18 0.01 60);
+
+  /* Primary: terracotta/rust — warm accent */
+  --primary: oklch(0.52 0.14 35);
+  --primary-foreground: oklch(0.98 0.005 80);
+
+  --secondary: oklch(0.94 0.012 80);
+  --secondary-foreground: oklch(0.3 0.01 60);
+
+  --muted: oklch(0.94 0.012 80);
+  --muted-foreground: oklch(0.52 0.015 70);
+
+  /* Accent: warm sage green */
+  --accent: oklch(0.92 0.018 140);
+  --accent-foreground: oklch(0.25 0.04 140);
+
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
+
+  /* Borders: very subtle warm gray */
+  --border: oklch(0.88 0.012 75);
+  --input: oklch(0.88 0.012 75);
+  --ring: oklch(0.52 0.14 35 / 0.4);
 
   /* Charts */
-  --chart-1: oklch(0.65 0.14 185);
-  --chart-2: oklch(0.75 0.15 75);
-  --chart-3: oklch(0.65 0.22 15);
-  --chart-4: oklch(0.55 0.12 255);
-  --chart-5: oklch(0.7 0.1 145);
+  --chart-1: oklch(0.52 0.14 35);
+  --chart-2: oklch(0.62 0.1 140);
+  --chart-3: oklch(0.65 0.1 220);
+  --chart-4: oklch(0.7 0.12 75);
+  --chart-5: oklch(0.55 0.1 310);
+
+  /* Sidebar: warm slightly darker cream */
+  --sidebar: oklch(0.955 0.018 78);
+  --sidebar-foreground: oklch(0.18 0.01 60);
+  --sidebar-primary: oklch(0.52 0.14 35);
+  --sidebar-primary-foreground: oklch(0.98 0.005 80);
+  --sidebar-accent: oklch(0.93 0.015 78);
+  --sidebar-accent-foreground: oklch(0.18 0.01 60);
+  --sidebar-border: oklch(0.87 0.014 75);
+  --sidebar-ring: oklch(0.52 0.14 35 / 0.4);
 }
+
+/* No dark mode for editorial — the warmth is the point */
 
 @layer base {
   * {
@@ -115,7 +119,7 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: 'Inter', sans-serif;
+    font-feature-settings: "kern" 1, "liga" 1;
   }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
@@ -127,9 +131,6 @@
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled) {
     @apply cursor-pointer;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', sans-serif;
   }
 }
 
@@ -162,103 +163,58 @@
     }
   }
 
-  /* Timer font */
-  .font-timer {
-    font-family: 'JetBrains Mono', monospace;
-  }
-
-  /* Heading font */
+  /* Editorial display typography */
   .font-display {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
   }
 
-  /* Teal glow effect */
-  .glow-teal {
-    box-shadow: 0 0 20px oklch(0.65 0.14 185 / 0.3), 0 0 40px oklch(0.65 0.14 185 / 0.1);
+  /* Thin editorial divider */
+  .editorial-divider {
+    border: none;
+    border-top: 1px solid oklch(0.82 0.015 75);
+    margin: 1.5rem 0;
   }
 
-  /* Coral glow */
-  .glow-coral {
-    box-shadow: 0 0 20px oklch(0.65 0.22 15 / 0.3);
+  /* Editorial label — small caps style */
+  .editorial-label {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.65rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: oklch(0.52 0.015 70);
   }
 
-  /* Gold glow */
-  .glow-gold {
-    box-shadow: 0 0 20px oklch(0.75 0.15 75 / 0.3);
-  }
-
-  /* Task priority chips */
-  .chip-focus {
-    background: oklch(0.65 0.14 185 / 0.12);
-    color: oklch(0.55 0.14 185);
-    border: 1px solid oklch(0.65 0.14 185 / 0.3);
-  }
-  .chip-urgent {
-    background: oklch(0.65 0.22 15 / 0.12);
-    color: oklch(0.55 0.22 15);
-    border: 1px solid oklch(0.65 0.22 15 / 0.3);
-  }
-  .chip-done {
-    background: oklch(0.75 0.15 75 / 0.12);
-    color: oklch(0.6 0.15 75);
-    border: 1px solid oklch(0.75 0.15 75 / 0.3);
-  }
-
-  /* Smooth sidebar transition */
-  .sidebar-transition {
-    transition: width 200ms ease-out, transform 200ms ease-out;
-  }
-
-  /* Confetti animation */
-  @keyframes confetti-fall {
-    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-    100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
-  }
-  .confetti-piece {
-    animation: confetti-fall 0.8s ease-out forwards;
-  }
-
-  /* Pulse ring animation for active timer */
-  @keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 0.6; }
-    50% { transform: scale(1.05); opacity: 0.3; }
-    100% { transform: scale(1); opacity: 0.6; }
-  }
-  .pulse-ring {
-    animation: pulse-ring 2s ease-in-out infinite;
-  }
-
-  /* Task completion checkmark draw */
-  @keyframes check-draw {
-    0% { stroke-dashoffset: 50; }
-    100% { stroke-dashoffset: 0; }
-  }
-  .check-draw {
-    stroke-dasharray: 50;
-    animation: check-draw 0.3s ease-out forwards;
-  }
-
-  /* FadeIn for sidebar label */
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-
-  /* Floating brain dump button */
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-4px); }
-  }
-  .float-btn {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Mood bounce */
-  @keyframes mood-bounce {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-  }
-  .mood-bounce {
-    animation: mood-bounce 0.3s ease-out;
+  /* Terracotta accent underline */
+  .accent-underline {
+    text-decoration: underline;
+    text-decoration-color: oklch(0.52 0.14 35 / 0.5);
+    text-underline-offset: 3px;
   }
 }
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up    { animation: fadeUp 0.4s ease forwards; }
+.animate-fade-in    { animation: fadeIn 0.3s ease forwards; }
+.animate-slide-left { animation: slideInLeft 0.35s ease forwards; }
+.animate-scale-in   { animation: scaleIn 0.3s ease forwards; }
