@@ -3,7 +3,7 @@
    Auto-detect #tags on capture, filter by tag, highlight inline
    ============================================================ */
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { PixelBrain } from "@/components/PixelIcons";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,8 @@ interface BrainDumpEntry {
 
 interface BrainDumpProps {
   onConvertToTask: (task: Task) => void;
+  initialText?: string;
+  onInitialTextConsumed?: () => void;
 }
 
 const M = {
@@ -78,7 +80,7 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
   );
 }
 
-export function BrainDump({ onConvertToTask }: BrainDumpProps) {
+export function BrainDump({ onConvertToTask, initialText, onInitialTextConsumed }: BrainDumpProps) {
   const [currentThought, setCurrentThought] = useState("");
   const [entries,        setEntries]        = useState<BrainDumpEntry[]>([]);
   const [activeTag,      setActiveTag]      = useState<string | null>(null);
@@ -126,6 +128,21 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
     setActiveTag(null);
     toast.info("Brain dump cleared.", { duration: 2000 });
   };
+
+  // Auto-dump initialText (from quick-capture bar) once on mount
+  useEffect(() => {
+    if (initialText && initialText.trim()) {
+      const tags = extractTags(initialText);
+      setEntries((prev) => [
+        { id: nanoid(), text: initialText.trim(), tags, createdAt: new Date(), converted: false },
+        ...prev,
+      ]);
+      const tagMsg = tags.length > 0 ? ` Tagged: ${tags.map((t) => `#${t}`).join(", ")}` : "";
+      toast.success(`Thought captured.${tagMsg}`, { duration: 2500 });
+      onInitialTextConsumed?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Live tag preview while typing
   const liveTagsInInput = extractTags(currentThought);

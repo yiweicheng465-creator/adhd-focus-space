@@ -75,13 +75,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         borderRight: "1px solid oklch(0.90 0.010 72)",
       }}
     >
-      {/* Logo */}
-      <div className="mb-5">
-        <LogoMark />
-      </div>
 
-      {/* Thin rule */}
-      <div className="w-6 mb-4" style={{ borderTop: "1px solid oklch(0.90 0.010 72)" }} />
 
       {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-2">

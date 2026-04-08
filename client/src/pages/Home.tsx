@@ -33,6 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Flower2 } from "lucide-react";
+import { PixelDump } from "@/components/PixelIcons";
 
 type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
@@ -73,6 +74,7 @@ export default function Home() {
   const [focusSessions, setFocusSessions] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
+  const [pendingDump, setPendingDump] = useState<string | null>(null);
 
   // Daily check-in
   const { show: showCheckIn, dismiss: dismissCheckIn } = useDailyCheckIn();
@@ -150,7 +152,11 @@ export default function Home() {
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            {activeSection === "braindump" ? (
+            <PixelDump size={16} active={false} />
+          ) : (
             <Icon className="w-4 h-4 shrink-0" style={{ color: "oklch(0.52 0.14 35)" }} />
+          )}
             <h1
               className="text-base font-bold italic leading-tight truncate"
               style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
@@ -213,6 +219,7 @@ export default function Home() {
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
                 allCategories={allCategories}
+                onQuickDump={(text) => setPendingDump(text)}
               />
               </div>
             )}
@@ -335,7 +342,11 @@ export default function Home() {
               >
                 <BrainDumpDecor />
                 <div className="relative z-10">
-                  <BrainDump onConvertToTask={handleConvertToTask} />
+                  <BrainDump
+                    onConvertToTask={handleConvertToTask}
+                    initialText={pendingDump ?? undefined}
+                    onInitialTextConsumed={() => setPendingDump(null)}
+                  />
                 </div>
               </div>
             )}
