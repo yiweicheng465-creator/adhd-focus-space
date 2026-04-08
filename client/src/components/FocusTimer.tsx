@@ -1,219 +1,301 @@
-/**
- * FocusTimer — Cat Companion Design
- * Morandi palette, flat 2D. Cat grows during focus, scared when paused,
- * alien-abducted when abandoned mid-session.
- */
+/* ============================================================
+   ADHD FOCUS SPACE — Focus Timer (Balloon Deflate)
+   Design: Hand-painted sketch balloon that deflates as you focus.
+   Needle creeps toward the balloon as time runs out.
+   Reset mid-session → needle pops the balloon.
+   Complete → balloon fully deflated, stress fully released.
+
+   Palette: warm cream bg, golden balloon, dark ink stroke
+   Typography: Playfair Display (display), DM Sans (body), JetBrains Mono (digits)
+   ============================================================ */
+
 import { useEffect, useRef, useState, useCallback } from "react";
-import { Check, Pause, Play, SkipForward, X, Settings } from "lucide-react";
-import { toast } from "sonner";
+import { RotateCcw, Play, Pause, SkipForward, Settings, Check, X } from "lucide-react";
 
 type TimerMode = "focus" | "short" | "long";
-type CatState = "idle" | "running" | "paused" | "abducted" | "complete";
-
-const MODE_META: Record<TimerMode, { label: string; color: string }> = {
-  focus: { label: "FOCUS",       color: "#C4714A" },
-  short: { label: "SHORT BREAK", color: "#7A8C6E" },
-  long:  { label: "LONG BREAK",  color: "#A8929E" },
-};
+type BalloonState = "idle" | "running" | "paused" | "popping" | "popped" | "complete";
 
 const DEFAULT_DURATIONS: Record<TimerMode, number> = { focus: 25, short: 5, long: 15 };
 const PRESETS: Record<TimerMode, number[]> = {
   focus: [15, 25, 45, 60],
   short: [3, 5, 10],
-  long:  [10, 15, 20, 30],
+  long: [10, 15, 20, 30],
+};
+const MODE_LABELS: Record<TimerMode, string> = {
+  focus: "Focus",
+  short: "Short Break",
+  long: "Long Break",
+};
+const MODE_COLORS: Record<TimerMode, string> = {
+  focus: "#C8603A",
+  short: "#7A8C6E",
+  long: "#7A8C9E",
+};
+const BALLOON_FILLS: Record<TimerMode, string> = {
+  focus: "#E8C06A",
+  short: "#A8C4A0",
+  long: "#A0B8C8",
 };
 
-const CAT_MESSAGES: Record<CatState, string[]> = {
-  idle:     ["Your kitty is waiting. Start focusing!", "Ready when you are. Let's do this!", "Your cat believes in you"],
-  running:  ["Your kitty's growing. Keep going!", "Interrupting focus will cause its loss.", "Stay focused — your cat is counting on you!"],
-  paused:   ["Break time's over, start focusing again", "Your kitty is scared. Come back!", "Don't leave your cat waiting too long..."],
-  abducted: ["Dang! Aliens snatched your cat", "Your cat got abducted. Start fresh!", "The aliens won this round. Try again?"],
-  complete: ["Session complete! Your kitty is thriving!", "Amazing focus! Your cat is so proud.", "You did it! Your kitty grew big and happy!"],
+// ── Balloon path helper ───────────────────────────────────────────────────────
+function makeBalloonPath(cx: number, cy: number, rx: number, ry: number) {
+  return `
+    M ${cx} ${cy - ry}
+    C ${cx + rx * 1.18} ${cy - ry * 0.95},
+      ${cx + rx * 1.22} ${cy + ry * 0.55},
+      ${cx + rx * 0.12} ${cy + ry * 0.92}
+    C ${cx - rx * 0.08} ${cy + ry * 1.02},
+      ${cx - rx * 0.08} ${cy + ry * 1.02},
+      ${cx - rx * 0.22} ${cy + ry * 0.90}
+    C ${cx - rx * 1.28} ${cy + ry * 0.52},
+      ${cx - rx * 1.20} ${cy - ry * 0.92},
+      ${cx} ${cy - ry}
+    Z
+  `;
+}
+
+// ── Pop burst ─────────────────────────────────────────────────────────────────
+function PopBurst() {
+  const rays = [
+    [0, 18, 52], [28, 16, 44], [55, 20, 58], [82, 15, 48],
+    [110, 22, 60], [138, 17, 50], [165, 21, 55], [195, 14, 46],
+    [222, 19, 54], [250, 16, 42], [278, 23, 58], [308, 18, 50],
+    [335, 20, 52],
+  ];
+  return (
+    <svg width="200" height="200" viewBox="0 0 180 180" style={{ display: "block" }}>
+      {rays.map(([angle, r1, r2], i) => {
+        const rad = (angle * Math.PI) / 180;
+        const x1 = 90 + r1 * Math.cos(rad), y1 = 90 + r1 * Math.sin(rad);
+        const x2 = 90 + r2 * Math.cos(rad), y2 = 90 + r2 * Math.sin(rad);
+        return (
+          <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+            stroke={i % 3 === 0 ? "#C8603A" : i % 3 === 1 ? "#E8C06A" : "#2a1f14"}
+            strokeWidth={1.8 + (i % 3) * 0.6} strokeLinecap="round" opacity="0.85" />
+        );
+      })}
+      {[30, 90, 150, 210, 270, 330].map((a, i) => {
+        const r = 38 + (i % 2) * 10;
+        const rad = (a * Math.PI) / 180;
+        return <circle key={i} cx={90 + r * Math.cos(rad)} cy={90 + r * Math.sin(rad)} r={3.5}
+          fill={i % 2 === 0 ? "#C8603A" : "#E8C06A"} opacity="0.9" />;
+      })}
+      <text x="90" y="97" textAnchor="middle" fill="#C8603A" fontSize="20" fontWeight="900"
+        fontFamily="'Playfair Display', Georgia, serif" fontStyle="italic">POP!</text>
+    </svg>
+  );
+}
+
+// ── BalloonScene: unified SVG with balloon + needle ───────────────────────────
+function BalloonScene({
+  balloonScale, timeLabel, showNeedle, touching, mode,
+}: {
+  balloonScale: number;
+  timeLabel: string;
+  showNeedle: boolean;
+  touching: boolean;
+  mode: TimerMode;
+}) {
+  const s = Math.max(0.15, balloonScale);
+  const cx = 110, cy = 100;
+  const rx = 72 * s, ry = 84 * s;
+  const knotY = cy + ry;
+  const knotSize = 9 * s;
+  const stringY1 = knotY + knotSize * 1.2;
+  const stringY2 = 255;
+
+  const FILL = BALLOON_FILLS[mode];
+  const STROKE = "#2a1f14";
+  const sw = 2.2;
+
+  const bPath = makeBalloonPath(cx, cy, rx, ry);
+  const h1 = `M ${cx - rx * 0.38} ${cy - ry * 0.58} Q ${cx - rx * 0.22} ${cy - ry * 0.72} ${cx - rx * 0.05} ${cy - ry * 0.62}`;
+  const h2 = `M ${cx - rx * 0.42} ${cy - ry * 0.38} Q ${cx - rx * 0.30} ${cy - ry * 0.48} ${cx - rx * 0.18} ${cy - ry * 0.40}`;
+
+  // Needle tip always tracks balloon right edge
+  const progressFromScale = Math.max(0, Math.min(1, (1 - balloonScale) / 0.85));
+  const needleGap = touching ? -4 : Math.max(8, 80 - progressFromScale * 72);
+  const balloonRightEdge = cx + rx;
+  const needleTipX = balloonRightEdge + needleGap;
+  const needleEyeX = needleTipX + 130;
+  const needleY = cy;
+
+  const svgW = 340;
+  const svgH = 270;
+
+  return (
+    <svg
+      width={svgW}
+      height={svgH}
+      viewBox={`0 0 ${svgW} ${svgH}`}
+      style={{ display: "block", overflow: "visible", maxWidth: "100%" }}
+    >
+      {/* Balloon fill */}
+      <path d={bPath} fill={FILL} />
+      {/* Balloon outline */}
+      <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" />
+      {/* Gloss highlights */}
+      {s > 0.4 && (
+        <>
+          <path d={h1} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth={sw * 0.9} strokeLinecap="round" />
+          <path d={h2} fill="none" stroke="rgba(255,255,255,0.38)" strokeWidth={sw * 0.7} strokeLinecap="round" />
+        </>
+      )}
+      {/* Knot */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx - knotSize * 0.75} ${knotY} L${cx} ${knotY + knotSize * 1.3} L${cx + knotSize * 0.75} ${knotY} L${cx} ${knotY - knotSize * 0.25}Z`}
+          fill={FILL} stroke={STROKE} strokeWidth={sw * 0.85} strokeLinejoin="round"
+        />
+      )}
+      {/* String */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx} ${stringY1} C${cx - 18} ${(stringY1 + stringY2) * 0.45} ${cx + 10} ${(stringY1 + stringY2) * 0.72} ${cx} ${stringY2}`}
+          fill="none" stroke={STROKE} strokeWidth={sw * 0.75} strokeLinecap="round"
+        />
+      )}
+      {/* Text inside balloon */}
+      {s > 0.45 && (
+        <>
+          <text x={cx} y={cy - 10} textAnchor="middle" fill={STROKE}
+            fontSize={Math.round(13 * s)} fontWeight="800"
+            fontFamily="'Playfair Display', Georgia, serif" letterSpacing="1">
+            {MODE_LABELS[mode].toUpperCase()}
+          </text>
+          <text x={cx} y={cy + 14} textAnchor="middle" fill={STROKE}
+            fontSize={Math.round(13 * s)} fontFamily="'JetBrains Mono', monospace" letterSpacing="1.5">
+            {timeLabel}
+          </text>
+        </>
+      )}
+
+      {/* Needle — tip always at balloon right edge + gap */}
+      {showNeedle && (
+        <g style={{ transition: touching ? "transform 0.5s cubic-bezier(0.25,0,0.5,1)" : "transform 0.4s ease-out" }}>
+          <path
+            d={`M ${needleTipX} ${needleY - 2} C ${needleTipX + 30} ${needleY - 4}, ${needleTipX + 70} ${needleY - 5}, ${needleEyeX - 12} ${needleY}`}
+            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+          />
+          <path
+            d={`M ${needleTipX} ${needleY + 2} C ${needleTipX + 30} ${needleY + 4}, ${needleTipX + 70} ${needleY + 5}, ${needleEyeX - 12} ${needleY}`}
+            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+          />
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="5" ry="3" fill="none" stroke="#2a1f14" strokeWidth="1.6" />
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="2" ry="1.2" fill="none" stroke="#2a1f14" strokeWidth="1" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
+// ── Status messages ───────────────────────────────────────────────────────────
+const IDLE_MSGS: Record<TimerMode, string> = {
+  focus: "Start the timer — breathe out your stress, one second at a time.",
+  short: "Take a breath. Let the tension float away.",
+  long: "A longer rest. Let the air — and the pressure — out slowly.",
+};
+const RUNNING_MSGS = [
+  "Stay focused — the needle is watching...",
+  "Every second of focus deflates the stress.",
+  "Keep going. The balloon is getting lighter.",
+  "You're doing great. Don't let the needle win.",
+];
+const PAUSED_MSG = "Paused — the needle is waiting. Don't let it win.";
+const POPPED_MSG = "Your focus balloon popped. Shake it off and try again!";
+const COMPLETE_MSGS: Record<TimerMode, string> = {
+  focus: "All the stress is out. Session complete! 🎉",
+  short: "Break over — you're refreshed and ready.",
+  long: "Long break complete. You've earned it.",
 };
 
-// ── Cat SVG components ──────────────────────────────────────────────────────
-
-function CatIdle({ scale = 1, color = "#3D2E1E" }: { scale?: number; color?: string }) {
-  const s = Math.max(0.55, Math.min(1.0, scale));
-  const size = Math.round(72 + s * 88);
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: "block" }}>
-      <ellipse cx="50" cy="68" rx="22" ry="20" fill={color} />
-      <circle cx="50" cy="42" r="18" fill={color} />
-      <polygon points="36,28 30,14 42,24" fill={color} />
-      <polygon points="64,28 70,14 58,24" fill={color} />
-      <polygon points="37,27 32,17 42,24" fill="#C8A090" opacity="0.5" />
-      <polygon points="63,27 68,17 58,24" fill="#C8A090" opacity="0.5" />
-      <circle cx="43" cy="41" r="5" fill="white" />
-      <circle cx="57" cy="41" r="5" fill="white" />
-      <circle cx="44" cy="42" r="3" fill="#1A1008" />
-      <circle cx="58" cy="42" r="3" fill="#1A1008" />
-      <circle cx="45.5" cy="40.5" r="1.2" fill="white" />
-      <circle cx="59.5" cy="40.5" r="1.2" fill="white" />
-      <ellipse cx="50" cy="48" rx="2" ry="1.5" fill="#C8A090" />
-      <path d="M48 49.5 Q50 52 52 49.5" stroke="#C8A090" strokeWidth="1" fill="none" />
-      <path d="M72 72 Q88 60 82 50 Q78 42 72 50" stroke={color} strokeWidth="5" fill="none" strokeLinecap="round" />
-      <ellipse cx="38" cy="85" rx="8" ry="5" fill={color} />
-      <ellipse cx="62" cy="85" rx="8" ry="5" fill={color} />
-      <ellipse cx="50" cy="91" rx={14 + s * 6} ry="3" fill="rgba(0,0,0,0.07)" />
-    </svg>
-  );
-}
-
-function CatScared({ color = "#3D2E1E" }: { color?: string }) {
-  return (
-    <svg width="120" height="120" viewBox="0 0 100 100" style={{ display: "block" }}>
-      <ellipse cx="50" cy="72" rx="28" ry="18" fill={color} />
-      <circle cx="50" cy="50" r="20" fill={color} />
-      <polygon points="34,34 26,16 40,30" fill={color} />
-      <polygon points="66,34 74,16 60,30" fill={color} />
-      <polygon points="35,33 28,19 40,30" fill="#C8A090" opacity="0.5" />
-      <polygon points="65,33 72,19 60,30" fill="#C8A090" opacity="0.5" />
-      <circle cx="41" cy="49" r="7" fill="white" />
-      <circle cx="59" cy="49" r="7" fill="white" />
-      <circle cx="41" cy="50" r="4" fill="#1A1008" />
-      <circle cx="59" cy="50" r="4" fill="#1A1008" />
-      <circle cx="43" cy="48" r="1.5" fill="white" />
-      <circle cx="61" cy="48" r="1.5" fill="white" />
-      <ellipse cx="72" cy="38" rx="3" ry="4" fill="#A8D0E8" opacity="0.7" />
-      <polygon points="70,36 74,36 72,30" fill="#A8D0E8" opacity="0.7" />
-      <ellipse cx="50" cy="56" rx="2" ry="1.5" fill="#C8A090" />
-      <path d="M46 58 Q48 56 50 58 Q52 60 54 58" stroke="#C8A090" strokeWidth="1.2" fill="none" />
-      <path d="M78 75 Q90 65 85 55 Q80 48 74 56" stroke={color} strokeWidth="7" fill="none" strokeLinecap="round" />
-      <ellipse cx="40" cy="86" rx="7" ry="4" fill={color} />
-      <ellipse cx="60" cy="86" rx="7" ry="4" fill={color} />
-      <ellipse cx="50" cy="92" rx="22" ry="3" fill="rgba(0,0,0,0.07)" />
-    </svg>
-  );
-}
-
-function CatAbducted({ color = "#3D2E1E" }: { color?: string }) {
-  return (
-    <svg width="160" height="190" viewBox="0 0 160 190" style={{ display: "block" }}>
-      <ellipse cx="80" cy="40" rx="52" ry="17" fill="#4A4A4A" />
-      <ellipse cx="80" cy="34" rx="30" ry="15" fill="#6A6A6A" />
-      <ellipse cx="80" cy="27" rx="20" ry="12" fill="#8A9A7A" opacity="0.85" />
-      <circle cx="58" cy="44" r="4.5" fill="#F0C060" opacity="0.9" />
-      <circle cx="70" cy="48" r="3.5" fill="#F0C060" opacity="0.75" />
-      <circle cx="82" cy="49" r="3.5" fill="#F0C060" opacity="0.75" />
-      <circle cx="94" cy="47" r="4" fill="#F0C060" opacity="0.85" />
-      <circle cx="106" cy="43" r="4.5" fill="#F0C060" opacity="0.9" />
-      <polygon points="54,57 106,57 122,145 38,145" fill="#F5E090" opacity="0.22" />
-      <line x1="54" y1="57" x2="38" y2="145" stroke="#F0C060" strokeWidth="1" opacity="0.35" />
-      <line x1="106" y1="57" x2="122" y2="145" stroke="#F0C060" strokeWidth="1" opacity="0.35" />
-      <g opacity="0.5" transform="translate(80,118) scale(0.52) translate(-50,-50)">
-        <ellipse cx="50" cy="68" rx="22" ry="20" fill="none" stroke={color} strokeWidth="3.5" strokeDasharray="5,4" />
-        <circle cx="50" cy="42" r="18" fill="none" stroke={color} strokeWidth="3.5" strokeDasharray="5,4" />
-        <polygon points="36,28 30,14 42,24" fill="none" stroke={color} strokeWidth="2.5" strokeDasharray="4,3" />
-        <polygon points="64,28 70,14 58,24" fill="none" stroke={color} strokeWidth="2.5" strokeDasharray="4,3" />
-        <circle cx="43" cy="41" r="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
-        <circle cx="57" cy="41" r="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
-        <path d="M72 72 Q88 60 82 50 Q78 42 72 50" stroke={color} strokeWidth="4" fill="none" strokeLinecap="round" strokeDasharray="5,4" />
-        <ellipse cx="38" cy="85" rx="8" ry="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
-        <ellipse cx="62" cy="85" rx="8" ry="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
-      </g>
-    </svg>
-  );
-}
-
-function CatComplete({ color = "#3D2E1E" }: { color?: string }) {
-  return (
-    <svg width="160" height="160" viewBox="0 0 100 100" style={{ display: "block" }}>
-      <ellipse cx="50" cy="68" rx="26" ry="22" fill={color} />
-      <circle cx="50" cy="40" r="22" fill={color} />
-      <polygon points="34,24 26,8 42,20" fill={color} />
-      <polygon points="66,24 74,8 58,20" fill={color} />
-      <polygon points="35,23 28,11 42,20" fill="#C8A090" opacity="0.5" />
-      <polygon points="65,23 72,11 58,20" fill="#C8A090" opacity="0.5" />
-      <path d="M38 40 Q43 36 48 40" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <path d="M52 40 Q57 36 62 40" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
-      <circle cx="36" cy="46" r="5" fill="#E8A090" opacity="0.35" />
-      <circle cx="64" cy="46" r="5" fill="#E8A090" opacity="0.35" />
-      <ellipse cx="50" cy="50" rx="2.5" ry="2" fill="#C8A090" />
-      <path d="M46 52 Q50 57 54 52" stroke="#C8A090" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-      <path d="M76 74 Q96 55 88 36 Q84 24 76 32" stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" />
-      <ellipse cx="38" cy="87" rx="9" ry="6" fill={color} />
-      <ellipse cx="62" cy="87" rx="9" ry="6" fill={color} />
-      <ellipse cx="50" cy="94" rx="24" ry="4" fill="rgba(0,0,0,0.07)" />
-    </svg>
-  );
-}
-
-// ── Main component ──────────────────────────────────────────────────────────
-
+// ── Main component ────────────────────────────────────────────────────────────
 interface FocusTimerProps {
   onSessionComplete?: () => void;
 }
 
 export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
-  const [durations, setDurations] = useState<Record<TimerMode, number>>(DEFAULT_DURATIONS);
-  const [mode, setMode]           = useState<TimerMode>("focus");
-  const [timeLeft, setTimeLeft]   = useState(DEFAULT_DURATIONS.focus * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [sessions, setSessions]   = useState(0);
-  const [catState, setCatState]   = useState<CatState>("idle");
+  const [durations, setDurations] = useState<Record<TimerMode, number>>({ ...DEFAULT_DURATIONS });
+  const [mode, setMode] = useState<TimerMode>("focus");
+  const [remaining, setRemaining] = useState(DEFAULT_DURATIONS.focus * 60);
+  const [running, setRunning] = useState(false);
+  const [balloonState, setBalloonState] = useState<BalloonState>("idle");
+  const [touching, setTouching] = useState(false);
+  const [msgIdx, setMsgIdx] = useState(0);
+  const [sessions, setSessions] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
-  const [editingMode, setEditingMode]   = useState<TimerMode | null>(null);
-  const [editVal, setEditVal]           = useState("");
-  const [msgIdx, setMsgIdx]             = useState(0);
-  const [abductAnim, setAbductAnim]     = useState(false);
+  const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
+  const [editVal, setEditVal] = useState("");
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const editRef     = useRef<HTMLInputElement>(null);
+  const msgRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const completedRef = useRef(false);
+  const editRef = useRef<HTMLInputElement>(null);
 
   const totalSec = durations[mode] * 60;
-  const progress = totalSec > 0 ? 1 - timeLeft / totalSec : 0;
-  const meta     = MODE_META[mode];
-  const catScale = mode === "focus" ? 0.55 + progress * 0.45 : 0.8;
-  const mm = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-  const ss = (timeLeft % 60).toString().padStart(2, "0");
-  const catColor = mode === "focus" ? "#3D2E1E" : mode === "short" ? "#4A5E3A" : "#6A4A5E";
+  const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
+  // Balloon deflates from 1.0 → 0.15 as focus progresses
+  const balloonScale = balloonState === "popped" ? 0 : 1 - progress * 0.85;
 
-  const handleComplete = useCallback(() => {
-    setIsRunning(false);
-    setCatState("complete");
-    if (mode === "focus") {
-      setSessions((s) => s + 1);
-      toast.success("Session complete — your kitty is thriving!", { duration: 4000 });
-      onSessionComplete?.();
-    } else {
-      toast.info("Break over. Ready to focus?", { duration: 3000 });
-      setCatState("idle");
-    }
-  }, [mode, onSessionComplete]);
+  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const ss = String(remaining % 60).padStart(2, "0");
 
+  // Rotate running messages
   useEffect(() => {
-    if (isRunning) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) { clearInterval(intervalRef.current!); handleComplete(); return 0; }
-          return prev - 1;
-        });
-      }, 1000);
+    if (running) {
+      msgRef.current = setInterval(() => setMsgIdx((i) => (i + 1) % RUNNING_MSGS.length), 8000);
     } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
+      if (msgRef.current) clearInterval(msgRef.current);
     }
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isRunning, handleComplete]);
+    return () => { if (msgRef.current) clearInterval(msgRef.current); };
+  }, [running]);
 
+  // Focus editingMode input
   useEffect(() => {
     if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
   }, [editingMode]);
 
+  const handleComplete = useCallback(() => {
+    setRunning(false);
+    setBalloonState("complete");
+    if (mode === "focus") {
+      setSessions((s) => s + 1);
+      if (!completedRef.current) {
+        completedRef.current = true;
+        onSessionComplete?.();
+      }
+    }
+  }, [mode, onSessionComplete]);
+
+  // Countdown
   useEffect(() => {
-    const msgs = CAT_MESSAGES[catState];
-    const t = setInterval(() => setMsgIdx((i) => (i + 1) % msgs.length), 8000);
-    setMsgIdx(0);
-    return () => clearInterval(t);
-  }, [catState]);
+    if (running && remaining > 0) {
+      intervalRef.current = setInterval(() => {
+        setRemaining((r) => {
+          if (r <= 1) {
+            clearInterval(intervalRef.current!);
+            handleComplete();
+            return 0;
+          }
+          return r - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running, remaining, handleComplete]);
 
   const switchMode = (m: TimerMode) => {
-    setIsRunning(false); setMode(m); setTimeLeft(durations[m] * 60); setCatState("idle");
+    if (running) return;
+    setMode(m);
+    setRemaining(durations[m] * 60);
+    setBalloonState("idle");
+    setTouching(false);
+    completedRef.current = false;
   };
 
   const applyDuration = (m: TimerMode, mins: number) => {
     const v = Math.max(1, Math.min(180, mins));
     setDurations((d) => ({ ...d, [m]: v }));
-    if (m === mode) { setIsRunning(false); setTimeLeft(v * 60); }
+    if (m === mode) { setRunning(false); setRemaining(v * 60); setBalloonState("idle"); }
   };
 
   const commitEdit = () => {
@@ -223,47 +305,67 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     setEditingMode(null);
   };
 
-  const handlePlayPause = () => {
-    if (catState === "abducted") return;
-    const next = !isRunning;
-    setIsRunning(next);
-    if (next) {
-      setCatState("running");
-    } else {
-      if (progress > 0.02) setCatState("paused");
-    }
+  const handleStartPause = () => {
+    if (balloonState === "complete" || balloonState === "popped" || balloonState === "popping") return;
+    const next = !running;
+    setRunning(next);
+    setBalloonState(next ? "running" : "paused");
+  };
+
+  const handleSkip = () => {
+    clearInterval(intervalRef.current!);
+    handleComplete();
+    setRemaining(0);
   };
 
   const handleReset = () => {
-    const hadProgress = progress > 0.05 && mode === "focus";
-    setIsRunning(false);
-    setTimeLeft(durations[mode] * 60);
-    if (hadProgress) {
-      setCatState("abducted");
-      setAbductAnim(true);
-      setTimeout(() => { setAbductAnim(false); setCatState("idle"); }, 3500);
+    const wasRunning = running && progress > 0.05;
+    clearInterval(intervalRef.current!);
+    setRunning(false);
+    completedRef.current = false;
+    if (wasRunning) {
+      setBalloonState("popping");
+      setTouching(true);
+      setTimeout(() => {
+        setBalloonState("popped");
+        setTouching(false);
+        setTimeout(() => {
+          setRemaining(durations[mode] * 60);
+          setBalloonState("idle");
+        }, 2200);
+      }, 700);
     } else {
-      setCatState("idle");
+      setRemaining(durations[mode] * 60);
+      setBalloonState("idle");
     }
   };
 
-  const currentMsg = CAT_MESSAGES[catState][msgIdx % CAT_MESSAGES[catState].length];
+  const showNeedle = balloonState === "running" || balloonState === "popping" || balloonState === "paused";
+  const accentColor = MODE_COLORS[mode];
   const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
 
+  const statusMsg = (() => {
+    if (balloonState === "complete") return COMPLETE_MSGS[mode];
+    if (balloonState === "popped" || balloonState === "popping") return POPPED_MSG;
+    if (balloonState === "running") return RUNNING_MSGS[msgIdx];
+    if (balloonState === "paused") return PAUSED_MSG;
+    return IDLE_MSGS[mode];
+  })();
+
   return (
-    <div className="flex flex-col gap-4" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+    <div className="flex flex-col gap-3" style={{ fontFamily: "'DM Sans', system-ui" }}>
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase" }}>Focus Timer</p>
-          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase" }}>{meta.label}</p>
+          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>Focus Timer</p>
+          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{MODE_LABELS[mode]}</p>
         </div>
         <div className="flex items-center gap-2">
           {sessions > 0 && (
-            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B" }}>{sessions} SESSION{sessions > 1 ? "S" : ""}</span>
+            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{sessions} SESSION{sessions > 1 ? "S" : ""}</span>
           )}
-          <button onClick={() => setShowSettings((s) => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? meta.color : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
-            <Settings size={11} color={showSettings ? meta.color : "#8C7B6B"} />
+          <button onClick={() => setShowSettings((s) => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
+            <Settings size={11} color={showSettings ? accentColor : "#8C7B6B"} />
           </button>
         </div>
       </div>
@@ -271,7 +373,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* Mode tabs */}
       <div style={{ display: "flex", gap: 6 }}>
         {(["focus", "short", "long"] as TimerMode[]).map((m) => (
-          <button key={m} onClick={() => switchMode(m)} style={{ flex: 1, padding: "6px 0", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", border: `1px solid ${mode === m ? MODE_META[m].color : "#D4C4B0"}`, background: mode === m ? MODE_META[m].color : "transparent", color: mode === m ? "#FAF6F1" : "#8C7B6B", cursor: "pointer", borderRadius: 0, fontFamily: "'JetBrains Mono', monospace" }}>
+          <button key={m} onClick={() => switchMode(m)} style={{
+            flex: 1, padding: "6px 0", fontSize: 9, letterSpacing: "0.18em",
+            textTransform: "uppercase", border: `1px solid ${mode === m ? MODE_COLORS[m] : "#D4C4B0"}`,
+            background: mode === m ? MODE_COLORS[m] : "transparent",
+            color: mode === m ? "#FAF6F1" : "#8C7B6B", cursor: running ? "not-allowed" : "pointer",
+            borderRadius: 0, fontFamily: "'JetBrains Mono', monospace", opacity: running ? 0.6 : 1,
+          }}>
             {m === "focus" ? "Focus" : m === "short" ? "Short" : "Long"}
           </button>
         ))}
@@ -280,23 +388,34 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* Settings panel */}
       {showSettings && (
         <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
-          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>Duration (min) — click to edit</p>
+          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
           <div style={{ display: "flex", gap: 16 }}>
             {(["focus", "short", "long"] as TimerMode[]).map((m) => (
               <div key={m} style={{ flex: 1 }}>
-                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4 }}>{m}</p>
+                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" }}>{m}</p>
                 {editingMode === m ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input ref={editRef} value={editVal} onChange={(e) => setEditVal(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }} type="number" min={1} max={180} style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_META[m].color}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }} />
-                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_META[m].color} /></button>
+                    <input ref={editRef} value={editVal} onChange={(e) => setEditVal(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
+                      type="number" min={1} max={180}
+                      style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_COLORS[m]}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }} />
+                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_COLORS[m]} /></button>
                     <button onClick={() => setEditingMode(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><X size={12} color="#8C7B6B" /></button>
                   </div>
                 ) : (
-                  <button onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }} style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}>{durations[m]}</button>
+                  <button onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }}
+                    style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}>
+                    {durations[m]}
+                  </button>
                 )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
                   {PRESETS[m].map((p) => (
-                    <button key={p} onClick={() => applyDuration(m, p)} style={{ fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", border: `1px solid ${durations[m] === p ? MODE_META[m].color : "#D4C4B0"}`, background: durations[m] === p ? `${MODE_META[m].color}18` : "transparent", color: durations[m] === p ? MODE_META[m].color : "#8C7B6B", borderRadius: 0 }}>{p}</button>
+                    <button key={p} onClick={() => applyDuration(m, p)} style={{
+                      fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                      border: `1px solid ${durations[m] === p ? MODE_COLORS[m] : "#D4C4B0"}`,
+                      background: durations[m] === p ? `${MODE_COLORS[m]}18` : "transparent",
+                      color: durations[m] === p ? MODE_COLORS[m] : "#8C7B6B", borderRadius: 0,
+                    }}>{p}</button>
                   ))}
                 </div>
               </div>
@@ -305,60 +424,122 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         </div>
       )}
 
-      {/* Cat companion card */}
-      <div style={{ background: "#FDFAF5", border: "1px solid #E8DDD0", padding: "24px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", minHeight: 260, position: "relative", overflow: "hidden" }}>
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", minHeight: 175, transition: "transform 0.6s ease", transform: abductAnim ? "translateY(-24px)" : "translateY(0)" }}>
-          {catState === "idle"     && <CatIdle scale={0.6} color={catColor} />}
-          {catState === "running"  && <CatIdle scale={catScale} color={catColor} />}
-          {catState === "paused"   && <CatScared color={catColor} />}
-          {catState === "abducted" && <CatAbducted color={catColor} />}
-          {catState === "complete" && <CatComplete color={catColor} />}
+      {/* Balloon scene */}
+      <div style={{
+        background: "#FDFAF5",
+        border: "1px solid #E8DDD0",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        padding: "20px 16px 16px",
+        minHeight: 260,
+        overflow: "visible",
+        position: "relative",
+      }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%",
+          minHeight: 220,
+          overflow: "visible",
+        }}>
+          {balloonState === "popped" ? (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
+              <PopBurst />
+            </div>
+          ) : (
+            <BalloonScene
+              balloonScale={balloonScale}
+              timeLabel={mm + ":" + ss}
+              showNeedle={showNeedle}
+              touching={touching}
+              mode={mode}
+            />
+          )}
         </div>
-        <div style={{ marginTop: 10, textAlign: "center" }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 2 }}>
-            <span style={{ fontSize: 52, fontWeight: 700, lineHeight: 1, color: "#1A1008", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em" }}>{mm}</span>
-            <span style={{ fontSize: 36, fontWeight: 300, color: meta.color, margin: "0 1px", fontFamily: "'JetBrains Mono', monospace" }}>:</span>
-            <span style={{ fontSize: 52, fontWeight: 700, lineHeight: 1, color: "#1A1008", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em" }}>{ss}</span>
-          </div>
-        </div>
-        <p style={{ marginTop: 10, fontSize: 11, color: "#6A5A4A", textAlign: "center", maxWidth: 220, lineHeight: 1.55, fontFamily: "'Playfair Display', serif", fontStyle: "italic", minHeight: 34 }}>
-          {currentMsg}
+
+        {/* Status message */}
+        <p style={{
+          fontSize: 11, color: balloonState === "popped" || balloonState === "popping" ? "#C8603A" : "#6A5A4A",
+          margin: "8px 0 0", fontStyle: "italic",
+          fontFamily: "'Playfair Display', serif",
+          maxWidth: 260, textAlign: "center", lineHeight: 1.55, minHeight: 34,
+          transition: "color 0.3s",
+        }}>
+          {statusMsg}
         </p>
-        {catState === "abducted" && (
-          <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "#FAE8E0", border: "1px solid #E8C0B0", padding: "4px 10px", fontSize: 10, color: "#C4714A", fontFamily: "'JetBrains Mono', monospace" }}>
-            <span>&#9829;</span> Likability -5
-          </div>
-        )}
       </div>
 
-      {/* Progress bar */}
+      {/* Progress segments */}
       <div style={{ display: "flex", gap: 3 }}>
         {segments.map((filled, i) => (
-          <div key={i} style={{ flex: 1, height: 6, background: filled ? meta.color : "#E8DDD0", transition: "background 0.5s" }} />
+          <div key={i} style={{ flex: 1, height: 5, background: filled ? accentColor : "#E8DDD0", transition: "background 0.5s" }} />
         ))}
       </div>
 
       {/* Controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        <button onClick={handlePlayPause} disabled={catState === "abducted"} style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 22px", borderRadius: 999, background: isRunning ? "transparent" : "#3D2E1E", border: "1px solid #3D2E1E", color: isRunning ? "#3D2E1E" : "#FAF6F1", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.14em", cursor: catState === "abducted" ? "not-allowed" : "pointer", opacity: catState === "abducted" ? 0.5 : 1, boxShadow: isRunning ? "none" : "0 3px 0 #1a1208", transition: "all 0.1s" }}>
-          {isRunning ? <Pause size={11} /> : <Play size={11} />}
-          {isRunning ? "PAUSE" : catState === "complete" ? "DONE" : "START"}
+        {/* Reset */}
+        <button onClick={handleReset} title="Reset" style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 36, height: 36, borderRadius: "50%",
+          background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", cursor: "pointer",
+        }}>
+          <RotateCcw size={13} />
         </button>
-        <button onClick={handleReset} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999, background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.14em", cursor: "pointer", boxShadow: "0 2px 0 #C4B4A0", transition: "all 0.1s" }}>
-          <SkipForward size={11} /> RESET
+
+        {/* Play / Pause */}
+        {balloonState !== "complete" && balloonState !== "popped" && balloonState !== "popping" && (
+          <button onClick={handleStartPause} style={{
+            display: "flex", alignItems: "center", gap: 7,
+            padding: "9px 24px", borderRadius: 999,
+            background: running ? "transparent" : "#2a1f14",
+            border: "1px solid #2a1f14",
+            color: running ? "#2a1f14" : "#FAF6F1",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+            letterSpacing: "0.14em", cursor: "pointer",
+            boxShadow: running ? "none" : "0 3px 0 #1a1208",
+            transition: "all 0.1s",
+          }}>
+            {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {balloonState === "paused" ? "RESUME" : "START"}</>}
+          </button>
+        )}
+
+        {/* Skip */}
+        <button onClick={handleSkip} title="Skip to end" style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          width: 36, height: 36, borderRadius: "50%",
+          background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", cursor: "pointer",
+        }}>
+          <SkipForward size={13} />
         </button>
+
+        {/* Session dots */}
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? meta.color : "#E8DDD0", transition: "background 0.3s" }} />
+            <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
           ))}
-          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3 }}>{sessions}/4</span>
+          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
         </div>
       </div>
 
+      {/* New session button after complete/popped */}
+      {(balloonState === "complete" || balloonState === "popped") && (
+        <button onClick={() => { setRemaining(durations[mode] * 60); setBalloonState("idle"); completedRef.current = false; }} style={{
+          background: "transparent", border: "1px solid #2a1f14", color: "#2a1f14",
+          borderRadius: 999, padding: "7px 22px", fontSize: 10, cursor: "pointer",
+          fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em",
+          alignSelf: "center",
+        }}>
+          NEW SESSION
+        </button>
+      )}
+
       {/* Footer */}
-      <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 10, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase" }}>{durations[mode]} min · {meta.label}</span>
-        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B" }}>{Math.round(progress * 100)}% ELAPSED</span>
+      <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
+        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(progress * 100)}% ELAPSED</span>
       </div>
     </div>
   );

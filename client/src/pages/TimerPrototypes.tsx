@@ -785,6 +785,141 @@ function SketchNeedle({ touching }: { touching?: boolean }) {
   );
 }
 
+
+// ── SceneSVG: balloon + needle in one SVG so needle always tracks balloon edge ──
+// The balloon is drawn at scale `s` from its natural center (100, 95).
+// The balloon right edge in SVG coords = cx + rx = 100 + 68*s.
+// The needle tip is placed at (balloonRightEdge + needleGap) horizontally,
+// vertically centered on the balloon center (cy = 95).
+// The needle SVG is 130×36; we embed it via <image> or re-draw it inline.
+function SceneSVG({
+  balloonScale, timeLabel, showNeedle, touching,
+}: {
+  balloonScale: number;
+  timeLabel: string;
+  showNeedle: boolean;
+  touching: boolean;
+}) {
+  const s = Math.max(0.15, balloonScale);
+  const cx = 100, cy = 95;
+  const rx = 68 * s, ry = 80 * s;
+  const knotY = cy + ry;
+  const knotSize = 9 * s;
+  const stringY1 = knotY + knotSize * 1.2;
+  const stringY2 = 240;
+  const FILL = "#E8C06A";
+  const STROKE = "#2a1f14";
+  const sw = 2.2;
+
+  const bPath = `
+    M ${cx} ${cy - ry}
+    C ${cx + rx * 1.18} ${cy - ry * 0.95},
+      ${cx + rx * 1.22} ${cy + ry * 0.55},
+      ${cx + rx * 0.12} ${cy + ry * 0.92}
+    C ${cx - rx * 0.08} ${cy + ry * 1.02},
+      ${cx - rx * 0.08} ${cy + ry * 1.02},
+      ${cx - rx * 0.22} ${cy + ry * 0.90}
+    C ${cx - rx * 1.28} ${cy + ry * 0.52},
+      ${cx - rx * 1.20} ${cy - ry * 0.92},
+      ${cx} ${cy - ry}
+    Z
+  `;
+  const h1 = `M ${cx - rx * 0.38} ${cy - ry * 0.58} Q ${cx - rx * 0.22} ${cy - ry * 0.72} ${cx - rx * 0.05} ${cy - ry * 0.62}`;
+  const h2 = `M ${cx - rx * 0.42} ${cy - ry * 0.38} Q ${cx - rx * 0.30} ${cy - ry * 0.48} ${cx - rx * 0.18} ${cy - ry * 0.40}`;
+
+  // Needle geometry — tip at (needleTipX, cy), eye 130px to the right
+  // Gap: when not touching start at 80px away, shrinks with progress; touching = -4 (overlapping)
+  // We receive the gap via touching flag; balloonScale encodes progress implicitly
+  // gap = touching ? -4 : lerp(80→10) based on balloonScale (1→0.15)
+  const progressFromScale = (1 - balloonScale) / 0.85; // 0→1
+  const needleGap = touching ? -4 : Math.max(10, 80 - progressFromScale * 70);
+  const balloonRightEdge = cx + rx; // in SVG coords
+  const needleTipX = balloonRightEdge + needleGap;
+  const needleEyeX = needleTipX + 130;
+  const needleY = cy; // vertically aligned to balloon center
+
+  // SVG canvas wide enough to fit needle at full scale
+  const svgW = 340;
+  const svgH = 260;
+
+  return (
+    <svg
+      width={svgW}
+      height={svgH}
+      viewBox={`0 0 ${svgW} ${svgH}`}
+      style={{ display: "block", overflow: "visible" }}
+    >
+      {/* Balloon fill */}
+      <path d={bPath} fill={FILL} />
+      {/* Balloon outline */}
+      <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" />
+      {/* Gloss highlights */}
+      {s > 0.4 && (
+        <>
+          <path d={h1} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth={sw * 0.9} strokeLinecap="round" />
+          <path d={h2} fill="none" stroke="rgba(255,255,255,0.38)" strokeWidth={sw * 0.7} strokeLinecap="round" />
+        </>
+      )}
+      {/* Knot */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx - knotSize * 0.75} ${knotY} L${cx} ${knotY + knotSize * 1.3} L${cx + knotSize * 0.75} ${knotY} L${cx} ${knotY - knotSize * 0.25}Z`}
+          fill={FILL} stroke={STROKE} strokeWidth={sw * 0.85} strokeLinejoin="round"
+        />
+      )}
+      {/* String */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx} ${stringY1} C${cx - 18} ${(stringY1 + stringY2) * 0.45} ${cx + 10} ${(stringY1 + stringY2) * 0.72} ${cx} ${stringY2}`}
+          fill="none" stroke={STROKE} strokeWidth={sw * 0.75} strokeLinecap="round"
+        />
+      )}
+      {/* Text inside balloon */}
+      {s > 0.5 && (
+        <>
+          <text x={cx} y={cy - 12} textAnchor="middle" fill={STROKE}
+            fontSize={Math.round(15 * s)} fontWeight="800"
+            fontFamily="'Playfair Display', Georgia, serif" letterSpacing="1">
+            MY
+          </text>
+          <text x={cx} y={cy + 8} textAnchor="middle" fill={STROKE}
+            fontSize={Math.round(15 * s)} fontWeight="800"
+            fontFamily="'Playfair Display', Georgia, serif" letterSpacing="1">
+            FOCUS
+          </text>
+          <text x={cx} y={cy + 30} textAnchor="middle" fill={STROKE}
+            fontSize={Math.round(12 * s)} fontFamily="'JetBrains Mono', monospace" letterSpacing="1.5">
+            {timeLabel}
+          </text>
+        </>
+      )}
+
+      {/* Needle — drawn inline, tip tracks balloon right edge */}
+      {showNeedle && (
+        <g style={{
+          transition: touching
+            ? "transform 0.5s cubic-bezier(0.25, 0, 0.5, 1)"
+            : "transform 0.4s ease-out",
+        }}>
+          {/* Upper line */}
+          <path
+            d={`M ${needleTipX} ${needleY - 2} C ${needleTipX + 30} ${needleY - 4}, ${needleTipX + 70} ${needleY - 5}, ${needleEyeX - 12} ${needleY}`}
+            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+          />
+          {/* Lower line */}
+          <path
+            d={`M ${needleTipX} ${needleY + 2} C ${needleTipX + 30} ${needleY + 4}, ${needleTipX + 70} ${needleY + 5}, ${needleEyeX - 12} ${needleY}`}
+            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+          />
+          {/* Eye */}
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="5" ry="3" fill="none" stroke="#2a1f14" strokeWidth="1.6" />
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="2" ry="1.2" fill="none" stroke="#2a1f14" strokeWidth="1" />
+        </g>
+      )}
+    </svg>
+  );
+}
+
 function SketchPopBurst() {
   // Hand-drawn starburst — irregular ray lengths, slightly rotated
   const rays = [
@@ -906,7 +1041,7 @@ function ProtoF() {
       border: "1px solid #e8dcc8",
     }}>
 
-      {/* Scene — balloon + needle side by side */}
+      {/* Scene — balloon + needle in a shared SVG coordinate space */}
       <div style={{
         display: "flex",
         alignItems: "center",
@@ -915,38 +1050,19 @@ function ProtoF() {
         minHeight: 260,
         position: "relative",
       }}>
-
-        {/* Balloon or pop burst */}
         {deflateState === "popped" ? (
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 220 }}>
             <SketchPopBurst />
           </div>
         ) : (
-          <div style={{
-            transition: "transform 0.5s ease",
-            transform: `scale(${balloonScale})`,
-            transformOrigin: "bottom center",
-          }}>
-            <SketchBalloon scale={1} timeLabel={mm + ":" + ss} />
-          </div>
-        )}
-
-        {/* Needle — absolutely positioned to the right of balloon */}
-        {isVisible && (
-          <div style={{
-            position: "absolute",
-            // Position needle tip relative to balloon right edge
-            // Balloon SVG is 200px wide, balloon body right edge ≈ cx + rx = 100 + 68 = 168px from SVG left
-            // We place needle so its tip (x=0 of needle SVG) is needleGap px away from balloon right
-            left: `calc(50% + ${68 * balloonScale + needleGap}px)`,
-            top: "50%",
-            transform: "translateY(-50%) translateY(-20px)",
-            transition: touching
-              ? "left 0.5s cubic-bezier(0.25, 0, 0.5, 1)"
-              : "left 0.8s cubic-bezier(0.34, 1.2, 0.64, 1)",
-          }}>
-            <SketchNeedle touching={touching} />
-          </div>
+          /* Unified SVG: balloon shrinks from its bottom-center anchor;
+             needle tip is always computed from the actual balloon right-edge in SVG coords */
+          <SceneSVG
+            balloonScale={balloonScale}
+            timeLabel={mm + ":" + ss}
+            showNeedle={isVisible}
+            touching={touching}
+          />
         )}
       </div>
 
@@ -977,8 +1093,8 @@ function ProtoF() {
             : deflateState === "popped" || deflateState === "popping"
             ? "Your focus balloon popped. Try again!"
             : deflateState === "running"
-            ? `Needle is ${Math.round(needleGap)}px away — keep going!`
-            : "Start to let the air out slowly."}
+            ? "Stay focused — the needle is watching..."
+            : "Start the timer — breathe out your stress, one second at a time."}
         </p>
       </div>
 

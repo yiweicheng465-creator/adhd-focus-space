@@ -5,7 +5,7 @@
    Each logged win has a clickable icon to change category.
    ============================================================ */
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
@@ -144,29 +144,42 @@ function IconPickerPopover({
   current,
   onSelect,
   onClose,
+  anchorRef,
 }: {
   current: number;
   onSelect: (idx: number) => void;
   onClose: () => void;
+  anchorRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+
+  useEffect(() => {
+    if (anchorRef?.current) {
+      const rect = anchorRef.current.getBoundingClientRect();
+      setPos({ top: rect.bottom + 6, left: rect.left });
+    }
+  }, [anchorRef]);
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
+      if (ref.current && !ref.current.contains(e.target as Node) &&
+          anchorRef?.current && !anchorRef.current.contains(e.target as Node)) onClose();
     }
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
-  }, [onClose]);
+  }, [onClose, anchorRef]);
+
+  const style: React.CSSProperties = pos
+    ? { position: "fixed", top: pos.top, left: pos.left }
+    : { position: "absolute", top: "calc(100% + 6px)", left: 0 };
 
   return (
     <div
       ref={ref}
       style={{
-        position: "absolute",
-        zIndex: 50,
-        top: "calc(100% + 6px)",
-        left: 0,
+        ...style,
+        zIndex: 9999,
         background: M.card,
         border: `1px solid ${M.border}`,
         borderRadius: 10,
@@ -225,6 +238,12 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
   const [showNewPicker,  setShowNewPicker]  = useState(false);
   // Which win item has its picker open: win id or null
   const [editingWinId,   setEditingWinId]   = useState<string | null>(null);
+  const newPickerBtnRef = useRef<HTMLButtonElement>(null);
+  const winPickerBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const setWinBtnRef = useCallback((id: string) => (el: HTMLButtonElement | null) => {
+    if (el) winPickerBtnRefs.current.set(id, el);
+    else winPickerBtnRefs.current.delete(id);
+  }, []);
 
   const addWin = () => {
     if (!newWin.trim()) return;
@@ -273,6 +292,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
           {/* Icon picker trigger */}
           <div style={{ position: "relative" }}>
             <button
+              ref={newPickerBtnRef}
               onClick={() => setShowNewPicker((v) => !v)}
               className="w-10 h-10 flex items-center justify-center transition-all shrink-0"
               style={{
@@ -289,6 +309,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
                 current={selectedIcon}
                 onSelect={setSelectedIcon}
                 onClose={() => setShowNewPicker(false)}
+                anchorRef={newPickerBtnRef}
               />
             )}
           </div>
@@ -336,6 +357,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
               {/* Clickable icon — opens picker to change category */}
               <div style={{ position: "relative", flexShrink: 0, marginTop: 2 }}>
                 <button
+                  ref={setWinBtnRef(win.id)}
                   onClick={() => setEditingWinId(isEditing ? null : win.id)}
                   title="Click to change category"
                   style={{
@@ -364,6 +386,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
                     current={iconIdx}
                     onSelect={(idx) => changeWinIcon(win.id, idx)}
                     onClose={() => setEditingWinId(null)}
+                    anchorRef={{ current: winPickerBtnRefs.current.get(win.id) ?? null }}
                   />
                 )}
               </div>
