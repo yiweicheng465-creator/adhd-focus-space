@@ -33,7 +33,7 @@ function LogoMark() {
     <div
       className="w-10 h-10 flex items-center justify-center"
       title="ADHD Focus Space"
-      style={{ background: "oklch(0.955 0.016 76)" }}
+      style={{ background: "oklch(0.975 0.010 72)" }}
     >
       <img
         src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-logo-blob2-8QDj2kgAG624iuGTX4JAY6.webp"
@@ -71,8 +71,8 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
     <aside
       className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-5"
       style={{
-        background: "oklch(0.955 0.016 76)",
-        borderRight: "1px solid oklch(0.87 0.014 75)",
+        background: "oklch(0.975 0.010 72)",
+        borderRight: "1px solid oklch(0.90 0.010 72)",
       }}
     >
       {/* Logo */}
@@ -81,7 +81,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       </div>
 
       {/* Thin rule */}
-      <div className="w-6 mb-4" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
+      <div className="w-6 mb-4" style={{ borderTop: "1px solid oklch(0.90 0.010 72)" }} />
 
       {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-2">
@@ -135,7 +135,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         <svg width="8" height="8" viewBox="0 0 8 8" style={{ opacity: 0.3 }}>
           <rect x="1" y="1" width="6" height="6" transform="rotate(45 4 4)" fill="oklch(0.55 0.09 35)" />
         </svg>
-        <div className="w-6" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
+        <div className="w-6" style={{ borderTop: "1px solid oklch(0.90 0.010 72)" }} />
         <LiveTime />
       </div>
     </aside>
