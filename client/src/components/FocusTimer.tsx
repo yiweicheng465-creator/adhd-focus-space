@@ -298,12 +298,14 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
   }, [editingMode]);
 
-  const handleComplete = useCallback(() => {
+  // natural=true  → timer hit zero → counts as a win
+  // natural=false → user skipped/quit early → no win
+  const handleComplete = useCallback((natural = true) => {
     setRunning(false);
     setBalloonState("complete");
     if (mode === "focus") {
       setSessions((s) => s + 1);
-      if (!completedRef.current) {
+      if (natural && !completedRef.current) {
         completedRef.current = true;
         onSessionComplete?.();
       }
@@ -356,9 +358,10 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     setBalloonState(next ? "running" : "paused");
   };
 
+  // Skip = user-initiated early end → NOT a win
   const handleSkip = () => {
     clearInterval(intervalRef.current!);
-    handleComplete();
+    handleComplete(false);
     setRemaining(0);
   };
 
