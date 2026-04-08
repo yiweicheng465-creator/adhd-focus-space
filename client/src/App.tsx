@@ -7,14 +7,16 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
 import TimerPrototypes from "./pages/TimerPrototypes";
-import Monthly from "./pages/Monthly";
+import Monthly from "@/pages/Monthly";
+import Insight from "@/pages/Insight";
 
 function Router() {
   return (
     <Switch>
       <Route path={"/"} component={Home} />
       <Route path={"/timer-prototypes"} component={TimerPrototypes} />
-      <Route path={"/monthly"} component={Monthly} />
+        <Route path="/monthly" component={Monthly} />
+        <Route path="/insight" component={Insight} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

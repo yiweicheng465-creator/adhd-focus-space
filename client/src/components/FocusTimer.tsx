@@ -110,8 +110,11 @@ function BalloonScene({
   mode: TimerMode;
   isRunning: boolean;
 }) {
-  const s = Math.max(0.15, balloonScale);
-  const cx = 110, cy = 100;
+  const s = Math.max(0.20, balloonScale);
+  // As balloon shrinks, it floats upward — making deflation very visible
+  const cx = 110;
+  // At full size cy=110; as it shrinks it rises toward cy=55
+  const cy = 110 - (1 - s) * 55;
   const rx = 72 * s, ry = 84 * s;
   const knotY = cy + ry;
   const knotSize = 9 * s;
@@ -274,8 +277,8 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  // Balloon deflates from 1.0 → 0.15 as focus progresses
-  const balloonScale = balloonState === "popped" ? 0 : 1 - progress * 0.85;
+  // Balloon deflates from 1.0 → 0.20 as focus progresses (more dramatic shrink)
+  const balloonScale = balloonState === "popped" ? 0 : 1 - progress * 0.80;
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");

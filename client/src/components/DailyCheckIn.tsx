@@ -145,11 +145,19 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
     setTimeout(() => inputRef.current?.focus(), 150);
   }, [step]);
 
+  const parseHashtag = (raw: string): { cleanText: string; tag: string | null } => {
+    const match = raw.match(/(^|\s)#([\w-]+)(\s|$)/);
+    if (!match) return { cleanText: raw.trim(), tag: null };
+    const cleanText = raw.replace(/(^|\s)#[\w-]+(\s|$)/g, " ").replace(/\s{2,}/g, " ").trim();
+    return { cleanText, tag: match[2].toLowerCase() };
+  };
+
   const addTask = () => {
-    if (taskInput.trim()) {
-      setTasks((p) => [...p, { text: taskInput.trim(), context: taskContext }]);
-      setTaskInput("");
-    }
+    if (!taskInput.trim()) return;
+    const { cleanText, tag } = parseHashtag(taskInput);
+    const context = (tag ?? taskContext) as "work" | "personal";
+    setTasks((p) => [...p, { text: cleanText || taskInput.trim(), context }]);
+    setTaskInput("");
   };
 
   const addAgent = () => {
@@ -344,7 +352,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "tasks" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Add tasks for today. Press Enter to add each one.
+                Add tasks for today. Press Enter to add each one. Use <span style={{ color: M.accent }}>#work</span> or <span style={{ color: M.accent }}>#personal</span> to categorize.
               </p>
               <div className="flex gap-2 mb-2">
                 <input
@@ -352,19 +360,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   value={taskInput}
                   onChange={(e) => setTaskInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTask()}
-                  placeholder="e.g. Reply to Alice's email…"
+                  placeholder="e.g. Reply to Alice's email… or add #work #yoga"
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
+                  style={{ border: `1px solid ${taskInput.includes("#") ? M.accent : M.border}`, color: M.ink, transition: "border-color 0.2s" }}
                 />
-                <select
-                  value={taskContext}
-                  onChange={(e) => setTaskContext(e.target.value as "work" | "personal")}
-                  className="px-2 py-2 text-xs bg-transparent focus:outline-none"
-                  style={{ border: `1px solid ${M.border}`, color: M.muted }}
-                >
-                  <option value="work">Work</option>
-                  <option value="personal">Personal</option>
-                </select>
                 <button
                   onClick={addTask}
                   className="px-3 py-2 text-sm font-bold"
@@ -393,35 +392,25 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "agents" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Log any AI agents you have running. Name and what they're doing.
+                Log any AI agents you have running. Press Enter to add each one.
               </p>
-              <div className="flex flex-col gap-2 mb-2">
+              <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
                   value={agentName}
                   onChange={(e) => setAgentName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && agentTask ? addAgent() : undefined}
+                  onKeyDown={(e) => e.key === "Enter" && addAgent()}
                   placeholder="Agent name (e.g. Manus, Claude…)"
-                  className="w-full px-3 py-2 text-sm bg-transparent focus:outline-none"
+                  className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
                   style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
-                <div className="flex gap-2">
-                  <input
-                    value={agentTask}
-                    onChange={(e) => setAgentTask(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && addAgent()}
-                    placeholder="What is it doing? (e.g. writing blog post draft)"
-                    className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                    style={{ border: `1px solid ${M.border}`, color: M.ink }}
-                  />
-                  <button
-                    onClick={addAgent}
-                    className="px-3 py-2 text-sm font-bold"
-                    style={{ background: M.accent, color: "white" }}
-                  >
-                    +
-                  </button>
-                </div>
+                <button
+                  onClick={addAgent}
+                  className="px-3 py-2 text-sm font-bold"
+                  style={{ background: M.accent, color: "white" }}
+                >
+                  +
+                </button>
               </div>
               {agents.length > 0 && (
                 <ul className="space-y-1.5 mt-3">

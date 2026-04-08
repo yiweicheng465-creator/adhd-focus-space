@@ -106,6 +106,38 @@ function MonthlyLink() {
   );
 }
 
+/* Info/bulb icon link to /insight */
+function InsightLink() {
+  const [location, navigate] = useLocation();
+  const active = location === "/insight";
+  return (
+    <button
+      onClick={() => navigate("/insight")}
+      title="Insight — how this app works"
+      className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
+      style={{ background: active ? "oklch(0.55 0.09 35 / 0.09)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.09 35 / 0.04)"; }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+    >
+      {active && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.55 0.09 35)" }} />
+      )}
+      {/* Simple circle-i icon */}
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <circle cx="9" cy="9" r="7" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4"/>
+        <line x1="9" y1="8" x2="9" y2="13" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.5" strokeLinecap="round"/>
+        <circle cx="9" cy="5.5" r="0.9" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+      </svg>
+      <span
+        className="text-[7px] mt-1 tracking-[0.12em] font-medium"
+        style={{ fontFamily: "'DM Sans', sans-serif", color: active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)" }}
+      >
+        IDEA
+      </span>
+    </button>
+  );
+}
+
 /* Beaker icon link to /timer-prototypes */
 function PrototypesLink() {
   const [location, navigate] = useLocation();
@@ -199,6 +231,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Monthly + Prototypes links — bottom of nav */}
       <div className="w-full px-2 mt-1">
         <MonthlyLink />
+        <InsightLink />
         <PrototypesLink />
         {/* Subtle clear-data button — only visible on hover */}
         {onClearData && (
