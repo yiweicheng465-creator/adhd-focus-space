@@ -259,37 +259,43 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               />
             ))}
 
-            {/* SVG filter for inner button drop-shadow */}
+            {/* SVG defs: dome gradient + filters */}
             <defs>
-              <filter id="btn3d" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#C8B8A4" floodOpacity="0.7" />
-              </filter>
-              <filter id="btn3d-pressed" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#C8B8A4" floodOpacity="0.4" />
-              </filter>
-              <radialGradient id="btnBevel" cx="38%" cy="32%" r="65%">
-                <stop offset="0%" stopColor="#FDFAF6" />
-                <stop offset="60%" stopColor="#F5EDE3" />
-                <stop offset="100%" stopColor="#E8D8C8" />
+              {/* Convex dome gradient — bright top-left, warm shadow bottom-right */}
+              <radialGradient id="domeGrad" cx="35%" cy="28%" r="70%">
+                <stop offset="0%" stopColor="#FEFCF8" />
+                <stop offset="40%" stopColor="#F5EDE3" />
+                <stop offset="80%" stopColor="#E8D8C8" />
+                <stop offset="100%" stopColor="#D8C8B4" />
               </radialGradient>
+              {/* Outer groove ring gradient */}
+              <radialGradient id="grooveGrad" cx="50%" cy="50%" r="50%">
+                <stop offset="85%" stopColor="#E0D0BC" />
+                <stop offset="100%" stopColor="#F5EDE3" />
+              </radialGradient>
+              {/* Drop shadow filter for the dome */}
+              <filter id="domeShadow" x="-15%" y="-15%" width="130%" height="130%">
+                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#B8A898" floodOpacity="0.5" />
+              </filter>
+              <filter id="domeShadowPressed" x="-15%" y="-15%" width="130%" height="130%">
+                <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#B8A898" floodOpacity="0.3" />
+              </filter>
             </defs>
 
-            {/* Outer beige knob face — flat, no shadow */}
-            <circle cx={CX} cy={CY} r={R} fill="#F5EDE3" />
-            {/* Thin warm border */}
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1.5" />
+            {/* Outer groove ring — slightly darker, recessed look */}
+            <circle cx={CX} cy={CY} r={R} fill="#E8D8C8" />
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
 
-            {/* Inner 3D raised center button */}
-            <circle cx={CX} cy={CY} r={R - 28}
-              fill="url(#btnBevel)"
-              stroke="#D4C4B0"
-              strokeWidth="1"
-              filter={isRunning ? "url(#btn3d-pressed)" : "url(#btn3d)"}
+            {/* Full-size convex dome button — same radius as R, raised */}
+            <circle cx={CX} cy={CY} r={R - 8}
+              fill="url(#domeGrad)"
+              filter={isRunning ? "url(#domeShadowPressed)" : "url(#domeShadow)"}
             />
-            {/* Top-left highlight arc for bevel illusion */}
-            <path
-              d={`M ${CX - (R-28) * 0.6} ${CY - (R-28) * 0.2} A ${R-28} ${R-28} 0 0 1 ${CX + (R-28) * 0.2} ${CY - (R-28) * 0.65}`}
-              fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round"
+            {/* Thin border on dome edge */}
+            <circle cx={CX} cy={CY} r={R - 8} fill="none" stroke="#D8C8B4" strokeWidth="0.8" />
+            {/* Top-left specular highlight */}
+            <ellipse cx={CX - (R-8)*0.22} cy={CY - (R-8)*0.28} rx={(R-8)*0.28} ry={(R-8)*0.18}
+              fill="rgba(255,255,255,0.45)" transform={`rotate(-30 ${CX} ${CY})`}
             />
 
             {/* Progress arc on top */}
