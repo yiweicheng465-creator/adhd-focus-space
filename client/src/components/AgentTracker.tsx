@@ -35,8 +35,9 @@ const M = {
   roseBdr:  "oklch(0.52 0.07 20 / 0.25)",
   ink:      "oklch(0.28 0.018 65)",
   muted:    "oklch(0.55 0.018 70)",
-  border:   "oklch(0.88 0.014 75)",
-  card:     "oklch(0.985 0.007 80)",
+  border:   "oklch(0.90 0.010 75)",
+  card:     "oklch(0.992 0.005 80 / 0.85)",
+  surface:  "oklch(0.985 0.007 78 / 0.60)",
 };
 
 /* ── Types ── */
@@ -158,39 +159,39 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   };
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="flex flex-col" style={{ gap: 24 }}>
 
       {/* Context switcher — dynamic categories */}
       <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} />
 
       {/* Summary cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10 }}>
         {[
-          { icon: <Cpu className="w-3.5 h-3.5" />,         label: "Running Now",    value: runningCount,       color: M.coral,   bg: M.coralBg,  border: M.coralBdr },
-          { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Done Today",     value: doneCount,          color: M.sage,    bg: M.sageBg,   border: M.sageBdr  },
-          { icon: <Cpu className="w-3.5 h-3.5" />,          label: "Total Today",    value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
+          { icon: Cpu,          label: "Running",     value: runningCount,       color: M.coral,   bg: M.coralBg,  border: M.coralBdr },
+          { icon: CheckCircle2, label: "Done Today",  value: doneCount,          color: M.sage,    bg: M.sageBg,   border: M.sageBdr  },
+          { icon: Cpu,          label: "Total Today", value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
           {
-            icon: <Flame className="w-3.5 h-3.5" />,
-            label: "Uncovered Tasks",
+            icon: Flame,
+            label: "Uncovered",
             value: uncoveredTasks.length,
             color:  uncoveredTasks.length > 0 ? M.rose    : M.sage,
             bg:     uncoveredTasks.length > 0 ? M.roseBg  : M.sageBg,
             border: uncoveredTasks.length > 0 ? M.roseBdr : M.sageBdr,
           },
-        ].map(({ icon, label, value, color, bg, border }) => (
-          <div key={label} className="p-4" style={{ background: bg, border: `1px solid ${border}` }}>
-            <div className="flex items-center gap-1.5 mb-2" style={{ color }}>
-              {icon}
-              <span style={LABEL}>{label}</span>
+        ].map(({ icon: Icon, label, value, color, bg, border }) => (
+          <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: "14px 16px", backdropFilter: "blur(6px)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+              <Icon style={{ width: 12, height: 12, color }} />
+              <span style={{ ...LABEL, color: M.muted }}>{label}</span>
             </div>
-            <p className="text-2xl font-bold" style={{ color, fontFamily: "'Playfair Display', serif" }}>{value}</p>
+            <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.65rem", fontWeight: 700, color, lineHeight: 1 }}>{value}</p>
           </div>
         ))}
       </div>
 
       {/* Coverage alert */}
       {uncoveredTasks.length > 0 && (
-        <div className="p-4" style={{ border: `1px solid ${M.roseBdr}`, background: M.roseBg }}>
+        <div style={{ padding: "14px 18px", borderRadius: 10, border: `1px solid ${M.roseBdr}`, background: M.roseBg }}>
           <div className="flex items-center gap-2 mb-2">
             <Flame className="w-4 h-4" style={{ color: M.rose }} />
             <p className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
@@ -208,7 +209,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       )}
 
       {uncoveredTasks.length === 0 && contextTasks.length > 0 && (
-        <div className="p-3 flex items-center gap-2" style={{ border: `1px solid ${M.sageBdr}`, background: M.sageBg }}>
+        <div style={{ padding: "12px 18px", borderRadius: 10, border: `1px solid ${M.sageBdr}`, background: M.sageBg, display: "flex", alignItems: "center", gap: 8 }}>
           <CheckCircle2 className="w-4 h-4" style={{ color: M.sage }} />
           <p className="text-sm font-medium" style={{ color: M.sage, fontFamily: "'DM Sans', sans-serif" }}>
             All active tasks are covered. You're fully delegated!
@@ -217,20 +218,23 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       )}
 
       {/* Add agent form */}
-      <div className="p-5 flex flex-col gap-3" style={{ background: M.card, border: `1px solid ${M.border}` }}>
-        <p className="editorial-label mb-1" style={{ color: M.coral }}>Log a new agent</p>
+      <div style={{ padding: "22px 22px 18px", borderRadius: 16, background: M.card, border: `1px solid ${M.border}`, backdropFilter: "blur(8px)", display: "flex", flexDirection: "column", gap: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 2 }}>
+          <div style={{ width: 3, height: 16, background: M.coral, borderRadius: 2, flexShrink: 0 }} />
+          <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.92rem", fontWeight: 700, fontStyle: "italic", color: M.ink }}>Log a new agent</span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Input
             value={name} onChange={(e) => setName(e.target.value)}
-            placeholder="Agent name (e.g. Manus, Claude, GPT-4o)"
-            style={{ background: "oklch(0.972 0.010 78)", border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
+            placeholder="Agent name (e.g. Manus, Claude)"
+            style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
           />
           <Input
             value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addAgent()}
             placeholder="What is it doing?"
-            style={{ background: "oklch(0.972 0.010 78)", border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
           />
         </div>
 
@@ -244,14 +248,18 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
               <button
                 key={ctx}
                 onClick={() => setNewCtx(ctx)}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
                 style={{
-                  background:  newCtx === ctx ? cfg.bg : "transparent",
-                  color:       newCtx === ctx ? cfg.color : M.muted,
-                  border:      `1px solid ${newCtx === ctx ? cfg.border : M.border}`,
-                  fontFamily:  "'DM Sans', sans-serif",
+                  display: "flex", alignItems: "center", gap: 5,
+                  padding: "5px 12px",
+                  borderRadius: 20,
+                  border: `1px solid ${newCtx === ctx ? cfg.border : M.border}`,
+                  background: newCtx === ctx ? cfg.bg : "transparent",
+                  color: newCtx === ctx ? cfg.color : M.muted,
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: "0.75rem",
+                  fontWeight: newCtx === ctx ? 600 : 400,
                   cursor: "pointer",
-                  borderRadius: 0,
+                  transition: "all 0.15s",
                 }}
               >
                 <Icon className="w-3 h-3" />
@@ -267,8 +275,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
             <Link2 className="w-4 h-4 shrink-0" style={{ color: M.muted }} />
             <select
               value={linkedTaskId} onChange={(e) => setLinkedTaskId(e.target.value)}
-              className="flex-1 text-sm px-3 py-2 focus:outline-none"
-              style={{ border: `1px solid ${M.border}`, background: "oklch(0.972 0.010 78)", color: M.ink, fontFamily: "'DM Sans', sans-serif" }}
+              style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", padding: "8px 12px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 80)", color: linkedTaskId ? M.ink : M.muted, outline: "none" }}
             >
               <option value="">Link to a task (optional)</option>
               {linkableTasks.map((t) => (
@@ -338,13 +345,14 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
           const linkedTask = tasks.find((t) => t.id === agent.linkedTaskId);
 
           return (
-            <div key={agent.id} className="overflow-hidden transition-all" style={{ border: `1px solid ${cfg.border}`, background: M.card }}>
+            <div key={agent.id} style={{ borderRadius: 14, overflow: "hidden", border: `1px solid ${M.border}`, background: M.card, backdropFilter: "blur(6px)", transition: "box-shadow 0.15s" }}>
+              {/* Status accent bar */}
+              <div style={{ height: 3, background: cfg.color, opacity: 0.45 }} />
               {/* Main row */}
-              <div className="flex items-start gap-3 p-4 cursor-pointer" onClick={() => setExpandedId(isExpanded ? null : agent.id)}>
+              <div className="flex items-start gap-3 cursor-pointer" style={{ padding: "15px 18px" }} onClick={() => setExpandedId(isExpanded ? null : agent.id)}>
                 {/* Status icon */}
                 <div
-                  className="w-9 h-9 flex items-center justify-center shrink-0 mt-0.5"
-                  style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}
+                  style={{ width: 38, height: 38, borderRadius: 10, background: cfg.bg, border: `1px solid ${cfg.border}`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, marginTop: 2 }}
                 >
                   <StatusIcon className="w-4 h-4" style={{ color: cfg.color }} />
                 </div>
@@ -352,8 +360,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 {/* Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-semibold text-sm" style={{ color: M.ink, fontFamily: "'Playfair Display', serif" }}>{agent.name}</span>
-                    <span className="text-[10px] px-2 py-0.5 font-medium" style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}`, fontFamily: "'DM Sans', sans-serif" }}>
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.95rem", fontWeight: 700, color: M.ink }}>{agent.name}</span>
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.60rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase" as const, padding: "2px 8px", borderRadius: 20, background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.border}` }}>
                       {cfg.label}
                     </span>
                     <ContextBadge context={agent.context} />
@@ -364,7 +372,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       </span>
                     )}
                   </div>
-                  <p className="text-sm mt-0.5 truncate" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>{agent.task}</p>
+                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: M.muted, marginTop: 4, marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agent.task}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{elapsed(agent.startedAt, agent.endedAt)}</span>
                     <span>Started {new Date(agent.startedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>
@@ -385,7 +393,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
 
               {/* Expanded notes */}
               {isExpanded && (
-                <div className="px-4 pb-4" style={{ borderTop: `1px solid ${cfg.border}` }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ padding: "0 18px 18px", paddingTop: 16, borderTop: `1px solid ${M.border}` }} onClick={(e) => e.stopPropagation()}>
                   <p className="text-xs font-medium mt-3 mb-1.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     Notes / output summary
                   </p>
@@ -394,8 +402,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       <textarea
                         value={noteEditing.value}
                         onChange={(e) => setNoteEditing({ id: agent.id, value: e.target.value })}
-                        className="w-full text-sm px-3 py-2 resize-none focus:outline-none min-h-[80px]"
-                        style={{ border: `1px solid ${M.border}`, background: "oklch(0.972 0.010 78)", color: M.ink, fontFamily: "'DM Sans', sans-serif" }}
+                        style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", padding: "10px 12px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 80)", color: M.ink, resize: "vertical" as const, minHeight: 80, outline: "none" }}
                         placeholder="What did this agent produce? Any key outputs?"
                       />
                       <div className="flex gap-2">
@@ -405,9 +412,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                     </div>
                   ) : (
                     <div
-                      className="text-sm cursor-pointer p-2 min-h-[40px] transition-colors"
-                      style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
                       onClick={() => setNoteEditing({ id: agent.id, value: agent.notes ?? "" })}
+                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: agent.notes ? M.ink : M.muted, fontStyle: agent.notes ? "normal" : "italic", padding: "10px 12px", borderRadius: 8, border: `1px dashed ${M.border}`, background: "oklch(0.990 0.005 78 / 0.60)", cursor: "pointer", minHeight: 40 }}
                     >
                       {agent.notes ? agent.notes : <span className="italic opacity-60">Click to add notes or output summary…</span>}
                     </div>
