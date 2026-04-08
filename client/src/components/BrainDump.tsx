@@ -81,10 +81,32 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
   );
 }
 
+const STORAGE_KEY = "adhd_braindump_entries";
+
+function loadEntries(): BrainDumpEntry[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Array<BrainDumpEntry & { createdAt: string }>;
+    return parsed.map((e) => ({ ...e, createdAt: new Date(e.createdAt) }));
+  } catch {
+    return [];
+  }
+}
+
 export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
   const [currentThought, setCurrentThought] = useState("");
-  const [entries,        setEntries]        = useState<BrainDumpEntry[]>([]);
+  const [entries,        setEntries]        = useState<BrainDumpEntry[]>(() => loadEntries());
   const [activeTag,      setActiveTag]      = useState<string | null>(null);
+
+  // Persist entries to localStorage whenever they change
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    } catch {
+      // storage full or unavailable — silently ignore
+    }
+  }, [entries]);
 
   // All unique tags across all entries
   const allTags = useMemo(() => {
