@@ -266,60 +266,63 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
           return (
             <div
               key={task.id}
-              className={cn("group flex items-start gap-3 p-3 transition-all duration-300")}
+              className={cn("group flex items-center gap-3 px-4 py-3 transition-all duration-300 relative")}
               style={{
-                background:  task.done ? "oklch(0.93 0.012 78 / 0.5)" : M.card,
-                border:      `1px solid ${task.done ? M.border : M.border}`,
-                opacity:     isCompleting ? 0.5 : task.done ? 0.65 : 1,
-                transform:   isCompleting ? "scale(0.97)" : "scale(1)",
-              }}
-              onMouseEnter={(e) => {
-                if (!task.done) (e.currentTarget as HTMLDivElement).style.borderColor = `${M.coral}40`;
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor = M.border;
+                background:   task.done ? "oklch(0.97 0.006 78)" : M.card,
+                borderTop:    `1px solid ${M.border}`,
+                borderRight:  `1px solid ${M.border}`,
+                borderBottom: `1px solid ${M.border}`,
+                // Priority accent: thin left bar
+                borderLeft:   `3px solid ${task.done ? M.border : pcfg.color}`,
+                opacity:      isCompleting ? 0.5 : task.done ? 0.55 : 1,
+                transform:    isCompleting ? "scale(0.98)" : "scale(1)",
               }}
             >
-              {/* Checkbox */}
+              {/* Checkbox — minimal circle/check */}
               <button
                 onClick={() => toggleTask(task.id)}
-                className="mt-0.5 flex-shrink-0 transition-transform hover:scale-110"
+                className="flex-shrink-0 transition-all hover:scale-110"
+                style={{ color: task.done ? pcfg.color : "oklch(0.80 0.012 75)" }}
               >
                 {task.done
-                  ? <CheckCircle2 className="w-5 h-5" style={{ color: pcfg.color }} />
-                  : <Circle      className="w-5 h-5" style={{ color: M.muted }} />
+                  ? <CheckCircle2 className="w-4 h-4" />
+                  : <Circle       className="w-4 h-4" />
                 }
               </button>
 
               {/* Text */}
               <div className="flex-1 min-w-0">
                 <p
-                  className={cn("text-sm leading-snug", task.done && "line-through")}
-                  style={{ color: task.done ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
+                  className={cn(task.done && "line-through")}
+                  style={{
+                    color:      task.done ? M.muted : M.ink,
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontSize:   "0.82rem",
+                    fontWeight: task.done ? 300 : 400,
+                    letterSpacing: "0.01em",
+                    lineHeight: 1.4,
+                  }}
                 >
                   {task.text}
                 </p>
               </div>
 
-              {/* Context badge */}
+              {/* Context badge — tiny dot + label */}
               <ContextBadge context={task.context} />
 
-              {/* Priority badge */}
-              <span
-                className="flex items-center gap-1 text-[10px] px-2 py-0.5 font-medium shrink-0"
-                style={{ background: pcfg.bg, color: pcfg.color, border: `1px solid ${pcfg.border}`, fontFamily: "'DM Sans', sans-serif" }}
-              >
-                <PIcon className="w-2.5 h-2.5" />
-                {pcfg.label}
-              </span>
+              {/* Priority — just the icon, no pill */}
+              <PIcon
+                className="w-3 h-3 shrink-0 opacity-60"
+                style={{ color: pcfg.color }}
+              />
 
               {/* Delete */}
               <button
                 onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1"
                 style={{ color: M.muted }}
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
           );
