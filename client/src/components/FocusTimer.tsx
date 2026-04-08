@@ -101,13 +101,14 @@ function PopBurst() {
 
 // ── BalloonScene: unified SVG with balloon + needle ───────────────────────────
 function BalloonScene({
-  balloonScale, timeLabel, showNeedle, touching, mode,
+  balloonScale, timeLabel, showNeedle, touching, mode, isRunning,
 }: {
   balloonScale: number;
   timeLabel: string;
   showNeedle: boolean;
   touching: boolean;
   mode: TimerMode;
+  isRunning: boolean;
 }) {
   const s = Math.max(0.15, balloonScale);
   const cx = 110, cy = 100;
@@ -157,25 +158,42 @@ function BalloonScene({
       {/* Balloon outline — warm brown crayon stroke */}
       <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" opacity="0.78" />
 
-      {/* Smiley face — crayon style, closed arc eyes + smile */}
+      {/* When running: show MM:SS countdown inside balloon; otherwise show face */}
       {s > 0.45 && (
-        <g opacity={Math.min(1, (s - 0.45) * 5)}>
-          {/* Left eye — cute downward arc ᵕ (like picture 2) */}
-          <path
-            d={`M ${cx - eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx - eyeOffX} ${eyeY + ry * 0.10} ${cx - eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
-          />
-          {/* Right eye — cute downward arc ᵕ */}
-          <path
-            d={`M ${cx + eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx + eyeOffX} ${eyeY + ry * 0.10} ${cx + eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
-          />
-          {/* Gentle smile — soft and content */}
-          <path
-            d={`M ${cx - smileR * 0.7} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.42} ${cx + smileR * 0.7} ${cy + ry * 0.28}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.80"
-          />
-        </g>
+        isRunning ? (
+          /* Countdown text centered in balloon */
+          <text
+            x={cx}
+            y={cy + ry * 0.12}
+            textAnchor="middle"
+            dominantBaseline="middle"
+            fontFamily="'JetBrains Mono', monospace"
+            fontWeight="700"
+            fontSize={Math.round(rx * 0.58)}
+            fill={STROKE}
+            opacity="0.82"
+          >
+            {timeLabel}
+          </text>
+        ) : (
+          <g opacity={Math.min(1, (s - 0.45) * 5)}>
+            {/* Left eye — cute downward arc ᵕ (like picture 2) */}
+            <path
+              d={`M ${cx - eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx - eyeOffX} ${eyeY + ry * 0.10} ${cx - eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
+              fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
+            />
+            {/* Right eye — cute downward arc ᵕ */}
+            <path
+              d={`M ${cx + eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx + eyeOffX} ${eyeY + ry * 0.10} ${cx + eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
+              fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
+            />
+            {/* Gentle smile — soft and content */}
+            <path
+              d={`M ${cx - smileR * 0.7} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.42} ${cx + smileR * 0.7} ${cy + ry * 0.28}`}
+              fill="none" stroke={STROKE} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.80"
+            />
+          </g>
+        )
       )}
 
       {/* Knot — organic teardrop shape */}
@@ -478,6 +496,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               showNeedle={showNeedle}
               touching={touching}
               mode={mode}
+              isRunning={running}
             />
           )}
         </div>
@@ -501,8 +520,8 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         ))}
       </div>
 
-      {/* MM:SS Countdown */}
-      {(running || balloonState === "paused") && (
+      {/* MM:SS Countdown — shown below when paused, hidden when running (shown in balloon) */}
+      {balloonState === "paused" && (
         <div style={{ textAlign: "center", margin: "2px 0" }}>
           <span style={{
             fontFamily: "'JetBrains Mono', monospace",
