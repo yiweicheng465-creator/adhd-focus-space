@@ -29,20 +29,13 @@ const NAV = [
 /* ── Logo mark: refined editorial monogram ── */
 function LogoMark() {
   return (
-    <div className="relative w-10 h-10 flex items-center justify-center">
-      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-        {/* Outer square with rounded corners — warm parchment fill */}
-        <rect x="1" y="1" width="38" height="38" rx="6" fill="oklch(0.55 0.09 35 / 0.10)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" />
-        {/* Serif italic A — drawn as paths for crispness */}
-        {/* Left stroke of A */}
-        <line x1="12" y1="30" x2="20" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="2" strokeLinecap="round" />
-        {/* Right stroke of A */}
-        <line x1="28" y1="30" x2="20" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="2" strokeLinecap="round" />
-        {/* Crossbar */}
-        <line x1="14.5" y1="22" x2="25.5" y2="22" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" />
-        {/* Small decorative dot — top right corner */}
-        <circle cx="33" cy="7" r="2" fill="oklch(0.55 0.09 35)" />
-      </svg>
+    <div className="w-10 h-10 flex items-center justify-center overflow-hidden" title="ADHD Focus Space">
+      <img
+        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-logo-blob2-8QDj2kgAG624iuGTX4JAY6.webp"
+        alt="ADHD Focus Space logo"
+        className="w-10 h-10 object-cover"
+        style={{ borderRadius: "2px" }}
+      />
     </div>
   );
 }
