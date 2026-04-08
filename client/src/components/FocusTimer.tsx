@@ -1,20 +1,19 @@
 /**
- * FocusTimer — Instrument / Podcast-Player Aesthetic
- * Design: Large JetBrains Mono digits, barcode-style progress bar,
- * geometric SVG circle dial with tick marks, pill toggle controls.
- * Morandi palette only — no blue, no teal.
- * Reference: podcast player UI (00:32:00 style), instrument panel.
+ * FocusTimer — Cat Companion Design
+ * Morandi palette, flat 2D. Cat grows during focus, scared when paused,
+ * alien-abducted when abandoned mid-session.
  */
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Check, Pause, Play, SkipForward, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type TimerMode = "focus" | "short" | "long";
+type CatState = "idle" | "running" | "paused" | "abducted" | "complete";
 
-const MODE_META: Record<TimerMode, { label: string; stroke: string; glow: string }> = {
-  focus: { label: "FOCUS",       stroke: "#C4714A", glow: "rgba(196,113,74,0.12)"  },
-  short: { label: "SHORT BREAK", stroke: "#7A8C6E", glow: "rgba(122,140,110,0.12)" },
-  long:  { label: "LONG BREAK",  stroke: "#A8929E", glow: "rgba(168,146,158,0.12)" },
+const MODE_META: Record<TimerMode, { label: string; color: string }> = {
+  focus: { label: "FOCUS",       color: "#C4714A" },
+  short: { label: "SHORT BREAK", color: "#7A8C6E" },
+  long:  { label: "LONG BREAK",  color: "#A8929E" },
 };
 
 const DEFAULT_DURATIONS: Record<TimerMode, number> = { focus: 25, short: 5, long: 15 };
@@ -24,132 +23,123 @@ const PRESETS: Record<TimerMode, number[]> = {
   long:  [10, 15, 20, 30],
 };
 
-const R = 82;       // outer bezel radius
-const CX = 96;
-const CY = 96;
-const CIRC = 2 * Math.PI * R;
-// Groove ring radius — sits between the dome button (r=60) and the bezel (r=82)
-// Placed at r=70 to be clearly in the gap, close to the dome edge
-const GROOVE_R = 70;
-const GROOVE_CIRC = 2 * Math.PI * GROOVE_R;
+const CAT_MESSAGES: Record<CatState, string[]> = {
+  idle:     ["Your kitty is waiting. Start focusing!", "Ready when you are. Let's do this!", "Your cat believes in you"],
+  running:  ["Your kitty's growing. Keep going!", "Interrupting focus will cause its loss.", "Stay focused — your cat is counting on you!"],
+  paused:   ["Break time's over, start focusing again", "Your kitty is scared. Come back!", "Don't leave your cat waiting too long..."],
+  abducted: ["Dang! Aliens snatched your cat", "Your cat got abducted. Start fresh!", "The aliens won this round. Try again?"],
+  complete: ["Session complete! Your kitty is thriving!", "Amazing focus! Your cat is so proud.", "You did it! Your kitty grew big and happy!"],
+};
 
-// ── SecuraDial: Secura-style filled wedge countdown dial ──
-interface SecuraDialProps {
-  cx: number; cy: number; R: number;
-  arcProgress: number;  // 1 = full, 0 = empty
-  isRunning: boolean;
-  ticks: Array<{ angle: number; major: boolean; x1: number; y1: number; x2: number; y2: number }>;
-  meta: { stroke: string; glow: string; label: string };
-  onAddTime: (mins: number) => void;
-}
+// ── Cat SVG components ──────────────────────────────────────────────────────
 
-function describeWedge(cx: number, cy: number, r: number, progress: number): string {
-  // progress: 1 = full circle, 0 = empty. Wedge starts at 12 o'clock, fills clockwise.
-  if (progress <= 0) return "";
-  if (progress >= 1) {
-    // Full circle — use two arcs to avoid degenerate path
-    return [
-      `M ${cx} ${cy - r}`,
-      `A ${r} ${r} 0 1 1 ${cx - 0.001} ${cy - r}`,
-      "Z",
-    ].join(" ");
-  }
-  const angle = progress * 2 * Math.PI - Math.PI / 2; // end angle (clockwise from 12)
-  const ex = cx + r * Math.cos(angle);
-  const ey = cy + r * Math.sin(angle);
-  const largeArc = progress > 0.5 ? 1 : 0;
-  return [
-    `M ${cx} ${cy}`,
-    `L ${cx} ${cy - r}`,           // line to 12 o'clock
-    `A ${r} ${r} 0 ${largeArc} 1 ${ex} ${ey}`, // arc clockwise to end point
-    "Z",
-  ].join(" ");
-}
-
-function SecuraDial({ cx, cy, R, arcProgress, isRunning, ticks, meta, onAddTime }: SecuraDialProps) {
-  // Knob radius — large dark center knob like Secura
-  const KNOB_R = R * 0.38;
-  // Wedge fills from center to inner edge of tick ring
-  const WEDGE_R = R - 10;
-
-  const wedgePath = describeWedge(cx, cy, WEDGE_R, arcProgress);
-
-  // 2D flat colors — no gradients, no shadows
-  const BEZEL_FILL = "#EDE0CE";     // warm beige flat
-  const FACE_FILL  = "#FAF6F0";     // cream
-  const KNOB_FILL  = "#4A3728";     // flat dark brown
-  const KNOB_RING  = "#3A2A1A";     // knob border
-
+function CatIdle({ scale = 1, color = "#3D2E1E" }: { scale?: number; color?: string }) {
+  const s = Math.max(0.55, Math.min(1.0, scale));
+  const size = Math.round(72 + s * 88);
   return (
-    <svg
-      width={cx * 2} height={cy * 2} viewBox={`0 0 ${cx * 2} ${cy * 2}`}
-      style={{ cursor: isRunning ? "default" : "pointer", display: "block" }}
-      onClick={() => onAddTime(1)}
-      onContextMenu={(e) => { e.preventDefault(); onAddTime(5); }}
-    >
-      <defs>
-        {/* Clip to keep wedge inside the face circle */}
-        <clipPath id="faceClip">
-          <circle cx={cx} cy={cy} r={WEDGE_R} />
-        </clipPath>
-      </defs>
-
-      {/* Outer bezel — flat warm beige ring */}
-      <circle cx={cx} cy={cy} r={R} fill={BEZEL_FILL} />
-      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
-
-      {/* Face — flat cream */}
-      <circle cx={cx} cy={cy} r={WEDGE_R} fill={FACE_FILL} />
-
-      {/* Filled wedge sector — terracotta, depletes clockwise */}
-      {arcProgress > 0 && (
-        <path
-          d={wedgePath}
-          fill={meta.stroke}
-          opacity="0.85"
-          clipPath="url(#faceClip)"
-          style={{ transition: isRunning ? "d 1s linear" : "none" }}
-        />
-      )}
-
-      {/* Face border (on top of wedge) */}
-      <circle cx={cx} cy={cy} r={WEDGE_R} fill="none" stroke="#D4C4B0" strokeWidth="0.8" />
-
-      {/* Tick marks — inside the bezel band */}
-      {ticks.map((t, i) => (
-        <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-          stroke={t.major ? "#5A4A3A" : "#8C7B6B"}
-          strokeWidth={t.major ? 1.8 : 0.8}
-        />
-      ))}
-
-      {/* Knob groove ring — flat 2D */}
-      <circle cx={cx} cy={cy} r={KNOB_R + 4}
-        fill="none" stroke="#8C7B6B" strokeWidth="2" opacity="0.4" />
-
-      {/* Flat center knob — no gradient, no shadow */}
-      <circle cx={cx} cy={cy} r={KNOB_R}
-        fill={KNOB_FILL}
-        stroke={KNOB_RING} strokeWidth="1"
-      />
-
-      {/* Simple dot indicator on knob */}
-      <circle cx={cx} cy={cy - KNOB_R * 0.55} r="2.5" fill="rgba(255,255,255,0.6)" />
-
-      {/* +1 / +5 hint text when stopped */}
-      {!isRunning && (
-        <>
-          <text x={cx} y={cy + KNOB_R * 0.35} textAnchor="middle" fontSize="6.5"
-            fill="rgba(255,255,255,0.65)" fontFamily="'JetBrains Mono', monospace"
-            letterSpacing="0.08em">+1 MIN</text>
-          <text x={cx} y={cy + KNOB_R * 0.55} textAnchor="middle" fontSize="5.5"
-            fill="rgba(255,255,255,0.4)" fontFamily="'JetBrains Mono', monospace"
-            letterSpacing="0.06em">R-CLICK +5</text>
-        </>
-      )}
+    <svg width={size} height={size} viewBox="0 0 100 100" style={{ display: "block" }}>
+      <ellipse cx="50" cy="68" rx="22" ry="20" fill={color} />
+      <circle cx="50" cy="42" r="18" fill={color} />
+      <polygon points="36,28 30,14 42,24" fill={color} />
+      <polygon points="64,28 70,14 58,24" fill={color} />
+      <polygon points="37,27 32,17 42,24" fill="#C8A090" opacity="0.5" />
+      <polygon points="63,27 68,17 58,24" fill="#C8A090" opacity="0.5" />
+      <circle cx="43" cy="41" r="5" fill="white" />
+      <circle cx="57" cy="41" r="5" fill="white" />
+      <circle cx="44" cy="42" r="3" fill="#1A1008" />
+      <circle cx="58" cy="42" r="3" fill="#1A1008" />
+      <circle cx="45.5" cy="40.5" r="1.2" fill="white" />
+      <circle cx="59.5" cy="40.5" r="1.2" fill="white" />
+      <ellipse cx="50" cy="48" rx="2" ry="1.5" fill="#C8A090" />
+      <path d="M48 49.5 Q50 52 52 49.5" stroke="#C8A090" strokeWidth="1" fill="none" />
+      <path d="M72 72 Q88 60 82 50 Q78 42 72 50" stroke={color} strokeWidth="5" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="85" rx="8" ry="5" fill={color} />
+      <ellipse cx="62" cy="85" rx="8" ry="5" fill={color} />
+      <ellipse cx="50" cy="91" rx={14 + s * 6} ry="3" fill="rgba(0,0,0,0.07)" />
     </svg>
   );
 }
+
+function CatScared({ color = "#3D2E1E" }: { color?: string }) {
+  return (
+    <svg width="120" height="120" viewBox="0 0 100 100" style={{ display: "block" }}>
+      <ellipse cx="50" cy="72" rx="28" ry="18" fill={color} />
+      <circle cx="50" cy="50" r="20" fill={color} />
+      <polygon points="34,34 26,16 40,30" fill={color} />
+      <polygon points="66,34 74,16 60,30" fill={color} />
+      <polygon points="35,33 28,19 40,30" fill="#C8A090" opacity="0.5" />
+      <polygon points="65,33 72,19 60,30" fill="#C8A090" opacity="0.5" />
+      <circle cx="41" cy="49" r="7" fill="white" />
+      <circle cx="59" cy="49" r="7" fill="white" />
+      <circle cx="41" cy="50" r="4" fill="#1A1008" />
+      <circle cx="59" cy="50" r="4" fill="#1A1008" />
+      <circle cx="43" cy="48" r="1.5" fill="white" />
+      <circle cx="61" cy="48" r="1.5" fill="white" />
+      <ellipse cx="72" cy="38" rx="3" ry="4" fill="#A8D0E8" opacity="0.7" />
+      <polygon points="70,36 74,36 72,30" fill="#A8D0E8" opacity="0.7" />
+      <ellipse cx="50" cy="56" rx="2" ry="1.5" fill="#C8A090" />
+      <path d="M46 58 Q48 56 50 58 Q52 60 54 58" stroke="#C8A090" strokeWidth="1.2" fill="none" />
+      <path d="M78 75 Q90 65 85 55 Q80 48 74 56" stroke={color} strokeWidth="7" fill="none" strokeLinecap="round" />
+      <ellipse cx="40" cy="86" rx="7" ry="4" fill={color} />
+      <ellipse cx="60" cy="86" rx="7" ry="4" fill={color} />
+      <ellipse cx="50" cy="92" rx="22" ry="3" fill="rgba(0,0,0,0.07)" />
+    </svg>
+  );
+}
+
+function CatAbducted({ color = "#3D2E1E" }: { color?: string }) {
+  return (
+    <svg width="160" height="190" viewBox="0 0 160 190" style={{ display: "block" }}>
+      <ellipse cx="80" cy="40" rx="52" ry="17" fill="#4A4A4A" />
+      <ellipse cx="80" cy="34" rx="30" ry="15" fill="#6A6A6A" />
+      <ellipse cx="80" cy="27" rx="20" ry="12" fill="#8A9A7A" opacity="0.85" />
+      <circle cx="58" cy="44" r="4.5" fill="#F0C060" opacity="0.9" />
+      <circle cx="70" cy="48" r="3.5" fill="#F0C060" opacity="0.75" />
+      <circle cx="82" cy="49" r="3.5" fill="#F0C060" opacity="0.75" />
+      <circle cx="94" cy="47" r="4" fill="#F0C060" opacity="0.85" />
+      <circle cx="106" cy="43" r="4.5" fill="#F0C060" opacity="0.9" />
+      <polygon points="54,57 106,57 122,145 38,145" fill="#F5E090" opacity="0.22" />
+      <line x1="54" y1="57" x2="38" y2="145" stroke="#F0C060" strokeWidth="1" opacity="0.35" />
+      <line x1="106" y1="57" x2="122" y2="145" stroke="#F0C060" strokeWidth="1" opacity="0.35" />
+      <g opacity="0.5" transform="translate(80,118) scale(0.52) translate(-50,-50)">
+        <ellipse cx="50" cy="68" rx="22" ry="20" fill="none" stroke={color} strokeWidth="3.5" strokeDasharray="5,4" />
+        <circle cx="50" cy="42" r="18" fill="none" stroke={color} strokeWidth="3.5" strokeDasharray="5,4" />
+        <polygon points="36,28 30,14 42,24" fill="none" stroke={color} strokeWidth="2.5" strokeDasharray="4,3" />
+        <polygon points="64,28 70,14 58,24" fill="none" stroke={color} strokeWidth="2.5" strokeDasharray="4,3" />
+        <circle cx="43" cy="41" r="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
+        <circle cx="57" cy="41" r="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
+        <path d="M72 72 Q88 60 82 50 Q78 42 72 50" stroke={color} strokeWidth="4" fill="none" strokeLinecap="round" strokeDasharray="5,4" />
+        <ellipse cx="38" cy="85" rx="8" ry="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
+        <ellipse cx="62" cy="85" rx="8" ry="5" fill="none" stroke={color} strokeWidth="2" strokeDasharray="3,3" />
+      </g>
+    </svg>
+  );
+}
+
+function CatComplete({ color = "#3D2E1E" }: { color?: string }) {
+  return (
+    <svg width="160" height="160" viewBox="0 0 100 100" style={{ display: "block" }}>
+      <ellipse cx="50" cy="68" rx="26" ry="22" fill={color} />
+      <circle cx="50" cy="40" r="22" fill={color} />
+      <polygon points="34,24 26,8 42,20" fill={color} />
+      <polygon points="66,24 74,8 58,20" fill={color} />
+      <polygon points="35,23 28,11 42,20" fill="#C8A090" opacity="0.5" />
+      <polygon points="65,23 72,11 58,20" fill="#C8A090" opacity="0.5" />
+      <path d="M38 40 Q43 36 48 40" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <path d="M52 40 Q57 36 62 40" stroke="white" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+      <circle cx="36" cy="46" r="5" fill="#E8A090" opacity="0.35" />
+      <circle cx="64" cy="46" r="5" fill="#E8A090" opacity="0.35" />
+      <ellipse cx="50" cy="50" rx="2.5" ry="2" fill="#C8A090" />
+      <path d="M46 52 Q50 57 54 52" stroke="#C8A090" strokeWidth="1.5" fill="none" strokeLinecap="round" />
+      <path d="M76 74 Q96 55 88 36 Q84 24 76 32" stroke={color} strokeWidth="6" fill="none" strokeLinecap="round" />
+      <ellipse cx="38" cy="87" rx="9" ry="6" fill={color} />
+      <ellipse cx="62" cy="87" rx="9" ry="6" fill={color} />
+      <ellipse cx="50" cy="94" rx="24" ry="4" fill="rgba(0,0,0,0.07)" />
+    </svg>
+  );
+}
+
+// ── Main component ──────────────────────────────────────────────────────────
 
 interface FocusTimerProps {
   onSessionComplete?: () => void;
@@ -161,28 +151,33 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   const [timeLeft, setTimeLeft]   = useState(DEFAULT_DURATIONS.focus * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [sessions, setSessions]   = useState(0);
+  const [catState, setCatState]   = useState<CatState>("idle");
   const [showSettings, setShowSettings] = useState(false);
   const [editingMode, setEditingMode]   = useState<TimerMode | null>(null);
   const [editVal, setEditVal]           = useState("");
+  const [msgIdx, setMsgIdx]             = useState(0);
+  const [abductAnim, setAbductAnim]     = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const editRef     = useRef<HTMLInputElement>(null);
 
-  const totalSec  = durations[mode] * 60;
-  // progress counts UP (0→1) — used for barcode fill
-  const progress  = totalSec > 0 ? 1 - timeLeft / totalSec : 0;
-  // arcProgress counts DOWN (1→0) — used for the dial arc (countdown)
-  const arcProgress = totalSec > 0 ? timeLeft / totalSec : 1;
-  const dashOff   = CIRC * (1 - progress);
-  const meta      = MODE_META[mode];
+  const totalSec = durations[mode] * 60;
+  const progress = totalSec > 0 ? 1 - timeLeft / totalSec : 0;
+  const meta     = MODE_META[mode];
+  const catScale = mode === "focus" ? 0.55 + progress * 0.45 : 0.8;
+  const mm = Math.floor(timeLeft / 60).toString().padStart(2, "0");
+  const ss = (timeLeft % 60).toString().padStart(2, "0");
+  const catColor = mode === "focus" ? "#3D2E1E" : mode === "short" ? "#4A5E3A" : "#6A4A5E";
 
   const handleComplete = useCallback(() => {
     setIsRunning(false);
+    setCatState("complete");
     if (mode === "focus") {
       setSessions((s) => s + 1);
-      toast.success("Session complete — take a breath.", { duration: 4000 });
+      toast.success("Session complete — your kitty is thriving!", { duration: 4000 });
       onSessionComplete?.();
     } else {
       toast.info("Break over. Ready to focus?", { duration: 3000 });
+      setCatState("idle");
     }
   }, [mode, onSessionComplete]);
 
@@ -204,10 +199,15 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
   }, [editingMode]);
 
+  useEffect(() => {
+    const msgs = CAT_MESSAGES[catState];
+    const t = setInterval(() => setMsgIdx((i) => (i + 1) % msgs.length), 8000);
+    setMsgIdx(0);
+    return () => clearInterval(t);
+  }, [catState]);
+
   const switchMode = (m: TimerMode) => {
-    setIsRunning(false);
-    setMode(m);
-    setTimeLeft(durations[m] * 60);
+    setIsRunning(false); setMode(m); setTimeLeft(durations[m] * 60); setCatState("idle");
   };
 
   const applyDuration = (m: TimerMode, mins: number) => {
@@ -223,144 +223,80 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     setEditingMode(null);
   };
 
-  const mm = Math.floor(timeLeft / 60).toString().padStart(2, "0");
-  const ss = (timeLeft % 60).toString().padStart(2, "0");
-
-  // Barcode bars — 52 bars, height modulated by sine for visual rhythm
-  const bars = Array.from({ length: 52 }, (_, i) => {
-    const ratio = i / 52;
-    const filled = ratio <= progress;
-    const h = 6 + Math.abs(Math.sin(i * 0.55)) * 10;
-    return { filled, h: filled ? h + 3 : h };
-  });
-
-  // Dial tick marks — sit inside the bezel band (between r=74 and r=82)
-  const ticks = Array.from({ length: 60 }, (_, i) => {
-    const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
-    const major = i % 5 === 0;
-    // Ticks go from the inner edge of the bezel band inward
-    const r1 = R - 2;                           // outer end: just inside bezel outer border
-    const r2 = R - 2 - (major ? 8 : 4);         // inner end: deeper for major ticks
-    const tickFraction = i / 60;
-    const isRemaining = tickFraction <= arcProgress;
-    return { angle, major, isRemaining, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
-  });
-
-  // Dot position — tracks the TRAILING edge of the countdown arc
-  // arcProgress=1 → dot at 12 o'clock (start), arcProgress=0 → dot at 12 o'clock (end)
-  const dotAngle = arcProgress * 2 * Math.PI - Math.PI / 2;
-  const dotX = CX + (R - 5) * Math.cos(dotAngle);
-  const dotY = CY + (R - 5) * Math.sin(dotAngle);
-
-  // Add time to current timer (only when stopped)
-  const addTime = (mins: number) => {
-    if (isRunning) return;
-    setTimeLeft((prev) => Math.min(prev + mins * 60, 180 * 60));
-    setDurations((d) => ({ ...d, [mode]: Math.min(d[mode] + mins, 180) }));
+  const handlePlayPause = () => {
+    if (catState === "abducted") return;
+    const next = !isRunning;
+    setIsRunning(next);
+    if (next) {
+      setCatState("running");
+    } else {
+      if (progress > 0.02) setCatState("paused");
+    }
   };
 
-  return (
-    <div className="flex flex-col gap-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+  const handleReset = () => {
+    const hadProgress = progress > 0.05 && mode === "focus";
+    setIsRunning(false);
+    setTimeLeft(durations[mode] * 60);
+    if (hadProgress) {
+      setCatState("abducted");
+      setAbductAnim(true);
+      setTimeout(() => { setAbductAnim(false); setCatState("idle"); }, 3500);
+    } else {
+      setCatState("idle");
+    }
+  };
 
-      {/* ── Header ── */}
+  const currentMsg = CAT_MESSAGES[catState][msgIdx % CAT_MESSAGES[catState].length];
+  const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
+
+  return (
+    <div className="flex flex-col gap-4" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase" }}>
-            Focus Timer
-          </p>
-          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase" }}>
-            {meta.label}
-          </p>
+          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase" }}>Focus Timer</p>
+          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase" }}>{meta.label}</p>
         </div>
         <div className="flex items-center gap-2">
           {sessions > 0 && (
-            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B" }}>
-              {sessions} SESSION{sessions > 1 ? "S" : ""}
-            </span>
+            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B" }}>{sessions} SESSION{sessions > 1 ? "S" : ""}</span>
           )}
-          <button
-            onClick={() => setShowSettings((s) => !s)}
-            style={{ width: 26, height: 26, border: `1px solid ${showSettings ? meta.stroke : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}
-          >
-            <Settings size={11} color={showSettings ? meta.stroke : "#8C7B6B"} />
+          <button onClick={() => setShowSettings((s) => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? meta.color : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
+            <Settings size={11} color={showSettings ? meta.color : "#8C7B6B"} />
           </button>
         </div>
       </div>
 
-      {/* ── Mode tabs ── */}
+      {/* Mode tabs */}
       <div style={{ display: "flex", gap: 6 }}>
         {(["focus", "short", "long"] as TimerMode[]).map((m) => (
-          <button
-            key={m}
-            onClick={() => switchMode(m)}
-            style={{
-              flex: 1,
-              padding: "6px 0",
-              fontSize: 9,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              border: `1px solid ${mode === m ? MODE_META[m].stroke : "#D4C4B0"}`,
-              background: mode === m ? MODE_META[m].stroke : "transparent",
-              color: mode === m ? "#FAF6F1" : "#8C7B6B",
-              cursor: "pointer",
-              borderRadius: 0,
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
+          <button key={m} onClick={() => switchMode(m)} style={{ flex: 1, padding: "6px 0", fontSize: 9, letterSpacing: "0.18em", textTransform: "uppercase", border: `1px solid ${mode === m ? MODE_META[m].color : "#D4C4B0"}`, background: mode === m ? MODE_META[m].color : "transparent", color: mode === m ? "#FAF6F1" : "#8C7B6B", cursor: "pointer", borderRadius: 0, fontFamily: "'JetBrains Mono', monospace" }}>
             {m === "focus" ? "Focus" : m === "short" ? "Short" : "Long"}
           </button>
         ))}
       </div>
 
-      {/* ── Settings panel ── */}
+      {/* Settings panel */}
       {showSettings && (
         <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
-          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>
-            Duration (min) — click to edit
-          </p>
+          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>Duration (min) — click to edit</p>
           <div style={{ display: "flex", gap: 16 }}>
             {(["focus", "short", "long"] as TimerMode[]).map((m) => (
               <div key={m} style={{ flex: 1 }}>
-                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4 }}>
-                  {m}
-                </p>
+                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4 }}>{m}</p>
                 {editingMode === m ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input
-                      ref={editRef}
-                      value={editVal}
-                      onChange={(e) => setEditVal(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
-                      type="number" min={1} max={180}
-                      style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_META[m].stroke}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }}
-                    />
-                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_META[m].stroke} /></button>
+                    <input ref={editRef} value={editVal} onChange={(e) => setEditVal(e.target.value)} onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }} type="number" min={1} max={180} style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_META[m].color}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }} />
+                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_META[m].color} /></button>
                     <button onClick={() => setEditingMode(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><X size={12} color="#8C7B6B" /></button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }}
-                    style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}
-                  >
-                    {durations[m]}
-                  </button>
+                  <button onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }} style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}>{durations[m]}</button>
                 )}
-                {/* Presets */}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
                   {PRESETS[m].map((p) => (
-                    <button
-                      key={p}
-                      onClick={() => applyDuration(m, p)}
-                      style={{
-                        fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
-                        border: `1px solid ${durations[m] === p ? MODE_META[m].stroke : "#D4C4B0"}`,
-                        background: durations[m] === p ? `${MODE_META[m].stroke}18` : "transparent",
-                        color: durations[m] === p ? MODE_META[m].stroke : "#8C7B6B",
-                        borderRadius: 0,
-                      }}
-                    >
-                      {p}
-                    </button>
+                    <button key={p} onClick={() => applyDuration(m, p)} style={{ fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace", border: `1px solid ${durations[m] === p ? MODE_META[m].color : "#D4C4B0"}`, background: durations[m] === p ? `${MODE_META[m].color}18` : "transparent", color: durations[m] === p ? MODE_META[m].color : "#8C7B6B", borderRadius: 0 }}>{p}</button>
                   ))}
                 </div>
               </div>
@@ -369,168 +305,60 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         </div>
       )}
 
-      {/* ── Main instrument panel ── */}
-      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
-
-        {/* SVG Dial — Secura-style filled wedge countdown */}
-        <div style={{ flexShrink: 0, position: "relative" }}>
-          {/* Outer ambient glow when running */}
-          <div style={{
-            position: "absolute", inset: -4, borderRadius: "50%",
-            boxShadow: isRunning ? `0 0 20px 8px ${meta.glow}` : "none",
-            transition: "box-shadow 1.5s ease",
-            pointerEvents: "none",
-          }} />
-          <SecuraDial
-            cx={CX} cy={CY} R={R}
-            arcProgress={arcProgress}
-            isRunning={isRunning}
-            ticks={ticks}
-            meta={meta}
-            onAddTime={addTime}
-          />
+      {/* Cat companion card */}
+      <div style={{ background: "#FDFAF5", border: "1px solid #E8DDD0", padding: "24px 20px 20px", display: "flex", flexDirection: "column", alignItems: "center", minHeight: 260, position: "relative", overflow: "hidden" }}>
+        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", minHeight: 175, transition: "transform 0.6s ease", transform: abductAnim ? "translateY(-24px)" : "translateY(0)" }}>
+          {catState === "idle"     && <CatIdle scale={0.6} color={catColor} />}
+          {catState === "running"  && <CatIdle scale={catScale} color={catColor} />}
+          {catState === "paused"   && <CatScared color={catColor} />}
+          {catState === "abducted" && <CatAbducted color={catColor} />}
+          {catState === "complete" && <CatComplete color={catColor} />}
         </div>
-
-        {/* Right panel: digits + barcode + controls */}
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, paddingTop: 8 }}>
-
-          {/* Large digits */}
-          <div>
-            <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
-              <span style={{ fontSize: 56, fontWeight: 700, lineHeight: 1, color: "#3D2E1E", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.03em" }}>
-                {mm}
-              </span>
-              <span style={{ fontSize: 36, fontWeight: 300, color: meta.stroke, margin: "0 2px", fontFamily: "'JetBrains Mono', monospace" }}>
-                :
-              </span>
-              <span style={{ fontSize: 56, fontWeight: 700, lineHeight: 1, color: "#3D2E1E", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.03em" }}>
-                {ss}
-              </span>
-            </div>
-            <div style={{ display: "flex", gap: 28, marginTop: 2 }}>
-              <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#8C7B6B" }}>MM</span>
-              <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#8C7B6B" }}>SS</span>
-            </div>
+        <div style={{ marginTop: 10, textAlign: "center" }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "center", gap: 2 }}>
+            <span style={{ fontSize: 52, fontWeight: 700, lineHeight: 1, color: "#1A1008", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em" }}>{mm}</span>
+            <span style={{ fontSize: 36, fontWeight: 300, color: meta.color, margin: "0 1px", fontFamily: "'JetBrains Mono', monospace" }}>:</span>
+            <span style={{ fontSize: 52, fontWeight: 700, lineHeight: 1, color: "#1A1008", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em" }}>{ss}</span>
           </div>
-
-          {/* Barcode progress */}
-          <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: 36 }}>
-            {bars.map((bar, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 3,
-                  height: bar.h,
-                  background: bar.filled ? meta.stroke : "#E8DDD0",
-                  flexShrink: 0,
-                  transition: "background 0.4s",
-                }}
-              />
-            ))}
+        </div>
+        <p style={{ marginTop: 10, fontSize: 11, color: "#6A5A4A", textAlign: "center", maxWidth: 220, lineHeight: 1.55, fontFamily: "'Playfair Display', serif", fontStyle: "italic", minHeight: 34 }}>
+          {currentMsg}
+        </p>
+        {catState === "abducted" && (
+          <div style={{ marginTop: 8, display: "inline-flex", alignItems: "center", gap: 5, background: "#FAE8E0", border: "1px solid #E8C0B0", padding: "4px 10px", fontSize: 10, color: "#C4714A", fontFamily: "'JetBrains Mono', monospace" }}>
+            <span>&#9829;</span> Likability -5
           </div>
+        )}
+      </div>
 
-          {/* Controls */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Play/Pause pill — 3D press effect */}
-            <button
-              onClick={() => setIsRunning((r) => !r)}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "8px 20px",
-                borderRadius: 999,
-                background: isRunning ? "transparent" : "#3D2E1E",
-                border: `1px solid #3D2E1E`,
-                color: isRunning ? "#3D2E1E" : "#FAF6F1",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                letterSpacing: "0.14em",
-                cursor: "pointer",
-                // 3D depth: bottom-right shadow creates raised look
-                boxShadow: isRunning
-                  ? "inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.1)"
-                  : "0 3px 0 #1a1208, 0 4px 8px rgba(0,0,0,0.25)",
-                transform: "translateY(0)",
-                transition: "box-shadow 0.1s, transform 0.1s",
-              }}
-              onMouseDown={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 0 #1a1208, 0 2px 4px rgba(0,0,0,0.2)";
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(2px)";
-              }}
-              onMouseUp={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = isRunning
-                  ? "inset 0 1px 3px rgba(0,0,0,0.15)"
-                  : "0 3px 0 #1a1208, 0 4px 8px rgba(0,0,0,0.25)";
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-              }}
-            >
-              {isRunning ? <Pause size={11} /> : <Play size={11} />}
-              {isRunning ? "PAUSE" : "START"}
-            </button>
+      {/* Progress bar */}
+      <div style={{ display: "flex", gap: 3 }}>
+        {segments.map((filled, i) => (
+          <div key={i} style={{ flex: 1, height: 6, background: filled ? meta.color : "#E8DDD0", transition: "background 0.5s" }} />
+        ))}
+      </div>
 
-            {/* Reset pill — 3D press effect */}
-            <button
-              onClick={() => { setIsRunning(false); setTimeLeft(durations[mode] * 60); }}
-              style={{
-                display: "flex", alignItems: "center", gap: 6,
-                padding: "8px 16px",
-                borderRadius: 999,
-                background: "transparent",
-                border: "1px solid #D4C4B0",
-                color: "#8C7B6B",
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 10,
-                letterSpacing: "0.14em",
-                cursor: "pointer",
-                boxShadow: "0 2px 0 #C4B4A0, 0 3px 6px rgba(0,0,0,0.10)",
-                transition: "box-shadow 0.1s, transform 0.1s",
-              }}
-              onMouseDown={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0px 0 #C4B4A0";
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(2px)";
-              }}
-              onMouseUp={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 2px 0 #C4B4A0, 0 3px 6px rgba(0,0,0,0.10)";
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
-              }}
-            >
-              <SkipForward size={11} />
-              RESET
-            </button>
-          </div>
-
-          {/* Session dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div
-                key={i}
-                style={{
-                  width: 7, height: 7,
-                  background: i < sessions % 4 ? meta.stroke : "#E8DDD0",
-                  transition: "background 0.3s",
-                }}
-              />
-            ))}
-            <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 4 }}>
-              {sessions} / 4
-            </span>
-          </div>
+      {/* Controls */}
+      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <button onClick={handlePlayPause} disabled={catState === "abducted"} style={{ display: "flex", alignItems: "center", gap: 8, padding: "9px 22px", borderRadius: 999, background: isRunning ? "transparent" : "#3D2E1E", border: "1px solid #3D2E1E", color: isRunning ? "#3D2E1E" : "#FAF6F1", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.14em", cursor: catState === "abducted" ? "not-allowed" : "pointer", opacity: catState === "abducted" ? 0.5 : 1, boxShadow: isRunning ? "none" : "0 3px 0 #1a1208", transition: "all 0.1s" }}>
+          {isRunning ? <Pause size={11} /> : <Play size={11} />}
+          {isRunning ? "PAUSE" : catState === "complete" ? "DONE" : "START"}
+        </button>
+        <button onClick={handleReset} style={{ display: "flex", alignItems: "center", gap: 6, padding: "9px 16px", borderRadius: 999, background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", fontSize: 10, letterSpacing: "0.14em", cursor: "pointer", boxShadow: "0 2px 0 #C4B4A0", transition: "all 0.1s" }}>
+          <SkipForward size={11} /> RESET
+        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? meta.color : "#E8DDD0", transition: "background 0.3s" }} />
+          ))}
+          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3 }}>{sessions}/4</span>
         </div>
       </div>
 
-      {/* Footer rule */}
+      {/* Footer */}
       <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 10, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase" }}>
-          {durations[mode]} min · {meta.label}
-        </span>
-        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B" }}>
-          TIME ELAPSED ◌
-        </span>
+        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase" }}>{durations[mode]} min · {meta.label}</span>
+        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B" }}>{Math.round(progress * 100)}% ELAPSED</span>
       </div>
     </div>
   );
