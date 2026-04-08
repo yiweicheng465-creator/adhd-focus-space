@@ -6,7 +6,7 @@
    - Less text, more geometric shapes
    ============================================================ */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { FocusTimer } from "@/components/FocusTimer";
@@ -35,6 +35,80 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
+
+
+/* ── Compact mood pill for the header ── */
+const MOOD_DATA = [
+  { value: 1, label: "Drained",  emoji: "😶", color: "oklch(0.62 0.06 280)" },
+  { value: 2, label: "Low",      emoji: "😕", color: "oklch(0.60 0.08 290)" },
+  { value: 3, label: "Okay",     emoji: "😐", color: "oklch(0.55 0.08 60)"  },
+  { value: 4, label: "Good",     emoji: "🙂", color: "oklch(0.48 0.12 155)" },
+  { value: 5, label: "Glowing",  emoji: "😊", color: "oklch(0.58 0.14 40)"  },
+];
+
+function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (v: number) => void }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const current = MOOD_DATA.find((m) => m.value === mood);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen((o: boolean) => !o)}
+        className="flex items-center gap-1.5 px-2.5 py-1 transition-all"
+        style={{
+          border: "1px solid oklch(0.87 0.014 75)",
+          background: open ? "oklch(0.965 0.012 78)" : "transparent",
+          borderRadius: 20,
+          fontFamily: "'DM Sans', sans-serif",
+          fontSize: "0.72rem",
+          color: current ? current.color : "oklch(0.55 0.015 70)",
+        }}
+        title="How are you feeling?"
+      >
+        <span style={{ fontSize: "0.85rem" }}>{current ? current.emoji : "🙂"}</span>
+        <span className="hidden sm:inline">{current ? current.label : "Mood"}</span>
+      </button>
+      {open && (
+        <div
+          className="absolute right-0 top-full mt-1 z-50 flex gap-1.5 p-2"
+          style={{
+            background: "oklch(0.990 0.006 78)",
+            border: "1px solid oklch(0.87 0.014 75)",
+            borderRadius: 12,
+            boxShadow: "0 4px 16px oklch(0.18 0.01 60 / 0.10)",
+          }}
+        >
+          {MOOD_DATA.map((m) => (
+            <button
+              key={m.value}
+              onClick={() => { onMoodChange(m.value); setOpen(false); }}
+              title={m.label}
+              className="flex flex-col items-center gap-0.5 px-2 py-1.5 transition-all"
+              style={{
+                borderRadius: 8,
+                background: mood === m.value ? "oklch(0.965 0.012 78)" : "transparent",
+                border: mood === m.value ? `1px solid ${m.color}40` : "1px solid transparent",
+              }}
+            >
+              <span style={{ fontSize: "1.2rem" }}>{m.emoji}</span>
+              <span style={{ fontSize: "0.60rem", color: m.color, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{m.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 // Simple flag icon for Goals — replaces complex flower
 function GoalFlagIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
@@ -236,6 +310,9 @@ export default function Home() {
               )}
             </div>
 
+            {/* Mood pill */}
+            <MoodPill mood={mood} onMoodChange={setMood} />
+
             {/* Wrap-up */}
             <button
               onClick={() => setWrapUpOpen(true)}
@@ -267,7 +344,6 @@ export default function Home() {
                 goals={goals}
                 agents={agents}
                 mood={mood}
-                onMoodChange={setMood}
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
                 allCategories={allCategories}

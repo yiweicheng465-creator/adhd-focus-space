@@ -9,7 +9,6 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { MoodCheckIn } from "./MoodCheckIn";
 import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
 import type { Task } from "./TaskManager";
@@ -28,7 +27,6 @@ interface DashboardProps {
   goals: Goal[];
   agents: Agent[];
   mood: number | null;
-  onMoodChange: (mood: number) => void;
   onNavigate: (section: string) => void;
   onQuickDump?: (text: string) => void;
   onSessionComplete: () => void;
@@ -77,7 +75,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNavigate, onSessionComplete, allCategories, onQuickDump }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSessionComplete, allCategories, onQuickDump }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -198,11 +196,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
           <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
           </div>{/* end right column */}
         </div>{/* end illustration+content row */}
-      </div>
-
-      {/* ── Mood check-in ── */}
-      <div className="p-5" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
-        <MoodCheckIn currentMood={mood} onMoodChange={onMoodChange} />
       </div>
 
       {/* ── Category breakdown — dynamic, shows all known categories ── */}
