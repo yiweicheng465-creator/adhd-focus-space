@@ -27,7 +27,7 @@ const COLORS = [
   "oklch(0.52 0.07 145)",  // sage
   "oklch(0.62 0.06 20)",   // pinky beige
   "oklch(0.55 0.018 70)",  // slumber
-  "oklch(0.42 0.04 250)",  // muted slate
+  "oklch(0.52 0.06 300)",  // dusty mauve
   "oklch(0.72 0.018 75)",  // warm sand
 ];
 

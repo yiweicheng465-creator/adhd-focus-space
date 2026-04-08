@@ -1,7 +1,7 @@
 /* ============================================================
    ADHD FOCUS SPACE — Context Switcher v3.0 (Morandi)
-   Work  → muted slate-indigo  oklch(0.52 0.07 255)
-   Personal → soft dusty rose  oklch(0.62 0.06 20)
+   Work  → sage green  oklch(0.48 0.07 145)
+   Personal → dusty mauve  oklch(0.52 0.06 300)
    ============================================================ */
 
 import { cn } from "@/lib/utils";
@@ -22,11 +22,11 @@ export const CONTEXT_CONFIG: Record<ItemContext, {
   work: {
     label:      "Work",
     icon:       Briefcase,
-    color:      "oklch(0.42 0.07 255)",
-    bg:         "oklch(0.42 0.07 255 / 0.07)",
-    border:     "oklch(0.42 0.07 255 / 0.22)",
-    pill:       "oklch(0.42 0.07 255 / 0.07)",
-    pillActive: "oklch(0.42 0.07 255)",
+    color:      "oklch(0.42 0.07 145)",
+    bg:         "oklch(0.42 0.07 145 / 0.07)",
+    border:     "oklch(0.42 0.07 145 / 0.22)",
+    pill:       "oklch(0.42 0.07 145 / 0.07)",
+    pillActive: "oklch(0.42 0.07 145)",
   },
   personal: {
     label:      "Personal",

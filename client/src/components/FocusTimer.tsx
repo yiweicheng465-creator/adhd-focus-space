@@ -20,7 +20,7 @@ type TimerMode = "focus" | "short" | "long";
 const MODE_COLORS: Record<TimerMode, { color: string; label: string }> = {
   focus: { color: "oklch(0.52 0.14 35)",  label: "Focus"       },
   short: { color: "oklch(0.55 0.12 140)", label: "Short Break" },
-  long:  { color: "oklch(0.50 0.10 220)", label: "Long Break"  },
+  long:  { color: "oklch(0.52 0.06 300)", label: "Long Break"  },
 };
 
 // Default durations in minutes

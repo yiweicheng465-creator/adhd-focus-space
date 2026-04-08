@@ -136,7 +136,7 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
               <div className="space-y-2">
                 {workDone.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium mb-1" style={{ color: "oklch(0.42 0.06 250)", fontFamily: "'DM Sans', sans-serif" }}>Work</p>
+                    <p className="text-xs font-medium mb-1" style={{ color: M.sage, fontFamily: "'DM Sans', sans-serif" }}>Work</p>
                     {workDone.map((t) => <TaskRow key={t.id} text={t.text} color={M.sage} />)}
                   </div>
                 )}

@@ -166,8 +166,8 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
       {activeContext === "all" && (
         <div className="grid grid-cols-2 gap-4">
           {[
-            { ctx: "work",     label: "Work",     icon: Briefcase, color: "oklch(0.5 0.18 260)", bg: "oklch(0.5 0.18 260 / 0.05)", border: "oklch(0.5 0.18 260 / 0.2)" },
-            { ctx: "personal", label: "Personal", icon: User,      color: "oklch(0.55 0.18 310)", bg: "oklch(0.55 0.18 310 / 0.05)", border: "oklch(0.55 0.18 310 / 0.2)" },
+            { ctx: "work",     label: "Work",     icon: Briefcase, color: "oklch(0.48 0.07 145)", bg: "oklch(0.48 0.07 145 / 0.07)", border: "oklch(0.48 0.07 145 / 0.22)" },
+            { ctx: "personal", label: "Personal", icon: User,      color: "oklch(0.52 0.06 300)", bg: "oklch(0.52 0.06 300 / 0.07)", border: "oklch(0.52 0.06 300 / 0.22)" },
           ].map(({ ctx, label, icon: Icon, color, bg, border }) => (
             <button
               key={ctx}
@@ -317,7 +317,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
             <div className="space-y-2">
               {activeTasks.slice(0, 5).map((t) => {
                 const pc: Record<string, string> = { urgent: "oklch(0.6 0.2 15)", focus: TC, normal: "oklch(0.62 0.1 75)" };
-                const cc: Record<string, string> = { work: "oklch(0.5 0.18 260)", personal: "oklch(0.55 0.18 310)" };
+                const cc: Record<string, string> = { work: "oklch(0.48 0.07 145)", personal: "oklch(0.52 0.06 300)" };
                 return (
                   <div
                     key={t.id}

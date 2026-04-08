@@ -102,7 +102,7 @@
   --chart-2:             oklch(0.68 0.06 145);   /* sage */
   --chart-3:             oklch(0.72 0.04 75);    /* slumber */
   --chart-4:             oklch(0.75 0.05 300);   /* lavender */
-  --chart-5:             oklch(0.62 0.06 220);   /* steel blue */
+  --chart-5:             oklch(0.55 0.06 145);   /* sage green */
 
   /* ── Sidebar ── */
   --sidebar:             oklch(0.955 0.016 76);
@@ -142,9 +142,9 @@
   --m-lavender-border: oklch(0.72 0.05 300 / 0.30);
 
   /* Work context (muted indigo) */
-  --m-indigo:        oklch(0.58 0.08 255);
-  --m-indigo-light:  oklch(0.58 0.08 255 / 0.08);
-  --m-indigo-border: oklch(0.58 0.08 255 / 0.25);
+  --m-indigo:        oklch(0.50 0.06 145);   /* sage — Work context */
+  --m-indigo-light:  oklch(0.50 0.06 145 / 0.08);
+  --m-indigo-border: oklch(0.50 0.06 145 / 0.25);
 
   /* Griffin charcoal */
   --m-ink:           oklch(0.28 0.018 65);

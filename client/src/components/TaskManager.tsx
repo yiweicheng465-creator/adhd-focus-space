@@ -1,7 +1,7 @@
 /* ============================================================
    ADHD FOCUS SPACE — Task Manager v3.0 (Morandi)
    Priority: Urgent=coral, Focus=sage, Normal=slumber
-   Context: Work=slate-indigo, Personal=dusty-rose
+   Context: Work=sage-green, Personal=dusty-mauve
    ============================================================ */
 
 import { useState } from "react";
