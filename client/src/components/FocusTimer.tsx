@@ -24,10 +24,14 @@ const PRESETS: Record<TimerMode, number[]> = {
   long:  [10, 15, 20, 30],
 };
 
-const R = 82;
+const R = 82;       // outer bezel radius
 const CX = 96;
 const CY = 96;
 const CIRC = 2 * Math.PI * R;
+// Groove ring radius — sits between the dome button (r=60) and the bezel (r=82)
+// Placed at r=70 to be clearly in the gap, close to the dome edge
+const GROOVE_R = 70;
+const GROOVE_CIRC = 2 * Math.PI * GROOVE_R;
 
 interface FocusTimerProps {
   onSessionComplete?: () => void;
@@ -112,13 +116,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     return { filled, h: filled ? h + 3 : h };
   });
 
-  // Dial tick marks — glow orange for ticks within remaining time (countdown)
+  // Dial tick marks — sit inside the bezel band (between r=74 and r=82)
   const ticks = Array.from({ length: 60 }, (_, i) => {
     const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
     const major = i % 5 === 0;
-    const r1 = R + 2;
-    const r2 = R + 2 + (major ? 9 : 4);
-    // A tick is "remaining" if it falls within the arcProgress arc (from 0 to arcProgress * 60)
+    // Ticks go from the inner edge of the bezel band inward
+    const r1 = R - 2;                           // outer end: just inside bezel outer border
+    const r2 = R - 2 - (major ? 8 : 4);         // inner end: deeper for major ticks
     const tickFraction = i / 60;
     const isRemaining = tickFraction <= arcProgress;
     return { angle, major, isRemaining, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
@@ -252,13 +256,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
         {/* SVG Dial — flat watch-face, wide soft shadow ring countdown, raised center button */}
         <div style={{ flexShrink: 0, position: "relative" }}>
-          {/* Wide soft shadow ring — shows remaining time as orange halo, fades as time depletes */}
+          {/* Outer ambient glow — subtle warm halo when running */}
           <div style={{
-            position: "absolute", inset: 0, borderRadius: "50%",
+            position: "absolute", inset: -4, borderRadius: "50%",
             boxShadow: isRunning
-              ? `0 0 ${6 + arcProgress * 28}px ${arcProgress * 18}px rgba(196,113,74,${(arcProgress * 0.22).toFixed(2)})`
+              ? `0 0 18px 6px ${meta.glow}`
               : "none",
-            transition: "box-shadow 1s linear",
+            transition: "box-shadow 1.5s ease",
             pointerEvents: "none",
           }} />
           <svg
@@ -277,15 +281,59 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               <filter id="btnShadow" x="-20%" y="-20%" width="140%" height="140%">
                 <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#B8A898" floodOpacity="0.45" />
               </filter>
+              {/* Soft glow filter for the countdown ring */}
+              <filter id="ringGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="2.5" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
             </defs>
 
             {/* ── Flat watch-face style dial ── */}
-            {/* Outer bezel ring — warm tan */}
+            {/* Outer bezel ring — warm tan band */}
             <circle cx={CX} cy={CY} r={R} fill="#E8DDD0" />
-            {/* Flat cream inner face — flush to bezel */}
-            <circle cx={CX} cy={CY} r={R} fill="#FAF6F0" />
-            {/* Bezel border */}
+            {/* Flat cream inner face */}
+            <circle cx={CX} cy={CY} r={R - 8} fill="#FAF6F0" />
+            {/* Bezel outer border */}
             <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
+            {/* Inner face border */}
+            <circle cx={CX} cy={CY} r={R - 8} fill="none" stroke="#D4C4B0" strokeWidth="0.7" />
+
+            {/* ── Groove countdown ring — sits between inner face edge (r=74) and dome (r=60) ── */}
+            {/* Background track (full circle, very faint warm groove) */}
+            <circle
+              cx={CX} cy={CY} r={GROOVE_R}
+              fill="none"
+              stroke="#DDD0C0"
+              strokeWidth="3"
+              opacity="0.5"
+            />
+            {/* Countdown arc: full at start, depletes clockwise to nothing */}
+            <circle
+              cx={CX} cy={CY} r={GROOVE_R}
+              fill="none"
+              stroke={meta.stroke}
+              strokeWidth="3.5"
+              strokeLinecap="round"
+              strokeDasharray={GROOVE_CIRC}
+              strokeDashoffset={GROOVE_CIRC * (1 - arcProgress)}
+              transform={`rotate(-90 ${CX} ${CY})`}
+              opacity={arcProgress > 0 ? 0.9 : 0}
+              filter={isRunning ? "url(#ringGlow)" : undefined}
+              style={{ transition: isRunning ? "stroke-dashoffset 1s linear" : "none" }}
+            />
+            {/* Leading dot at 12 o'clock (start position marker) */}
+            <circle cx={CX} cy={CY - GROOVE_R} r={2} fill="#C8B8A4" opacity="0.4" />
+            {/* Trailing dot tracks the end of the arc */}
+            {arcProgress > 0.01 && arcProgress < 0.99 && (
+              <circle
+                cx={CX + GROOVE_R * Math.cos(arcProgress * 2 * Math.PI - Math.PI / 2)}
+                cy={CY + GROOVE_R * Math.sin(arcProgress * 2 * Math.PI - Math.PI / 2)}
+                r={3.5}
+                fill={meta.stroke}
+                opacity="0.95"
+                filter={isRunning ? "url(#ringGlow)" : undefined}
+              />
+            )}
 
             {/* Tick marks — all neutral, no glow (shadow ring handles countdown) */}
             {ticks.map((t, i) => (
@@ -295,6 +343,19 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               />
             ))}
 
+            {/* Groove shadow ring around the dome — creates sunken-ring illusion */}
+            <circle
+              cx={CX} cy={CY} r={R - 18}
+              fill="none"
+              stroke="rgba(0,0,0,0.08)"
+              strokeWidth="5"
+            />
+            <circle
+              cx={CX} cy={CY} r={R - 18}
+              fill="none"
+              stroke="rgba(255,255,255,0.5)"
+              strokeWidth="1.5"
+            />
             {/* Raised center button — dome gradient + drop shadow */}
             <circle
               cx={CX} cy={CY} r={R - 22}
@@ -302,10 +363,10 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               filter="url(#btnShadow)"
               stroke="#D4C4B0" strokeWidth="0.8"
             />
-            {/* Highlight arc on raised button */}
+            {/* Highlight arc on raised button (top-left specular) */}
             <path
               d={`M ${CX - (R-22) * 0.55} ${CY - (R-22) * 0.45} A ${R-22} ${R-22} 0 0 1 ${CX + (R-22) * 0.45} ${CY - (R-22) * 0.55}`}
-              fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"
+              fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round"
             />
 
             {/* Center cross hair */}
