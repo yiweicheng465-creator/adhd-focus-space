@@ -133,21 +133,22 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
         <div className="absolute bottom-3 left-3" style={{ transform: "rotate(-90deg)" }}><CornerMark /></div>
         <div className="absolute bottom-3 right-3" style={{ transform: "rotate(180deg)" }}><CornerMark /></div>
 
-        {/* Illustration — line art person, anchored bottom-right */}
-        <div
-          className="absolute bottom-0 right-6 hidden md:block"
-          style={{ pointerEvents: "none" }}
-        >
-          <img
-            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp"
-            alt="thinking person illustration"
-            className="object-contain"
-            style={{ height: 170, opacity: 0.65 }}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="relative p-7 flex flex-col gap-4" style={{ paddingRight: "13rem" }}>
+        {/* Content — illustration left, text right */}
+        <div className="relative flex items-stretch">
+          {/* Left: illustration panel */}
+          <div
+            className="hidden md:flex w-44 shrink-0 items-end justify-center pb-0 pt-4"
+            style={{ borderRight: `1px solid ${BORDER}` }}
+          >
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp"
+              alt="thinking person illustration"
+              className="object-contain w-full"
+              style={{ maxHeight: 190, opacity: 0.72 }}
+            />
+          </div>
+          {/* Right: greeting + controls */}
+          <div className="flex-1 p-7 flex flex-col gap-4">
           {/* Date + greeting */}
           <div>
             <p className="editorial-label mb-1">
@@ -187,7 +188,8 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
 
           {/* Context switcher */}
           <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} />
-        </div>
+          </div>{/* end right column */}
+        </div>{/* end illustration+content row */}
       </div>
 
       {/* ── Mood check-in ── */}
