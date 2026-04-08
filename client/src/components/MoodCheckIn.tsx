@@ -25,15 +25,16 @@ const MESSAGES: Record<number, string> = {
   5: "You're glowing — channel it.",
 };
 
-/* ── 1. Drained — flat grey circle, neutral dots, flat line mouth ── */
+/* ── 1. Drained — flat grey circle, OVAL/sleepy eyes, flat line mouth ── */
 function FaceDrained({ active }: { active: boolean }) {
   const fill = active ? "#B8B4C8" : "#CCC8D8";
   const c = "#5A5570";
   return (
     <svg viewBox="0 0 80 80" fill="none">
       <circle cx="40" cy="40" r="32" fill={fill} />
-      <circle cx="28" cy="37" r="3" fill={c} />
-      <circle cx="52" cy="37" r="3" fill={c} />
+      {/* Oval/sleepy eyes — wider than tall, half-closed look */}
+      <ellipse cx="28" cy="37" rx="4.5" ry="2.5" fill={c} />
+      <ellipse cx="52" cy="37" rx="4.5" ry="2.5" fill={c} />
       <line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
@@ -55,17 +56,20 @@ function FaceLow({ active }: { active: boolean }) {
   );
 }
 
-/* ── 3. Okay — warm brown/tan circle, neutral dots, flat mouth ── */
+/* ── 3. Okay — warm brown/tan circle, round dot eyes, small nose, flat mouth ── */
 function FaceOkay({ active }: { active: boolean }) {
   const fill = active ? "#A89070" : "#C4AA88";
   const c = "#4A3820";
   return (
     <svg viewBox="0 0 80 80" fill="none">
       <circle cx="40" cy="40" r="32" fill={fill} />
-      <circle cx="28" cy="37" r="3" fill={c} />
-      <circle cx="52" cy="37" r="3" fill={c} />
-      {/* Flat/neutral mouth */}
-      <line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round" />
+      {/* Round dot eyes — clearly circular, distinct from Drained's ovals */}
+      <circle cx="28" cy="35" r="3.5" fill={c} />
+      <circle cx="52" cy="35" r="3.5" fill={c} />
+      {/* Small nose — tiny dot below center */}
+      <circle cx="40" cy="44" r="1.8" fill={c} opacity="0.7" />
+      {/* Flat/neutral mouth — slightly lower */}
+      <line x1="30" y1="53" x2="50" y2="53" stroke={c} strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

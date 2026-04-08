@@ -78,7 +78,10 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
   const addGoal = () => {
     if (!newGoal.trim()) return;
     const { cleanText, tag } = parseHashtag(newGoal);
-    const context = tag ?? newGoalCtx;
+    // If a hashtag is typed, use it; otherwise use the currently active tab category
+    // (fall back to "work" only when on the "all" tab with no hashtag)
+    const contextFromTab = activeContext !== "all" ? activeContext : newGoalCtx;
+    const context = tag ?? contextFromTab;
     if (goals.filter((g) => g.context === context).length >= 5) {
       toast.error(`Max 5 goals per category. Focus is power!`, { duration: 3000 });
       return;
@@ -86,7 +89,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
     onGoalsChange([...goals, { id: nanoid(), text: cleanText || newGoal.trim(), progress: 0, context, createdAt: new Date() }]);
     setNewGoal("");
     if (tag) toast.success(`Goal added to #${tag}.`, { duration: 2000 });
-    else toast.success("Goal set.", { duration: 2000 });
+    else toast.success(`Goal added to ${context}.`, { duration: 2000 });
   };
 
   const updateProgress = (id: string, delta: number) => {
