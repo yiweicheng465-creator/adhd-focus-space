@@ -1139,6 +1139,312 @@ function ProtoF() {
 }
 
 // ─── Main showcase page ───────────────────────────────────────────────────────
+
+/* ============================================================
+   SHARED — ElegantNeedle helper (sewing needle, no connecting line)
+   ============================================================ */
+function ElegantNeedle({ size = 180, angle = 0, opacity = 1 }: { size?: number; angle?: number; opacity?: number }) {
+  return (
+    <svg width={size} height={size * 0.22} viewBox="0 0 200 44"
+      style={{ display: "block", opacity, transform: `rotate(${angle}deg)`, transformOrigin: "center" }}>
+      {/* Needle body — tapered from eye end to sharp tip */}
+      <path d="M 170,22 C 155,19 100,20 30,21.5 C 10,22 2,22 1,22 C 2,22 10,22 30,22.5 C 100,24 155,25 170,22 Z" fill="#1a1a1a" />
+      {/* Eye — oval at thick end */}
+      <ellipse cx="175" cy="22" rx="11" ry="7" fill="none" stroke="#1a1a1a" strokeWidth="2.5" />
+      <ellipse cx="175" cy="22" rx="5.5" ry="3.5" fill="#f5ede2" />
+      {/* Subtle shine on body */}
+      <path d="M 70,20.5 C 100,19.5 145,19.5 168,20.5" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="1.2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+/* ============================================================
+   PROTO G — Golden Balloon (warm golden, FOCUS text, elegant needle)
+   ============================================================ */
+function ProtoG() {
+  const DURATION = 5 * 60;
+  const [seconds, setSeconds] = useState(DURATION);
+  const [running, setRunning] = useState(false);
+  const [popped, setPopped] = useState(false);
+  const [popAnim, setPopAnim] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const progress = seconds / DURATION;
+  const elapsed = DURATION - seconds;
+  const elapsedFrac = elapsed / DURATION;
+  // Needle starts at x=390, creeps to x=290 as balloon shrinks
+  const needleX = 390 - elapsedFrac * 100;
+  const r = 110 * progress;
+  const cx = 155; const cy = 130;
+  const face = popped ? "none" : running ? "calm" : elapsed > 0 ? "worried" : "none";
+
+  useEffect(() => {
+    if (running && !popped) {
+      timerRef.current = setInterval(() => {
+        setSeconds(s => {
+          if (s <= 1) { clearInterval(timerRef.current!); setRunning(false); return 0; }
+          return s - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [running, popped]);
+
+  function handleReset() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (elapsed > DURATION * 0.05 && !popped) {
+      setRunning(false); setPopAnim(true);
+      setTimeout(() => { setPopped(true); setPopAnim(false); }, 600);
+      setTimeout(() => { setPopped(false); setSeconds(DURATION); }, 2800);
+    } else { setRunning(false); setSeconds(DURATION); setPopped(false); }
+  }
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss = String(seconds % 60).padStart(2, "0");
+
+  return (
+    <div style={{ background: "#f5ede2", borderRadius: 20, padding: "28px 20px 24px", fontFamily: "'DM Sans',system-ui", minHeight: 380 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
+        <svg width="500" height="300" viewBox="0 0 500 300" style={{ overflow: "visible" }}>
+          {popped ? (
+            <g>
+              {[0,40,80,120,160,200,240,280,320].map((a, i) => (
+                <line key={i} x1={cx} y1={cy} x2={cx + Math.cos(a*Math.PI/180)*70} y2={cy + Math.sin(a*Math.PI/180)*70} stroke="#C8603A" strokeWidth="3" strokeLinecap="round" />
+              ))}
+              <text x={cx} y={cy+8} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize="22" fontWeight="700" fill="#C8603A">POP!</text>
+            </g>
+          ) : (
+            <g>
+              {/* String */}
+              <path d={`M ${cx},${cy+r} C ${cx-8},${cy+r+28} ${cx+8},${cy+r+52} ${cx},${cy+r+82}`} fill="none" stroke="#2a1a0e" strokeWidth="1.8" strokeLinecap="round" />
+              {/* Balloon body */}
+              <ellipse cx={cx} cy={cy} rx={r*0.88} ry={r} fill={popAnim ? "#C8603A" : "#D4A96A"} />
+              <ellipse cx={cx} cy={cy} rx={r*0.88} ry={r} fill="none" stroke="#2a1a0e" strokeWidth="2.2" />
+              {/* Highlight */}
+              {progress > 0.15 && <ellipse cx={cx-r*0.28} cy={cy-r*0.32} rx={r*0.18} ry={r*0.11} fill="#E8C98A" opacity="0.7" transform={`rotate(-20,${cx-r*0.28},${cy-r*0.32})`} />}
+              {/* Knot */}
+              {progress > 0.2 && <path d={`M ${cx-7*progress},${cy+r-4} Q ${cx},${cy+r+8} ${cx+7*progress},${cy+r-4}`} fill="#D4A96A" stroke="#2a1a0e" strokeWidth="1.8" />}
+              {/* Face */}
+              {face === "calm" && progress > 0.3 && <>
+                <path d={`M ${cx-r*0.18},${cy-r*0.05} Q ${cx-r*0.12},${cy-r*0.13} ${cx-r*0.06},${cy-r*0.05}`} fill="none" stroke="#2a1a0e" strokeWidth="2" strokeLinecap="round" />
+                <path d={`M ${cx+r*0.06},${cy-r*0.05} Q ${cx+r*0.12},${cy-r*0.13} ${cx+r*0.18},${cy-r*0.05}`} fill="none" stroke="#2a1a0e" strokeWidth="2" strokeLinecap="round" />
+                <path d={`M ${cx-r*0.12},${cy+r*0.12} Q ${cx},${cy+r*0.22} ${cx+r*0.12},${cy+r*0.12}`} fill="none" stroke="#2a1a0e" strokeWidth="2" strokeLinecap="round" />
+              </>}
+              {face === "worried" && progress > 0.3 && <>
+                <circle cx={cx-r*0.14} cy={cy-r*0.06} r={r*0.04} fill="#2a1a0e" />
+                <circle cx={cx+r*0.14} cy={cy-r*0.06} r={r*0.04} fill="#2a1a0e" />
+                <path d={`M ${cx-r*0.12},${cy+r*0.16} Q ${cx},${cy+r*0.09} ${cx+r*0.12},${cy+r*0.16}`} fill="none" stroke="#2a1a0e" strokeWidth="2" strokeLinecap="round" />
+              </>}
+              {/* Timer text */}
+              {progress > 0.25 && <>
+                <text x={cx} y={cy-r*0.08} textAnchor="middle" fontFamily="'DM Sans',system-ui" fontSize="11" fontWeight="700" fill="#2a1a0e" letterSpacing="3" opacity="0.75">FOCUS</text>
+                <text x={cx} y={cy+r*0.14} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize="22" fontWeight="700" fill="#2a1a0e">{mm}:{ss}</text>
+              </>}
+            </g>
+          )}
+          {/* Elegant needle — no connecting line */}
+          {!popped && (
+            <g transform={`translate(${needleX},122)`} style={{ transition: running ? "transform 1s linear" : "none" }}>
+              <ElegantNeedle size={160} angle={0} opacity={running || elapsed > 0 ? 1 : 0.3} />
+            </g>
+          )}
+        </svg>
+      </div>
+      <p style={{ textAlign: "center", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 13, color: "#8B7355", margin: "0 0 16px" }}>
+        {popped ? "The balloon popped — try again." : seconds === 0 ? "Session complete! Stress released." : running ? "Breathe. The needle is patient." : elapsed > 0 ? "Paused — the needle is waiting. Don't let it win." : "Start to let the stress out slowly."}
+      </p>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={() => setRunning(r => !r)} disabled={popped || seconds === 0} style={{ padding: "8px 22px", borderRadius: 30, border: "none", cursor: "pointer", background: running ? "#8B9E7A" : "#C8603A", color: "#fff", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>{running ? "PAUSE" : "START"}</button>
+        <button onClick={handleReset} style={{ padding: "8px 22px", borderRadius: 30, border: "1.5px solid #C8603A", cursor: "pointer", background: "transparent", color: "#C8603A", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>RESET</button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PROTO H — Round Coral Balloon (cute round, face, coral fill)
+   ============================================================ */
+function ProtoH() {
+  const DURATION = 5 * 60;
+  const [seconds, setSeconds] = useState(DURATION);
+  const [running, setRunning] = useState(false);
+  const [popped, setPopped] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const progress = seconds / DURATION;
+  const elapsed = DURATION - seconds;
+  const elapsedFrac = elapsed / DURATION;
+  const needleX = 390 - elapsedFrac * 100;
+  const r = 115 * progress;
+  const cx = 155; const cy = 130;
+  const face = popped ? "none" : running ? "calm" : elapsed > 0 ? "worried" : "none";
+
+  useEffect(() => {
+    if (running && !popped) {
+      timerRef.current = setInterval(() => {
+        setSeconds(s => {
+          if (s <= 1) { clearInterval(timerRef.current!); setRunning(false); return 0; }
+          return s - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [running, popped]);
+
+  function handleReset() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (elapsed > DURATION * 0.05 && !popped) {
+      setRunning(false);
+      setTimeout(() => setPopped(true), 400);
+      setTimeout(() => { setPopped(false); setSeconds(DURATION); }, 2800);
+    } else { setRunning(false); setSeconds(DURATION); setPopped(false); }
+  }
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss_str = String(seconds % 60).padStart(2, "0");
+
+  return (
+    <div style={{ background: "#edeae4", borderRadius: 20, padding: "28px 20px 24px", fontFamily: "'DM Sans',system-ui", minHeight: 380 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
+        <svg width="500" height="300" viewBox="0 0 500 300" style={{ overflow: "visible" }}>
+          {popped ? (
+            <g>
+              {[0,45,90,135,180,225,270,315].map((a, i) => (
+                <line key={i} x1={cx} y1={cy} x2={cx+Math.cos(a*Math.PI/180)*80} y2={cy+Math.sin(a*Math.PI/180)*80} stroke="#E07060" strokeWidth="3.5" strokeLinecap="round" />
+              ))}
+              <text x={cx} y={cy+8} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize="24" fontWeight="700" fill="#E07060">POP!</text>
+            </g>
+          ) : (
+            <g>
+              <path d={`M ${cx},${cy+r} C ${cx-8},${cy+r+28} ${cx+8},${cy+r+52} ${cx},${cy+r+82}`} fill="none" stroke="#2a1a0e" strokeWidth="1.8" strokeLinecap="round" />
+              <ellipse cx={cx} cy={cy} rx={r} ry={r} fill="#E8856A" />
+              <ellipse cx={cx} cy={cy} rx={r} ry={r} fill="none" stroke="#2a1a0e" strokeWidth="2.5" />
+              {progress > 0.15 && <ellipse cx={cx-r*0.28} cy={cy-r*0.3} rx={r*0.2} ry={r*0.13} fill="#F2A88A" opacity="0.65" transform={`rotate(-18,${cx-r*0.28},${cy-r*0.3})`} />}
+              {progress > 0.2 && <path d={`M ${cx-7*progress},${cy+r-4} Q ${cx},${cy+r+8} ${cx+7*progress},${cy+r-4}`} fill="#E8856A" stroke="#2a1a0e" strokeWidth="1.8" />}
+              {face === "calm" && progress > 0.3 && <>
+                <path d={`M ${cx-r*0.18},${cy-r*0.07} Q ${cx-r*0.11},${cy-r*0.16} ${cx-r*0.04},${cy-r*0.07}`} fill="none" stroke="#2a1a0e" strokeWidth="2.2" strokeLinecap="round" />
+                <path d={`M ${cx+r*0.04},${cy-r*0.07} Q ${cx+r*0.11},${cy-r*0.16} ${cx+r*0.18},${cy-r*0.07}`} fill="none" stroke="#2a1a0e" strokeWidth="2.2" strokeLinecap="round" />
+                <path d={`M ${cx-r*0.14},${cy+r*0.12} Q ${cx},${cy+r*0.24} ${cx+r*0.14},${cy+r*0.12}`} fill="none" stroke="#2a1a0e" strokeWidth="2.2" strokeLinecap="round" />
+              </>}
+              {face === "worried" && progress > 0.3 && <>
+                <circle cx={cx-r*0.14} cy={cy-r*0.05} r={r*0.045} fill="#2a1a0e" />
+                <circle cx={cx+r*0.14} cy={cy-r*0.05} r={r*0.045} fill="#2a1a0e" />
+                <path d={`M ${cx-r*0.13},${cy+r*0.16} Q ${cx},${cy+r*0.09} ${cx+r*0.13},${cy+r*0.16}`} fill="none" stroke="#2a1a0e" strokeWidth="2.2" strokeLinecap="round" />
+              </>}
+              {progress > 0.35 && <text x={cx} y={cy+r*0.08} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize="20" fontWeight="700" fill="#2a1a0e">{mm}:{ss_str}</text>}
+            </g>
+          )}
+          {!popped && (
+            <g transform={`translate(${needleX},122)`} style={{ transition: running ? "transform 1s linear" : "none" }}>
+              <ElegantNeedle size={160} angle={0} opacity={running || elapsed > 0 ? 1 : 0.3} />
+            </g>
+          )}
+        </svg>
+      </div>
+      <p style={{ textAlign: "center", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 13, color: "#7A6A5A", margin: "0 0 16px" }}>
+        {popped ? "Oops — the balloon popped." : seconds === 0 ? "You did it! Stress released." : running ? "Releasing stress, one breath at a time." : elapsed > 0 ? "Paused — the needle is watching." : "Start to let the stress out slowly."}
+      </p>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={() => setRunning(r => !r)} disabled={popped || seconds === 0} style={{ padding: "8px 22px", borderRadius: 30, border: "none", cursor: "pointer", background: running ? "#8B9E7A" : "#C8603A", color: "#fff", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>{running ? "PAUSE" : "START"}</button>
+        <button onClick={handleReset} style={{ padding: "8px 22px", borderRadius: 30, border: "1.5px solid #C8603A", cursor: "pointer", background: "transparent", color: "#C8603A", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>RESET</button>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   PROTO I — Soft Glow Balloon (pale cream, radial glow, minimal dot eyes)
+   ============================================================ */
+function ProtoI() {
+  const DURATION = 5 * 60;
+  const [seconds, setSeconds] = useState(DURATION);
+  const [running, setRunning] = useState(false);
+  const [popped, setPopped] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const progress = seconds / DURATION;
+  const elapsed = DURATION - seconds;
+  const elapsedFrac = elapsed / DURATION;
+  const needleX = 400 - elapsedFrac * 110;
+  const r = 115 * progress;
+  const cx = 155; const cy = 130;
+
+  useEffect(() => {
+    if (running && !popped) {
+      timerRef.current = setInterval(() => {
+        setSeconds(s => {
+          if (s <= 1) { clearInterval(timerRef.current!); setRunning(false); return 0; }
+          return s - 1;
+        });
+      }, 1000);
+    }
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, [running, popped]);
+
+  function handleReset() {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (elapsed > DURATION * 0.05 && !popped) {
+      setRunning(false);
+      setTimeout(() => setPopped(true), 400);
+      setTimeout(() => { setPopped(false); setSeconds(DURATION); }, 2800);
+    } else { setRunning(false); setSeconds(DURATION); setPopped(false); }
+  }
+
+  const mm = String(Math.floor(seconds / 60)).padStart(2, "0");
+  const ss_str = String(seconds % 60).padStart(2, "0");
+
+  return (
+    <div style={{ background: "#f0ece6", borderRadius: 20, padding: "28px 20px 24px", fontFamily: "'DM Sans',system-ui", minHeight: 380 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 300 }}>
+        <svg width="500" height="300" viewBox="0 0 500 300" style={{ overflow: "visible" }}>
+          <defs>
+            <radialGradient id="iglow" cx="40%" cy="35%" r="65%">
+              <stop offset="0%" stopColor="#fdf6f0" />
+              <stop offset="60%" stopColor="#f0ddd0" />
+              <stop offset="100%" stopColor="#e0c8b8" />
+            </radialGradient>
+          </defs>
+          {popped ? (
+            <g>
+              {[0,36,72,108,144,180,216,252,288,324].map((a, i) => (
+                <line key={i} x1={cx} y1={cy} x2={cx+Math.cos(a*Math.PI/180)*75} y2={cy+Math.sin(a*Math.PI/180)*75} stroke="#8B7355" strokeWidth="2.5" strokeLinecap="round" />
+              ))}
+              <text x={cx} y={cy+8} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize="22" fontWeight="700" fontStyle="italic" fill="#8B7355">pop.</text>
+            </g>
+          ) : (
+            <g>
+              <path d={`M ${cx},${cy+r} C ${cx-7},${cy+r+26} ${cx+7},${cy+r+50} ${cx},${cy+r+80}`} fill="none" stroke="#5a4030" strokeWidth="1.6" strokeLinecap="round" />
+              <ellipse cx={cx} cy={cy+r*0.12} rx={r*0.85} ry={r*0.28} fill="rgba(200,160,120,0.10)" />
+              <ellipse cx={cx} cy={cy} rx={r*0.92} ry={r} fill="url(#iglow)" />
+              <ellipse cx={cx} cy={cy} rx={r*0.92} ry={r} fill="none" stroke="#5a4030" strokeWidth="1.8" />
+              {progress > 0.2 && <path d={`M ${cx-6*progress},${cy+r-3} Q ${cx},${cy+r+9} ${cx+6*progress},${cy+r-3}`} fill="#f0ddd0" stroke="#5a4030" strokeWidth="1.6" />}
+              {progress > 0.3 && <>
+                <circle cx={cx-r*0.12} cy={cy-r*0.04} r={r*0.035} fill="#5a4030" />
+                <circle cx={cx+r*0.12} cy={cy-r*0.04} r={r*0.035} fill="#5a4030" />
+                {running && <path d={`M ${cx-r*0.1},${cy+r*0.14} Q ${cx},${cy+r*0.22} ${cx+r*0.1},${cy+r*0.14}`} fill="none" stroke="#5a4030" strokeWidth="1.6" strokeLinecap="round" />}
+                {!running && elapsed > 0 && <path d={`M ${cx-r*0.1},${cy+r*0.18} Q ${cx},${cy+r*0.11} ${cx+r*0.1},${cy+r*0.18}`} fill="none" stroke="#5a4030" strokeWidth="1.6" strokeLinecap="round" />}
+              </>}
+              {progress > 0.35 && <text x={cx} y={cy+r*0.1} textAnchor="middle" fontFamily="'Playfair Display',serif" fontSize={Math.max(14, r*0.18)} fontWeight="700" fontStyle="italic" fill="#5a4030" opacity="0.8">{mm}:{ss_str}</text>}
+            </g>
+          )}
+          {!popped && (
+            <g transform={`translate(${needleX},122)`} style={{ transition: running ? "transform 1s linear" : "none" }}>
+              <ElegantNeedle size={160} angle={0} opacity={running || elapsed > 0 ? 0.9 : 0.22} />
+            </g>
+          )}
+        </svg>
+      </div>
+      <p style={{ textAlign: "center", fontFamily: "'Playfair Display',serif", fontStyle: "italic", fontSize: 13, color: "#8B7355", margin: "0 0 16px" }}>
+        {popped ? "The tension broke — breathe and reset." : seconds === 0 ? "Fully released. You made it." : running ? "Softly, slowly — let it go." : elapsed > 0 ? "Paused — the needle is waiting." : "Start to let the stress out slowly."}
+      </p>
+      <div style={{ display: "flex", gap: 10, justifyContent: "center" }}>
+        <button onClick={() => setRunning(r => !r)} disabled={popped || seconds === 0} style={{ padding: "8px 22px", borderRadius: 30, border: "none", cursor: "pointer", background: running ? "#8B9E7A" : "#C8603A", color: "#fff", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>{running ? "PAUSE" : "START"}</button>
+        <button onClick={handleReset} style={{ padding: "8px 22px", borderRadius: 30, border: "1.5px solid #C8603A", cursor: "pointer", background: "transparent", color: "#C8603A", fontWeight: 600, fontSize: 13, letterSpacing: 1 }}>RESET</button>
+      </div>
+    </div>
+  );
+}
+
 export default function TimerPrototypes() {
   return (
     <div style={{ minHeight: "100vh", background: "oklch(0.975 0.012 80)", padding: "40px 24px 60px", fontFamily: "system-ui" }}>
@@ -1219,6 +1525,31 @@ export default function TimerPrototypes() {
           </p>
         </div>
 
+
+        {/* G */}
+        <div>
+          <p className="proto-label">G — Golden Balloon <span className="proto-badge">Elegant</span></p>
+          <ProtoG />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            Warm golden balloon with FOCUS text inside. Elegant sewing needle on the right. Deflates as you focus — needle creeps in when paused.
+          </p>
+        </div>
+        {/* H */}
+        <div>
+          <p className="proto-label">H — Round Cute Balloon <span className="proto-badge">Playful</span></p>
+          <ProtoH />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            Coral round balloon with a cute face — smiles when running, looks worried when paused. Elegant needle approaches from the right.
+          </p>
+        </div>
+        {/* I */}
+        <div>
+          <p className="proto-label">I — Soft Glow Balloon <span className="proto-badge">Minimal</span></p>
+          <ProtoI />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            Pale cream balloon with a soft radial glow and minimal dot eyes. Quiet and calming. Needle barely visible until you pause.
+          </p>
+        </div>
       {/* Footer CTA */}
       <div style={{ maxWidth: 960, margin: "48px auto 0", padding: "24px", background: "#fff", borderRadius: 16, textAlign: "center", boxShadow: "0 2px 12px rgba(92,61,46,0.06)" }}>
         <p style={{ color: "#5C3D2E", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>Which design do you prefer?</p>
