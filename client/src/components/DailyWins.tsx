@@ -122,14 +122,25 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
               <button
                 key={icon.key}
                 onClick={() => { setSelectedIcon(idx); setShowIconPicker(false); }}
-                className="w-9 h-9 flex items-center justify-center transition-all"
+                className="flex flex-col items-center justify-center gap-1 transition-all"
                 title={icon.label}
                 style={{
+                  width: 60,
+                  padding: "8px 4px 6px",
                   background:  selectedIcon === idx ? M.pinkBg : "transparent",
                   border:      `1px solid ${selectedIcon === idx ? M.pinkBdr : M.border}`,
                 }}
               >
-                <icon.Component size={16} color={selectedIcon === idx ? M.coral : M.muted} />
+                <icon.Component size={24} color={selectedIcon === idx ? M.coral : M.muted} />
+                <span style={{
+                  fontSize: 9,
+                  fontFamily: "'DM Sans', sans-serif",
+                  color: selectedIcon === idx ? M.coral : M.muted,
+                  letterSpacing: "0.04em",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                  lineHeight: 1,
+                }}>{icon.label}</span>
               </button>
             ))}
           </div>

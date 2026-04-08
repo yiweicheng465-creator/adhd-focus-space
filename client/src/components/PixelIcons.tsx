@@ -232,19 +232,23 @@ export function PixelAgents({ size = 20, active, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelFire({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Flame: wide base, tapered top, inner glow core — 20×20 grid
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
-      {/* Flame body */}
-      <rect x="6" y="1" width="4" height="2" fill={c} />
-      <rect x="5" y="3" width="6" height="2" fill={c} />
-      <rect x="4" y="5" width="8" height="2" fill={c} />
-      <rect x="3" y="7" width="10" height="3" fill={c} />
-      <rect x="4" y="10" width="8" height="2" fill={c} />
-      <rect x="5" y="12" width="6" height="2" fill={c} />
-      {/* Inner lighter core */}
-      <rect x="6" y="6" width="4" height="4" fill={c} opacity="0.4" />
-      {/* Tip */}
-      <rect x="7" y="2" width="2" height="1" fill={c} opacity="0.6" />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Outer flame body */}
+      <rect x="8" y="1" width="4" height="2" fill={c} />
+      <rect x="6" y="3" width="8" height="2" fill={c} />
+      <rect x="5" y="5" width="10" height="2" fill={c} />
+      <rect x="4" y="7" width="12" height="2" fill={c} />
+      <rect x="3" y="9" width="14" height="3" fill={c} />
+      <rect x="4" y="12" width="12" height="2" fill={c} />
+      <rect x="5" y="14" width="10" height="2" fill={c} />
+      <rect x="6" y="16" width="8" height="2" fill={c} />
+      {/* Inner glow — lighter centre */}
+      <rect x="7" y="8" width="6" height="6" fill={c} opacity="0.35" />
+      <rect x="8" y="10" width="4" height="3" fill="white" opacity="0.18" />
+      {/* Tip spark */}
+      <rect x="9" y="0" width="2" height="2" fill={c} opacity="0.7" />
     </svg>
   );
 }
@@ -254,17 +258,22 @@ export function PixelFire({ size = 16, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelCheck({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Big bold checkmark — thick tick on 20×20
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
-      {/* Circle */}
-      <rect x="4" y="1" width="8" height="2" fill={c} />
-      <rect x="2" y="3" width="2" height="10" fill={c} />
-      <rect x="12" y="3" width="2" height="10" fill={c} />
-      <rect x="4" y="13" width="8" height="2" fill={c} />
-      {/* Checkmark */}
-      <rect x="5" y="8" width="2" height="2" fill={c} />
-      <rect x="7" y="10" width="2" height="2" fill={c} />
-      <rect x="9" y="6" width="2" height="4" fill={c} />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Circle outline */}
+      <rect x="4" y="1" width="12" height="2" fill={c} />
+      <rect x="2" y="3" width="2" height="14" fill={c} />
+      <rect x="16" y="3" width="2" height="14" fill={c} />
+      <rect x="4" y="17" width="12" height="2" fill={c} />
+      {/* Thick checkmark — left downstroke */}
+      <rect x="5" y="10" width="3" height="3" fill={c} />
+      <rect x="6" y="12" width="3" height="3" fill={c} />
+      {/* Right upstroke */}
+      <rect x="8" y="13" width="3" height="2" fill={c} />
+      <rect x="10" y="11" width="3" height="3" fill={c} />
+      <rect x="12" y="8" width="3" height="4" fill={c} />
+      <rect x="14" y="6" width="2" height="3" fill={c} />
     </svg>
   );
 }
@@ -274,19 +283,29 @@ export function PixelCheck({ size = 16, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelStar({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Classic 5-point pixel star on 20×20
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
-      {/* Vertical beam */}
-      <rect x="7" y="1" width="2" height="14" fill={c} />
-      {/* Horizontal beam */}
-      <rect x="1" y="7" width="14" height="2" fill={c} />
-      {/* Diagonal dots */}
-      <rect x="4" y="4" width="2" height="2" fill={c} opacity="0.6" />
-      <rect x="10" y="4" width="2" height="2" fill={c} opacity="0.6" />
-      <rect x="4" y="10" width="2" height="2" fill={c} opacity="0.6" />
-      <rect x="10" y="10" width="2" height="2" fill={c} opacity="0.6" />
-      {/* Center */}
-      <rect x="6" y="6" width="4" height="4" fill={c} />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Top point */}
+      <rect x="9" y="1" width="2" height="3" fill={c} />
+      {/* Upper-left arm */}
+      <rect x="5" y="4" width="4" height="2" fill={c} />
+      <rect x="3" y="6" width="3" height="2" fill={c} />
+      {/* Upper-right arm */}
+      <rect x="11" y="4" width="4" height="2" fill={c} />
+      <rect x="14" y="6" width="3" height="2" fill={c} />
+      {/* Middle horizontal band */}
+      <rect x="1" y="8" width="18" height="2" fill={c} />
+      {/* Centre body */}
+      <rect x="6" y="7" width="8" height="4" fill={c} />
+      {/* Lower-left leg */}
+      <rect x="3" y="11" width="4" height="2" fill={c} />
+      <rect x="1" y="13" width="4" height="2" fill={c} />
+      {/* Lower-right leg */}
+      <rect x="13" y="11" width="4" height="2" fill={c} />
+      <rect x="15" y="13" width="4" height="2" fill={c} />
+      {/* Bottom gap between legs */}
+      <rect x="5" y="13" width="10" height="2" fill={c} opacity="0" />
     </svg>
   );
 }
@@ -296,21 +315,30 @@ export function PixelStar({ size = 16, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelTarget({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Bullseye: 3 concentric rings + centre dot, 20×20
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
       {/* Outer ring */}
-      <rect x="3" y="1" width="10" height="2" fill={c} />
-      <rect x="1" y="3" width="2" height="10" fill={c} />
-      <rect x="13" y="3" width="2" height="10" fill={c} />
-      <rect x="3" y="13" width="10" height="2" fill={c} />
+      <rect x="4" y="1" width="12" height="2" fill={c} />
+      <rect x="1" y="4" width="2" height="12" fill={c} />
+      <rect x="17" y="4" width="2" height="12" fill={c} />
+      <rect x="4" y="17" width="12" height="2" fill={c} />
+      <rect x="2" y="2" width="2" height="2" fill={c} />
+      <rect x="16" y="2" width="2" height="2" fill={c} />
+      <rect x="2" y="16" width="2" height="2" fill={c} />
+      <rect x="16" y="16" width="2" height="2" fill={c} />
       {/* Middle ring */}
-      <rect x="5" y="4" width="6" height="1" fill={c} />
-      <rect x="4" y="5" width="1" height="6" fill={c} />
-      <rect x="11" y="5" width="1" height="6" fill={c} />
-      <rect x="5" y="11" width="6" height="1" fill={c} />
-      {/* Center dot */}
-      <rect x="6" y="6" width="4" height="4" fill={c} />
-      <rect x="7" y="7" width="2" height="2" fill="white" opacity="0.5" />
+      <rect x="6" y="5" width="8" height="2" fill={c} />
+      <rect x="5" y="6" width="2" height="8" fill={c} />
+      <rect x="13" y="6" width="2" height="8" fill={c} />
+      <rect x="6" y="13" width="8" height="2" fill={c} />
+      {/* Inner ring */}
+      <rect x="8" y="8" width="4" height="1" fill={c} />
+      <rect x="8" y="11" width="4" height="1" fill={c} />
+      <rect x="8" y="8" width="1" height="4" fill={c} />
+      <rect x="11" y="8" width="1" height="4" fill={c} />
+      {/* Centre dot */}
+      <rect x="9" y="9" width="2" height="2" fill={c} />
     </svg>
   );
 }
@@ -320,16 +348,22 @@ export function PixelTarget({ size = 16, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelLightning({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Bold lightning bolt — thick diagonal slash, 20×20
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
-      {/* Lightning bolt */}
-      <rect x="9" y="1" width="4" height="2" fill={c} />
-      <rect x="7" y="3" width="4" height="2" fill={c} />
-      <rect x="5" y="5" width="6" height="2" fill={c} />
-      <rect x="5" y="7" width="8" height="2" fill={c} />
-      <rect x="3" y="9" width="6" height="2" fill={c} />
-      <rect x="3" y="11" width="4" height="2" fill={c} />
-      <rect x="3" y="13" width="2" height="2" fill={c} />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Top-right block */}
+      <rect x="11" y="1" width="5" height="2" fill={c} />
+      <rect x="9" y="3" width="5" height="2" fill={c} />
+      <rect x="7" y="5" width="5" height="2" fill={c} />
+      {/* Middle wide band */}
+      <rect x="5" y="7" width="10" height="3" fill={c} />
+      {/* Lower-left block */}
+      <rect x="5" y="10" width="8" height="2" fill={c} />
+      <rect x="4" y="12" width="6" height="2" fill={c} />
+      <rect x="3" y="14" width="5" height="2" fill={c} />
+      <rect x="3" y="16" width="3" height="2" fill={c} />
+      {/* Highlight streak */}
+      <rect x="10" y="8" width="2" height="2" fill="white" opacity="0.25" />
     </svg>
   );
 }
@@ -361,21 +395,32 @@ export function PixelClockMini({ size = 16, color }: PixelIconProps) {
    ════════════════════════════════════════════════════ */
 export function PixelTrophy({ size = 16, color }: PixelIconProps) {
   const c = color || PX;
+  // Trophy cup: wide bowl, two handles, stem, wide base, star inside — 20×20
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
-      {/* Cup */}
-      <rect x="4" y="2" width="8" height="7" fill="none" stroke={c} strokeWidth="1.5" />
-      {/* Handles */}
-      <rect x="2" y="3" width="2" height="4" fill="none" stroke={c} strokeWidth="1" />
-      <rect x="12" y="3" width="2" height="4" fill="none" stroke={c} strokeWidth="1" />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Cup body */}
+      <rect x="5" y="2" width="10" height="2" fill={c} />
+      <rect x="4" y="4" width="2" height="6" fill={c} />
+      <rect x="14" y="4" width="2" height="6" fill={c} />
+      <rect x="5" y="10" width="10" height="2" fill={c} />
+      {/* Cup bottom curve */}
+      <rect x="6" y="11" width="8" height="1" fill={c} />
+      {/* Left handle */}
+      <rect x="2" y="4" width="2" height="2" fill={c} />
+      <rect x="1" y="6" width="2" height="3" fill={c} />
+      <rect x="2" y="9" width="2" height="2" fill={c} />
+      {/* Right handle */}
+      <rect x="16" y="4" width="2" height="2" fill={c} />
+      <rect x="17" y="6" width="2" height="3" fill={c} />
+      <rect x="16" y="9" width="2" height="2" fill={c} />
       {/* Stem */}
-      <rect x="7" y="9" width="2" height="3" fill={c} />
+      <rect x="9" y="12" width="2" height="3" fill={c} />
       {/* Base */}
-      <rect x="5" y="12" width="6" height="2" fill={c} />
-      {/* Star on cup */}
-      <rect x="7" y="4" width="2" height="1" fill={c} />
-      <rect x="6" y="5" width="4" height="1" fill={c} />
-      <rect x="7" y="6" width="2" height="1" fill={c} />
+      <rect x="5" y="15" width="10" height="2" fill={c} />
+      <rect x="4" y="17" width="12" height="2" fill={c} />
+      {/* Star inside cup */}
+      <rect x="9" y="4" width="2" height="4" fill={c} opacity="0.7" />
+      <rect x="7" y="6" width="6" height="2" fill={c} opacity="0.7" />
     </svg>
   );
 }
