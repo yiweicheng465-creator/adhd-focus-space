@@ -58,9 +58,11 @@ interface GoalsProps {
   defaultContext?: ActiveContext;
   /** Shared category list from Home — includes all contexts across tasks/goals/agents */
   allCategories?: string[];
+  /** Called when user wants to delete a custom tag */
+  onDeleteCategory?: (ctx: string) => void;
 }
 
-export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategories }: GoalsProps) {
+export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategories, onDeleteCategory }: GoalsProps) {
   const [newGoal,       setNewGoal]       = useState("");
   const [newGoalCtx,    setNewGoalCtx]    = useState<ItemContext>("work");
   const [activeContext, setActiveContext] = useState<ActiveContext>(defaultContext);
@@ -107,7 +109,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} />
+      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} onDeleteContext={onDeleteCategory} />
 
       {/* Overall progress */}
       {visibleGoals.length > 0 && (

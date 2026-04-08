@@ -73,6 +73,10 @@ interface TaskManagerProps {
   tasks: Task[];
   onTasksChange: (tasks: Task[]) => void;
   defaultContext?: ActiveContext;
+  /** Shared category list from Home */
+  allCategories?: string[];
+  /** Called when user wants to delete a custom tag */
+  onDeleteCategory?: (ctx: string) => void;
 }
 
 /* Parse hashtags from input text — returns { cleanText, tag }
@@ -87,7 +91,7 @@ function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
   return { cleanText, tag: match[2].toLowerCase() };
 }
 
-export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: TaskManagerProps) {
+export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allCategories, onDeleteCategory }: TaskManagerProps) {
   const [newTaskText,     setNewTaskText]     = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("focus");
   const [newTaskContext,  setNewTaskContext]  = useState<ItemContext>("work");
@@ -95,8 +99,8 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
   const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
   const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
 
-  // Collect all unique contexts from existing tasks (for the switcher tabs)
-  const allContexts = Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
+  // Collect all unique contexts — prefer shared list from Home, fall back to deriving from tasks
+  const allContexts = allCategories ?? Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
 
   // Detect hashtag in current input for live preview
   const { tag: liveTag } = parseHashtag(newTaskText);
@@ -157,7 +161,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Context switcher — shows all known categories */}
-      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={allContexts} />
+      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={allContexts} onDeleteContext={onDeleteCategory} />
 
       {/* Add task */}
       <div className="flex flex-col gap-2">

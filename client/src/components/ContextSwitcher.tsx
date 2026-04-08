@@ -6,7 +6,7 @@
    ============================================================ */
 
 import { cn } from "@/lib/utils";
-import { Briefcase, LayoutGrid, User, Hash } from "lucide-react";
+import { Briefcase, LayoutGrid, User, Hash, X } from "lucide-react";
 
 // ItemContext is now a flexible string — "work" | "personal" | any custom tag
 export type ItemContext   = string;
@@ -76,9 +76,11 @@ interface ContextSwitcherProps {
   counts?: Record<string, number>;
   /** All known contexts to show as tabs (besides "all") */
   contexts?: string[];
+  /** Called when user deletes a custom (non-builtin) context tag */
+  onDeleteContext?: (ctx: string) => void;
 }
 
-export function ContextSwitcher({ active, onChange, counts, contexts }: ContextSwitcherProps) {
+export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteContext }: ContextSwitcherProps) {
   // Always show "all", then built-ins, then custom
   const builtins = ["work", "personal"];
   const custom   = (contexts ?? []).filter((c) => !builtins.includes(c));
@@ -101,35 +103,61 @@ export function ContextSwitcher({ active, onChange, counts, contexts }: ContextS
         const isActive = active === id;
         const cfg      = id !== "all" ? getContextConfig(id) : null;
 
+        const isCustom = id !== "all" && !builtins.includes(id);
         return (
-          <button
-            key={id}
-            onClick={() => onChange(id)}
-            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all justify-center shrink-0"
-            style={{
-              background:  isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
-              color:       isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
-              border:      `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
-              fontFamily:  "'DM Sans', sans-serif",
-              letterSpacing: "0.04em",
-              cursor: "pointer",
-              borderRadius: 0,
-            }}
-          >
-            <Icon className="w-3 h-3" />
-            {label}
-            {counts?.[id] !== undefined && counts[id] > 0 && (
-              <span
-                className="text-[10px] px-1.5 py-0.5 font-medium"
+          <div key={id} className="flex items-center" style={{ position: "relative" }}>
+            <button
+              onClick={() => onChange(id)}
+              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all justify-center shrink-0"
+              style={{
+                background:  isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
+                color:       isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
+                border:      `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
+                borderRight: isCustom && onDeleteContext ? "none" : undefined,
+                fontFamily:  "'DM Sans', sans-serif",
+                letterSpacing: "0.04em",
+                cursor: "pointer",
+                borderRadius: 0,
+              }}
+            >
+              <Icon className="w-3 h-3" />
+              {label}
+              {counts?.[id] !== undefined && counts[id] > 0 && (
+                <span
+                  className="text-[10px] px-1.5 py-0.5 font-medium"
+                  style={{
+                    background: "oklch(0.88 0.014 75 / 0.6)",
+                    color: "oklch(0.55 0.015 70)",
+                  }}
+                >
+                  {counts[id]}
+                </span>
+              )}
+            </button>
+            {isCustom && onDeleteContext && (
+              <button
+                onClick={(e) => { e.stopPropagation(); onDeleteContext(id); }}
+                title={`Delete #${id} tag`}
+                className="flex items-center justify-center transition-all"
                 style={{
-                  background: "oklch(0.88 0.014 75 / 0.6)",
-                  color: "oklch(0.55 0.015 70)",
+                  width: 20,
+                  height: "100%",
+                  minHeight: 30,
+                  background: isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
+                  color: "oklch(0.58 0.015 70)",
+                  border: `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
+                  borderLeft: "none",
+                  cursor: "pointer",
+                  borderRadius: 0,
+                  padding: 0,
                 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.55 0.18 25)"; (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.18 25 / 0.08)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.58 0.015 70)"; (e.currentTarget as HTMLButtonElement).style.background = isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent"; }}
               >
-                {counts[id]}
-              </span>
+                <X className="w-2.5 h-2.5" />
+              </button>
             )}
-          </button>
+          </div>
         );
       })}
     </div>

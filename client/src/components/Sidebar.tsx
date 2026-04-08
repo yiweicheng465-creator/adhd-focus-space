@@ -5,6 +5,7 @@
    ============================================================ */
 
 import React, { useEffect, useState } from "react";
+import { useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
   PixelHome,
@@ -66,6 +67,39 @@ function LiveTime() {
   );
 }
 
+/* Beaker icon link to /timer-prototypes */
+function PrototypesLink() {
+  const [location, navigate] = useLocation();
+  const active = location === "/timer-prototypes";
+  return (
+    <button
+      onClick={() => navigate("/timer-prototypes")}
+      title="Timer Prototypes"
+      className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
+      style={{ background: active ? "oklch(0.55 0.09 35 / 0.09)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.09 35 / 0.04)"; }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+    >
+      {active && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.55 0.09 35)" }} />
+      )}
+      {/* Beaker SVG */}
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <path d="M6 2v6L2 14a1 1 0 00.9 1.5h12.2A1 1 0 0016 14l-4-6V2" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+        <line x1="5" y1="2" x2="13" y2="2" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4" strokeLinecap="round"/>
+        <circle cx="7" cy="12" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+        <circle cx="11" cy="13.5" r="0.7" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+      </svg>
+      <span
+        className="text-[7px] mt-1 tracking-[0.12em] font-medium"
+        style={{ fontFamily: "'DM Sans', sans-serif", color: active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)" }}
+      >
+        LAB
+      </span>
+    </button>
+  );
+}
+
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   return (
     <aside
@@ -123,8 +157,13 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         })}
       </nav>
 
+      {/* Prototypes link — bottom of nav */}
+      <div className="w-full px-2 mt-1">
+        <PrototypesLink />
+      </div>
+
       {/* Bottom: time */}
-      <div className="mt-auto flex flex-col items-center gap-2 pb-1">
+      <div className="flex flex-col items-center gap-2 pb-1">
         {/* Tiny geometric diamond */}
         <svg width="8" height="8" viewBox="0 0 8 8" style={{ opacity: 0.3 }}>
           <rect x="1" y="1" width="6" height="6" transform="rotate(45 4 4)" fill="oklch(0.55 0.09 35)" />

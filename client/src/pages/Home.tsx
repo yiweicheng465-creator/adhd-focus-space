@@ -69,6 +69,8 @@ export default function Home() {
   const [goals,  setGoals]  = useLocalStorage<Goal[]>("adhd-goals",  INITIAL_GOALS);
   const [agents, setAgents] = useLocalStorage<Agent[]>("adhd-agents", []);
   const [mood,   setMood]   = useLocalStorage<number | null>("adhd-mood", null);
+  // Manually deleted custom tags — persisted so they stay gone even if no items use them
+  const [deletedCategories, setDeletedCategories] = useLocalStorage<string[]>("adhd-deleted-categories", []);
 
   // ── Transient state ──
   const [focusSessions, setFocusSessions] = useState(0);
@@ -133,7 +135,17 @@ export default function Home() {
     ...tasks.map((t) => t.context),
     ...goals.map((g) => g.context),
     ...agents.map((a) => a.context),
-  ])).filter(Boolean);
+  ])).filter(Boolean).filter((c) => !deletedCategories.includes(c));
+
+  /** Delete a custom category: reassign all its items to "personal", then hide the tag */
+  const handleDeleteCategory = (ctx: string) => {
+    if (ctx === "work" || ctx === "personal") return; // protect built-ins
+    setTasks((prev) => prev.map((t) => t.context === ctx ? { ...t, context: "personal" } : t));
+    setGoals((prev) => prev.map((g) => g.context === ctx ? { ...g, context: "personal" } : g));
+    setAgents((prev) => prev.map((a) => a.context === ctx ? { ...a, context: "personal" } : a));
+    setDeletedCategories((prev) => [...prev, ctx]);
+    toast.success(`#${ctx} tag removed. Items moved to Personal.`, { duration: 3000 });
+  };
 
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
@@ -318,7 +330,7 @@ export default function Home() {
               >
                 <TasksDecor />
                 <div className="relative z-10">
-                  <TaskManager tasks={tasks} onTasksChange={handleTasksChange} />
+                  <TaskManager tasks={tasks} onTasksChange={handleTasksChange} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} />
                 </div>
               </div>
             )}
@@ -358,7 +370,7 @@ export default function Home() {
               >
                 <GoalsDecor />
                 <div className="relative z-10">
-                  <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} />
+                  <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} />
                 </div>
               </div>
             )}
