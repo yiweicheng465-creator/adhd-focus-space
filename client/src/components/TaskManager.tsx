@@ -5,6 +5,7 @@
    ============================================================ */
 
 import { useState } from "react";
+import { EisenhowerMatrix, priorityToQuadrant, type QuadrantId } from "./EisenhowerMatrix";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { CheckCircle2, Circle, Flame, Plus, Star, Trash2, Zap } from "lucide-react";
@@ -98,6 +99,18 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
   const [completingId,    setCompletingId]    = useState<string | null>(null);
   const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
   const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
+  // Quadrant map: taskId → quadrantId (persisted in component state)
+  const [quadrantMap, setQuadrantMap]         = useState<Record<string, QuadrantId>>(() => {
+    try {
+      const saved = localStorage.getItem("adhd-quadrant-map");
+      return saved ? JSON.parse(saved) : {};
+    } catch { return {}; }
+  });
+
+  function handleQuadrantMapChange(map: Record<string, QuadrantId>) {
+    setQuadrantMap(map);
+    try { localStorage.setItem("adhd-quadrant-map", JSON.stringify(map)); } catch {}
+  }
 
   // Collect all unique contexts — prefer shared list from Home, fall back to deriving from tasks
   const allContexts = allCategories ?? Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
@@ -343,6 +356,14 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
           );
         })}
       </div>
+
+      {/* ── Eisenhower Matrix ── */}
+      <EisenhowerMatrix
+        tasks={tasks}
+        onTasksChange={onTasksChange}
+        quadrantMap={quadrantMap}
+        onQuadrantMapChange={handleQuadrantMapChange}
+      />
     </div>
   );
 }
