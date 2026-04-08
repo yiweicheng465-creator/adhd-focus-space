@@ -11,7 +11,7 @@ import { CheckCircle2, Circle, Flame, Plus, Star, Trash2, Zap } from "lucide-rea
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
-  ContextSwitcher, ContextBadge, CONTEXT_CONFIG,
+  ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
 
@@ -75,6 +75,14 @@ interface TaskManagerProps {
   defaultContext?: ActiveContext;
 }
 
+/* Parse hashtags from input text — returns { cleanText, tag } */
+function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
+  const match = raw.match(/#([\w-]+)/);
+  if (!match) return { cleanText: raw.trim(), tag: null };
+  const cleanText = raw.replace(/#[\w-]+/g, "").trim();
+  return { cleanText, tag: match[1].toLowerCase() };
+}
+
 export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: TaskManagerProps) {
   const [newTaskText,     setNewTaskText]     = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("focus");
@@ -83,16 +91,25 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
   const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
   const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
 
+  // Collect all unique contexts from existing tasks (for the switcher tabs)
+  const allContexts = Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
+
+  // Detect hashtag in current input for live preview
+  const { tag: liveTag } = parseHashtag(newTaskText);
+
   const addTask = () => {
     if (!newTaskText.trim()) return;
+    const { cleanText, tag } = parseHashtag(newTaskText);
+    const context = tag ?? newTaskContext;
     const task: Task = {
-      id: nanoid(), text: newTaskText.trim(),
-      priority: newTaskPriority, context: newTaskContext,
+      id: nanoid(), text: cleanText || newTaskText.trim(),
+      priority: newTaskPriority, context,
       done: false, createdAt: new Date(),
     };
     onTasksChange([task, ...tasks]);
     setNewTaskText("");
-    toast.success("Task added.", { duration: 2000 });
+    if (tag) toast.success(`Task added to #${tag}.`, { duration: 2000 });
+    else toast.success("Task added.", { duration: 2000 });
   };
 
   const toggleTask = (id: string) => {
@@ -112,11 +129,11 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
 
   const deleteTask = (id: string) => onTasksChange(tasks.filter((t) => t.id !== id));
 
-  const counts = {
-    all:      tasks.filter((t) => !t.done).length,
-    work:     tasks.filter((t) => !t.done && t.context === "work").length,
-    personal: tasks.filter((t) => !t.done && t.context === "personal").length,
-  };
+  // Build counts for all known contexts
+  const counts: Record<string, number> = { all: tasks.filter((t) => !t.done).length };
+  allContexts.forEach((ctx) => {
+    counts[ctx] = tasks.filter((t) => !t.done && t.context === ctx).length;
+  });
 
   const contextFiltered = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
   const sorted = [...contextFiltered].sort((a, b) => {
@@ -135,8 +152,8 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* Context switcher */}
-      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} />
+      {/* Context switcher — shows all known categories */}
+      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={allContexts} />
 
       {/* Add task */}
       <div className="flex flex-col gap-2">
@@ -145,9 +162,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="What needs to get done?"
+            placeholder="Task name... or add #yoga #reading to categorize"
             className="flex-1"
-            style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: M.card, border: `1px solid ${liveTag ? M.coral : M.border}`, fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
           />
           <button
             onClick={addTask}
@@ -157,6 +174,20 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
             Add
           </button>
         </div>
+
+        {/* Live hashtag preview */}
+        {liveTag && (
+          <div className="flex items-center gap-1.5" style={{ fontSize: "0.7rem", color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ color: M.coral }}>◆</span>
+            Will be added to category{" "}
+            <span
+              className="px-2 py-0.5 font-medium"
+              style={{ background: M.coral + "15", color: M.coral, border: `1px solid ${M.coral}30`, fontFamily: "'DM Sans', sans-serif", fontSize: "0.68rem", letterSpacing: "0.06em" }}
+            >
+              #{liveTag}
+            </span>
+          </div>
+        )}
 
         {/* Priority + context row */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -189,7 +220,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
           <div className="w-px h-4" style={{ background: M.border }} />
 
           {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg  = CONTEXT_CONFIG[ctx];
+            const cfg  = getContextConfig(ctx);
             const Icon = cfg.icon;
             const isActive = newTaskContext === ctx;
             return (

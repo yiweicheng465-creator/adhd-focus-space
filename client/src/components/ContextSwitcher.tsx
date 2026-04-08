@@ -1,83 +1,123 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Context Switcher v3.0 (Morandi)
+   ADHD FOCUS SPACE — Context Switcher v4.0 (Dynamic Categories)
    Work  → sage green  oklch(0.48 0.07 145)
-   Personal → dusty mauve  oklch(0.52 0.06 300)
+   Personal → dusty mauve  oklch(0.52 0.06 20)
+   Custom → auto-generated Morandi palette from label hash
    ============================================================ */
 
 import { cn } from "@/lib/utils";
-import { Briefcase, LayoutGrid, User } from "lucide-react";
+import { Briefcase, LayoutGrid, User, Hash } from "lucide-react";
 
-export type ItemContext   = "work" | "personal";
-export type ActiveContext = "work" | "personal" | "all";
+// ItemContext is now a flexible string — "work" | "personal" | any custom tag
+export type ItemContext   = string;
+export type ActiveContext = string; // "all" | any ItemContext
 
-export const CONTEXT_CONFIG: Record<ItemContext, {
+/* Built-in contexts with fixed Morandi colors */
+export const BUILTIN_CONTEXT_CONFIG: Record<string, {
   label: string;
   icon: React.ElementType;
   color: string;
   bg: string;
   border: string;
-  pill: string;
-  pillActive: string;
 }> = {
   work: {
-    label:      "Work",
-    icon:       Briefcase,
-    color:      "oklch(0.42 0.07 145)",
-    bg:         "oklch(0.42 0.07 145 / 0.07)",
-    border:     "oklch(0.42 0.07 145 / 0.22)",
-    pill:       "oklch(0.42 0.07 145 / 0.07)",
-    pillActive: "oklch(0.42 0.07 145)",
+    label:  "Work",
+    icon:   Briefcase,
+    color:  "oklch(0.42 0.07 145)",
+    bg:     "oklch(0.42 0.07 145 / 0.07)",
+    border: "oklch(0.42 0.07 145 / 0.22)",
   },
   personal: {
-    label:      "Personal",
-    icon:       User,
-    color:      "oklch(0.52 0.07 20)",
-    bg:         "oklch(0.52 0.07 20 / 0.07)",
-    border:     "oklch(0.52 0.07 20 / 0.22)",
-    pill:       "oklch(0.52 0.07 20 / 0.07)",
-    pillActive: "oklch(0.52 0.07 20)",
+    label:  "Personal",
+    icon:   User,
+    color:  "oklch(0.52 0.07 20)",
+    bg:     "oklch(0.52 0.07 20 / 0.07)",
+    border: "oklch(0.52 0.07 20 / 0.22)",
   },
 };
+
+// Keep legacy export for compatibility
+export const CONTEXT_CONFIG = BUILTIN_CONTEXT_CONFIG;
+
+/* Generate a deterministic Morandi color from a string label */
+function hashColor(label: string): { color: string; bg: string; border: string } {
+  // Morandi hue palette: warm earthy tones
+  const hues = [35, 55, 75, 95, 115, 145, 165, 185, 205, 260, 290, 320, 345];
+  let hash = 0;
+  for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) & 0xffff;
+  const hue = hues[hash % hues.length];
+  return {
+    color:  `oklch(0.48 0.07 ${hue})`,
+    bg:     `oklch(0.48 0.07 ${hue} / 0.07)`,
+    border: `oklch(0.48 0.07 ${hue} / 0.22)`,
+  };
+}
+
+/* Get config for any context — built-in or custom */
+export function getContextConfig(ctx: string): {
+  label: string;
+  icon: React.ElementType;
+  color: string;
+  bg: string;
+  border: string;
+} {
+  if (BUILTIN_CONTEXT_CONFIG[ctx]) return BUILTIN_CONTEXT_CONFIG[ctx];
+  const colors = hashColor(ctx);
+  return {
+    label: ctx.charAt(0).toUpperCase() + ctx.slice(1),
+    icon:  Hash,
+    ...colors,
+  };
+}
 
 interface ContextSwitcherProps {
   active: ActiveContext;
   onChange: (ctx: ActiveContext) => void;
-  counts?: { work: number; personal: number; all: number };
+  counts?: Record<string, number>;
+  /** All known contexts to show as tabs (besides "all") */
+  contexts?: string[];
 }
 
-export function ContextSwitcher({ active, onChange, counts }: ContextSwitcherProps) {
-  const options: { id: ActiveContext; label: string; icon: React.ElementType }[] = [
-    { id: "all",      label: "All",      icon: LayoutGrid },
-    { id: "work",     label: "Work",     icon: Briefcase  },
-    { id: "personal", label: "Personal", icon: User       },
+export function ContextSwitcher({ active, onChange, counts, contexts }: ContextSwitcherProps) {
+  // Always show "all", then built-ins, then custom
+  const builtins = ["work", "personal"];
+  const custom   = (contexts ?? []).filter((c) => !builtins.includes(c));
+  const allCtxs  = [...builtins, ...custom];
+
+  const options: { id: string; label: string; icon: React.ElementType }[] = [
+    { id: "all", label: "All", icon: LayoutGrid },
+    ...allCtxs.map((c) => {
+      const cfg = getContextConfig(c);
+      return { id: c, label: cfg.label, icon: cfg.icon };
+    }),
   ];
 
   return (
     <div
-      className="flex items-center gap-0"
+      className="flex items-center gap-0 overflow-x-auto"
       style={{ border: "1px solid oklch(0.88 0.014 75)" }}
     >
       {options.map(({ id, label, icon: Icon }, idx) => {
         const isActive = active === id;
-        const count    = counts?.[id];
-        const cfg      = id !== "all" ? CONTEXT_CONFIG[id as ItemContext] : null;
+        const cfg      = id !== "all" ? getContextConfig(id) : null;
 
         return (
           <button
             key={id}
             onClick={() => onChange(id)}
-            className="flex items-center gap-1.5 px-4 py-2 text-xs font-medium transition-all flex-1 justify-center"
+            className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all justify-center shrink-0"
             style={{
               background:  isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
               color:       isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
-              borderRight: idx < 2 ? "1px solid oklch(0.88 0.014 75)" : undefined,
+              borderRight: idx < options.length - 1 ? "1px solid oklch(0.88 0.014 75)" : undefined,
               fontFamily:  "'DM Sans', sans-serif",
               letterSpacing: "0.04em",
+              cursor: "pointer",
             }}
           >
             <Icon className="w-3 h-3" />
             {label}
-            {count !== undefined && (
+            {counts?.[id] !== undefined && counts[id] > 0 && (
               <span
                 className="text-[10px] px-1.5 py-0.5 font-medium"
                 style={{
@@ -85,7 +125,7 @@ export function ContextSwitcher({ active, onChange, counts }: ContextSwitcherPro
                   color: "oklch(0.55 0.015 70)",
                 }}
               >
-                {count}
+                {counts[id]}
               </span>
             )}
           </button>
@@ -95,13 +135,13 @@ export function ContextSwitcher({ active, onChange, counts }: ContextSwitcherPro
   );
 }
 
-/* Inline context badge — used on cards */
-export function ContextBadge({ context }: { context: ItemContext }) {
-  const cfg  = CONTEXT_CONFIG[context];
+/* Inline context badge — used on task cards */
+export function ContextBadge({ context }: { context: string }) {
+  const cfg  = getContextConfig(context);
   const Icon = cfg.icon;
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 font-medium"
+      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 font-medium shrink-0"
       style={{
         background:  cfg.bg,
         color:       cfg.color,
