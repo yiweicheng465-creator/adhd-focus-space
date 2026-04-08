@@ -163,9 +163,17 @@ export default function Home() {
     setAgents([]);
     setMood(null);
     setDeletedCategories([]);
-    // Also clear daily check-in suppression so it shows fresh
-    localStorage.removeItem("adhd-checkin-date");
-    toast.success("All test data cleared. Fresh start!", { duration: 3000 });
+    // Clear daily check-in suppression keys (both skip + X-dismiss for today)
+    const today = new Date().toDateString();
+    localStorage.removeItem(`adhd-checkin-skip-${today}`);
+    localStorage.removeItem(`adhd-checkin-x-${today}`);
+    // Re-show the check-in modal immediately
+    dismissCheckIn(false); // hide current if open
+    setTimeout(() => {
+      // Trigger a page reload so the hook re-evaluates and shows the modal
+      window.location.reload();
+    }, 300);
+    toast.success("All test data cleared. Reloading…", { duration: 2000 });
   };
 
   /** Delete a custom category: reassign all its items to "personal", then hide the tag */
