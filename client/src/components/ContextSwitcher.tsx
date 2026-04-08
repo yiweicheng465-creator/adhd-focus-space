@@ -94,8 +94,8 @@ export function ContextSwitcher({ active, onChange, counts, contexts }: ContextS
 
   return (
     <div
-      className="flex items-center gap-0 overflow-x-auto"
-      style={{ border: "1px solid oklch(0.88 0.014 75)" }}
+      className="flex flex-wrap items-center gap-1"
+      style={{ padding: "2px 0" }}
     >
       {options.map(({ id, label, icon: Icon }, idx) => {
         const isActive = active === id;
@@ -109,10 +109,11 @@ export function ContextSwitcher({ active, onChange, counts, contexts }: ContextS
             style={{
               background:  isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
               color:       isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
-              borderRight: idx < options.length - 1 ? "1px solid oklch(0.88 0.014 75)" : undefined,
+              border:      `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
               fontFamily:  "'DM Sans', sans-serif",
               letterSpacing: "0.04em",
               cursor: "pointer",
+              borderRadius: 0,
             }}
           >
             <Icon className="w-3 h-3" />

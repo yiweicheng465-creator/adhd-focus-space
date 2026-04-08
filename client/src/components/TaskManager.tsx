@@ -75,12 +75,16 @@ interface TaskManagerProps {
   defaultContext?: ActiveContext;
 }
 
-/* Parse hashtags from input text — returns { cleanText, tag } */
+/* Parse hashtags from input text — returns { cleanText, tag }
+ * Only the #tag token is stripped; the rest of the text is preserved exactly.
+ * Example: "work out #workout" → { cleanText: "work out", tag: "workout" }
+ */
 function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
-  const match = raw.match(/#([\w-]+)/);
+  const match = raw.match(/(^|\s)#([\w-]+)(\s|$)/);
   if (!match) return { cleanText: raw.trim(), tag: null };
-  const cleanText = raw.replace(/#[\w-]+/g, "").trim();
-  return { cleanText, tag: match[1].toLowerCase() };
+  // Remove only the matched #tag token (with surrounding spaces collapsed)
+  const cleanText = raw.replace(/(^|\s)#[\w-]+(\s|$)/g, " ").replace(/\s{2,}/g, " ").trim();
+  return { cleanText, tag: match[2].toLowerCase() };
 }
 
 export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: TaskManagerProps) {

@@ -11,7 +11,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { MoodCheckIn } from "./MoodCheckIn";
 import { FocusTimer } from "./FocusTimer";
-import { ContextSwitcher, type ActiveContext } from "./ContextSwitcher";
+import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
@@ -95,11 +95,12 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
     (t) => !agents.some((a) => a.linkedTaskId === t.id && (a.status === "running" || a.status === "paused"))
   );
 
-  const ctxCounts = {
-    all:      tasks.filter((t) => !t.done).length,
-    work:     tasks.filter((t) => !t.done && t.context === "work").length,
-    personal: tasks.filter((t) => !t.done && t.context === "personal").length,
-  };
+  // Build counts for all known contexts (dynamic)
+  const allContexts = Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
+  const ctxCounts: Record<string, number> = { all: tasks.filter((t) => !t.done).length };
+  allContexts.forEach((ctx) => {
+    ctxCounts[ctx] = tasks.filter((t) => !t.done && t.context === ctx).length;
+  });
 
   return (
     <div className="flex flex-col gap-6">
@@ -186,8 +187,8 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
             <kbd className="hidden sm:inline text-[10px] border px-1.5 py-0.5" style={{ color: MUTED, borderColor: BORDER }}>↵</kbd>
           </div>
 
-          {/* Context switcher */}
-          <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} />
+          {/* Context switcher — dynamic categories */}
+          <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
           </div>{/* end right column */}
         </div>{/* end illustration+content row */}
       </div>
@@ -304,16 +305,21 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
             <div className="space-y-2">
               {activeTasks.slice(0, 5).map((t) => {
                 const pc: Record<string, string> = { urgent: "oklch(0.6 0.2 15)", focus: TC, normal: "oklch(0.62 0.1 75)" };
-                const cc: Record<string, string> = { work: "oklch(0.48 0.07 145)", personal: "oklch(0.52 0.06 300)" };
+                const ctxColor = getContextConfig(t.context).color;
                 return (
                   <div
                     key={t.id}
                     className="flex items-center gap-3 p-3 transition-all"
                     style={{ border: `1px solid ${BORDER}` }}
                   >
-                    <div className="w-1.5 h-1.5 shrink-0" style={{ background: pc[t.priority] }} />
+                    <div className="w-1.5 h-1.5 shrink-0" style={{ background: pc[t.priority] ?? TC }} />
                     <p className="text-sm flex-1 truncate" style={{ color: INK }}>{t.text}</p>
-                    <div className="w-1.5 h-1.5 shrink-0" style={{ background: cc[t.context] }} />
+                    <span
+                      className="text-[10px] px-1.5 py-0.5 shrink-0"
+                      style={{ color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em" }}
+                    >
+                      {t.context}
+                    </span>
                   </div>
                 );
               })}
