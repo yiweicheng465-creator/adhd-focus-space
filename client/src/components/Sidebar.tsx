@@ -30,15 +30,18 @@ const NAV = [
 /* ── Logo mark: refined editorial monogram ── */
 function LogoMark() {
   return (
-    <div className="w-10 h-10 flex items-center justify-center" title="ADHD Focus Space">
+    <div
+      className="w-10 h-10 flex items-center justify-center"
+      title="ADHD Focus Space"
+      style={{ background: "oklch(0.955 0.016 76)" }}
+    >
       <img
         src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-logo-blob2-8QDj2kgAG624iuGTX4JAY6.webp"
         alt="ADHD Focus Space logo"
         className="w-10 h-10 object-contain"
         style={{
-          // mix-blend-multiply removes the white background on light surfaces
           mixBlendMode: "multiply",
-          borderRadius: 0,
+          filter: "saturate(1.1)",
         }}
       />
     </div>
