@@ -112,12 +112,12 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   knownCategories.forEach((ctx) => { counts[ctx] = agents.filter((a) => a.context === ctx).length; });
 
   const addAgent = () => {
-    if (!name.trim() || !taskDesc.trim()) {
-      toast.error("Give the agent a name and describe what it's doing.");
+    if (!name.trim()) {
+      toast.error("Give the agent a name.");
       return;
     }
     const agent: Agent = {
-      id: nanoid(), name: name.trim(), task: taskDesc.trim(),
+      id: nanoid(), name: name.trim(), task: "",
       status: "running", context: newCtx,
       linkedTaskId: linkedTaskId || undefined, startedAt: new Date(),
     };
@@ -228,19 +228,12 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
           <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.92rem", fontWeight: 700, fontStyle: "italic", color: M.ink }}>Log a new agent</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <Input
-            value={name} onChange={(e) => setName(e.target.value)}
-            placeholder="Agent name (e.g. Manus, Claude)"
-            style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
-          />
-          <Input
-            value={taskDesc} onChange={(e) => setTaskDesc(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && addAgent()}
-            placeholder="What is it doing?"
-            style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
-          />
-        </div>
+        <Input
+          value={name} onChange={(e) => setName(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addAgent()}
+          placeholder="Agent name (e.g. Manus, Claude)"
+          style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
+        />
 
         {/* Context picker — dynamic categories */}
         <div className="flex items-center gap-2 flex-wrap">
@@ -376,7 +369,6 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       </span>
                     )}
                   </div>
-                  <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: M.muted, marginTop: 4, marginBottom: 6, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{agent.task}</p>
                   <div className="flex items-center gap-3 mt-1.5 text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
                     <span className="flex items-center gap-1"><Clock className="w-3 h-3" />{elapsed(agent.startedAt, agent.endedAt)}</span>
                     <span>Started {new Date(agent.startedAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}</span>

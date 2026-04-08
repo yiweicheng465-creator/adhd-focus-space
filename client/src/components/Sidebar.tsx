@@ -20,6 +20,7 @@ import {
 interface SidebarProps {
   activeSection: string;
   onSectionChange: (section: string) => void;
+  onClearData?: () => void;
 }
 
 const NAV = [
@@ -138,7 +139,7 @@ function PrototypesLink() {
   );
 }
 
-export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
+export function Sidebar({ activeSection, onSectionChange, onClearData }: SidebarProps) {
   return (
     <aside
       className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-5"
@@ -199,6 +200,23 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
       <div className="w-full px-2 mt-1">
         <MonthlyLink />
         <PrototypesLink />
+        {/* Subtle clear-data button — only visible on hover */}
+        {onClearData && (
+          <button
+            onClick={onClearData}
+            title="Clear all test data"
+            className="relative w-full flex flex-col items-center justify-center py-2 opacity-20 hover:opacity-60 transition-opacity duration-200"
+            style={{ background: "transparent" }}
+          >
+            <svg width="14" height="14" viewBox="0 0 18 18" fill="none">
+              <polyline points="3,6 15,6" stroke="oklch(0.45 0.08 15)" strokeWidth="1.4" strokeLinecap="round"/>
+              <path d="M7 6V4h4v2" stroke="oklch(0.45 0.08 15)" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              <rect x="4" y="6" width="10" height="9" rx="1.5" stroke="oklch(0.45 0.08 15)" strokeWidth="1.4"/>
+              <line x1="7" y1="9" x2="7" y2="13" stroke="oklch(0.45 0.08 15)" strokeWidth="1.2" strokeLinecap="round"/>
+              <line x1="11" y1="9" x2="11" y2="13" stroke="oklch(0.45 0.08 15)" strokeWidth="1.2" strokeLinecap="round"/>
+            </svg>
+          </button>
+        )}
       </div>
 
       {/* Bottom: time */}

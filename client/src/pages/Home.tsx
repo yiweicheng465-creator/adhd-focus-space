@@ -33,7 +33,7 @@ import {
 } from "@/components/PageDecor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Trash2 } from "lucide-react";
+import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
 
 // Simple flag icon for Goals — replaces complex flower
@@ -189,7 +189,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
       {/* Sidebar */}
-      <Sidebar activeSection={activeSection} onSectionChange={(s) => setActiveSection(s as Section)} />
+      <Sidebar activeSection={activeSection} onSectionChange={(s) => setActiveSection(s as Section)} onClearData={handleClearTestData} />
 
       {/* Main content */}
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
@@ -246,16 +246,6 @@ export default function Home() {
               <span className="hidden sm:inline">Wrap up</span>
             </button>
 
-            {/* Clear test data */}
-            <button
-              onClick={handleClearTestData}
-              title="Clear all test data"
-              className="flex items-center gap-1.5 text-xs transition-colors hover:text-foreground"
-              style={{ color: "oklch(0.62 0.06 15)" }}
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Clear data</span>
-            </button>
           </div>
         </header>
 
