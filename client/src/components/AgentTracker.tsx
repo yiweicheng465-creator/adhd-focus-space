@@ -228,59 +228,33 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
           <span style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.92rem", fontWeight: 700, fontStyle: "italic", color: M.ink }}>Log a new agent</span>
         </div>
 
-        <Input
-          value={name} onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && addAgent()}
-          placeholder="Agent name (e.g. Manus, Claude)"
-          style={{ background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
-        />
-
-        {/* Context picker — dynamic categories */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <span style={LABEL}>Category:</span>
-          {knownCategories.map((ctx) => {
-            const cfg  = getContextConfig(ctx);
-            const Icon = cfg.icon;
-            return (
-              <button
-                key={ctx}
-                onClick={() => setNewCtx(ctx)}
-                style={{
-                  display: "flex", alignItems: "center", gap: 5,
-                  padding: "5px 12px",
-                  borderRadius: 20,
-                  border: `1px solid ${newCtx === ctx ? cfg.border : M.border}`,
-                  background: newCtx === ctx ? cfg.bg : "transparent",
-                  color: newCtx === ctx ? cfg.color : M.muted,
-                  fontFamily: "'DM Sans', sans-serif",
-                  fontSize: "0.75rem",
-                  fontWeight: newCtx === ctx ? 600 : 400,
-                  cursor: "pointer",
-                  transition: "all 0.15s",
-                }}
-              >
-                <Icon className="w-3 h-3" />
-                {cfg.label}
-              </button>
-            );
-          })}
+        {/* Name + task-link inline row */}
+        <div className="flex gap-2 items-center">
+          <Input
+            value={name} onChange={(e) => setName(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && addAgent()}
+            placeholder="Agent name (e.g. Manus, Claude)"
+            style={{ flex: 1, background: "oklch(0.997 0.003 80)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
+          />
+          <select
+            value={linkedTaskId}
+            onChange={(e) => {
+              const tid = e.target.value;
+              setLinkedTaskId(tid);
+              // Auto-inherit category from linked task
+              if (tid) {
+                const linked = activeTasks.find((t) => t.id === tid);
+                if (linked) setNewCtx(linked.context as ItemContext);
+              }
+            }}
+            style={{ minWidth: 160, maxWidth: 220, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "0 10px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 80)", color: linkedTaskId ? M.ink : M.muted, outline: "none", height: 42, cursor: "pointer" }}
+          >
+            <option value="">Link to task…</option>
+            {activeTasks.map((t) => (
+              <option key={t.id} value={t.id}>{t.text.length > 30 ? t.text.slice(0, 30) + "…" : t.text}</option>
+            ))}
+          </select>
         </div>
-
-        {/* Link to task */}
-        {linkableTasks.length > 0 && (
-          <div className="flex items-center gap-2">
-            <Link2 className="w-4 h-4 shrink-0" style={{ color: M.muted }} />
-            <select
-              value={linkedTaskId} onChange={(e) => setLinkedTaskId(e.target.value)}
-              style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", padding: "8px 12px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 80)", color: linkedTaskId ? M.ink : M.muted, outline: "none" }}
-            >
-              <option value="">Link to a task (optional)</option>
-              {linkableTasks.map((t) => (
-                <option key={t.id} value={t.id}>{t.text}</option>
-              ))}
-            </select>
-          </div>
-        )}
 
         <button
           onClick={addAgent}
