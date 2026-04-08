@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
   CheckCircle2, Clock, Flame,
-  Link2, Pause, Play, Plus, RefreshCw, Trash2, XCircle,
+  Link2, Pause, Play, Plus, RefreshCw, Trash2, X, XCircle,
 } from "lucide-react";
 import { PixelAgents } from "@/components/PixelIcons";
 import { toast } from "sonner";
@@ -93,6 +93,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   const [filterStatus,   setFilterStatus]  = useState<AgentStatus | "all">("all");
   const [expandedId,     setExpandedId]    = useState<string | null>(null);
   const [noteEditing,    setNoteEditing]   = useState<{ id: string; value: string } | null>(null);
+  const [taskEditing,    setTaskEditing]   = useState<string | null>(null); // agent id being task-edited
 
   const today        = new Date().toDateString();
   const todayAgents  = agents.filter((a) => new Date(a.startedAt).toDateString() === today);
@@ -142,6 +143,17 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
     onAgentsChange(agents.map((a) => a.id === noteEditing.id ? { ...a, notes: noteEditing.value } : a));
     setNoteEditing(null);
     toast.success("Note saved.", { duration: 1500 });
+  };
+
+  const updateLinkedTask = (agentId: string, taskId: string) => {
+    const linked = activeTasks.find((t) => t.id === taskId);
+    onAgentsChange(agents.map((a) =>
+      a.id === agentId
+        ? { ...a, linkedTaskId: taskId || undefined, context: (linked?.context as ItemContext) ?? a.context }
+        : a
+    ));
+    setTaskEditing(null);
+    toast.success(taskId ? "Task linked." : "Task link removed.", { duration: 1500 });
   };
 
   const filtered = agents
@@ -336,11 +348,13 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       {cfg.label}
                     </span>
                     <ContextBadge context={agent.context} />
-                    {linkedTask && (
+                    {linkedTask ? (
                       <span className="text-xs flex items-center gap-1" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
                         <Link2 className="w-3 h-3" />
                         {linkedTask.text.length > 28 ? linkedTask.text.slice(0, 28) + "…" : linkedTask.text}
                       </span>
+                    ) : (
+                      <span className="text-xs italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif", opacity: 0.6 }}>no task linked</span>
                     )}
                   </div>
                   <div className="flex items-center gap-3 mt-1.5 text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
@@ -361,9 +375,48 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 </div>
               </div>
 
-              {/* Expanded notes */}
+              {/* Expanded notes + task link editor */}
               {isExpanded && (
                 <div style={{ padding: "0 18px 18px", paddingTop: 16, borderTop: `1px solid ${M.border}` }} onClick={(e) => e.stopPropagation()}>
+
+                  {/* Task link row */}
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.10em", textTransform: "uppercase", color: M.muted }}>Linked task</span>
+                    {taskEditing === agent.id ? (
+                      <>
+                        <select
+                          defaultValue={agent.linkedTaskId ?? ""}
+                          onChange={(e) => updateLinkedTask(agent.id, e.target.value)}
+                          autoFocus
+                          style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "5px 10px", borderRadius: 8, border: `1px solid ${M.coralBdr}`, background: "oklch(0.997 0.003 80)", color: M.ink, outline: "none", cursor: "pointer" }}
+                        >
+                          <option value="">— none —</option>
+                          {activeTasks.map((t) => (
+                            <option key={t.id} value={t.id}>{t.text.length > 40 ? t.text.slice(0, 40) + "…" : t.text}</option>
+                          ))}
+                        </select>
+                        <button onClick={() => setTaskEditing(null)} className="p-1" style={{ color: M.muted }}>
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: linkedTask ? M.ink : M.muted, fontStyle: linkedTask ? "normal" : "italic" }}>
+                          {linkedTask ? (linkedTask.text.length > 40 ? linkedTask.text.slice(0, 40) + "…" : linkedTask.text) : "none"}
+                        </span>
+                        <button
+                          onClick={() => setTaskEditing(agent.id)}
+                          className="p-1 transition-colors"
+                          style={{ color: M.muted }}
+                          title="Edit linked task"
+                        >
+                          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                            <path d="M9 2L11 4L4 11H2V9L9 2Z" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        </button>
+                      </>
+                    )}
+                  </div>
                   <p className="text-xs font-medium mt-3 mb-1.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>
                     Notes / output summary
                   </p>
