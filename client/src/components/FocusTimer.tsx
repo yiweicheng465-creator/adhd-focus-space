@@ -32,23 +32,36 @@ const MODE_COLORS: Record<TimerMode, string> = {
   long: "#7A8C9E",
 };
 const BALLOON_FILLS: Record<TimerMode, string> = {
-  focus: "#E8C06A",
-  short: "#A8C4A0",
-  long: "#A0B8C8",
+  focus: "#F07B5A",   // coral salmon — matches reference
+  short: "#A8C4A0",   // sage green for short break
+  long: "#A0B8C8",    // dusty blue for long break
+};
+// String colors — warm crayon tones instead of pure black
+const STRING_COLORS: Record<TimerMode, string> = {
+  focus: "#6B4F3A",
+  short: "#4A6B4A",
+  long: "#3A4F6B",
 };
 
-// ── Balloon path helper ───────────────────────────────────────────────────────
+// ── Balloon path helper — crayon wobbly organic shape ────────────────────────
 function makeBalloonPath(cx: number, cy: number, rx: number, ry: number) {
+  // Organic wobbly balloon — slightly asymmetric like a hand-drawn crayon sketch
   return `
     M ${cx} ${cy - ry}
-    C ${cx + rx * 1.18} ${cy - ry * 0.95},
-      ${cx + rx * 1.22} ${cy + ry * 0.55},
-      ${cx + rx * 0.12} ${cy + ry * 0.92}
-    C ${cx - rx * 0.08} ${cy + ry * 1.02},
-      ${cx - rx * 0.08} ${cy + ry * 1.02},
-      ${cx - rx * 0.22} ${cy + ry * 0.90}
-    C ${cx - rx * 1.28} ${cy + ry * 0.52},
-      ${cx - rx * 1.20} ${cy - ry * 0.92},
+    C ${cx + rx * 0.55} ${cy - ry * 1.12},
+      ${cx + rx * 1.28} ${cy - ry * 0.68},
+      ${cx + rx * 1.18} ${cy + ry * 0.08}
+    C ${cx + rx * 1.10} ${cy + ry * 0.70},
+      ${cx + rx * 0.52} ${cy + ry * 1.05},
+      ${cx + rx * 0.08} ${cy + ry * 0.96}
+    C ${cx - rx * 0.05} ${cy + ry * 1.04},
+      ${cx - rx * 0.18} ${cy + ry * 1.02},
+      ${cx - rx * 0.30} ${cy + ry * 0.90}
+    C ${cx - rx * 1.15} ${cy + ry * 0.58},
+      ${cx - rx * 1.22} ${cy - ry * 0.55},
+      ${cx - rx * 0.62} ${cy - ry * 0.98}
+    C ${cx - rx * 0.32} ${cy - ry * 1.10},
+      ${cx - rx * 0.05} ${cy - ry * 1.08},
       ${cx} ${cy - ry}
     Z
   `;
@@ -105,12 +118,17 @@ function BalloonScene({
   const stringY2 = 255;
 
   const FILL = BALLOON_FILLS[mode];
-  const STROKE = "#2a1f14";
-  const sw = 2.2;
+  // Warm crayon brown stroke — not pure black
+  const STROKE = "#3A2A1A";
+  const STRING_C = STRING_COLORS[mode];
+  const sw = 2.4;
 
   const bPath = makeBalloonPath(cx, cy, rx, ry);
-  const h1 = `M ${cx - rx * 0.38} ${cy - ry * 0.58} Q ${cx - rx * 0.22} ${cy - ry * 0.72} ${cx - rx * 0.05} ${cy - ry * 0.62}`;
-  const h2 = `M ${cx - rx * 0.42} ${cy - ry * 0.38} Q ${cx - rx * 0.30} ${cy - ry * 0.48} ${cx - rx * 0.18} ${cy - ry * 0.40}`;
+
+  // Smiley face positions — scale with balloon
+  const eyeY = cy - ry * 0.08;
+  const eyeOffX = rx * 0.28;
+  const smileR = rx * 0.30;
 
   // Needle tip always tracks balloon right edge
   const progressFromScale = Math.max(0, Math.min(1, (1 - balloonScale) / 0.85));
@@ -130,44 +148,49 @@ function BalloonScene({
       viewBox={`0 0 ${svgW} ${svgH}`}
       style={{ display: "block", overflow: "visible", maxWidth: "100%" }}
     >
-      {/* Balloon fill */}
-      <path d={bPath} fill={FILL} />
-      {/* Balloon outline */}
-      <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" />
-      {/* Gloss highlights */}
-      {s > 0.4 && (
-        <>
-          <path d={h1} fill="none" stroke="rgba(255,255,255,0.55)" strokeWidth={sw * 0.9} strokeLinecap="round" />
-          <path d={h2} fill="none" stroke="rgba(255,255,255,0.38)" strokeWidth={sw * 0.7} strokeLinecap="round" />
-        </>
+      {/* Balloon fill — slightly transparent for crayon look */}
+      <path d={bPath} fill={FILL} opacity="0.90" />
+      {/* Inner crayon texture — soft inner glow */}
+      {s > 0.5 && (
+        <path d={bPath} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={sw * 3} strokeLinejoin="round" strokeLinecap="round" />
       )}
-      {/* Knot */}
-      {s > 0.22 && (
-        <path
-          d={`M${cx - knotSize * 0.75} ${knotY} L${cx} ${knotY + knotSize * 1.3} L${cx + knotSize * 0.75} ${knotY} L${cx} ${knotY - knotSize * 0.25}Z`}
-          fill={FILL} stroke={STROKE} strokeWidth={sw * 0.85} strokeLinejoin="round"
-        />
-      )}
-      {/* String */}
-      {s > 0.22 && (
-        <path
-          d={`M${cx} ${stringY1} C${cx - 18} ${(stringY1 + stringY2) * 0.45} ${cx + 10} ${(stringY1 + stringY2) * 0.72} ${cx} ${stringY2}`}
-          fill="none" stroke={STROKE} strokeWidth={sw * 0.75} strokeLinecap="round"
-        />
-      )}
-      {/* Text inside balloon */}
+      {/* Balloon outline — warm brown crayon stroke */}
+      <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" opacity="0.78" />
+
+      {/* Smiley face — crayon style, closed arc eyes + smile */}
       {s > 0.45 && (
-        <>
-          <text x={cx} y={cy - 10} textAnchor="middle" fill={STROKE}
-            fontSize={Math.round(13 * s)} fontWeight="800"
-            fontFamily="'Playfair Display', Georgia, serif" letterSpacing="1">
-            {MODE_LABELS[mode].toUpperCase()}
-          </text>
-          <text x={cx} y={cy + 14} textAnchor="middle" fill={STROKE}
-            fontSize={Math.round(13 * s)} fontFamily="'JetBrains Mono', monospace" letterSpacing="1.5">
-            {timeLabel}
-          </text>
-        </>
+        <g opacity={Math.min(1, (s - 0.45) * 5)}>
+          {/* Left eye — closed happy arc */}
+          <path
+            d={`M ${cx - eyeOffX - rx * 0.11} ${eyeY} Q ${cx - eyeOffX} ${eyeY - ry * 0.13} ${cx - eyeOffX + rx * 0.11} ${eyeY}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+          />
+          {/* Right eye — closed happy arc */}
+          <path
+            d={`M ${cx + eyeOffX - rx * 0.11} ${eyeY} Q ${cx + eyeOffX} ${eyeY - ry * 0.13} ${cx + eyeOffX + rx * 0.11} ${eyeY}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+          />
+          {/* Smile arc */}
+          <path
+            d={`M ${cx - smileR} ${cy + ry * 0.20} Q ${cx} ${cy + ry * 0.48} ${cx + smileR} ${cy + ry * 0.20}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+          />
+        </g>
+      )}
+
+      {/* Knot — organic teardrop shape */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx - knotSize * 0.6} ${knotY} Q${cx} ${knotY + knotSize * 1.6} ${cx + knotSize * 0.6} ${knotY} Q${cx} ${knotY - knotSize * 0.3} ${cx - knotSize * 0.6} ${knotY}Z`}
+          fill={FILL} stroke={STROKE} strokeWidth={sw * 0.75} strokeLinejoin="round" opacity="0.85"
+        />
+      )}
+      {/* String — warm colored crayon line, slightly wavy */}
+      {s > 0.22 && (
+        <path
+          d={`M${cx} ${stringY1} C${cx - 14} ${stringY1 + (stringY2 - stringY1) * 0.35} ${cx + 8} ${stringY1 + (stringY2 - stringY1) * 0.65} ${cx - 4} ${stringY2}`}
+          fill="none" stroke={STRING_C} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.72"
+        />
       )}
 
       {/* Needle — tip always at balloon right edge + gap */}
@@ -175,14 +198,14 @@ function BalloonScene({
         <g style={{ transition: touching ? "transform 0.5s cubic-bezier(0.25,0,0.5,1)" : "transform 0.4s ease-out" }}>
           <path
             d={`M ${needleTipX} ${needleY - 2} C ${needleTipX + 30} ${needleY - 4}, ${needleTipX + 70} ${needleY - 5}, ${needleEyeX - 12} ${needleY}`}
-            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+            fill="none" stroke="#3A2A1A" strokeWidth="1.8" strokeLinecap="round"
           />
           <path
             d={`M ${needleTipX} ${needleY + 2} C ${needleTipX + 30} ${needleY + 4}, ${needleTipX + 70} ${needleY + 5}, ${needleEyeX - 12} ${needleY}`}
-            fill="none" stroke="#2a1f14" strokeWidth="1.8" strokeLinecap="round"
+            fill="none" stroke="#3A2A1A" strokeWidth="1.8" strokeLinecap="round"
           />
-          <ellipse cx={needleEyeX - 6} cy={needleY} rx="5" ry="3" fill="none" stroke="#2a1f14" strokeWidth="1.6" />
-          <ellipse cx={needleEyeX - 6} cy={needleY} rx="2" ry="1.2" fill="none" stroke="#2a1f14" strokeWidth="1" />
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="5" ry="3" fill="none" stroke="#3A2A1A" strokeWidth="1.6" />
+          <ellipse cx={needleEyeX - 6} cy={needleY} rx="2" ry="1.2" fill="none" stroke="#3A2A1A" strokeWidth="1" />
         </g>
       )}
     </svg>

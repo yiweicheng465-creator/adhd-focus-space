@@ -1,53 +1,90 @@
 /* ============================================================
    ADHD FOCUS SPACE — DailySplash
    Design: Dreamy aura gradient opening animation, shown once per day
-   Inspired by the soft blurry aura reference images
-   Fades in with floating orbs, then fades out after ~3.5s
+   - Duration: ~7s hold + 1.2s fade-out = ~8.2s total
+   - Daily rotating motivation sentences (deterministic by date)
+   - Tap anywhere to skip
    ============================================================ */
 
 import { useEffect, useState } from "react";
 
-const QUOTES = [
-  { text: "If you're growing slow,\nyou're still growing.", author: "— Furaest Studio" },
-  { text: "Your brain is not broken —\nit just works differently.", author: "" },
-  { text: "One thing at a time.\nThat's enough.", author: "" },
-  { text: "Progress, not perfection.", author: "" },
-  { text: "Small steps still\nmove you forward.", author: "" },
+// 30 daily motivation sentences — one per day of month (deterministic)
+const DAILY_QUOTES = [
+  { text: "If you're growing slow,\nyou're still growing.", sub: "Progress is progress." },
+  { text: "Your brain is not broken —\nit just works differently.", sub: "" },
+  { text: "One thing at a time.\nThat's enough.", sub: "" },
+  { text: "Progress, not perfection.\nEvery small step counts.", sub: "" },
+  { text: "Small steps still\nmove you forward.", sub: "" },
+  { text: "You don't have to do\neverything today.", sub: "Just one thing." },
+  { text: "Rest is not laziness.\nIt's part of the work.", sub: "" },
+  { text: "You showed up.\nThat already counts.", sub: "" },
+  { text: "Be patient with yourself —\nyou're learning as you go.", sub: "" },
+  { text: "The messy middle\nis still the middle.", sub: "You're moving." },
+  { text: "Done is better\nthan perfect.", sub: "" },
+  { text: "Your focus will return.\nBe gentle with yourself.", sub: "" },
+  { text: "Every day is a\nfresh start.", sub: "" },
+  { text: "You are more capable\nthan you think.", sub: "" },
+  { text: "Chaos is okay.\nYou can work with chaos.", sub: "" },
+  { text: "Celebrate the small wins.\nThey add up.", sub: "" },
+  { text: "You don't need\nto have it all figured out.", sub: "Just begin." },
+  { text: "Your ideas matter.\nDump them, sort them later.", sub: "" },
+  { text: "Slow down.\nYour best thinking happens here.", sub: "" },
+  { text: "It's okay to\nstart over.", sub: "" },
+  { text: "You are not behind.\nYou are exactly where you need to be.", sub: "" },
+  { text: "Breathe first.\nThen begin.", sub: "" },
+  { text: "The goal is consistency,\nnot intensity.", sub: "" },
+  { text: "You've gotten through\nevery hard day so far.", sub: "" },
+  { text: "One focused hour\nbeats ten scattered ones.", sub: "" },
+  { text: "Your brain is wired\nfor creativity.", sub: "Use it." },
+  { text: "Imperfect action\nbeats perfect inaction.", sub: "" },
+  { text: "Today's effort\nis tomorrow's momentum.", sub: "" },
+  { text: "You are building something\nreal, one day at a time.", sub: "" },
+  { text: "Start anywhere.\nMomentum will follow.", sub: "" },
 ];
 
 function getTodayKey() {
   return `adhd-splash-${new Date().toDateString()}`;
 }
 
+function getTodayQuote() {
+  const day = new Date().getDate(); // 1–31
+  return DAILY_QUOTES[(day - 1) % DAILY_QUOTES.length];
+}
+
 export default function DailySplash({ onDone }: { onDone: () => void }) {
   const [phase, setPhase] = useState<"in" | "hold" | "out" | "done">("in");
-  const quote = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  const quote = getTodayQuote();
 
   useEffect(() => {
-    // in → hold after 0.8s
-    const t1 = setTimeout(() => setPhase("hold"), 800);
-    // hold → out after 3.2s
-    const t2 = setTimeout(() => setPhase("out"), 3200);
-    // out → done after 4.2s (1s fade-out)
+    // in → hold after 0.9s (fade in)
+    const t1 = setTimeout(() => setPhase("hold"), 900);
+    // hold → out after 8s (much longer to read)
+    const t2 = setTimeout(() => setPhase("out"), 8000);
+    // out → done after 9.2s (1.2s fade-out)
     const t3 = setTimeout(() => {
       setPhase("done");
       onDone();
-    }, 4200);
+    }, 9200);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onDone]);
+
+  const handleSkip = () => {
+    setPhase("out");
+    setTimeout(() => { setPhase("done"); onDone(); }, 1000);
+  };
 
   if (phase === "done") return null;
 
   const opacity = phase === "in" ? 0 : phase === "out" ? 0 : 1;
   const transition = phase === "in"
-    ? "opacity 0.8s ease-out"
+    ? "opacity 0.9s ease-out"
     : phase === "out"
-    ? "opacity 1s ease-in"
-    : "opacity 0.8s ease-out";
+    ? "opacity 1.2s ease-in"
+    : "opacity 0.9s ease-out";
 
   return (
     <div
-      onClick={() => { setPhase("out"); setTimeout(onDone, 1000); }}
+      onClick={handleSkip}
       style={{
         position: "fixed",
         inset: 0,
@@ -122,14 +159,6 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
               calcMode="spline" keySplines="0.4 0 0.6 1; 0.4 0 0.6 1; 0.4 0 0.6 1" />
           </ellipse>
         </g>
-
-        {/* Subtle grain */}
-        <filter id="sp-grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" />
-          <feColorMatrix type="saturate" values="0" />
-          <feBlend in="SourceGraphic" mode="overlay" />
-        </filter>
-        <rect width="800" height="900" fill="transparent" filter="url(#sp-grain)" opacity="0.04" />
       </svg>
 
       {/* Text content */}
@@ -171,14 +200,15 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
           {quote.text}
         </div>
 
-        {quote.author && (
+        {quote.sub && (
           <div style={{
             fontFamily: "'DM Sans', sans-serif",
-            fontSize: "0.78rem",
+            fontSize: "0.85rem",
             color: "oklch(0.50 0.04 35 / 0.70)",
             letterSpacing: "0.04em",
+            fontStyle: "italic",
           }}>
-            {quote.author}
+            {quote.sub}
           </div>
         )}
 

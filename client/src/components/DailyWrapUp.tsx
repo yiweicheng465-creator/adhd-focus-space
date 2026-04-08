@@ -5,7 +5,8 @@
    ============================================================ */
 
 import { useState } from "react";
-import { CheckCircle2, ClipboardCopy, Cpu, Sparkles, X } from "lucide-react";
+import { CheckCircle2, ClipboardCopy, Sparkles, X } from "lucide-react";
+import { PixelAgents } from "@/components/PixelIcons";
 import { toast } from "sonner";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
@@ -295,7 +296,7 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
           </Section>
 
           {/* Agents */}
-          <Section icon={<Cpu className="w-4 h-4" />} title={`AI Agents today (${todayAgents.length})`} color={M.coral}>
+          <Section icon={<PixelAgents size={16} active={true} color={M.coral} />} title={`AI Agents today (${todayAgents.length})`} color={M.coral}>
             {todayAgents.length === 0 ? (
               <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No agents logged today.</p>
             ) : (

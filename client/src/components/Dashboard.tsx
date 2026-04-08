@@ -16,7 +16,8 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { CheckCircle2, Clock, Cpu, Flame, Flower2, Sparkles, Zap } from "lucide-react";
+import { CheckCircle2, Clock, Flame, Flower2, Sparkles, Zap } from "lucide-react";
+import { PixelAgents } from "@/components/PixelIcons";
 import { PixelTrophy } from "@/components/PixelIcons";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
@@ -349,7 +350,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Cpu className="w-3.5 h-3.5" style={{ color: TC }} />
+            <PixelAgents size={14} active={true} color={TC} />
             <p className="editorial-label">AI Agents</p>
             {runningAgents.length > 0 && (
               <span

@@ -197,14 +197,15 @@ export function EisenhowerMatrix({
       </div>
 
       {/* Axis labels */}
-      <div style={{ position: "relative", paddingLeft: 28, paddingBottom: 22 }}>
+      <div style={{ position: "relative", paddingLeft: 36, paddingBottom: 22 }}>
 
         {/* Y-axis label: Importance */}
         <div style={{
           position: "absolute",
-          left: 0,
+          left: -2,
           top: "50%",
-          transform: "translateY(-50%) rotate(-90deg)",
+          width: 20,
+          transform: "translateX(-50%) translateY(-50%) rotate(-90deg)",
           transformOrigin: "center center",
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 9,
@@ -212,6 +213,7 @@ export function EisenhowerMatrix({
           textTransform: "uppercase",
           color: "oklch(0.60 0.018 70)",
           whiteSpace: "nowrap",
+          textAlign: "center",
         }}>
           Importance ↑
         </div>

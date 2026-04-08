@@ -8,9 +8,10 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-  CheckCircle2, Clock, Cpu, Flame,
+  CheckCircle2, Clock, Flame,
   Link2, Pause, Play, Plus, RefreshCw, Trash2, XCircle,
 } from "lucide-react";
+import { PixelAgents } from "@/components/PixelIcons";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
@@ -167,9 +168,9 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4" style={{ gap: 10 }}>
         {[
-          { icon: Cpu,          label: "Running",     value: runningCount,       color: M.coral,   bg: M.coralBg,  border: M.coralBdr },
+          { icon: PixelAgents,  label: "Running",     value: runningCount,       color: M.coral,   bg: M.coralBg,  border: M.coralBdr },
           { icon: CheckCircle2, label: "Done Today",  value: doneCount,          color: M.sage,    bg: M.sageBg,   border: M.sageBdr  },
-          { icon: Cpu,          label: "Total Today", value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
+          { icon: PixelAgents,  label: "Total Today", value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
           {
             icon: Flame,
             label: "Uncovered",
@@ -181,7 +182,10 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
         ].map(({ icon: Icon, label, value, color, bg, border }) => (
           <div key={label} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 12, padding: "14px 16px", backdropFilter: "blur(6px)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-              <Icon style={{ width: 12, height: 12, color }} />
+              {Icon === PixelAgents
+                ? <PixelAgents size={12} active={false} color={color} />
+                : <Icon style={{ width: 12, height: 12, color }} />
+              }
               <span style={{ ...LABEL, color: M.muted }}>{label}</span>
             </div>
             <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.65rem", fontWeight: 700, color, lineHeight: 1 }}>{value}</p>
