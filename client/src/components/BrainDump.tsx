@@ -6,7 +6,7 @@
 import { useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Brain, Hash, Tag, Trash2, X } from "lucide-react";
+import { ArrowRight, Hash, Tag, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
@@ -132,16 +132,20 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
   return (
     <div className="flex flex-col gap-4 h-full">
 
-      {/* Header */}
-      <div className="flex items-start gap-3 p-4" style={{ background: M.coralBg, border: `1px solid ${M.coralBdr}` }}>
-        <Brain className="w-5 h-5 mt-0.5 shrink-0" style={{ color: M.coral }} />
-        <div className="flex-1">
-          <p className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-            Capture racing thoughts
-          </p>
-          <p className="text-xs mt-0.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-            Add <span style={{ color: M.coral, fontWeight: 600 }}>#tags</span> anywhere in your text to organise ideas. e.g. "Build a landing page <span style={{ color: M.coral }}>#work</span> <span style={{ color: M.coral }}>#design</span>"
-          </p>
+      {/* Header — minimal, geometric */}
+      <div className="flex items-center gap-3 mb-1">
+        {/* Geometric brain icon */}
+        <svg width="28" height="28" viewBox="0 0 28 28" style={{ opacity: 0.55, flexShrink: 0 }}>
+          <circle cx="14" cy="14" r="12" fill="none" stroke={M.coral} strokeWidth="1" />
+          <circle cx="14" cy="14" r="5" fill="none" stroke={M.coral} strokeWidth="0.8" />
+          <line x1="14" y1="2" x2="14" y2="9" stroke={M.coral} strokeWidth="0.8" />
+          <line x1="14" y1="19" x2="14" y2="26" stroke={M.coral} strokeWidth="0.8" />
+          <line x1="2" y1="14" x2="9" y2="14" stroke={M.coral} strokeWidth="0.8" />
+          <line x1="19" y1="14" x2="26" y2="14" stroke={M.coral} strokeWidth="0.8" />
+        </svg>
+        <div>
+          <p className="text-sm font-semibold italic" style={{ color: M.ink, fontFamily: "'Playfair Display', serif" }}>Brain Dump</p>
+          <p className="editorial-label" style={{ color: M.muted }}>Use <span style={{ color: M.coral }}>#tags</span> to organise</p>
         </div>
       </div>
 
@@ -178,7 +182,6 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
         <div className="flex items-center justify-between">
           <span className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>⌘ + Enter to capture</span>
           <button onClick={dump} className="m-btn-primary">
-            <Brain className="w-3.5 h-3.5" />
             Dump It
           </button>
         </div>
@@ -250,14 +253,16 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
       {/* Entries list */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {entries.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Brain className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
-            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-              Your brain dump is empty. Let your thoughts flow!
-            </p>
-            <p className="text-xs mt-1" style={{ color: `${M.muted}80`, fontFamily: "'DM Sans', sans-serif" }}>
-              Tip: use #tags to organise as you go
-            </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
+              <circle cx="20" cy="20" r="17" fill="none" stroke={M.muted} strokeWidth="1" />
+              <circle cx="20" cy="20" r="6" fill="none" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="20" y1="3" x2="20" y2="14" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="20" y1="26" x2="20" y2="37" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="3" y1="20" x2="14" y2="20" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="26" y1="20" x2="37" y2="20" stroke={M.muted} strokeWidth="0.8" />
+            </svg>
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Empty. Let your thoughts flow.</p>
           </div>
         )}
 

@@ -1,85 +1,71 @@
-/* ============================================================
-   ADHD FOCUS SPACE — Focus Timer v2.0
-   Design: Warm Editorial — terracotta accent, thin borders
-   Features:
-   - Fully customizable durations (click the label to edit)
-   - Preset buttons: 15 / 25 / 45 / 60 min for focus
-   - Modes: Focus, Short Break, Long Break
-   - Circular SVG progress ring
-   - Session counter (dots)
-   ============================================================ */
-
-import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Check, Pause, Pencil, Play, RotateCcw, SkipForward, X } from "lucide-react";
+/**
+ * FocusTimer — Instrument / Podcast-Player Aesthetic
+ * Design: Large JetBrains Mono digits, barcode-style progress bar,
+ * geometric SVG circle dial with tick marks, pill toggle controls.
+ * Morandi palette only — no blue, no teal.
+ * Reference: podcast player UI (00:32:00 style), instrument panel.
+ */
+import { useEffect, useRef, useState, useCallback } from "react";
+import { Check, Pause, Play, SkipForward, X, Settings } from "lucide-react";
 import { toast } from "sonner";
 
 type TimerMode = "focus" | "short" | "long";
 
-// Terracotta palette aligned with editorial design
-const MODE_COLORS: Record<TimerMode, { color: string; label: string }> = {
-  focus: { color: "oklch(0.52 0.14 35)",  label: "Focus"       },
-  short: { color: "oklch(0.55 0.12 140)", label: "Short Break" },
-  long:  { color: "oklch(0.52 0.06 300)", label: "Long Break"  },
+const MODE_META: Record<TimerMode, { label: string; stroke: string; glow: string }> = {
+  focus: { label: "FOCUS",       stroke: "#C4714A", glow: "rgba(196,113,74,0.12)"  },
+  short: { label: "SHORT BREAK", stroke: "#7A8C6E", glow: "rgba(122,140,110,0.12)" },
+  long:  { label: "LONG BREAK",  stroke: "#A8929E", glow: "rgba(168,146,158,0.12)" },
 };
 
-// Default durations in minutes
-const DEFAULT_DURATIONS: Record<TimerMode, number> = {
-  focus: 25,
-  short: 5,
-  long:  15,
-};
-
-// Quick preset options (minutes) per mode
+const DEFAULT_DURATIONS: Record<TimerMode, number> = { focus: 25, short: 5, long: 15 };
 const PRESETS: Record<TimerMode, number[]> = {
   focus: [15, 25, 45, 60],
   short: [3, 5, 10],
   long:  [10, 15, 20, 30],
 };
 
-const RADIUS       = 88;
-const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
+const R = 82;
+const CX = 96;
+const CY = 96;
+const CIRC = 2 * Math.PI * R;
 
 interface FocusTimerProps {
   onSessionComplete?: () => void;
 }
 
 export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
-  // Custom durations (in minutes) — user-editable
   const [durations, setDurations] = useState<Record<TimerMode, number>>(DEFAULT_DURATIONS);
-
   const [mode, setMode]           = useState<TimerMode>("focus");
   const [timeLeft, setTimeLeft]   = useState(DEFAULT_DURATIONS.focus * 60);
   const [isRunning, setIsRunning] = useState(false);
   const [sessions, setSessions]   = useState(0);
+  const [showSettings, setShowSettings] = useState(false);
+  const [editingMode, setEditingMode]   = useState<TimerMode | null>(null);
+  const [editVal, setEditVal]           = useState("");
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const editRef     = useRef<HTMLInputElement>(null);
 
-  // Editing state
-  const [editing, setEditing]     = useState<TimerMode | null>(null);
-  const [editVal, setEditVal]     = useState("");
-  const editRef                   = useRef<HTMLInputElement>(null);
-  const intervalRef               = useRef<ReturnType<typeof setInterval> | null>(null);
+  const totalSec  = durations[mode] * 60;
+  const progress  = totalSec > 0 ? 1 - timeLeft / totalSec : 0;
+  const dashOff   = CIRC * (1 - progress);
+  const meta      = MODE_META[mode];
 
-  const totalSeconds = durations[mode] * 60;
-  const progress     = timeLeft / totalSeconds;
-  const dashOffset   = CIRCUMFERENCE * (1 - progress);
-  const modeColor    = MODE_COLORS[mode].color;
+  const handleComplete = useCallback(() => {
+    setIsRunning(false);
+    if (mode === "focus") {
+      setSessions((s) => s + 1);
+      toast.success("Session complete — take a breath.", { duration: 4000 });
+      onSessionComplete?.();
+    } else {
+      toast.info("Break over. Ready to focus?", { duration: 3000 });
+    }
+  }, [mode, onSessionComplete]);
 
-  // Timer tick
   useEffect(() => {
     if (isRunning) {
       intervalRef.current = setInterval(() => {
         setTimeLeft((prev) => {
-          if (prev <= 1) {
-            setIsRunning(false);
-            if (mode === "focus") {
-              setSessions((s) => s + 1);
-              toast.success("Focus session complete! 🎉 Take a break.", { duration: 5000 });
-              onSessionComplete?.();
-            } else {
-              toast.info("Break over! Ready to focus?", { duration: 3000 });
-            }
-            return 0;
-          }
+          if (prev <= 1) { clearInterval(intervalRef.current!); handleComplete(); return 0; }
           return prev - 1;
         });
       }, 1000);
@@ -87,12 +73,11 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       if (intervalRef.current) clearInterval(intervalRef.current);
     }
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [isRunning, mode, onSessionComplete]);
+  }, [isRunning, handleComplete]);
 
-  // Focus edit input when editing opens
   useEffect(() => {
-    if (editing) setTimeout(() => editRef.current?.focus(), 50);
-  }, [editing]);
+    if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
+  }, [editingMode]);
 
   const switchMode = (m: TimerMode) => {
     setIsRunning(false);
@@ -101,261 +86,303 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   };
 
   const applyDuration = (m: TimerMode, mins: number) => {
-    const clamped = Math.max(1, Math.min(180, mins));
-    setDurations((d) => ({ ...d, [m]: clamped }));
-    if (m === mode) {
-      setIsRunning(false);
-      setTimeLeft(clamped * 60);
-    }
+    const v = Math.max(1, Math.min(180, mins));
+    setDurations((d) => ({ ...d, [m]: v }));
+    if (m === mode) { setIsRunning(false); setTimeLeft(v * 60); }
   };
 
   const commitEdit = () => {
-    if (!editing) return;
+    if (!editingMode) return;
     const parsed = parseInt(editVal, 10);
-    if (!isNaN(parsed)) applyDuration(editing, parsed);
-    setEditing(null);
-  };
-
-  const handleReset = () => {
-    setIsRunning(false);
-    setTimeLeft(durations[mode] * 60);
-  };
-
-  const handleSkip = () => {
-    setIsRunning(false);
-    switchMode(mode === "focus" ? "short" : "focus");
+    if (!isNaN(parsed)) applyDuration(editingMode, parsed);
+    setEditingMode(null);
   };
 
   const mm = Math.floor(timeLeft / 60).toString().padStart(2, "0");
   const ss = (timeLeft % 60).toString().padStart(2, "0");
 
-  const BORDER = "oklch(0.87 0.014 75)";
-  const INK    = "oklch(0.18 0.01 60)";
-  const MUTED  = "oklch(0.55 0.015 70)";
+  // Barcode bars — 52 bars, height modulated by sine for visual rhythm
+  const bars = Array.from({ length: 52 }, (_, i) => {
+    const ratio = i / 52;
+    const filled = ratio <= progress;
+    const h = 6 + Math.abs(Math.sin(i * 0.55)) * 10;
+    return { filled, h: filled ? h + 3 : h };
+  });
+
+  // Dial tick marks
+  const ticks = Array.from({ length: 60 }, (_, i) => {
+    const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
+    const major = i % 5 === 0;
+    const r1 = R + 5;
+    const r2 = R + 5 + (major ? 9 : 4);
+    return { angle, major, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
+  });
+
+  // Dot position on arc
+  const dotAngle = progress * 2 * Math.PI - Math.PI / 2;
+  const dotX = CX + R * Math.cos(dotAngle);
+  const dotY = CY + R * Math.sin(dotAngle);
 
   return (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col gap-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+
+      {/* ── Header ── */}
+      <div className="flex items-start justify-between">
+        <div>
+          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase" }}>
+            Focus Timer
+          </p>
+          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase" }}>
+            {meta.label}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          {sessions > 0 && (
+            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B" }}>
+              {sessions} SESSION{sessions > 1 ? "S" : ""}
+            </span>
+          )}
+          <button
+            onClick={() => setShowSettings((s) => !s)}
+            style={{ width: 26, height: 26, border: `1px solid ${showSettings ? meta.stroke : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}
+          >
+            <Settings size={11} color={showSettings ? meta.stroke : "#8C7B6B"} />
+          </button>
+        </div>
+      </div>
 
       {/* ── Mode tabs ── */}
-      <div
-        className="flex w-full"
-        style={{ border: `1px solid ${BORDER}` }}
-      >
-        {(Object.keys(MODE_COLORS) as TimerMode[]).map((m) => (
+      <div style={{ display: "flex", gap: 6 }}>
+        {(["focus", "short", "long"] as TimerMode[]).map((m) => (
           <button
             key={m}
             onClick={() => switchMode(m)}
-            className="flex-1 py-2 text-xs font-medium transition-all"
             style={{
-              background: mode === m ? MODE_COLORS[m].color : "transparent",
-              color: mode === m ? "white" : MUTED,
-              borderRight: m !== "long" ? `1px solid ${BORDER}` : undefined,
-              fontFamily: "'DM Sans', sans-serif",
-              letterSpacing: "0.06em",
+              flex: 1,
+              padding: "6px 0",
+              fontSize: 9,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              border: `1px solid ${mode === m ? MODE_META[m].stroke : "#D4C4B0"}`,
+              background: mode === m ? MODE_META[m].stroke : "transparent",
+              color: mode === m ? "#FAF6F1" : "#8C7B6B",
+              cursor: "pointer",
+              borderRadius: 0,
+              fontFamily: "'JetBrains Mono', monospace",
             }}
           >
-            {MODE_COLORS[m].label}
+            {m === "focus" ? "Focus" : m === "short" ? "Short" : "Long"}
           </button>
         ))}
       </div>
 
-      {/* ── Duration customizer ── */}
-      <div className="w-full">
-        <p
-          className="text-[10px] tracking-widest uppercase mb-2 text-center"
-          style={{ color: MUTED, fontFamily: "'DM Sans', sans-serif" }}
-        >
-          Duration — click to edit
-        </p>
+      {/* ── Settings panel ── */}
+      {showSettings && (
+        <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
+          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>
+            Duration (min) — click to edit
+          </p>
+          <div style={{ display: "flex", gap: 16 }}>
+            {(["focus", "short", "long"] as TimerMode[]).map((m) => (
+              <div key={m} style={{ flex: 1 }}>
+                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4 }}>
+                  {m}
+                </p>
+                {editingMode === m ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <input
+                      ref={editRef}
+                      value={editVal}
+                      onChange={(e) => setEditVal(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
+                      type="number" min={1} max={180}
+                      style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_META[m].stroke}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }}
+                    />
+                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_META[m].stroke} /></button>
+                    <button onClick={() => setEditingMode(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><X size={12} color="#8C7B6B" /></button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }}
+                    style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}
+                  >
+                    {durations[m]}
+                  </button>
+                )}
+                {/* Presets */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                  {PRESETS[m].map((p) => (
+                    <button
+                      key={p}
+                      onClick={() => applyDuration(m, p)}
+                      style={{
+                        fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                        border: `1px solid ${durations[m] === p ? MODE_META[m].stroke : "#D4C4B0"}`,
+                        background: durations[m] === p ? `${MODE_META[m].stroke}18` : "transparent",
+                        color: durations[m] === p ? MODE_META[m].stroke : "#8C7B6B",
+                        borderRadius: 0,
+                      }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-        {/* Preset chips */}
-        <div className="flex flex-wrap justify-center gap-1.5 mb-3">
-          {PRESETS[mode].map((mins) => (
-            <button
-              key={mins}
-              onClick={() => applyDuration(mode, mins)}
-              className="px-3 py-1 text-xs transition-all"
-              style={{
-                border: `1px solid ${durations[mode] === mins ? modeColor : BORDER}`,
-                background: durations[mode] === mins ? `${modeColor}15` : "transparent",
-                color: durations[mode] === mins ? modeColor : MUTED,
-                fontFamily: "'DM Sans', sans-serif",
-              }}
-            >
-              {mins} min
-            </button>
-          ))}
+      {/* ── Main instrument panel ── */}
+      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-          {/* Custom edit button */}
-          {editing === mode ? (
-            <div className="flex items-center gap-1">
-              <input
-                ref={editRef}
-                value={editVal}
-                onChange={(e) => setEditVal(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") commitEdit();
-                  if (e.key === "Escape") setEditing(null);
-                }}
-                className="w-14 px-2 py-1 text-xs text-center focus:outline-none"
-                style={{
-                  border: `1px solid ${modeColor}`,
-                  color: INK,
-                  background: "transparent",
-                  fontFamily: "'DM Sans', sans-serif",
-                }}
-                placeholder="min"
-                type="number"
-                min={1}
-                max={180}
+        {/* SVG Dial */}
+        <div style={{ flexShrink: 0 }}>
+          <svg width="192" height="192" viewBox="0 0 192 192">
+            {/* Tick marks */}
+            {ticks.map((t, i) => (
+              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                stroke={t.major ? "#3D2E1E" : "#D4C4B0"}
+                strokeWidth={t.major ? 1.5 : 0.7}
               />
-              <button onClick={commitEdit} style={{ color: modeColor }}>
-                <Check className="w-3.5 h-3.5" />
-              </button>
-              <button onClick={() => setEditing(null)} style={{ color: MUTED }}>
-                <X className="w-3.5 h-3.5" />
-              </button>
+            ))}
+            {/* Track ring */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#E8DDD0" strokeWidth="2" />
+            {/* Glow fill */}
+            <circle cx={CX} cy={CY} r={R - 8} fill={meta.glow} />
+            {/* Progress arc */}
+            <circle
+              cx={CX} cy={CY} r={R}
+              fill="none"
+              stroke={meta.stroke}
+              strokeWidth="2.5"
+              strokeLinecap="square"
+              strokeDasharray={CIRC}
+              strokeDashoffset={dashOff}
+              transform={`rotate(-90 ${CX} ${CY})`}
+              style={{ transition: "stroke-dashoffset 0.6s linear" }}
+            />
+            {/* Progress dot */}
+            {progress > 0.005 && (
+              <circle cx={dotX} cy={dotY} r="4.5" fill={meta.stroke} />
+            )}
+            {/* Center cross hair */}
+            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#D4C4B0" strokeWidth="0.8" />
+            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#D4C4B0" strokeWidth="0.8" />
+          </svg>
+        </div>
+
+        {/* Right panel: digits + barcode + controls */}
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 12, paddingTop: 8 }}>
+
+          {/* Large digits */}
+          <div>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 0 }}>
+              <span style={{ fontSize: 56, fontWeight: 700, lineHeight: 1, color: "#3D2E1E", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.03em" }}>
+                {mm}
+              </span>
+              <span style={{ fontSize: 36, fontWeight: 300, color: meta.stroke, margin: "0 2px", fontFamily: "'JetBrains Mono', monospace" }}>
+                :
+              </span>
+              <span style={{ fontSize: 56, fontWeight: 700, lineHeight: 1, color: "#3D2E1E", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.03em" }}>
+                {ss}
+              </span>
             </div>
-          ) : (
+            <div style={{ display: "flex", gap: 28, marginTop: 2 }}>
+              <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#8C7B6B" }}>MM</span>
+              <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#8C7B6B" }}>SS</span>
+            </div>
+          </div>
+
+          {/* Barcode progress */}
+          <div style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: 36 }}>
+            {bars.map((bar, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 3,
+                  height: bar.h,
+                  background: bar.filled ? meta.stroke : "#E8DDD0",
+                  flexShrink: 0,
+                  transition: "background 0.4s",
+                }}
+              />
+            ))}
+          </div>
+
+          {/* Controls */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            {/* Play/Pause pill */}
             <button
-              onClick={() => { setEditing(mode); setEditVal(String(durations[mode])); }}
-              className="flex items-center gap-1 px-3 py-1 text-xs transition-all"
+              onClick={() => setIsRunning((r) => !r)}
               style={{
-                border: `1px solid ${BORDER}`,
-                color: MUTED,
-                fontFamily: "'DM Sans', sans-serif",
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "8px 20px",
+                borderRadius: 999,
+                background: isRunning ? "transparent" : "#3D2E1E",
+                border: `1px solid #3D2E1E`,
+                color: isRunning ? "#3D2E1E" : "#FAF6F1",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                letterSpacing: "0.14em",
+                cursor: "pointer",
               }}
             >
-              <Pencil className="w-2.5 h-2.5" />
-              Custom
+              {isRunning ? <Pause size={11} /> : <Play size={11} />}
+              {isRunning ? "PAUSE" : "START"}
             </button>
-          )}
-        </div>
 
-        {/* Current duration display */}
-        <p
-          className="text-center text-xs"
-          style={{ color: MUTED, fontFamily: "'DM Sans', sans-serif" }}
-        >
-          Set to <span style={{ color: modeColor, fontWeight: 600 }}>{durations[mode]} min</span>
-          {durations[mode] !== DEFAULT_DURATIONS[mode] && (
+            {/* Skip pill */}
             <button
-              onClick={() => applyDuration(mode, DEFAULT_DURATIONS[mode])}
-              className="ml-2 underline text-[10px] hover:opacity-70"
-              style={{ color: MUTED }}
+              onClick={() => { setIsRunning(false); setTimeLeft(durations[mode] * 60); }}
+              style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 16px",
+                borderRadius: 999,
+                background: "transparent",
+                border: "1px solid #D4C4B0",
+                color: "#8C7B6B",
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 10,
+                letterSpacing: "0.14em",
+                cursor: "pointer",
+              }}
             >
-              reset
+              <SkipForward size={11} />
+              RESET
             </button>
-          )}
-        </p>
-      </div>
+          </div>
 
-      {/* ── Circular timer ── */}
-      <div className="relative flex items-center justify-center">
-        {isRunning && (
-          <div
-            className="absolute rounded-full animate-ping"
-            style={{
-              width: 216,
-              height: 216,
-              border: `1px solid ${modeColor}`,
-              opacity: 0.15,
-              animationDuration: "2s",
-            }}
-          />
-        )}
-
-        <svg width={216} height={216} className="-rotate-90">
-          {/* Track */}
-          <circle
-            cx={108} cy={108} r={RADIUS}
-            fill="none"
-            stroke="oklch(0.88 0.012 75)"
-            strokeWidth={8}
-          />
-          {/* Progress */}
-          <circle
-            cx={108} cy={108} r={RADIUS}
-            fill="none"
-            stroke={modeColor}
-            strokeWidth={8}
-            strokeLinecap="round"
-            strokeDasharray={CIRCUMFERENCE}
-            strokeDashoffset={dashOffset}
-            style={{ transition: "stroke-dashoffset 1s linear" }}
-          />
-        </svg>
-
-        {/* Time display */}
-        <div className="absolute flex flex-col items-center">
-          <span
-            className="text-5xl font-bold tabular-nums tracking-tight"
-            style={{ fontFamily: "'DM Sans', sans-serif", color: modeColor }}
-          >
-            {mm}:{ss}
-          </span>
-          <span
-            className="text-[10px] mt-1 tracking-widest uppercase"
-            style={{ color: MUTED, fontFamily: "'DM Sans', sans-serif" }}
-          >
-            {MODE_COLORS[mode].label}
-          </span>
+          {/* Session dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  width: 7, height: 7,
+                  background: i < sessions % 4 ? meta.stroke : "#E8DDD0",
+                  transition: "background 0.3s",
+                }}
+              />
+            ))}
+            <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 4 }}>
+              {sessions} / 4
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* ── Controls ── */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={handleReset}
-          className="w-9 h-9 flex items-center justify-center transition-all hover:opacity-70"
-          style={{ border: `1px solid ${BORDER}`, color: MUTED }}
-          title="Reset"
-        >
-          <RotateCcw className="w-3.5 h-3.5" />
-        </button>
-
-        {/* Play/Pause — main CTA */}
-        <button
-          onClick={() => setIsRunning(!isRunning)}
-          className="w-14 h-14 flex items-center justify-center transition-all hover:opacity-90 active:scale-95"
-          style={{ background: modeColor, color: "white" }}
-          title={isRunning ? "Pause" : "Start"}
-        >
-          {isRunning
-            ? <Pause className="w-5 h-5" />
-            : <Play  className="w-5 h-5 ml-0.5" />
-          }
-        </button>
-
-        <button
-          onClick={handleSkip}
-          className="w-9 h-9 flex items-center justify-center transition-all hover:opacity-70"
-          style={{ border: `1px solid ${BORDER}`, color: MUTED }}
-          title="Skip to next"
-        >
-          <SkipForward className="w-3.5 h-3.5" />
-        </button>
-      </div>
-
-      {/* ── Session dots ── */}
-      <div className="flex items-center gap-2">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="w-2 h-2 transition-all duration-300"
-            style={{
-              background: i < sessions % 4 ? modeColor : "oklch(0.88 0.012 75)",
-              transform: i < sessions % 4 ? "scale(1.2)" : "scale(1)",
-            }}
-          />
-        ))}
-        <span
-          className="text-xs ml-1"
-          style={{ color: MUTED, fontFamily: "'DM Sans', sans-serif" }}
-        >
-          {sessions} session{sessions !== 1 ? "s" : ""} today
+      {/* Footer rule */}
+      <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 10, display: "flex", justifyContent: "space-between" }}>
+        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase" }}>
+          {durations[mode]} min · {meta.label}
+        </span>
+        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B" }}>
+          TIME ELAPSED ◌
         </span>
       </div>
     </div>
   );
 }
+
+export default FocusTimer;

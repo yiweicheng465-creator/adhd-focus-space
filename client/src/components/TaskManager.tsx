@@ -246,10 +246,14 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
       {/* Task list */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <CheckCircle2 className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
+              <rect x="8" y="8" width="24" height="24" fill="none" stroke={M.muted} strokeWidth="1" />
+              <line x1="14" y1="20" x2="26" y2="20" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="20" y1="14" x2="20" y2="26" stroke={M.muted} strokeWidth="0.8" />
+            </svg>
             <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-              {filter === "active" ? "No active tasks — add one above!" : "Nothing here yet."}
+              {filter === "active" ? "All clear." : "Nothing here."}
             </p>
           </div>
         )}

@@ -125,11 +125,11 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
       {/* Wins list */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {wins.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Sparkles className="w-10 h-10 mb-3" style={{ color: `${M.pink}50` }} />
-            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-              Log your first win! Every small step counts.
-            </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
+              <polygon points="20,4 24,15 37,15 27,23 31,35 20,27 9,35 13,23 3,15 16,15" fill="none" stroke={M.muted} strokeWidth="1" strokeLinejoin="round" />
+            </svg>
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Log your first win.</p>
           </div>
         )}
 

@@ -1,9 +1,9 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Home Page v2.0
-   Design: Warm Editorial Minimalism
-   - Cream background, Playfair Display serif, DM Sans body
-   - Thin 1px borders, generous whitespace
-   - Daily check-in modal auto-opens once per day
+   ADHD FOCUS SPACE — Home Page v3.0
+   Design: Warm Editorial Minimalism + LocalStorage Persistence
+   - All state persisted to localStorage
+   - Focus page simplified with atmospheric sunset background
+   - Less text, more geometric shapes
    ============================================================ */
 
 import { useState } from "react";
@@ -20,20 +20,21 @@ import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Bot, Brain, CheckSquare, Clock, LayoutDashboard, Moon, Sparkles, Target } from "lucide-react";
 
 type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
-const SECTION_META: Record<Section, { title: string; subtitle: string; icon: React.ElementType }> = {
-  dashboard:  { title: "Dashboard",    subtitle: "Your daily overview at a glance",              icon: LayoutDashboard },
-  focus:      { title: "Focus Timer",  subtitle: "Pomodoro-style deep work sessions",            icon: Clock           },
-  tasks:      { title: "My Tasks",     subtitle: "Prioritize what matters most today",           icon: CheckSquare     },
-  wins:       { title: "Daily Wins",   subtitle: "Celebrate every step forward",                 icon: Sparkles        },
-  braindump:  { title: "Brain Dump",   subtitle: "Capture racing thoughts without losing focus", icon: Brain           },
-  goals:      { title: "Weekly Goals", subtitle: "Keep the big picture in sight",                icon: Target          },
-  agents:     { title: "AI Agents",    subtitle: "Track every agent you've deployed today",      icon: Bot             },
+const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
+  dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
+  focus:      { title: "Focus Timer",  icon: Clock           },
+  tasks:      { title: "My Tasks",     icon: CheckSquare     },
+  wins:       { title: "Daily Wins",   icon: Sparkles        },
+  braindump:  { title: "Brain Dump",   icon: Brain           },
+  goals:      { title: "Weekly Goals", icon: Target          },
+  agents:     { title: "AI Agents",    icon: Bot             },
 };
 
 const INITIAL_TASKS: Task[] = [
@@ -42,16 +43,24 @@ const INITIAL_TASKS: Task[] = [
   { id: "3", text: "Take a 10-minute walk",     priority: "normal", context: "personal", done: false, createdAt: new Date() },
 ];
 
+const INITIAL_GOALS: Goal[] = [
+  { id: "g1", text: "Complete the project proposal", progress: 30, context: "work",     createdAt: new Date() },
+  { id: "g2", text: "Exercise 3 times this week",    progress: 0,  context: "personal", createdAt: new Date() },
+];
+
+const SUNSET_WIDE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-wide_e4204b59.png";
+
 export default function Home() {
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
-  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
-  const [wins, setWins] = useState<Win[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([
-    { id: "g1", text: "Complete the project proposal", progress: 30, context: "work",     createdAt: new Date() },
-    { id: "g2", text: "Exercise 3 times this week",    progress: 0,  context: "personal", createdAt: new Date() },
-  ]);
-  const [agents, setAgents] = useState<Agent[]>([]);
-  const [mood, setMood] = useState<number | null>(null);
+
+  // ── Persisted state ──
+  const [tasks,  setTasks]  = useLocalStorage<Task[]>("adhd-tasks",  INITIAL_TASKS);
+  const [wins,   setWins]   = useLocalStorage<Win[]>("adhd-wins",   []);
+  const [goals,  setGoals]  = useLocalStorage<Goal[]>("adhd-goals",  INITIAL_GOALS);
+  const [agents, setAgents] = useLocalStorage<Agent[]>("adhd-agents", []);
+  const [mood,   setMood]   = useLocalStorage<number | null>("adhd-mood", null);
+
+  // ── Transient state ──
   const [focusSessions, setFocusSessions] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
@@ -65,7 +74,7 @@ export default function Home() {
     if (data.newWins.length) setWins((p) => [...data.newWins, ...p]);
     if (data.newAgents.length) setAgents((p) => [...data.newAgents, ...p]);
     dismissCheckIn();
-    toast.success("Welcome! Your workspace is ready.", { duration: 3000 });
+    toast.success("Workspace ready.", { duration: 2500 });
   };
 
   /* ── Task completion with confetti ── */
@@ -91,7 +100,7 @@ export default function Home() {
     setConfettiTrigger(true);
     const win: Win = {
       id: `session-${Date.now()}`,
-      text: `Completed focus session #${focusSessions + 1}`,
+      text: `Focus session #${focusSessions + 1} complete`,
       emoji: "⚡",
       createdAt: new Date(),
     };
@@ -100,7 +109,7 @@ export default function Home() {
 
   const handleConvertToTask = (task: Task) => {
     setTasks((prev) => [task, ...prev]);
-    toast.success("Added to tasks!", { duration: 2000 });
+    toast.success("Added to tasks.", { duration: 2000 });
   };
 
   const meta = SECTION_META[activeSection];
@@ -114,7 +123,7 @@ export default function Home() {
 
       {/* Main content */}
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
-        {/* Top header bar — editorial style */}
+        {/* Top header bar */}
         <header
           className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
           style={{
@@ -125,20 +134,17 @@ export default function Home() {
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
             <Icon className="w-4 h-4 shrink-0" style={{ color: "oklch(0.52 0.14 35)" }} />
-            <div className="min-w-0">
-              <h1
-                className="text-base font-bold italic leading-tight truncate"
-                style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
-              >
-                {meta.title}
-              </h1>
-              <p className="editorial-label truncate">{meta.subtitle}</p>
-            </div>
+            <h1
+              className="text-base font-bold italic leading-tight truncate"
+              style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+            >
+              {meta.title}
+            </h1>
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            {/* Stats */}
-            <div className="hidden sm:flex items-center gap-4 text-xs" style={{ color: "oklch(0.55 0.015 70)" }}>
+            {/* Mini stats */}
+            <div className="hidden sm:flex items-center gap-3 text-xs" style={{ color: "oklch(0.55 0.015 70)" }}>
               <span>{tasks.filter((t) => !t.done).length} tasks</span>
               <span style={{ color: "oklch(0.82 0.012 75)" }}>·</span>
               <span>{wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins</span>
@@ -149,10 +155,7 @@ export default function Home() {
                     onClick={() => setActiveSection("agents")}
                     className="flex items-center gap-1 hover:text-foreground transition-colors"
                   >
-                    <span
-                      className="w-1.5 h-1.5 rounded-full animate-pulse"
-                      style={{ background: "oklch(0.52 0.14 35)" }}
-                    />
+                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.52 0.14 35)" }} />
                     {runningAgents} agent{runningAgents > 1 ? "s" : ""}
                   </button>
                 </>
@@ -194,39 +197,87 @@ export default function Home() {
             )}
 
             {activeSection === "focus" && (
-              <div className="flex flex-col items-center gap-8 py-4">
+              <div className="flex flex-col items-center gap-6 py-4">
+                {/* Atmospheric sunset panel behind the timer */}
                 <div
-                  className="w-full max-w-md p-10"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-                >
-                  {/* Editorial header */}
-                  <div className="mb-8 text-center">
-                    <img
-                      src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-timer-SpuVNoS38pX9SRh3kmwiCK.webp"
-                      alt="timer illustration"
-                      className="w-16 mx-auto mb-4 opacity-70"
-                    />
-                    <h2
-                      className="text-xl font-bold italic"
-                      style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
-                    >
-                      Deep Work
-                    </h2>
-                    <p className="editorial-label mt-1">One session at a time</p>
-                  </div>
-                  <FocusTimer onSessionComplete={handleSessionComplete} />
-                </div>
-                <div
-                  className="w-full max-w-md p-5"
+                  className="w-full max-w-md relative overflow-hidden"
                   style={{ border: "1px solid oklch(0.87 0.014 75)" }}
                 >
-                  <p className="editorial-label mb-3">Focus tips</p>
-                  <ul className="space-y-2 text-sm" style={{ color: "oklch(0.45 0.01 60)" }}>
-                    <li>— Put your phone face-down or in another room</li>
-                    <li>— Close all browser tabs except what you need</li>
-                    <li>— Tell others you're in a focus session</li>
-                    <li>— Use the Brain Dump for distracting thoughts</li>
-                  </ul>
+                  {/* Sunset background */}
+                  <div
+                    className="absolute inset-0"
+                    style={{
+                      backgroundImage: `url(${SUNSET_WIDE})`,
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                      opacity: 0.15,
+                    }}
+                  />
+                  <div
+                    className="absolute inset-0"
+                    style={{ background: "oklch(0.985 0.008 80 / 0.88)" }}
+                  />
+                  {/* Corner marks */}
+                  {[
+                    "top-2 left-2",
+                    "top-2 right-2 rotate-90",
+                    "bottom-2 left-2 -rotate-90",
+                    "bottom-2 right-2 rotate-180",
+                  ].map((cls, i) => (
+                    <div key={i} className={`absolute ${cls}`}>
+                      <svg width="10" height="10" viewBox="0 0 10 10" style={{ opacity: 0.35 }}>
+                        <line x1="5" y1="0" x2="5" y2="4" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
+                        <line x1="6" y1="5" x2="10" y2="5" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
+                      </svg>
+                    </div>
+                  ))}
+                  <div className="relative p-10">
+                    {/* Small header */}
+                    <div className="mb-7 text-center">
+                      {/* Geometric clock icon */}
+                      <svg width="36" height="36" viewBox="0 0 36 36" className="mx-auto mb-3" style={{ opacity: 0.45 }}>
+                        <circle cx="18" cy="18" r="16" fill="none" stroke="oklch(0.52 0.14 35)" strokeWidth="1" />
+                        <circle cx="18" cy="18" r="1.5" fill="oklch(0.52 0.14 35)" />
+                        <line x1="18" y1="18" x2="18" y2="8" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="square" />
+                        <line x1="18" y1="18" x2="25" y2="18" stroke="oklch(0.52 0.14 35)" strokeWidth="1" strokeLinecap="square" />
+                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => {
+                          const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+                          const r1 = 13, r2 = i % 3 === 0 ? 11 : 12;
+                          return <line key={i} x1={18 + r1 * Math.cos(a)} y1={18 + r1 * Math.sin(a)} x2={18 + r2 * Math.cos(a)} y2={18 + r2 * Math.sin(a)} stroke="oklch(0.52 0.14 35)" strokeWidth="0.8" />;
+                        })}
+                      </svg>
+                      <h2
+                        className="text-xl font-bold italic"
+                        style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+                      >
+                        Deep Work
+                      </h2>
+                    </div>
+                    <FocusTimer onSessionComplete={handleSessionComplete} />
+                  </div>
+                </div>
+
+                {/* Focus tips — minimal, geometric */}
+                <div
+                  className="w-full max-w-md p-5"
+                  style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+                >
+                  <p className="editorial-label mb-3">Session tips</p>
+                  <div className="space-y-2">
+                    {[
+                      "Phone face-down or in another room",
+                      "Close all unneeded browser tabs",
+                      "Use Brain Dump for distracting thoughts",
+                    ].map((tip, i) => (
+                      <div key={i} className="flex items-start gap-3">
+                        <div
+                          className="w-1 h-1 mt-1.5 shrink-0"
+                          style={{ background: "oklch(0.52 0.14 35)", transform: "rotate(45deg)" }}
+                        />
+                        <p className="text-xs" style={{ color: "oklch(0.45 0.01 60)" }}>{tip}</p>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             )}
@@ -282,7 +333,6 @@ export default function Home() {
         <DailyWrapUp tasks={tasks} wins={wins} agents={agents} onClose={() => setWrapUpOpen(false)} />
       )}
 
-      {/* Daily check-in — auto-opens once per day */}
       {showCheckIn && (
         <DailyCheckIn
           onComplete={handleCheckInComplete}

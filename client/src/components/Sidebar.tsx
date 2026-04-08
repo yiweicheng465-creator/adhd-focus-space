@@ -121,8 +121,12 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         })}
       </nav>
 
-      {/* Bottom: time */}
+      {/* Bottom: sunset accent + time */}
       <div className="mt-auto flex flex-col items-center gap-2 pb-1">
+        {/* Tiny geometric diamond */}
+        <svg width="8" height="8" viewBox="0 0 8 8" style={{ opacity: 0.3 }}>
+          <rect x="1" y="1" width="6" height="6" transform="rotate(45 4 4)" fill="oklch(0.55 0.09 35)" />
+        </svg>
         <div className="w-6" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
         <LiveTime />
       </div>

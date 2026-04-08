@@ -8,7 +8,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
-  Bot, CheckCircle2, Clock, Cpu, Flame,
+  CheckCircle2, Clock, Cpu, Flame,
   Link2, Pause, Play, Plus, RefreshCw, Trash2, XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -166,7 +166,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
         {[
           { icon: <Cpu className="w-3.5 h-3.5" />,         label: "Running Now",    value: runningCount,       color: M.coral,   bg: M.coralBg,  border: M.coralBdr },
           { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Done Today",     value: doneCount,          color: M.sage,    bg: M.sageBg,   border: M.sageBdr  },
-          { icon: <Bot className="w-3.5 h-3.5" />,          label: "Total Today",    value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
+          { icon: <Cpu className="w-3.5 h-3.5" />,          label: "Total Today",    value: todayAgents.length, color: M.slumber, bg: M.slumBg,   border: M.slumBdr  },
           {
             icon: <Flame className="w-3.5 h-3.5" />,
             label: "Uncovered Tasks",
@@ -216,10 +216,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
 
       {/* Add agent form */}
       <div className="p-5 flex flex-col gap-3" style={{ background: M.card, border: `1px solid ${M.border}` }}>
-        <div className="flex items-center gap-2 mb-1">
-          <Bot className="w-4 h-4" style={{ color: M.coral }} />
-          <p className="text-sm font-semibold" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>Log a new agent</p>
-        </div>
+        <p className="editorial-label mb-1" style={{ color: M.coral }}>Log a new agent</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           <Input
@@ -318,9 +315,17 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       {/* Agent list */}
       <div className="space-y-3">
         {filtered.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            <Bot className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
-            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No agents logged yet. Start one above!</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
+              <rect x="8" y="14" width="24" height="20" fill="none" stroke={M.muted} strokeWidth="1" />
+              <circle cx="15" cy="24" r="3" fill="none" stroke={M.muted} strokeWidth="0.8" />
+              <circle cx="25" cy="24" r="3" fill="none" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="20" y1="14" x2="20" y2="8" stroke={M.muted} strokeWidth="1" />
+              <circle cx="20" cy="6" r="2" fill="none" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="8" y1="30" x2="4" y2="34" stroke={M.muted} strokeWidth="0.8" />
+              <line x1="32" y1="30" x2="36" y2="34" stroke={M.muted} strokeWidth="0.8" />
+            </svg>
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No agents yet.</p>
           </div>
         )}
 

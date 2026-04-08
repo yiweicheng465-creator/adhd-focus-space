@@ -164,11 +164,15 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
       {/* Goals list */}
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {visibleGoals.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Target className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
-            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-              Set up to 5 goals per context. Keep them specific and achievable.
-            </p>
+          <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
+            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
+              <circle cx="20" cy="20" r="17" fill="none" stroke={M.muted} strokeWidth="1" />
+              <circle cx="20" cy="20" r="10" fill="none" stroke={M.muted} strokeWidth="0.8" />
+              <circle cx="20" cy="20" r="3" fill={M.muted} />
+              <line x1="20" y1="3" x2="20" y2="10" stroke={M.muted} strokeWidth="1" />
+              <line x1="20" y1="30" x2="20" y2="37" stroke={M.muted} strokeWidth="1" />
+            </svg>
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No goals yet. Up to 5 per context.</p>
           </div>
         )}
 
