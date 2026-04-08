@@ -200,8 +200,8 @@ export default function Home() {
               <div className="flex flex-col items-center gap-6 py-4">
                 {/* Atmospheric sunset panel behind the timer */}
                 <div
-                  className="w-full max-w-md relative overflow-hidden"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)" }}
+                  className="w-full relative overflow-hidden"
+                  style={{ border: "1px solid oklch(0.87 0.014 75)", maxWidth: 680 }}
                 >
                   {/* Sunset background */}
                   <div
@@ -231,7 +231,7 @@ export default function Home() {
                       </svg>
                     </div>
                   ))}
-                  <div className="relative p-10">
+                  <div className="relative p-6" style={{ minWidth: 0, overflow: "hidden" }}>
                     {/* Small header */}
                     <div className="mb-7 text-center">
                       {/* Geometric clock icon */}

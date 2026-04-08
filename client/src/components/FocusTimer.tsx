@@ -123,6 +123,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   const dotX = CX + R * Math.cos(dotAngle);
   const dotY = CY + R * Math.sin(dotAngle);
 
+  // Add time to current timer (only when stopped)
+  const addTime = (mins: number) => {
+    if (isRunning) return;
+    setTimeLeft((prev) => Math.min(prev + mins * 60, 180 * 60));
+    setDurations((d) => ({ ...d, [mode]: Math.min(d[mode] + mins, 180) }));
+  };
+
   return (
     <div className="flex flex-col gap-5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
 
@@ -236,9 +243,15 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* ── Main instrument panel ── */}
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-        {/* SVG Dial */}
+        {/* SVG Dial — left click +1 min, right click +5 min (when stopped) */}
         <div style={{ flexShrink: 0 }}>
-          <svg width="192" height="192" viewBox="0 0 192 192">
+          <svg
+            width="192" height="192" viewBox="0 0 192 192"
+            style={{ cursor: isRunning ? "default" : "pointer" }}
+            onClick={() => addTime(1)}
+            onContextMenu={(e) => { e.preventDefault(); addTime(5); }}
+          >
+            {!isRunning && <title>Click +1 min · Right-click +5 min</title>}
             {/* Tick marks */}
             {ticks.map((t, i) => (
               <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
@@ -269,6 +282,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             {/* Center cross hair */}
             <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#D4C4B0" strokeWidth="0.8" />
             <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#D4C4B0" strokeWidth="0.8" />
+            {/* +1 / +5 hint text when stopped */}
+            {!isRunning && (
+              <>
+                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.7">+1 MIN</text>
+                <text x={CX} y={CY + 27} textAnchor="middle" fontSize="6" fill="#8C7B6B" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.08em" opacity="0.55">R-CLICK +5</text>
+              </>
+            )}
           </svg>
         </div>
 
@@ -312,7 +332,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
           {/* Controls */}
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {/* Play/Pause pill */}
+            {/* Play/Pause pill — 3D press effect */}
             <button
               onClick={() => setIsRunning((r) => !r)}
               style={{
@@ -326,13 +346,32 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
                 fontSize: 10,
                 letterSpacing: "0.14em",
                 cursor: "pointer",
+                // 3D depth: bottom-right shadow creates raised look
+                boxShadow: isRunning
+                  ? "inset 0 1px 3px rgba(0,0,0,0.15), 0 1px 0 rgba(255,255,255,0.1)"
+                  : "0 3px 0 #1a1208, 0 4px 8px rgba(0,0,0,0.25)",
+                transform: "translateY(0)",
+                transition: "box-shadow 0.1s, transform 0.1s",
+              }}
+              onMouseDown={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 1px 0 #1a1208, 0 2px 4px rgba(0,0,0,0.2)";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(2px)";
+              }}
+              onMouseUp={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = isRunning
+                  ? "inset 0 1px 3px rgba(0,0,0,0.15)"
+                  : "0 3px 0 #1a1208, 0 4px 8px rgba(0,0,0,0.25)";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
               }}
             >
               {isRunning ? <Pause size={11} /> : <Play size={11} />}
               {isRunning ? "PAUSE" : "START"}
             </button>
 
-            {/* Skip pill */}
+            {/* Reset pill — 3D press effect */}
             <button
               onClick={() => { setIsRunning(false); setTimeLeft(durations[mode] * 60); }}
               style={{
@@ -346,6 +385,19 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
                 fontSize: 10,
                 letterSpacing: "0.14em",
                 cursor: "pointer",
+                boxShadow: "0 2px 0 #C4B4A0, 0 3px 6px rgba(0,0,0,0.10)",
+                transition: "box-shadow 0.1s, transform 0.1s",
+              }}
+              onMouseDown={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 0px 0 #C4B4A0";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(2px)";
+              }}
+              onMouseUp={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.boxShadow = "0 2px 0 #C4B4A0, 0 3px 6px rgba(0,0,0,0.10)";
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.transform = "translateY(0)";
               }}
             >
               <SkipForward size={11} />
