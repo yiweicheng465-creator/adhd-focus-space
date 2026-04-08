@@ -112,13 +112,16 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     return { filled, h: filled ? h + 3 : h };
   });
 
-  // Dial tick marks
+  // Dial tick marks — glow orange for ticks within remaining time (countdown)
   const ticks = Array.from({ length: 60 }, (_, i) => {
     const angle = (i / 60) * 2 * Math.PI - Math.PI / 2;
     const major = i % 5 === 0;
-    const r1 = R + 5;
-    const r2 = R + 5 + (major ? 9 : 4);
-    return { angle, major, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
+    const r1 = R + 2;
+    const r2 = R + 2 + (major ? 9 : 4);
+    // A tick is "remaining" if it falls within the arcProgress arc (from 0 to arcProgress * 60)
+    const tickFraction = i / 60;
+    const isRemaining = tickFraction <= arcProgress;
+    return { angle, major, isRemaining, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
   });
 
   // Dot position — tracks the TRAILING edge of the countdown arc
@@ -255,40 +258,31 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             onClick={() => addTime(1)}
             onContextMenu={(e) => { e.preventDefault(); addTime(5); }}
           >
-            {/* Tick marks (outside the knob) */}
-            {ticks.map((t, i) => (
-              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                stroke={t.major ? "#3D2E1E" : "#D4C4B0"}
-                strokeWidth={t.major ? 1.5 : 0.7}
-              />
-            ))}
+            {/* SVG filter for orange glow on remaining ticks */}
+            <defs>
+              <filter id="tickGlow" x="-100%" y="-100%" width="300%" height="300%">
+                <feGaussianBlur stdDeviation="1.5" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
 
             {/* ── Flat watch-face style dial ── */}
             {/* Outer bezel ring — warm tan groove */}
-            <circle cx={CX} cy={CY} r={R} fill="#E0D0BC" />
-            {/* Inner bezel shadow line */}
-            <circle cx={CX} cy={CY} r={R - 1} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
-            {/* Flat white inner face */}
-            <circle cx={CX} cy={CY} r={R - 10} fill="#FAF6F0" />
-            {/* Subtle inner face border */}
-            <circle cx={CX} cy={CY} r={R - 10} fill="none" stroke="#D8C8B4" strokeWidth="0.6" />
+            <circle cx={CX} cy={CY} r={R} fill="#E8DDD0" />
+            {/* Flat white inner face — flush to bezel, no gap */}
+            <circle cx={CX} cy={CY} r={R} fill="#FAF6F0" />
+            {/* Subtle inner shadow ring for depth */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
 
-            {/* COUNTDOWN arc — starts full (arcProgress=1), depletes to zero */}
-            <circle
-              cx={CX} cy={CY} r={R - 5}
-              fill="none"
-              stroke={meta.stroke}
-              strokeWidth="4"
-              strokeLinecap="butt"
-              strokeDasharray={2 * Math.PI * (R - 5)}
-              strokeDashoffset={(2 * Math.PI * (R - 5)) * (1 - arcProgress)}
-              transform={`rotate(-90 ${CX} ${CY})`}
-              style={{ transition: "stroke-dashoffset 0.6s linear" }}
-            />
-            {/* Dot at trailing edge of countdown arc */}
-            {arcProgress < 0.995 && arcProgress > 0.005 && (
-              <circle cx={dotX} cy={dotY} r="4" fill={meta.stroke} />
-            )}
+            {/* Tick marks — orange glow on remaining ticks (countdown) */}
+            {ticks.map((t, i) => (
+              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+                stroke={t.isRemaining ? (isRunning ? meta.stroke : "#C8B8A4") : "#D8CEC4"}
+                strokeWidth={t.major ? (t.isRemaining && isRunning ? 2 : 1.5) : (t.isRemaining && isRunning ? 1 : 0.7)}
+                filter={t.isRemaining && isRunning ? "url(#tickGlow)" : undefined}
+                opacity={t.isRemaining ? 1 : 0.5}
+              />
+            ))}
 
             {/* Center cross hair — on top of inner button */}
             <line x1={CX - 5} y1={CY} x2={CX + 5} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
