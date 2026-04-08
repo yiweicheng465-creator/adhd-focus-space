@@ -113,14 +113,14 @@ function IconNutrition({ size = 20, color = "#888" }: IconProps) {
 
 // ── Icon registry ──────────────────────────────────────────────────────────────
 const WIN_ICONS = [
-  { key: "health",    Component: IconHealth,    label: "健康",    color: "oklch(0.60 0.10 15)"  },
-  { key: "study",     Component: IconStudy,     label: "学习",    color: "oklch(0.52 0.08 230)" },
-  { key: "work",      Component: IconWork,      label: "工作",    color: "oklch(0.50 0.07 145)" },
-  { key: "social",    Component: IconSocial,    label: "社交",    color: "oklch(0.58 0.09 55)"  },
-  { key: "creative",  Component: IconCreative,  label: "创意",    color: "oklch(0.55 0.10 300)" },
-  { key: "mindful",   Component: IconMindful,   label: "冥想",    color: "oklch(0.55 0.07 185)" },
-  { key: "fitness",   Component: IconFitness,   label: "运动",    color: "oklch(0.53 0.09 35)"  },
-  { key: "nutrition", Component: IconNutrition, label: "饮食",    color: "oklch(0.52 0.10 130)" },
+  { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.60 0.10 15)"  },
+  { key: "study",     Component: IconStudy,     label: "Study",     color: "oklch(0.52 0.08 230)" },
+  { key: "work",      Component: IconWork,      label: "Work",      color: "oklch(0.50 0.07 145)" },
+  { key: "social",    Component: IconSocial,    label: "Social",    color: "oklch(0.58 0.09 55)"  },
+  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "oklch(0.55 0.10 300)" },
+  { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "oklch(0.55 0.07 185)" },
+  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "oklch(0.53 0.09 35)"  },
+  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "oklch(0.52 0.10 130)" },
 ];
 
 const M = {
@@ -280,7 +280,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
                 background: showNewPicker ? `${SelectedIconDef.color}12` : M.card,
                 borderRadius: 6,
               }}
-              title="选择类别"
+              title="Choose category"
             >
               <SelectedIconDef.Component size={18} color={SelectedIconDef.color} />
             </button>
@@ -297,7 +297,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
             value={newWin}
             onChange={(e) => setNewWin(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addWin()}
-            placeholder="What did you accomplish?"
+                  placeholder="What did you accomplish?"
             className="flex-1"
             style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
           />
@@ -337,7 +337,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
               <div style={{ position: "relative", flexShrink: 0, marginTop: 2 }}>
                 <button
                   onClick={() => setEditingWinId(isEditing ? null : win.id)}
-                  title="点击更改类别"
+                  title="Click to change category"
                   style={{
                     width: 28,
                     height: 28,

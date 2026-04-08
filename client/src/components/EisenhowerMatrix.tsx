@@ -1,5 +1,5 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Eisenhower Matrix (四象限)
+   ADHD FOCUS SPACE — Eisenhower Matrix (Priority Matrix)
    Design: Morandi palette, pixel-art accents, hand-crafted feel
    Quadrant → Priority mapping:
      Q1 (urgent+important)     → "urgent"
@@ -32,8 +32,8 @@ interface QuadrantDef {
 const QUADRANTS: QuadrantDef[] = [
   {
     id: "q1",
-    label: "立刻做",
-    sub: "紧急 · 重要",
+    label: "Do Now",
+    sub: "Urgent · Important",
     action: "DO NOW",
     priority: "urgent",
     urgent: true,
@@ -46,8 +46,8 @@ const QUADRANTS: QuadrantDef[] = [
   },
   {
     id: "q2",
-    label: "计划做",
-    sub: "不紧急 · 重要",
+    label: "Schedule",
+    sub: "Not Urgent · Important",
     action: "SCHEDULE",
     priority: "focus",
     urgent: false,
@@ -60,8 +60,8 @@ const QUADRANTS: QuadrantDef[] = [
   },
   {
     id: "q3",
-    label: "委托别人",
-    sub: "紧急 · 不重要",
+    label: "Delegate",
+    sub: "Urgent · Not Important",
     action: "DELEGATE",
     priority: "normal",
     urgent: true,
@@ -74,8 +74,8 @@ const QUADRANTS: QuadrantDef[] = [
   },
   {
     id: "q4",
-    label: "减少 / 删除",
-    sub: "不紧急 · 不重要",
+    label: "Eliminate",
+    sub: "Not Urgent · Not Important",
     action: "ELIMINATE",
     priority: "normal",
     urgent: false,
@@ -182,7 +182,7 @@ export function EisenhowerMatrix({
           color: "oklch(0.28 0.018 65)",
           fontStyle: "italic",
         }}>
-          四象限优先级矩阵
+          Priority Matrix
         </span>
         <span style={{
           fontFamily: "'DM Sans', sans-serif",
@@ -192,14 +192,14 @@ export function EisenhowerMatrix({
           textTransform: "uppercase",
           marginLeft: 2,
         }}>
-          拖动任务卡片到对应象限
+          Drag tasks between quadrants
         </span>
       </div>
 
       {/* Axis labels */}
       <div style={{ position: "relative", paddingLeft: 28, paddingBottom: 22 }}>
 
-        {/* Y-axis label: 重要程度 */}
+        {/* Y-axis label: Importance */}
         <div style={{
           position: "absolute",
           left: 0,
@@ -213,7 +213,7 @@ export function EisenhowerMatrix({
           color: "oklch(0.60 0.018 70)",
           whiteSpace: "nowrap",
         }}>
-          重要程度 ↑
+          Importance ↑
         </div>
 
         {/* Grid */}
@@ -327,7 +327,7 @@ export function EisenhowerMatrix({
                       opacity: isOver ? 0.9 : 0.5,
                       padding: "12px 0",
                     }}>
-                      {isOver ? "放到这里 ↓" : "拖入任务"}
+                      {isOver ? "Drop here ↓" : "Drag tasks here"}
                     </div>
                   )}
                   {qTasks.map((task) => (
@@ -345,7 +345,7 @@ export function EisenhowerMatrix({
           })}
         </div>
 
-        {/* X-axis label: 紧急程度 */}
+        {/* X-axis label: Urgency */}
         <div style={{
           textAlign: "center",
           marginTop: 8,
@@ -355,7 +355,7 @@ export function EisenhowerMatrix({
           textTransform: "uppercase",
           color: "oklch(0.60 0.018 70)",
         }}>
-          紧急程度 →
+          Urgency →
         </div>
       </div>
     </div>
