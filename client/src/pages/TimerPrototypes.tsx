@@ -478,6 +478,401 @@ function ProtoD() {
   );
 }
 
+
+// ─── PROTOTYPE E: Balloon Inflate (grow to pop) ───────────────────────────────
+// Balloon starts tiny, grows as focus time accumulates.
+// On complete: hand with needle appears outside balloon (threatening — you earned it!).
+// Styling: warm cream bg, flat illustration, bold text inside balloon, like the reference.
+type BalloonInflateState = "idle" | "running" | "complete" | "popped";
+
+function HandWithNeedle({ threatening = false }: { threatening?: boolean }) {
+  // Flat illustrated hand holding a needle, pointing left toward the balloon
+  // Skin: warm peach #E8A87C, outline: #8B5E3C
+  const SKIN = "#E8A87C";
+  const SKIN_DARK = "#C87850";
+  const OUTLINE = "#8B5E3C";
+  return (
+    <svg width="110" height="90" viewBox="0 0 110 90" style={{ display: "block" }}>
+      {/* Needle — long thin line pointing left */}
+      <line x1="0" y1="44" x2="72" y2="44" stroke="#888" strokeWidth="1.2" strokeLinecap="round" />
+      {/* Needle eye hole */}
+      <ellipse cx="70" cy="44" rx="3.5" ry="2" fill="none" stroke="#888" strokeWidth="1.2" />
+      {/* Palm */}
+      <ellipse cx="86" cy="50" rx="20" ry="18" fill={SKIN} />
+      <ellipse cx="86" cy="50" rx="20" ry="18" fill="none" stroke={OUTLINE} strokeWidth="1.8" />
+      {/* Thumb — pointing down-left */}
+      <path d="M70 44 Q64 36 68 28 Q76 24 80 34 Q78 40 72 44Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Index finger — extended forward holding needle */}
+      <path d="M68 44 Q60 40 58 34 Q60 26 68 28 Q74 30 74 38 L72 44Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Middle finger curled */}
+      <path d="M72 56 Q66 50 68 42 Q74 38 78 44 Q80 50 76 56Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Ring finger curled */}
+      <path d="M80 60 Q76 54 78 48 Q84 46 88 52 Q90 58 86 62Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Pinky */}
+      <path d="M88 64 Q86 58 88 54 Q94 52 96 58 Q98 64 94 66Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" strokeLinejoin="round" />
+      {/* Knuckle shading */}
+      <path d="M78 46 Q84 44 90 46" fill="none" stroke={SKIN_DARK} strokeWidth="1" opacity="0.4" />
+      <path d="M80 52 Q86 50 92 52" fill="none" stroke={SKIN_DARK} strokeWidth="1" opacity="0.4" />
+      {/* Wrist */}
+      <path d="M96 38 Q108 40 110 50 Q108 62 96 64 L92 60 Q102 50 92 40Z" fill={SKIN} stroke={OUTLINE} strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function BalloonSVG({ scale, label, color, showHighlight = true }: { scale: number; label: string; color: string; showHighlight?: boolean }) {
+  // Flat balloon illustration matching reference image style
+  // scale: 0→1, 0 = tiny, 1 = full size
+  const s = Math.max(0.12, scale);
+  const rx = 62 * s;
+  const ry = 72 * s;
+  const cx = 80;
+  const cy = 85;
+  // Knot position at bottom of balloon
+  const knotY = cy + ry;
+  const knotSize = 7 * s;
+  // String
+  const stringY1 = knotY + knotSize;
+  const stringY2 = 195;
+  // Highlight
+  const hlRx = 14 * s;
+  const hlRy = 22 * s;
+  const hlCx = cx - rx * 0.35;
+  const hlCy = cy - ry * 0.25;
+
+  return (
+    <svg width="160" height="210" viewBox="0 0 160 210" style={{ display: "block", overflow: "visible" }}>
+      {/* Balloon body */}
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={color} />
+      {/* Highlight */}
+      {showHighlight && s > 0.3 && (
+        <ellipse cx={hlCx} cy={hlCy} rx={hlRx} ry={hlRy} fill="rgba(255,255,255,0.28)" transform={`rotate(-20 ${hlCx} ${hlCy})`} />
+      )}
+      {/* Knot */}
+      {s > 0.15 && (
+        <path
+          d={`M${cx - knotSize} ${knotY} Q${cx} ${knotY + knotSize * 1.4} ${cx + knotSize} ${knotY} Q${cx} ${knotY + knotSize * 0.6} ${cx - knotSize} ${knotY}Z`}
+          fill={color}
+          stroke="rgba(0,0,0,0.15)"
+          strokeWidth="0.8"
+        />
+      )}
+      {/* String */}
+      {s > 0.15 && (
+        <path d={`M${cx} ${stringY1} Q${cx - 12} ${(stringY1 + stringY2) / 2} ${cx} ${stringY2}`} fill="none" stroke="#5C3D2E" strokeWidth="1.5" strokeLinecap="round" />
+      )}
+      {/* Label text inside balloon */}
+      {s > 0.45 && (
+        <>
+          <text x={cx} y={cy - 8} textAnchor="middle" fill="#fff" fontSize={Math.round(13 * s)} fontWeight="700" fontFamily="'Playfair Display', Georgia, serif" letterSpacing="0.5">
+            {label}
+          </text>
+          <text x={cx} y={cy + 12} textAnchor="middle" fill="rgba(255,255,255,0.9)" fontSize={Math.round(11 * s)} fontFamily="system-ui" letterSpacing="1">
+            FOCUS
+          </text>
+        </>
+      )}
+    </svg>
+  );
+}
+
+function ProtoE() {
+  const TOTAL = 5 * 60; // 5 min demo for faster testing
+  const [remaining, setRemaining] = useState(TOTAL);
+  const [running, setRunning] = useState(false);
+  const [state, setState] = useState<BalloonInflateState>("idle");
+  const [popped, setPopped] = useState(false);
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const progress = (TOTAL - remaining) / TOTAL; // 0→1 elapsed
+  const balloonScale = 0.12 + progress * 0.88; // tiny→full
+  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const ss = String(remaining % 60).padStart(2, "0");
+
+  useEffect(() => {
+    if (running && remaining > 0) {
+      ref.current = setInterval(() => setRemaining((r) => {
+        if (r <= 1) {
+          clearInterval(ref.current!);
+          setRunning(false);
+          setState("complete");
+          return 0;
+        }
+        return r - 1;
+      }), 1000);
+    }
+    return () => { if (ref.current) clearInterval(ref.current); };
+  }, [running, remaining]);
+
+  const handleStart = () => {
+    if (state === "complete" || state === "popped") return;
+    setRunning((r) => !r);
+    setState(running ? "idle" : "running");
+  };
+
+  const handleReset = () => {
+    clearInterval(ref.current!);
+    setRunning(false);
+    setRemaining(TOTAL);
+    setState("idle");
+    setPopped(false);
+  };
+
+  // Balloon color: terracotta, deepens as it inflates
+  const balloonColor = state === "complete" ? "#B05040" : "#C8603A";
+
+  return (
+    <div style={{ background: "#FAF0E8", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px 24px", gap: 0, position: "relative", overflow: "hidden", boxShadow: "0 4px 24px rgba(92,61,46,0.10)", minHeight: 420 }}>
+
+      {/* Scene: balloon on left, hand on right when complete */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", width: "100%", minHeight: 230, position: "relative" }}>
+
+        {/* Balloon */}
+        <div style={{ transition: "transform 0.8s cubic-bezier(0.34,1.56,0.64,1)", transform: `scale(${state === "popped" ? 0 : 1})`, transformOrigin: "bottom center" }}>
+          <BalloonSVG scale={balloonScale} label={mm + ":" + ss} color={balloonColor} />
+        </div>
+
+        {/* Hand with needle — slides in from right when complete */}
+        <div style={{
+          position: "absolute",
+          right: state === "complete" ? 0 : -120,
+          bottom: 80,
+          transition: "right 0.9s cubic-bezier(0.34,1.56,0.64,1)",
+        }}>
+          <HandWithNeedle threatening={false} />
+        </div>
+      </div>
+
+      {/* Time display below balloon */}
+      <div style={{ textAlign: "center", marginTop: 4 }}>
+        <div style={{ fontSize: 38, fontWeight: 700, color: "#3D2B1F", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em", lineHeight: 1 }}>
+          {mm}:{ss}
+        </div>
+        <p style={{ fontSize: 11, color: "#8B9E7A", margin: "6px 0 0", fontStyle: "italic", fontFamily: "'Playfair Display', serif" }}>
+          {state === "complete"
+            ? "You did it! Your balloon is fully inflated."
+            : state === "running"
+            ? "Keep going — your balloon is growing!"
+            : "Start focusing to inflate your balloon."}
+        </p>
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+        {state !== "complete" && (
+          <button onClick={handleStart} style={{ background: "#C8603A", border: "none", color: "#fff", borderRadius: 50, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontWeight: 600, fontFamily: "system-ui" }}>
+            {running ? "Pause" : "Start"}
+          </button>
+        )}
+        <button onClick={handleReset} style={{ background: "transparent", border: "1.5px solid #C8603A", color: "#C8603A", borderRadius: 50, padding: "10px 20px", fontSize: 13, cursor: "pointer", fontFamily: "system-ui" }}>
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ─── PROTOTYPE F: Balloon Deflate (air leaks out while focusing) ──────────────
+// Balloon starts fully inflated. Air slowly escapes as focus progresses (balloon shrinks).
+// If timer is abandoned (reset while running): hand drives needle in → balloon pops.
+// Styling: white/light bg, flat outline balloon style (like the second reference image).
+type BalloonDeflateState = "idle" | "running" | "complete" | "popping" | "popped";
+
+function OutlineBalloon({ scale, timeLabel }: { scale: number; timeLabel: string }) {
+  // Outline-style balloon (like the second reference image — golden yellow with black outline)
+  const s = Math.max(0.15, scale);
+  const rx = 62 * s;
+  const ry = 74 * s;
+  const cx = 80;
+  const cy = 88;
+  const knotY = cy + ry;
+  const knotSize = 8 * s;
+  const stringY1 = knotY + knotSize;
+  const stringY2 = 200;
+  const FILL = "#E8C06A";
+  const STROKE = "#3D2B1F";
+
+  return (
+    <svg width="160" height="215" viewBox="0 0 160 215" style={{ display: "block", overflow: "visible" }}>
+      {/* Balloon body */}
+      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={FILL} stroke={STROKE} strokeWidth="2" />
+      {/* Knot — arrow/diamond shape like reference */}
+      {s > 0.2 && (
+        <path
+          d={`M${cx - knotSize * 0.8} ${knotY} L${cx} ${knotY + knotSize * 1.2} L${cx + knotSize * 0.8} ${knotY} L${cx} ${knotY - knotSize * 0.3}Z`}
+          fill={FILL}
+          stroke={STROKE}
+          strokeWidth="1.5"
+          strokeLinejoin="round"
+        />
+      )}
+      {/* String */}
+      {s > 0.2 && (
+        <path d={`M${cx} ${stringY1} Q${cx - 14} ${(stringY1 + stringY2) / 2} ${cx} ${stringY2}`} fill="none" stroke={STROKE} strokeWidth="1.5" strokeLinecap="round" />
+      )}
+      {/* Text inside */}
+      {s > 0.5 && (
+        <>
+          <text x={cx} y={cy - 10} textAnchor="middle" fill={STROKE} fontSize={Math.round(14 * s)} fontWeight="800" fontFamily="system-ui" letterSpacing="0.5">
+            MY
+          </text>
+          <text x={cx} y={cy + 8} textAnchor="middle" fill={STROKE} fontSize={Math.round(14 * s)} fontWeight="800" fontFamily="system-ui" letterSpacing="0.5">
+            FOCUS
+          </text>
+          <text x={cx} y={cy + 28} textAnchor="middle" fill={STROKE} fontSize={Math.round(11 * s)} fontFamily="'JetBrains Mono', monospace" letterSpacing="1">
+            {timeLabel}
+          </text>
+        </>
+      )}
+    </svg>
+  );
+}
+
+function NeedleOnly() {
+  // Just a needle (no hand) — like the second reference image
+  return (
+    <svg width="100" height="30" viewBox="0 0 100 30" style={{ display: "block" }}>
+      {/* Needle body — two converging lines */}
+      <line x1="0" y1="12" x2="88" y2="15" stroke="#3D2B1F" strokeWidth="1.5" strokeLinecap="round" />
+      <line x1="0" y1="18" x2="88" y2="15" stroke="#3D2B1F" strokeWidth="1.5" strokeLinecap="round" />
+      {/* Needle eye */}
+      <ellipse cx="90" cy="15" rx="4" ry="2.5" fill="none" stroke="#3D2B1F" strokeWidth="1.5" />
+    </svg>
+  );
+}
+
+function PopBurst() {
+  // Starburst pop effect
+  return (
+    <svg width="160" height="160" viewBox="0 0 160 160" style={{ display: "block" }}>
+      {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((angle, i) => {
+        const rad = (angle * Math.PI) / 180;
+        const r1 = 20, r2 = 55 + (i % 3) * 12;
+        const x1 = 80 + r1 * Math.cos(rad), y1 = 80 + r1 * Math.sin(rad);
+        const x2 = 80 + r2 * Math.cos(rad), y2 = 80 + r2 * Math.sin(rad);
+        return <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="#C8603A" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />;
+      })}
+      <text x="80" y="87" textAnchor="middle" fill="#C8603A" fontSize="22" fontWeight="800" fontFamily="system-ui">POP!</text>
+    </svg>
+  );
+}
+
+function ProtoF() {
+  const TOTAL = 5 * 60;
+  const [remaining, setRemaining] = useState(TOTAL);
+  const [running, setRunning] = useState(false);
+  const [deflateState, setDeflateState] = useState<BalloonDeflateState>("idle");
+  const ref = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const progress = (TOTAL - remaining) / TOTAL; // 0→1 elapsed
+  // Balloon deflates: starts full (scale 1), shrinks to 0.15 at end
+  const balloonScale = deflateState === "popped" ? 0 : 1 - progress * 0.85;
+  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const ss = String(remaining % 60).padStart(2, "0");
+
+  useEffect(() => {
+    if (running && remaining > 0) {
+      ref.current = setInterval(() => setRemaining((r) => {
+        if (r <= 1) {
+          clearInterval(ref.current!);
+          setRunning(false);
+          setDeflateState("complete");
+          return 0;
+        }
+        return r - 1;
+      }), 1000);
+    }
+    return () => { if (ref.current) clearInterval(ref.current); };
+  }, [running, remaining]);
+
+  const handleStart = () => {
+    if (deflateState === "complete" || deflateState === "popped" || deflateState === "popping") return;
+    const next = !running;
+    setRunning(next);
+    setDeflateState(next ? "running" : "idle");
+  };
+
+  const handleReset = () => {
+    const wasRunning = running && progress > 0.05;
+    clearInterval(ref.current!);
+    setRunning(false);
+    if (wasRunning) {
+      // Pop the balloon!
+      setDeflateState("popping");
+      setTimeout(() => {
+        setDeflateState("popped");
+        setTimeout(() => {
+          setRemaining(TOTAL);
+          setDeflateState("idle");
+        }, 2000);
+      }, 600);
+    } else {
+      setRemaining(TOTAL);
+      setDeflateState("idle");
+    }
+  };
+
+  // Needle slides in from right when running, retreats when paused
+  const needleRight = deflateState === "running" || deflateState === "popping" ? 8 : -110;
+
+  return (
+    <div style={{ background: "#FFFFFF", borderRadius: 20, display: "flex", flexDirection: "column", alignItems: "center", padding: "28px 20px 24px", gap: 0, position: "relative", overflow: "hidden", boxShadow: "0 4px 24px rgba(92,61,46,0.10)", minHeight: 420 }}>
+
+      {/* Scene */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", width: "100%", minHeight: 230, position: "relative" }}>
+
+        {/* Balloon or pop burst */}
+        {deflateState === "popped" ? (
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
+            <PopBurst />
+          </div>
+        ) : (
+          <div style={{ transition: "transform 0.6s ease", transform: `scale(${balloonScale})`, transformOrigin: "bottom center" }}>
+            <OutlineBalloon scale={1} timeLabel={mm + ":" + ss} />
+          </div>
+        )}
+
+        {/* Needle — slides in from right when running */}
+        <div style={{
+          position: "absolute",
+          right: needleRight,
+          bottom: 110,
+          transition: "right 0.7s cubic-bezier(0.34,1.56,0.64,1)",
+        }}>
+          <NeedleOnly />
+        </div>
+      </div>
+
+      {/* Time display */}
+      <div style={{ textAlign: "center", marginTop: 4 }}>
+        <div style={{ fontSize: 38, fontWeight: 700, color: "#3D2B1F", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "-0.02em", lineHeight: 1 }}>
+          {mm}:{ss}
+        </div>
+        <p style={{ fontSize: 11, color: "#8B9E7A", margin: "6px 0 0", fontStyle: "italic", fontFamily: "'Playfair Display', serif", maxWidth: 220, textAlign: "center" }}>
+          {deflateState === "complete"
+            ? "All the air is out. Session complete!"
+            : deflateState === "popped" || deflateState === "popping"
+            ? "Your focus balloon popped. Try again!"
+            : deflateState === "running"
+            ? "Air is escaping — the needle is close!"
+            : "Start to let the air out slowly."}
+        </p>
+      </div>
+
+      {/* Controls */}
+      <div style={{ display: "flex", gap: 10, marginTop: 16 }}>
+        {deflateState !== "complete" && deflateState !== "popped" && deflateState !== "popping" && (
+          <button onClick={handleStart} style={{ background: "#3D2B1F", border: "none", color: "#fff", borderRadius: 50, padding: "10px 28px", fontSize: 13, cursor: "pointer", fontWeight: 600, fontFamily: "system-ui" }}>
+            {running ? "Pause" : "Start"}
+          </button>
+        )}
+        <button onClick={handleReset} style={{ background: "transparent", border: "1.5px solid #3D2B1F", color: "#3D2B1F", borderRadius: 50, padding: "10px 20px", fontSize: 13, cursor: "pointer", fontFamily: "system-ui" }}>
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main showcase page ───────────────────────────────────────────────────────
 export default function TimerPrototypes() {
   return (
@@ -495,7 +890,7 @@ export default function TimerPrototypes() {
           Timer Design Prototypes
         </h1>
         <p style={{ color: "#8B9E7A", fontSize: 14, margin: 0 }}>
-          4 interactive prototypes — click Start to test each one. Pick your favourite and I'll integrate it into the main app.
+          6 interactive prototypes — click Start to test each one. Pick your favourite and I'll integrate it into the main app.
         </p>
       </div>
 
@@ -540,10 +935,29 @@ export default function TimerPrototypes() {
 
       </div>
 
+
+        {/* E */}
+        <div>
+          <p className="proto-label">E — Balloon Inflate <span className="proto-badge">Grow</span></p>
+          <ProtoE />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            Balloon starts tiny and grows as you focus. When the session completes, a hand holding a needle slides in from the right — you earned the full balloon, the needle is just a threat.
+          </p>
+        </div>
+
+        {/* F */}
+        <div>
+          <p className="proto-label">F — Balloon Deflate <span className="proto-badge">Pressure</span></p>
+          <ProtoF />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            Balloon starts fully inflated. Air slowly escapes as focus progresses (balloon shrinks). The needle creeps closer while you're running. Reset mid-session and the needle pops the balloon!
+          </p>
+        </div>
+
       {/* Footer CTA */}
       <div style={{ maxWidth: 960, margin: "48px auto 0", padding: "24px", background: "#fff", borderRadius: 16, textAlign: "center", boxShadow: "0 2px 12px rgba(92,61,46,0.06)" }}>
         <p style={{ color: "#5C3D2E", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>Which design do you prefer?</p>
-        <p style={{ color: "#8B9E7A", fontSize: 13, margin: 0 }}>Reply with A, B, C, or D — or mix elements from multiple designs — and I'll build it into the main app.</p>
+        <p style={{ color: "#8B9E7A", fontSize: 13, margin: 0 }}>Reply with A, B, C, D, E, or F — or mix elements from multiple designs — and I'll build it into the main app.</p>
       </div>
     </div>
   );
