@@ -10,9 +10,17 @@ import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
-  ContextSwitcher, ContextBadge, CONTEXT_CONFIG,
+  ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
+
+/* Parse hashtag from goal input — same logic as TaskManager */
+function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
+  const match = raw.match(/(^|\s)#([\w-]+)(\s|$)/);
+  if (!match) return { cleanText: raw.trim(), tag: null };
+  const cleanText = raw.replace(/(^|\s)#[\w-]+(\s|$)/g, " ").replace(/\s{2,}/g, " ").trim();
+  return { cleanText, tag: match[2].toLowerCase() };
+}
 
 export interface Goal {
   id: string;
@@ -48,24 +56,35 @@ interface GoalsProps {
   goals: Goal[];
   onGoalsChange: (goals: Goal[]) => void;
   defaultContext?: ActiveContext;
+  /** Shared category list from Home — includes all contexts across tasks/goals/agents */
+  allCategories?: string[];
 }
 
-export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsProps) {
+export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategories }: GoalsProps) {
   const [newGoal,       setNewGoal]       = useState("");
   const [newGoalCtx,    setNewGoalCtx]    = useState<ItemContext>("work");
   const [activeContext, setActiveContext] = useState<ActiveContext>(defaultContext);
+
+  // Unified categories: use shared list if provided, else derive from own goals
+  const knownCategories = allCategories ?? Array.from(new Set(["work", "personal", ...goals.map((g) => g.context)]));
+
+  // Detect hashtag in current input for live preview
+  const { tag: liveTag } = parseHashtag(newGoal);
 
   const visibleGoals = goals.filter((g) => activeContext === "all" ? true : g.context === activeContext);
 
   const addGoal = () => {
     if (!newGoal.trim()) return;
-    if (goals.filter((g) => g.context === newGoalCtx).length >= 5) {
-      toast.error(`Max 5 ${newGoalCtx} goals. Focus is power!`, { duration: 3000 });
+    const { cleanText, tag } = parseHashtag(newGoal);
+    const context = tag ?? newGoalCtx;
+    if (goals.filter((g) => g.context === context).length >= 5) {
+      toast.error(`Max 5 goals per category. Focus is power!`, { duration: 3000 });
       return;
     }
-    onGoalsChange([...goals, { id: nanoid(), text: newGoal.trim(), progress: 0, context: newGoalCtx, createdAt: new Date() }]);
+    onGoalsChange([...goals, { id: nanoid(), text: cleanText || newGoal.trim(), progress: 0, context, createdAt: new Date() }]);
     setNewGoal("");
-    toast.success("Goal set.", { duration: 2000 });
+    if (tag) toast.success(`Goal added to #${tag}.`, { duration: 2000 });
+    else toast.success("Goal set.", { duration: 2000 });
   };
 
   const updateProgress = (id: string, delta: number) => {
@@ -82,15 +101,13 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
   const avgProgress = visibleGoals.length > 0
     ? Math.round(visibleGoals.reduce((sum, g) => sum + g.progress, 0) / visibleGoals.length) : 0;
 
-  const counts = {
-    all:      goals.length,
-    work:     goals.filter((g) => g.context === "work").length,
-    personal: goals.filter((g) => g.context === "personal").length,
-  };
+  // Build dynamic counts for all known categories
+  const counts: Record<string, number> = { all: goals.length };
+  knownCategories.forEach((ctx) => { counts[ctx] = goals.filter((g) => g.context === ctx).length; });
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} />
+      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} />
 
       {/* Overall progress */}
       {visibleGoals.length > 0 && (
@@ -99,7 +116,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4" style={{ color: M.coral }} />
               <span className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-                {activeContext === "all" ? "Overall" : activeContext === "work" ? "Work" : "Personal"} Progress
+                {activeContext === "all" ? "Overall" : getContextConfig(activeContext).label} Progress
               </span>
             </div>
             <span className="text-sm font-bold" style={{ color: M.coral, fontFamily: "'Playfair Display', serif" }}>
@@ -123,9 +140,9 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
             value={newGoal}
             onChange={(e) => setNewGoal(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addGoal()}
-            placeholder="Set a goal for this week..."
+            placeholder="Goal... or add #health #learning to categorize"
             className="flex-1"
-            style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
+            style={{ background: M.card, border: `1px solid ${liveTag ? M.coral : M.border}`, fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
           />
           <button
             onClick={addGoal}
@@ -135,30 +152,46 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
-          <span style={LABEL}>Context:</span>
-          {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg  = CONTEXT_CONFIG[ctx];
-            const Icon = cfg.icon;
-            const isActive = newGoalCtx === ctx;
-            return (
-              <button
-                key={ctx}
-                onClick={() => setNewGoalCtx(ctx)}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
-                style={{
-                  background:  isActive ? cfg.bg : "transparent",
-                  color:       isActive ? cfg.color : M.muted,
-                  border:      `1px solid ${isActive ? cfg.border : M.border}`,
-                  fontFamily:  "'DM Sans', sans-serif",
-                }}
-              >
-                <Icon className="w-3 h-3" />
-                {cfg.label}
-              </button>
-            );
-          })}
-        </div>
+        {/* Live hashtag preview */}
+        {liveTag && (
+          <div className="flex items-center gap-1.5" style={{ fontSize: "0.7rem", color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+            <span style={{ color: M.coral }}>◆</span>
+            Will be added to category{" "}
+            <span className="px-2 py-0.5 font-medium" style={{ background: M.coral + "15", color: M.coral, border: `1px solid ${M.coral}30`, fontSize: "0.68rem", letterSpacing: "0.06em" }}>
+              #{liveTag}
+            </span>
+          </div>
+        )}
+
+        {/* Category selector — shows all known categories */}
+        {!liveTag && (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span style={LABEL}>Category:</span>
+            {knownCategories.map((ctx) => {
+              const cfg  = getContextConfig(ctx);
+              const Icon = cfg.icon;
+              const isActive = newGoalCtx === ctx;
+              return (
+                <button
+                  key={ctx}
+                  onClick={() => setNewGoalCtx(ctx)}
+                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
+                  style={{
+                    background:  isActive ? cfg.bg : "transparent",
+                    color:       isActive ? cfg.color : M.muted,
+                    border:      `1px solid ${isActive ? cfg.border : M.border}`,
+                    fontFamily:  "'DM Sans', sans-serif",
+                    cursor: "pointer",
+                    borderRadius: 0,
+                  }}
+                >
+                  <Icon className="w-3 h-3" />
+                  {cfg.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       {/* Goals list */}

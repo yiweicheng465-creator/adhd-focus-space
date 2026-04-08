@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import {
-  ContextSwitcher, ContextBadge, CONTEXT_CONFIG,
+  ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
 
@@ -78,9 +78,11 @@ interface AgentTrackerProps {
   onAgentsChange: (agents: Agent[]) => void;
   tasks: Task[];
   defaultContext?: ActiveContext;
+  /** Shared category list from Home — all contexts across tasks/goals/agents */
+  allCategories?: string[];
 }
 
-export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "all" }: AgentTrackerProps) {
+export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "all", allCategories }: AgentTrackerProps) {
   const [name,           setName]           = useState("");
   const [taskDesc,       setTaskDesc]       = useState("");
   const [linkedTaskId,   setLinkedTaskId]   = useState<string>("");
@@ -101,11 +103,11 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
     (t) => !agents.some((a) => a.linkedTaskId === t.id && (a.status === "running" || a.status === "paused"))
   );
 
-  const counts = {
-    all:      agents.length,
-    work:     agents.filter((a) => a.context === "work").length,
-    personal: agents.filter((a) => a.context === "personal").length,
-  };
+  // Unified categories: use shared list if provided, else derive from own agents
+  const knownCategories = allCategories ?? Array.from(new Set(["work", "personal", ...agents.map((a) => a.context)]));
+
+  const counts: Record<string, number> = { all: agents.length };
+  knownCategories.forEach((ctx) => { counts[ctx] = agents.filter((a) => a.context === ctx).length; });
 
   const addAgent = () => {
     if (!name.trim() || !taskDesc.trim()) {
@@ -158,8 +160,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   return (
     <div className="flex flex-col gap-5">
 
-      {/* Context switcher */}
-      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} />
+      {/* Context switcher — dynamic categories */}
+      <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} />
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -232,11 +234,11 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
           />
         </div>
 
-        {/* Context picker */}
-        <div className="flex items-center gap-2">
-          <span style={LABEL}>Context:</span>
-          {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg  = CONTEXT_CONFIG[ctx];
+        {/* Context picker — dynamic categories */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span style={LABEL}>Category:</span>
+          {knownCategories.map((ctx) => {
+            const cfg  = getContextConfig(ctx);
             const Icon = cfg.icon;
             return (
               <button
@@ -248,8 +250,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                   color:       newCtx === ctx ? cfg.color : M.muted,
                   border:      `1px solid ${newCtx === ctx ? cfg.border : M.border}`,
                   fontFamily:  "'DM Sans', sans-serif",
-                  outline:     newCtx === ctx ? `2px solid ${cfg.color}30` : undefined,
-                  outlineOffset: "2px",
+                  cursor: "pointer",
+                  borderRadius: 0,
                 }}
               >
                 <Icon className="w-3 h-3" />

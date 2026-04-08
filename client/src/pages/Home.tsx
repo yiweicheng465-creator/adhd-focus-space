@@ -116,6 +116,14 @@ export default function Home() {
   const Icon = meta.icon;
   const runningAgents = agents.filter((a) => a.status === "running").length;
 
+  // ── Unified category system: aggregate all contexts from tasks, goals, agents ──
+  const allCategories = Array.from(new Set([
+    "work", "personal",
+    ...tasks.map((t) => t.context),
+    ...goals.map((g) => g.context),
+    ...agents.map((a) => a.context),
+  ])).filter(Boolean);
+
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
       {/* Sidebar */}
@@ -193,6 +201,7 @@ export default function Home() {
                 onMoodChange={setMood}
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
+                allCategories={allCategories}
               />
             )}
 
@@ -314,12 +323,12 @@ export default function Home() {
                 className="p-8 min-h-[600px] flex flex-col"
                 style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
               >
-                <Goals goals={goals} onGoalsChange={setGoals} />
+                <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} />
               </div>
             )}
 
             {activeSection === "agents" && (
-              <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} />
+              <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} allCategories={allCategories} />
             )}
           </div>
         </div>

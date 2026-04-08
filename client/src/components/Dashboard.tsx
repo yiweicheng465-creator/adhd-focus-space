@@ -29,6 +29,8 @@ interface DashboardProps {
   onMoodChange: (mood: number) => void;
   onNavigate: (section: string) => void;
   onSessionComplete: () => void;
+  /** Shared category list from Home — all contexts across tasks/goals/agents */
+  allCategories?: string[];
 }
 
 const DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -72,7 +74,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNavigate, onSessionComplete }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNavigate, onSessionComplete, allCategories }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -198,41 +200,45 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
         <MoodCheckIn currentMood={mood} onMoodChange={onMoodChange} />
       </div>
 
-      {/* ── Work / Personal breakdown ── */}
+      {/* ── Category breakdown — dynamic, shows all known categories ── */}
       {activeContext === "all" && (
-        <div className="grid grid-cols-2 gap-4">
-          {[
-            { ctx: "work",     label: "Work",     icon: Briefcase, color: "oklch(0.48 0.07 145)", bg: "oklch(0.48 0.07 145 / 0.07)", border: "oklch(0.48 0.07 145 / 0.22)" },
-            { ctx: "personal", label: "Personal", icon: User,      color: "oklch(0.52 0.06 300)", bg: "oklch(0.52 0.06 300 / 0.07)", border: "oklch(0.52 0.06 300 / 0.22)" },
-          ].map(({ ctx, label, icon: Icon, color, bg, border }) => (
-            <button
-              key={ctx}
-              onClick={() => setActiveContext(ctx as ActiveContext)}
-              className="p-5 text-left transition-all hover:opacity-90 relative overflow-hidden"
-              style={{ background: bg, border: `1px solid ${border}` }}
-            >
-              {/* Geometric accent line */}
-              <div className="absolute top-0 left-0 w-full h-0.5" style={{ background: color, opacity: 0.4 }} />
-              <div className="flex items-center gap-2 mb-3">
-                <Icon className="w-3.5 h-3.5" style={{ color }} />
-                <span className="editorial-label" style={{ color }}>{label}</span>
-              </div>
-              <div className="flex items-end gap-6">
-                <div>
-                  <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color }}>
-                    {tasks.filter((t) => !t.done && t.context === ctx).length}
-                  </p>
-                  <p className="editorial-label">tasks</p>
+        <div
+          className="grid gap-4"
+          style={{ gridTemplateColumns: `repeat(${Math.min((allCategories ?? ["work","personal"]).length, 4)}, minmax(0, 1fr))` }}
+        >
+          {(allCategories ?? ["work", "personal"]).map((ctx) => {
+            const cfg = getContextConfig(ctx);
+            const Icon = cfg.icon;
+            return (
+              <button
+                key={ctx}
+                onClick={() => setActiveContext(ctx as ActiveContext)}
+                className="p-5 text-left transition-all hover:opacity-90 relative overflow-hidden"
+                style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}
+              >
+                {/* Geometric accent line */}
+                <div className="absolute top-0 left-0 w-full h-0.5" style={{ background: cfg.color, opacity: 0.4 }} />
+                <div className="flex items-center gap-2 mb-3">
+                  <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
+                  <span className="editorial-label" style={{ color: cfg.color }}>{cfg.label}</span>
                 </div>
-                <div>
-                  <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color }}>
-                    {agents.filter((a) => a.status === "running" && a.context === ctx).length}
-                  </p>
-                  <p className="editorial-label">agents</p>
+                <div className="flex items-end gap-6">
+                  <div>
+                    <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color: cfg.color }}>
+                      {tasks.filter((t) => !t.done && t.context === ctx).length}
+                    </p>
+                    <p className="editorial-label">tasks</p>
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color: cfg.color }}>
+                      {agents.filter((a) => a.status === "running" && a.context === ctx).length}
+                    </p>
+                    <p className="editorial-label">agents</p>
+                  </div>
                 </div>
-              </div>
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
