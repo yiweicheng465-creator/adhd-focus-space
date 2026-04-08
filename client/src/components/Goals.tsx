@@ -1,23 +1,17 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Goals Tracker
-   Design: Simple weekly goals with progress bars
-   Context: Work (indigo) | Personal (violet) tags on every goal
+   ADHD FOCUS SPACE — Goals Tracker v3.0 (Morandi)
+   Progress: coral bar, sage completed, slumber neutral
    ============================================================ */
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
-  ContextSwitcher,
-  ContextBadge,
-  CONTEXT_CONFIG,
-  type ItemContext,
-  type ActiveContext,
+  ContextSwitcher, ContextBadge, CONTEXT_CONFIG,
+  type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
 
 export interface Goal {
@@ -28,6 +22,28 @@ export interface Goal {
   createdAt: Date;
 }
 
+const M = {
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
+  sage:     "oklch(0.52 0.07 145)",
+  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
+  sageBdr:  "oklch(0.52 0.07 145 / 0.28)",
+  ink:      "oklch(0.28 0.018 65)",
+  muted:    "oklch(0.55 0.018 70)",
+  border:   "oklch(0.88 0.014 75)",
+  card:     "oklch(0.985 0.007 80)",
+};
+
+const LABEL: React.CSSProperties = {
+  fontFamily: "'DM Sans', sans-serif",
+  fontSize: "0.65rem",
+  fontWeight: 500,
+  letterSpacing: "0.10em",
+  textTransform: "uppercase",
+  color: M.muted,
+};
+
 interface GoalsProps {
   goals: Goal[];
   onGoalsChange: (goals: Goal[]) => void;
@@ -35,76 +51,68 @@ interface GoalsProps {
 }
 
 export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsProps) {
-  const [newGoal, setNewGoal] = useState("");
-  const [newGoalContext, setNewGoalContext] = useState<ItemContext>("work");
+  const [newGoal,       setNewGoal]       = useState("");
+  const [newGoalCtx,    setNewGoalCtx]    = useState<ItemContext>("work");
   const [activeContext, setActiveContext] = useState<ActiveContext>(defaultContext);
 
-  const visibleGoals = goals.filter((g) =>
-    activeContext === "all" ? true : g.context === activeContext
-  );
+  const visibleGoals = goals.filter((g) => activeContext === "all" ? true : g.context === activeContext);
 
   const addGoal = () => {
     if (!newGoal.trim()) return;
-    const contextGoals = goals.filter((g) => g.context === newGoalContext);
-    if (contextGoals.length >= 5) {
-      toast.error(`Max 5 ${newGoalContext} goals. Focus is power!`, { duration: 3000 });
+    if (goals.filter((g) => g.context === newGoalCtx).length >= 5) {
+      toast.error(`Max 5 ${newGoalCtx} goals. Focus is power!`, { duration: 3000 });
       return;
     }
-    const goal: Goal = {
-      id: nanoid(),
-      text: newGoal.trim(),
-      progress: 0,
-      context: newGoalContext,
-      createdAt: new Date(),
-    };
-    onGoalsChange([...goals, goal]);
+    onGoalsChange([...goals, { id: nanoid(), text: newGoal.trim(), progress: 0, context: newGoalCtx, createdAt: new Date() }]);
     setNewGoal("");
-    toast.success("Goal set! You've got this.", { duration: 2000 });
+    toast.success("Goal set.", { duration: 2000 });
   };
 
   const updateProgress = (id: string, delta: number) => {
     onGoalsChange(goals.map((g) => {
       if (g.id !== id) return g;
-      const newProgress = Math.min(100, Math.max(0, g.progress + delta));
-      if (newProgress === 100) toast.success("Goal complete! Amazing work! 🎯", { duration: 3000 });
-      return { ...g, progress: newProgress };
+      const next = Math.min(100, Math.max(0, g.progress + delta));
+      if (next === 100) toast.success("Goal complete! 🎯", { duration: 3000 });
+      return { ...g, progress: next };
     }));
   };
 
-  const deleteGoal = (id: string) => {
-    onGoalsChange(goals.filter((g) => g.id !== id));
-  };
+  const deleteGoal = (id: string) => onGoalsChange(goals.filter((g) => g.id !== id));
 
   const avgProgress = visibleGoals.length > 0
-    ? Math.round(visibleGoals.reduce((sum, g) => sum + g.progress, 0) / visibleGoals.length)
-    : 0;
+    ? Math.round(visibleGoals.reduce((sum, g) => sum + g.progress, 0) / visibleGoals.length) : 0;
 
   const counts = {
-    all: goals.length,
-    work: goals.filter((g) => g.context === "work").length,
+    all:      goals.length,
+    work:     goals.filter((g) => g.context === "work").length,
     personal: goals.filter((g) => g.context === "personal").length,
   };
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* Context switcher */}
       <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} />
 
       {/* Overall progress */}
       {visibleGoals.length > 0 && (
-        <div className="p-4 rounded-xl bg-[oklch(0.65_0.14_185_/_0.06)] border border-[oklch(0.65_0.14_185_/_0.15)]">
+        <div className="p-4" style={{ background: M.coralBg, border: `1px solid ${M.coralBdr}` }}>
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-              <span className="text-sm font-medium">
+              <TrendingUp className="w-4 h-4" style={{ color: M.coral }} />
+              <span className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
                 {activeContext === "all" ? "Overall" : activeContext === "work" ? "Work" : "Personal"} Progress
               </span>
             </div>
-            <span className="text-sm font-display font-bold text-[oklch(0.55_0.14_185)]">
+            <span className="text-sm font-bold" style={{ color: M.coral, fontFamily: "'Playfair Display', serif" }}>
               {avgProgress}%
             </span>
           </div>
-          <Progress value={avgProgress} className="h-2" />
+          {/* Custom progress bar */}
+          <div className="h-1.5 w-full" style={{ background: "oklch(0.88 0.014 75)" }}>
+            <div
+              className="h-full transition-all duration-500"
+              style={{ width: `${avgProgress}%`, background: M.coral }}
+            />
+          </div>
         </div>
       )}
 
@@ -116,28 +124,35 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
             onChange={(e) => setNewGoal(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addGoal()}
             placeholder="Set a goal for this week..."
-            className="flex-1 bg-white"
+            className="flex-1"
+            style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
           />
-          <Button onClick={addGoal} style={{ background: "oklch(0.65 0.14 185)" }}>
+          <button
+            onClick={addGoal}
+            className="px-4 py-2 text-sm font-medium transition-all hover:opacity-88"
+            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+          >
             <Plus className="w-4 h-4" />
-          </Button>
+          </button>
         </div>
 
-        {/* Context picker for new goal */}
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">Context:</span>
+          <span style={LABEL}>Context:</span>
           {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg = CONTEXT_CONFIG[ctx];
+            const cfg  = CONTEXT_CONFIG[ctx];
             const Icon = cfg.icon;
+            const isActive = newGoalCtx === ctx;
             return (
               <button
                 key={ctx}
-                onClick={() => setNewGoalContext(ctx)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all",
-                  newGoalContext === ctx ? "ring-2 ring-offset-1 scale-105" : "opacity-60 hover:opacity-100"
-                )}
-                style={{ background: cfg.bg, color: cfg.color, borderColor: cfg.border }}
+                onClick={() => setNewGoalCtx(ctx)}
+                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
+                style={{
+                  background:  isActive ? cfg.bg : "transparent",
+                  color:       isActive ? cfg.color : M.muted,
+                  border:      `1px solid ${isActive ? cfg.border : M.border}`,
+                  fontFamily:  "'DM Sans', sans-serif",
+                }}
               >
                 <Icon className="w-3 h-3" />
                 {cfg.label}
@@ -151,75 +166,92 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
       <div className="flex-1 overflow-y-auto space-y-3 pr-1">
         {visibleGoals.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Target className="w-10 h-10 text-muted-foreground/30 mb-3" />
-            <p className="text-sm text-muted-foreground">
+            <Target className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
               Set up to 5 goals per context. Keep them specific and achievable.
             </p>
           </div>
         )}
 
-        {visibleGoals.map((goal) => (
-          <div
-            key={goal.id}
-            className={cn(
-              "group p-4 rounded-xl border bg-white transition-all",
-              goal.progress === 100
-                ? "border-[oklch(0.75_0.15_75_/_0.4)] bg-[oklch(0.75_0.15_75_/_0.04)]"
-                : "border-border hover:border-[oklch(0.65_0.14_185_/_0.3)]"
-            )}
-          >
-            <div className="flex items-start justify-between gap-2 mb-3">
-              <div className="flex items-start gap-2 flex-1 min-w-0">
-                <Target className={cn(
-                  "w-4 h-4 mt-0.5 shrink-0",
-                  goal.progress === 100 ? "text-[oklch(0.65_0.15_75)]" : "text-[oklch(0.55_0.14_185)]"
-                )} />
-                <p className={cn(
-                  "text-sm font-medium leading-snug",
-                  goal.progress === 100 && "line-through text-muted-foreground"
-                )}>
-                  {goal.text}
-                </p>
+        {visibleGoals.map((goal) => {
+          const done = goal.progress === 100;
+          return (
+            <div
+              key={goal.id}
+              className="group p-4 transition-all"
+              style={{
+                background: done ? M.sageBg : M.card,
+                border:     `1px solid ${done ? M.sageBdr : M.border}`,
+              }}
+              onMouseEnter={(e) => {
+                if (!done) (e.currentTarget as HTMLDivElement).style.borderColor = M.coralBdr;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = done ? M.sageBdr : M.border;
+              }}
+            >
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex items-start gap-2 flex-1 min-w-0">
+                  <Target className="w-4 h-4 mt-0.5 shrink-0" style={{ color: done ? M.sage : M.coral }} />
+                  <p
+                    className={cn("text-sm font-medium leading-snug", done && "line-through")}
+                    style={{ color: done ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
+                  >
+                    {goal.text}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <ContextBadge context={goal.context} />
+                  <button
+                    onClick={() => deleteGoal(goal.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    style={{ color: M.muted }}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <ContextBadge context={goal.context} />
+
+              {/* Progress bar */}
+              <div className="flex items-center gap-3">
+                <div className="flex-1 h-1.5" style={{ background: "oklch(0.88 0.014 75)" }}>
+                  <div
+                    className="h-full transition-all duration-500"
+                    style={{ width: `${goal.progress}%`, background: done ? M.sage : M.coral }}
+                  />
+                </div>
+                <span className="text-xs font-medium w-8 text-right" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  {goal.progress}%
+                </span>
+              </div>
+
+              {/* Progress buttons */}
+              <div className="flex items-center gap-2 mt-2">
+                {[10, 25, 50].map((delta) => (
+                  <button
+                    key={delta}
+                    onClick={() => updateProgress(goal.id, delta)}
+                    disabled={done}
+                    className="text-xs px-2 py-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.coralBdr; (e.currentTarget as HTMLButtonElement).style.color = M.coral; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.border; (e.currentTarget as HTMLButtonElement).style.color = M.muted; }}
+                  >
+                    +{delta}%
+                  </button>
+                ))}
                 <button
-                  onClick={() => deleteGoal(goal.id)}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                  onClick={() => updateProgress(goal.id, -10)}
+                  disabled={goal.progress <= 0}
+                  className="text-xs px-2 py-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                  style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
                 >
-                  <Trash2 className="w-4 h-4" />
+                  -10%
                 </button>
               </div>
             </div>
-
-            <div className="flex items-center gap-3">
-              <Progress value={goal.progress} className="flex-1 h-2" />
-              <span className="text-xs font-medium text-muted-foreground w-8 text-right">
-                {goal.progress}%
-              </span>
-            </div>
-
-            <div className="flex items-center gap-2 mt-2">
-              {[10, 25, 50].map((delta) => (
-                <button
-                  key={delta}
-                  onClick={() => updateProgress(goal.id, delta)}
-                  disabled={goal.progress >= 100}
-                  className="text-xs px-2 py-0.5 rounded-md border border-border text-muted-foreground hover:border-[oklch(0.65_0.14_185_/_0.4)] hover:text-[oklch(0.55_0.14_185)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-                >
-                  +{delta}%
-                </button>
-              ))}
-              <button
-                onClick={() => updateProgress(goal.id, -10)}
-                disabled={goal.progress <= 0}
-                className="text-xs px-2 py-0.5 rounded-md border border-border text-muted-foreground hover:border-destructive/40 hover:text-destructive transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                -10%
-              </button>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );

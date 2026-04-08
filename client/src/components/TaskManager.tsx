@@ -1,18 +1,19 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Task Manager
-   Design: Priority chips (teal=focus, coral=urgent, gold=done)
-   Context: Work (indigo) | Personal (violet) tags on every task
+   ADHD FOCUS SPACE — Task Manager v3.0 (Morandi)
+   Priority: Urgent=coral, Focus=sage, Normal=slumber
+   Context: Work=slate-indigo, Personal=dusty-rose
    ============================================================ */
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Plus, Trash2, Flame, Star, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Plus, Star, Trash2, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
-import { ContextSwitcher, ContextBadge, CONTEXT_CONFIG, type ItemContext, type ActiveContext } from "./ContextSwitcher";
+import {
+  ContextSwitcher, ContextBadge, CONTEXT_CONFIG,
+  type ItemContext, type ActiveContext,
+} from "./ContextSwitcher";
 
 export type TaskPriority = "focus" | "urgent" | "normal";
 
@@ -25,15 +26,47 @@ export interface Task {
   createdAt: Date;
 }
 
+/* Morandi priority palette */
 const PRIORITY_CONFIG: Record<TaskPriority, {
-  label: string;
-  icon: React.ElementType;
-  chipClass: string;
-  color: string;
+  label: string; icon: React.ElementType;
+  color: string; bg: string; border: string;
 }> = {
-  urgent: { label: "Urgent", icon: Flame, chipClass: "chip-urgent", color: "oklch(0.65 0.22 15)" },
-  focus:  { label: "Focus",  icon: Zap,   chipClass: "chip-focus",  color: "oklch(0.65 0.14 185)" },
-  normal: { label: "Normal", icon: Star,  chipClass: "chip-done",   color: "oklch(0.75 0.15 75)" },
+  urgent: {
+    label: "Urgent", icon: Flame,
+    color:  "oklch(0.55 0.09 35)",
+    bg:     "oklch(0.55 0.09 35 / 0.08)",
+    border: "oklch(0.55 0.09 35 / 0.28)",
+  },
+  focus: {
+    label: "Focus", icon: Zap,
+    color:  "oklch(0.52 0.07 145)",
+    bg:     "oklch(0.52 0.07 145 / 0.08)",
+    border: "oklch(0.52 0.07 145 / 0.28)",
+  },
+  normal: {
+    label: "Normal", icon: Star,
+    color:  "oklch(0.55 0.018 70)",
+    bg:     "oklch(0.72 0.018 75 / 0.15)",
+    border: "oklch(0.72 0.018 75 / 0.40)",
+  },
+};
+
+const M = {
+  ink:    "oklch(0.28 0.018 65)",
+  muted:  "oklch(0.55 0.018 70)",
+  border: "oklch(0.88 0.014 75)",
+  card:   "oklch(0.985 0.007 80)",
+  bg:     "oklch(0.972 0.010 78)",
+  coral:  "oklch(0.55 0.09 35)",
+};
+
+const LABEL_STYLE: React.CSSProperties = {
+  fontFamily: "'DM Sans', sans-serif",
+  fontSize: "0.65rem",
+  fontWeight: 500,
+  letterSpacing: "0.10em",
+  textTransform: "uppercase",
+  color: M.muted,
 };
 
 interface TaskManagerProps {
@@ -43,26 +76,23 @@ interface TaskManagerProps {
 }
 
 export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: TaskManagerProps) {
-  const [newTaskText, setNewTaskText] = useState("");
+  const [newTaskText,     setNewTaskText]     = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("focus");
-  const [newTaskContext, setNewTaskContext] = useState<ItemContext>("work");
-  const [completingId, setCompletingId] = useState<string | null>(null);
-  const [activeContext, setActiveContext] = useState<ActiveContext>(defaultContext);
-  const [filter, setFilter] = useState<"all" | "active" | "done">("active");
+  const [newTaskContext,  setNewTaskContext]  = useState<ItemContext>("work");
+  const [completingId,    setCompletingId]    = useState<string | null>(null);
+  const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
+  const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
 
   const addTask = () => {
     if (!newTaskText.trim()) return;
     const task: Task = {
-      id: nanoid(),
-      text: newTaskText.trim(),
-      priority: newTaskPriority,
-      context: newTaskContext,
-      done: false,
-      createdAt: new Date(),
+      id: nanoid(), text: newTaskText.trim(),
+      priority: newTaskPriority, context: newTaskContext,
+      done: false, createdAt: new Date(),
     };
     onTasksChange([task, ...tasks]);
     setNewTaskText("");
-    toast.success("Task added!", { duration: 2000 });
+    toast.success("Task added.", { duration: 2000 });
   };
 
   const toggleTask = (id: string) => {
@@ -73,49 +103,42 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
       setTimeout(() => {
         onTasksChange(tasks.map((t) => t.id === id ? { ...t, done: true } : t));
         setCompletingId(null);
-        toast.success("Task complete! Great work! 🌟", { duration: 3000 });
+        toast.success("Task complete. Well done.", { duration: 3000 });
       }, 400);
     } else {
       onTasksChange(tasks.map((t) => t.id === id ? { ...t, done: false } : t));
     }
   };
 
-  const deleteTask = (id: string) => {
-    onTasksChange(tasks.filter((t) => t.id !== id));
-  };
+  const deleteTask = (id: string) => onTasksChange(tasks.filter((t) => t.id !== id));
 
-  // Context counts for switcher
   const counts = {
-    all: tasks.filter((t) => !t.done).length,
-    work: tasks.filter((t) => !t.done && t.context === "work").length,
+    all:      tasks.filter((t) => !t.done).length,
+    work:     tasks.filter((t) => !t.done && t.context === "work").length,
     personal: tasks.filter((t) => !t.done && t.context === "personal").length,
   };
 
-  const contextFiltered = tasks.filter((t) =>
-    activeContext === "all" ? true : t.context === activeContext
-  );
-
+  const contextFiltered = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
   const sorted = [...contextFiltered].sort((a, b) => {
     if (a.done !== b.done) return a.done ? 1 : -1;
     const order: TaskPriority[] = ["urgent", "focus", "normal"];
     return order.indexOf(a.priority) - order.indexOf(b.priority);
   });
-
   const filtered = sorted.filter((t) => {
     if (filter === "active") return !t.done;
-    if (filter === "done") return t.done;
+    if (filter === "done")   return t.done;
     return true;
   });
 
   const activeCount = contextFiltered.filter((t) => !t.done).length;
-  const doneCount = contextFiltered.filter((t) => t.done).length;
+  const doneCount   = contextFiltered.filter((t) => t.done).length;
 
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Context switcher */}
       <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} />
 
-      {/* Add task input */}
+      {/* Add task */}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
           <Input
@@ -123,27 +146,37 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
             placeholder="What needs to get done?"
-            className="flex-1 bg-white border-border focus-visible:ring-[oklch(0.65_0.14_185)]"
+            className="flex-1"
+            style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
           />
-          <Button onClick={addTask} className="shrink-0" style={{ background: "oklch(0.65 0.14 185)" }}>
-            <Plus className="w-4 h-4 mr-1" />
+          <button
+            onClick={addTask}
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium shrink-0 transition-all hover:opacity-88"
+            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+          >
+            <Plus className="w-4 h-4" />
             Add
-          </Button>
+          </button>
         </div>
 
         {/* Priority + context row */}
         <div className="flex items-center gap-2 flex-wrap">
           {(Object.keys(PRIORITY_CONFIG) as TaskPriority[]).map((p) => {
-            const { label, icon: Icon, chipClass } = PRIORITY_CONFIG[p];
+            const { label, icon: Icon, color, bg, border } = PRIORITY_CONFIG[p];
+            const isActive = newTaskPriority === p;
             return (
               <button
                 key={p}
                 onClick={() => setNewTaskPriority(p)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium transition-all",
-                  chipClass,
-                  newTaskPriority === p ? "ring-2 ring-offset-1 scale-105" : "opacity-60 hover:opacity-100"
-                )}
+                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
+                style={{
+                  background:  isActive ? bg : "transparent",
+                  color:       isActive ? color : M.muted,
+                  border:      `1px solid ${isActive ? border : M.border}`,
+                  fontFamily:  "'DM Sans', sans-serif",
+                  outline:     isActive ? `2px solid ${color}25` : undefined,
+                  outlineOffset: "2px",
+                }}
               >
                 <Icon className="w-3 h-3" />
                 {label}
@@ -151,23 +184,24 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
             );
           })}
 
-          <div className="w-px h-4 bg-border mx-1" />
+          <div className="w-px h-4" style={{ background: M.border }} />
 
           {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg = CONTEXT_CONFIG[ctx];
+            const cfg  = CONTEXT_CONFIG[ctx];
             const Icon = cfg.icon;
+            const isActive = newTaskContext === ctx;
             return (
               <button
                 key={ctx}
                 onClick={() => setNewTaskContext(ctx)}
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all",
-                  newTaskContext === ctx ? "ring-2 ring-offset-1 scale-105" : "opacity-60 hover:opacity-100"
-                )}
+                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
                 style={{
-                  background: cfg.bg,
-                  color: cfg.color,
-                  borderColor: cfg.border,
+                  background:  isActive ? cfg.bg : "transparent",
+                  color:       isActive ? cfg.color : M.muted,
+                  border:      `1px solid ${isActive ? cfg.border : M.border}`,
+                  fontFamily:  "'DM Sans', sans-serif",
+                  outline:     isActive ? `2px solid ${cfg.color}25` : undefined,
+                  outlineOffset: "2px",
                 }}
               >
                 <Icon className="w-3 h-3" />
@@ -179,68 +213,81 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
       </div>
 
       {/* Filter tabs */}
-      <div className="flex gap-1 text-sm border-b border-border pb-2">
+      <div className="flex gap-0 text-xs" style={{ borderBottom: `1px solid ${M.border}` }}>
         {[
           { id: "active", label: `Active (${activeCount})` },
           { id: "done",   label: `Done (${doneCount})` },
           { id: "all",    label: "All" },
-        ].map(({ id, label }) => (
-          <button
-            key={id}
-            onClick={() => setFilter(id as typeof filter)}
-            className={cn(
-              "px-3 py-1 rounded-md transition-colors",
-              filter === id
-                ? "bg-[oklch(0.65_0.14_185_/_0.1)] text-[oklch(0.55_0.14_185)] font-medium"
-                : "text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {label}
-          </button>
-        ))}
+        ].map(({ id, label }) => {
+          const isAct = filter === id;
+          return (
+            <button
+              key={id}
+              onClick={() => setFilter(id as typeof filter)}
+              className="px-4 py-2 transition-all"
+              style={{
+                color:        isAct ? M.coral : M.muted,
+                borderBottom: isAct ? `2px solid ${M.coral}` : "2px solid transparent",
+                fontFamily:   "'DM Sans', sans-serif",
+                fontWeight:   isAct ? 600 : 400,
+              }}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
 
       {/* Task list */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-3">
-              <CheckCircle2 className="w-6 h-6 text-muted-foreground" />
-            </div>
-            <p className="text-sm text-muted-foreground">
+            <CheckCircle2 className="w-10 h-10 mb-3" style={{ color: `${M.muted}50` }} />
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
               {filter === "active" ? "No active tasks — add one above!" : "Nothing here yet."}
             </p>
           </div>
         )}
 
         {filtered.map((task) => {
-          const { icon: PIcon, chipClass, color } = PRIORITY_CONFIG[task.priority];
+          const pcfg        = PRIORITY_CONFIG[task.priority];
+          const PIcon       = pcfg.icon;
           const isCompleting = completingId === task.id;
 
           return (
             <div
               key={task.id}
-              className={cn(
-                "group flex items-start gap-3 p-3 rounded-xl border transition-all duration-300",
-                task.done
-                  ? "bg-muted/40 border-border opacity-60"
-                  : "bg-white border-border hover:border-[oklch(0.65_0.14_185_/_0.4)] hover:shadow-sm",
-                isCompleting && "scale-95 opacity-50"
-              )}
+              className={cn("group flex items-start gap-3 p-3 transition-all duration-300")}
+              style={{
+                background:  task.done ? "oklch(0.93 0.012 78 / 0.5)" : M.card,
+                border:      `1px solid ${task.done ? M.border : M.border}`,
+                opacity:     isCompleting ? 0.5 : task.done ? 0.65 : 1,
+                transform:   isCompleting ? "scale(0.97)" : "scale(1)",
+              }}
+              onMouseEnter={(e) => {
+                if (!task.done) (e.currentTarget as HTMLDivElement).style.borderColor = `${M.coral}40`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLDivElement).style.borderColor = M.border;
+              }}
             >
+              {/* Checkbox */}
               <button
                 onClick={() => toggleTask(task.id)}
                 className="mt-0.5 flex-shrink-0 transition-transform hover:scale-110"
               >
-                {task.done ? (
-                  <CheckCircle2 className="w-5 h-5" style={{ color }} />
-                ) : (
-                  <Circle className="w-5 h-5 text-muted-foreground hover:text-[oklch(0.65_0.14_185)]" />
-                )}
+                {task.done
+                  ? <CheckCircle2 className="w-5 h-5" style={{ color: pcfg.color }} />
+                  : <Circle      className="w-5 h-5" style={{ color: M.muted }} />
+                }
               </button>
 
+              {/* Text */}
               <div className="flex-1 min-w-0">
-                <p className={cn("text-sm leading-snug", task.done && "line-through text-muted-foreground")}>
+                <p
+                  className={cn("text-sm leading-snug", task.done && "line-through")}
+                  style={{ color: task.done ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
+                >
                   {task.text}
                 </p>
               </div>
@@ -249,14 +296,19 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
               <ContextBadge context={task.context} />
 
               {/* Priority badge */}
-              <Badge className={cn("text-xs shrink-0", chipClass)}>
-                <PIcon className="w-3 h-3 mr-1" />
-                {PRIORITY_CONFIG[task.priority].label}
-              </Badge>
+              <span
+                className="flex items-center gap-1 text-[10px] px-2 py-0.5 font-medium shrink-0"
+                style={{ background: pcfg.bg, color: pcfg.color, border: `1px solid ${pcfg.border}`, fontFamily: "'DM Sans', sans-serif" }}
+              >
+                <PIcon className="w-2.5 h-2.5" />
+                {pcfg.label}
+              </span>
 
+              {/* Delete */}
               <button
                 onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ color: M.muted }}
               >
                 <Trash2 className="w-4 h-4" />
               </button>

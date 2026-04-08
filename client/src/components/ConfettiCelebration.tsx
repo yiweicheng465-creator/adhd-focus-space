@@ -21,13 +21,14 @@ interface Particle {
   shape: "rect" | "circle";
 }
 
+// Morandi palette — warm, muted, editorial
 const COLORS = [
-  "oklch(0.65 0.14 185)",  // teal
-  "oklch(0.75 0.15 75)",   // gold
-  "oklch(0.65 0.22 15)",   // coral
-  "oklch(0.6 0.12 145)",   // green
-  "oklch(0.5 0.18 260)",   // indigo
-  "oklch(0.55 0.18 310)",  // violet
+  "oklch(0.55 0.09 35)",   // coral
+  "oklch(0.52 0.07 145)",  // sage
+  "oklch(0.62 0.06 20)",   // pinky beige
+  "oklch(0.55 0.018 70)",  // slumber
+  "oklch(0.42 0.04 250)",  // muted slate
+  "oklch(0.72 0.018 75)",  // warm sand
 ];
 
 interface ConfettiCelebrationProps {

@@ -1,11 +1,9 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Daily Wins Tracker
-   Design: Gold accent, celebratory, dopamine-rewarding
-   Features: Log wins, view history, streak counter
+   ADHD FOCUS SPACE — Daily Wins Tracker v3.0 (Morandi)
+   Warm pinky-beige for today's wins, slumber for totals
    ============================================================ */
 
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { Award, Plus, Sparkles, Trophy } from "lucide-react";
@@ -13,13 +11,26 @@ import { toast } from "sonner";
 import { nanoid } from "nanoid";
 
 export interface Win {
-  id: string;
-  text: string;
-  emoji: string;
-  createdAt: Date;
+  id: string; text: string; emoji: string; createdAt: Date;
 }
 
 const WIN_EMOJIS = ["🌟", "🎯", "💪", "🚀", "✅", "🏆", "⚡", "🎉", "🔥", "💎"];
+
+const M = {
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
+  pink:     "oklch(0.62 0.06 20)",
+  pinkBg:   "oklch(0.62 0.06 20 / 0.08)",
+  pinkBdr:  "oklch(0.62 0.06 20 / 0.28)",
+  slumber:  "oklch(0.55 0.018 70)",
+  slumBg:   "oklch(0.72 0.018 75 / 0.15)",
+  slumBdr:  "oklch(0.72 0.018 75 / 0.40)",
+  ink:      "oklch(0.28 0.018 65)",
+  muted:    "oklch(0.55 0.018 70)",
+  border:   "oklch(0.88 0.014 75)",
+  card:     "oklch(0.985 0.007 80)",
+};
 
 interface DailyWinsProps {
   wins: Win[];
@@ -27,66 +38,52 @@ interface DailyWinsProps {
 }
 
 export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
-  const [newWin, setNewWin] = useState("");
-  const [selectedEmoji, setSelectedEmoji] = useState(WIN_EMOJIS[0]);
+  const [newWin,          setNewWin]          = useState("");
+  const [selectedEmoji,   setSelectedEmoji]   = useState(WIN_EMOJIS[0]);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const addWin = () => {
     if (!newWin.trim()) return;
-    const win: Win = {
-      id: nanoid(),
-      text: newWin.trim(),
-      emoji: selectedEmoji,
-      createdAt: new Date(),
-    };
-    onWinsChange([win, ...wins]);
+    onWinsChange([{ id: nanoid(), text: newWin.trim(), emoji: selectedEmoji, createdAt: new Date() }, ...wins]);
     setNewWin("");
-    toast.success("Win logged! You're crushing it! 🏆", { duration: 3000 });
+    toast.success("Win logged! You're doing great.", { duration: 3000 });
   };
 
   const todayWins = wins.filter((w) => {
     const today = new Date();
-    const winDate = new Date(w.createdAt);
-    return (
-      winDate.getDate() === today.getDate() &&
-      winDate.getMonth() === today.getMonth() &&
-      winDate.getFullYear() === today.getFullYear()
-    );
+    const d     = new Date(w.createdAt);
+    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   });
 
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Header stats */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="p-3 rounded-xl bg-[oklch(0.75_0.15_75_/_0.08)] border border-[oklch(0.75_0.15_75_/_0.2)]">
+        <div className="p-3" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}` }}>
           <div className="flex items-center gap-2 mb-1">
-            <Trophy className="w-4 h-4 text-[oklch(0.65_0.15_75)]" />
-            <span className="text-xs text-muted-foreground font-medium">Today</span>
+            <Trophy className="w-4 h-4" style={{ color: M.pink }} />
+            <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Today</span>
           </div>
-          <p className="text-2xl font-display font-bold text-[oklch(0.55_0.15_75)]">
-            {todayWins.length}
-          </p>
-          <p className="text-xs text-muted-foreground">wins logged</p>
+          <p className="text-2xl font-bold" style={{ color: M.pink, fontFamily: "'Playfair Display', serif" }}>{todayWins.length}</p>
+          <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>wins logged</p>
         </div>
-        <div className="p-3 rounded-xl bg-[oklch(0.65_0.14_185_/_0.08)] border border-[oklch(0.65_0.14_185_/_0.2)]">
+        <div className="p-3" style={{ background: M.slumBg, border: `1px solid ${M.slumBdr}` }}>
           <div className="flex items-center gap-2 mb-1">
-            <Award className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
-            <span className="text-xs text-muted-foreground font-medium">Total</span>
+            <Award className="w-4 h-4" style={{ color: M.slumber }} />
+            <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Total</span>
           </div>
-          <p className="text-2xl font-display font-bold text-[oklch(0.55_0.14_185)]">
-            {wins.length}
-          </p>
-          <p className="text-xs text-muted-foreground">all time</p>
+          <p className="text-2xl font-bold" style={{ color: M.slumber, fontFamily: "'Playfair Display', serif" }}>{wins.length}</p>
+          <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>all time</p>
         </div>
       </div>
 
       {/* Add win */}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
-          {/* Emoji picker trigger */}
           <button
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="w-10 h-10 rounded-lg border border-border bg-white flex items-center justify-center text-lg hover:border-[oklch(0.75_0.15_75)] transition-colors shrink-0"
+            className="w-10 h-10 flex items-center justify-center text-lg transition-all shrink-0"
+            style={{ border: `1px solid ${M.border}`, background: M.card }}
           >
             {selectedEmoji}
           </button>
@@ -95,31 +92,29 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
             onChange={(e) => setNewWin(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addWin()}
             placeholder="What did you accomplish?"
-            className="flex-1 bg-white"
+            className="flex-1"
+            style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
           />
-          <Button
+          <button
             onClick={addWin}
-            className="shrink-0"
-            style={{ background: "oklch(0.65 0.15 75)" }}
+            className="px-4 py-2 text-sm font-medium shrink-0 transition-all hover:opacity-88"
+            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
           >
             <Plus className="w-4 h-4" />
-          </Button>
+          </button>
         </div>
 
-        {/* Emoji picker */}
         {showEmojiPicker && (
-          <div className="flex flex-wrap gap-2 p-3 bg-white rounded-xl border border-border shadow-md">
+          <div className="flex flex-wrap gap-2 p-3" style={{ background: M.card, border: `1px solid ${M.border}` }}>
             {WIN_EMOJIS.map((emoji) => (
               <button
                 key={emoji}
-                onClick={() => {
-                  setSelectedEmoji(emoji);
-                  setShowEmojiPicker(false);
+                onClick={() => { setSelectedEmoji(emoji); setShowEmojiPicker(false); }}
+                className={cn("w-8 h-8 flex items-center justify-center text-lg transition-all")}
+                style={{
+                  background:  selectedEmoji === emoji ? M.pinkBg : "transparent",
+                  border:      `1px solid ${selectedEmoji === emoji ? M.pinkBdr : "transparent"}`,
                 }}
-                className={cn(
-                  "w-8 h-8 rounded-lg flex items-center justify-center text-lg hover:bg-muted transition-colors",
-                  selectedEmoji === emoji && "bg-[oklch(0.75_0.15_75_/_0.15)] ring-1 ring-[oklch(0.75_0.15_75)]"
-                )}
               >
                 {emoji}
               </button>
@@ -132,8 +127,8 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {wins.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Sparkles className="w-10 h-10 text-[oklch(0.75_0.15_75_/_0.4)] mb-3" />
-            <p className="text-sm text-muted-foreground">
+            <Sparkles className="w-10 h-10 mb-3" style={{ color: `${M.pink}50` }} />
+            <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
               Log your first win! Every small step counts.
             </p>
           </div>
@@ -144,29 +139,22 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
           return (
             <div
               key={win.id}
-              className={cn(
-                "flex items-start gap-3 p-3 rounded-xl border transition-all",
-                isToday
-                  ? "bg-[oklch(0.75_0.15_75_/_0.06)] border-[oklch(0.75_0.15_75_/_0.25)]"
-                  : "bg-white border-border opacity-70"
-              )}
+              className="flex items-start gap-3 p-3 transition-all"
+              style={{
+                background: isToday ? M.pinkBg : "oklch(0.93 0.012 78 / 0.4)",
+                border:     `1px solid ${isToday ? M.pinkBdr : M.border}`,
+                opacity:    isToday ? 1 : 0.65,
+              }}
             >
               <span className="text-xl flex-shrink-0">{win.emoji}</span>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium leading-snug">{win.text}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  {isToday
-                    ? "Today"
-                    : new Date(win.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                      })}
+                <p className="text-sm font-medium leading-snug" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{win.text}</p>
+                <p className="text-xs mt-0.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  {isToday ? "Today" : new Date(win.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </p>
               </div>
               {isToday && (
-                <span className="text-xs text-[oklch(0.6_0.15_75)] font-medium shrink-0">
-                  Today ✨
-                </span>
+                <span className="text-xs font-medium shrink-0" style={{ color: M.pink, fontFamily: "'DM Sans', sans-serif" }}>Today ✨</span>
               )}
             </div>
           );

@@ -1,18 +1,13 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Editorial Sidebar v2.0
-   Design: Warm cream, thin 1px borders, serif logo mark
-   Layout: Narrow 56px column, icon + tiny caps label
+   ADHD FOCUS SPACE — Sidebar v3.0 (Morandi)
+   Logo: SVG mark — overlapping circles with serif "A"
+   Colors: parchment bg, coral active, griffin charcoal text
    ============================================================ */
 
 import React, { useEffect, useState } from "react";
 import {
-  Bot,
-  Brain,
-  CheckSquare,
-  Clock,
-  LayoutDashboard,
-  Sparkles,
-  Target,
+  Bot, Brain, CheckSquare, Clock,
+  LayoutDashboard, Sparkles, Target,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -21,15 +16,36 @@ interface SidebarProps {
   onSectionChange: (section: string) => void;
 }
 
-const NAV_ITEMS = [
-  { id: "dashboard",  shortLabel: "HOME",   icon: LayoutDashboard, title: "Dashboard"  },
-  { id: "focus",      shortLabel: "FOCUS",  icon: Clock,           title: "Focus Timer" },
-  { id: "tasks",      shortLabel: "TASKS",  icon: CheckSquare,     title: "My Tasks"   },
-  { id: "wins",       shortLabel: "WINS",   icon: Sparkles,        title: "Daily Wins" },
-  { id: "braindump",  shortLabel: "DUMP",   icon: Brain,           title: "Brain Dump" },
-  { id: "goals",      shortLabel: "GOALS",  icon: Target,          title: "Goals"      },
-  { id: "agents",     shortLabel: "AGENTS", icon: Bot,             title: "AI Agents"  },
+const NAV = [
+  { id: "dashboard", short: "HOME",   Icon: LayoutDashboard, title: "Dashboard"   },
+  { id: "focus",     short: "FOCUS",  Icon: Clock,           title: "Focus Timer"  },
+  { id: "tasks",     short: "TASKS",  Icon: CheckSquare,     title: "My Tasks"     },
+  { id: "wins",      short: "WINS",   Icon: Sparkles,        title: "Daily Wins"   },
+  { id: "braindump", short: "DUMP",   Icon: Brain,           title: "Brain Dump"   },
+  { id: "goals",     short: "GOALS",  Icon: Target,          title: "Goals"        },
+  { id: "agents",    short: "AGENTS", Icon: Bot,             title: "AI Agents"    },
 ];
+
+/* ── Logo mark: refined editorial monogram ── */
+function LogoMark() {
+  return (
+    <div className="relative w-10 h-10 flex items-center justify-center">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Outer square with rounded corners — warm parchment fill */}
+        <rect x="1" y="1" width="38" height="38" rx="6" fill="oklch(0.55 0.09 35 / 0.10)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" />
+        {/* Serif italic A — drawn as paths for crispness */}
+        {/* Left stroke of A */}
+        <line x1="12" y1="30" x2="20" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="2" strokeLinecap="round" />
+        {/* Right stroke of A */}
+        <line x1="28" y1="30" x2="20" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="2" strokeLinecap="round" />
+        {/* Crossbar */}
+        <line x1="14.5" y1="22" x2="25.5" y2="22" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Small decorative dot — top right corner */}
+        <circle cx="33" cy="7" r="2" fill="oklch(0.55 0.09 35)" />
+      </svg>
+    </div>
+  );
+}
 
 function LiveTime() {
   const fmt = () =>
@@ -41,7 +57,7 @@ function LiveTime() {
   }, []);
   return (
     <span
-      className="text-[8px] tracking-widest"
+      className="text-[8px] tracking-widest tabular-nums"
       style={{ color: "oklch(0.62 0.015 70)", fontFamily: "'DM Sans', sans-serif" }}
     >
       {t}
@@ -52,81 +68,70 @@ function LiveTime() {
 export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-5 gap-0"
+      className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-5"
       style={{
-        background: "oklch(0.955 0.018 78)",
+        background: "oklch(0.955 0.016 76)",
         borderRight: "1px solid oklch(0.87 0.014 75)",
       }}
     >
-      {/* Logo mark */}
-      <div className="mb-5 flex flex-col items-center">
-        <div
-          className="w-8 h-8 flex items-center justify-center"
-          style={{
-            border: "1px solid oklch(0.52 0.14 35)",
-            background: "transparent",
-          }}
-        >
-          <span
-            className="text-sm font-bold italic"
-            style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.52 0.14 35)" }}
-          >
-            A
-          </span>
-        </div>
+      {/* Logo */}
+      <div className="mb-5">
+        <LogoMark />
       </div>
 
-      {/* Thin divider */}
+      {/* Thin rule */}
       <div className="w-6 mb-4" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
 
-      {/* Nav items */}
+      {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-2">
-        {NAV_ITEMS.map(({ id, shortLabel, icon: Icon, title }) => {
-          const isActive = activeSection === id;
+        {NAV.map(({ id, short, Icon, title }) => {
+          const active = activeSection === id;
           return (
             <button
               key={id}
               onClick={() => onSectionChange(id)}
               title={title}
               className={cn(
-                "relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150 group",
-                isActive ? "" : "hover:bg-[oklch(0.52_0.14_35_/_0.04)]"
+                "relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
               )}
               style={{
-                background: isActive ? "oklch(0.52 0.14 35 / 0.08)" : undefined,
+                background: active ? "oklch(0.55 0.09 35 / 0.09)" : "transparent",
+              }}
+              onMouseEnter={(e) => {
+                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.09 35 / 0.04)";
+              }}
+              onMouseLeave={(e) => {
+                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
               }}
             >
-              {/* Active left bar */}
-              {isActive && (
+              {active && (
                 <div
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5"
-                  style={{ background: "oklch(0.52 0.14 35)" }}
+                  style={{ background: "oklch(0.55 0.09 35)" }}
                 />
               )}
               <Icon
-                className="w-[15px] h-[15px] transition-colors"
-                style={{ color: isActive ? "oklch(0.52 0.14 35)" : "oklch(0.55 0.015 70)" }}
+                className="w-[15px] h-[15px]"
+                style={{ color: active ? "oklch(0.55 0.09 35)" : "oklch(0.58 0.018 70)" }}
               />
               <span
                 className="text-[7px] mt-1 tracking-[0.12em] font-medium"
                 style={{
                   fontFamily: "'DM Sans', sans-serif",
-                  color: isActive ? "oklch(0.52 0.14 35)" : "oklch(0.65 0.015 70)",
+                  color: active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)",
                 }}
               >
-                {shortLabel}
+                {short}
               </span>
             </button>
           );
         })}
       </nav>
 
-      {/* Bottom: live time */}
-      <div className="mt-auto flex flex-col items-center gap-1 pb-1">
+      {/* Bottom: time */}
+      <div className="mt-auto flex flex-col items-center gap-2 pb-1">
         <div className="w-6" style={{ borderTop: "1px solid oklch(0.87 0.014 75)" }} />
-        <div className="mt-2">
-          <LiveTime />
-        </div>
+        <LiveTime />
       </div>
     </aside>
   );

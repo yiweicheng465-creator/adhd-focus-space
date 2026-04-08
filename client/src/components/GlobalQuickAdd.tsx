@@ -1,17 +1,24 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Global Quick Add
-   ADHD principle: 最小启动单元 — 一句话就能开始
-   A floating button always visible on every page.
-   Press it (or hit Cmd/Ctrl+K) → type → Enter. Done.
-   No priority, no context required — defaults applied.
+   ADHD FOCUS SPACE — Global Quick Add v3.0 (Morandi)
+   Minimum-friction one-sentence task capture
+   Coral accent, warm cream card, no teal
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
 import { Plus, X, Zap } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
+
+const M = {
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
+  ink:      "oklch(0.28 0.018 65)",
+  muted:    "oklch(0.55 0.018 70)",
+  border:   "oklch(0.88 0.014 75)",
+  card:     "oklch(0.975 0.012 80)",
+};
 
 interface GlobalQuickAddProps {
   onAddTask: (task: Task) => void;
@@ -22,13 +29,9 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
   const [text, setText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Keyboard shortcut: Cmd/Ctrl + K
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
-        e.preventDefault();
-        setOpen((v) => !v);
-      }
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setOpen((v) => !v); }
       if (e.key === "Escape") setOpen(false);
     };
     window.addEventListener("keydown", handler);
@@ -42,18 +45,10 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
   const submit = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    const task: Task = {
-      id: nanoid(),
-      text: trimmed,
-      priority: "focus",
-      context: "work",
-      done: false,
-      createdAt: new Date(),
-    };
-    onAddTask(task);
+    onAddTask({ id: nanoid(), text: trimmed, priority: "focus", context: "work", done: false, createdAt: new Date() });
     setText("");
     setOpen(false);
-    toast.success("✅ 已加入任务列表！", {
+    toast.success("Task added.", {
       description: trimmed.length > 40 ? trimmed.slice(0, 40) + "…" : trimmed,
       duration: 2500,
     });
@@ -61,90 +56,93 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
 
   return (
     <>
-      {/* Floating trigger button */}
+      {/* Floating trigger */}
       <button
         onClick={() => setOpen(true)}
-        title="快速添加任务 (⌘K)"
-        className={cn(
-          "fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-all duration-200",
-          "hover:scale-110 active:scale-95",
-          open ? "opacity-0 pointer-events-none" : "opacity-100"
-        )}
-        style={{ background: "oklch(0.65 0.14 185)" }}
+        title="Quick add task (⌘K)"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
+        style={{
+          background: M.coral,
+          opacity: open ? 0 : 1,
+          pointerEvents: open ? "none" : "auto",
+        }}
       >
-        <Plus className="w-6 h-6 text-white" />
+        <Plus className="w-6 h-6" style={{ color: "oklch(0.97 0.005 80)" }} />
       </button>
 
-      {/* Backdrop */}
+      {/* Backdrop + modal */}
       {open && (
         <div
-          className="fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-end sm:items-center justify-center p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
+          style={{ background: "oklch(0.18 0.01 60 / 0.25)", backdropFilter: "blur(4px)" }}
           onClick={() => setOpen(false)}
         >
           <div
-            className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-border overflow-hidden"
+            className="w-full max-w-lg overflow-hidden shadow-2xl"
+            style={{ background: M.card, border: `1px solid ${M.border}` }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center gap-3 px-4 pt-4 pb-2">
-              <div
-                className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-                style={{ background: "oklch(0.65 0.14 185 / 0.1)" }}
-              >
-                <Zap className="w-4 h-4 text-[oklch(0.55_0.14_185)]" />
+            <div className="flex items-center gap-3 px-5 pt-5 pb-3">
+              <div className="w-8 h-8 flex items-center justify-center shrink-0" style={{ background: M.coralBg, border: `1px solid ${M.coralBdr}` }}>
+                <Zap className="w-4 h-4" style={{ color: M.coral }} />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-foreground">一句话添加任务</p>
-                <p className="text-xs text-muted-foreground">不用整理格式，说清楚要做什么就行</p>
+                <p className="text-sm font-semibold" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>Quick capture</p>
+                <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>One sentence — no formatting needed</p>
               </div>
-              <button onClick={() => setOpen(false)} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors">
+              <button onClick={() => setOpen(false)} className="p-1 transition-colors" style={{ color: M.muted }}>
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Input */}
-            <div className="px-4 pb-4">
+            <div className="px-5 pb-5">
               <input
                 ref={inputRef}
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") submit();
-                  if (e.key === "Escape") setOpen(false);
+                onKeyDown={(e) => { if (e.key === "Enter") submit(); if (e.key === "Escape") setOpen(false); }}
+                placeholder="e.g. Reply to Alice's email…"
+                className="w-full text-base px-4 py-3 bg-transparent focus:outline-none"
+                style={{
+                  border: `1px solid ${M.border}`,
+                  color: M.ink,
+                  fontFamily: "'DM Sans', sans-serif",
                 }}
-                placeholder="例如：帮我整理一下这周的会议记录…"
-                className="w-full text-base px-4 py-3 rounded-xl border border-border bg-background focus:outline-none focus:ring-2 focus:ring-[oklch(0.65_0.14_185_/_0.4)] placeholder:text-muted-foreground/60"
+                onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = M.coralBdr; }}
+                onBlur={(e)  => { (e.target as HTMLInputElement).style.borderColor = M.border; }}
               />
 
               {/* Quick examples */}
               <div className="flex flex-wrap gap-2 mt-3">
-                {[
-                  "回复 Alice 的邮件",
-                  "整理桌面文件夹",
-                  "写今天的日报",
-                  "预约下周体检",
-                ].map((example) => (
+                {["Reply to email", "Clear downloads folder", "Write daily summary", "Book appointment"].map((ex) => (
                   <button
-                    key={example}
-                    onClick={() => { setText(example); inputRef.current?.focus(); }}
-                    className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground hover:border-[oklch(0.65_0.14_185_/_0.4)] hover:text-[oklch(0.55_0.14_185)] transition-colors"
+                    key={ex}
+                    onClick={() => { setText(ex); inputRef.current?.focus(); }}
+                    className="text-xs px-3 py-1.5 transition-all"
+                    style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.coralBdr; (e.currentTarget as HTMLButtonElement).style.color = M.coral; }}
+                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.border; (e.currentTarget as HTMLButtonElement).style.color = M.muted; }}
                   >
-                    {example}
+                    {ex}
                   </button>
                 ))}
               </div>
 
               {/* Submit row */}
               <div className="flex items-center justify-between mt-4">
-                <p className="text-xs text-muted-foreground">默认：Focus 优先级 · Work 上下文</p>
+                <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  Defaults: Focus priority · Work context
+                </p>
                 <button
                   onClick={submit}
                   disabled={!text.trim()}
-                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
-                  style={{ background: "oklch(0.65 0.14 185)" }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
+                  style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
                 >
                   <Plus className="w-4 h-4" />
-                  添加任务
+                  Add task
                   <kbd className="text-xs opacity-70 ml-1">↵</kbd>
                 </button>
               </div>

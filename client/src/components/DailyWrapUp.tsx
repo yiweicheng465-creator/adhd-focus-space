@@ -1,17 +1,33 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Daily Wrap-Up
-   ADHD principle: 缺乏反馈执行力差 → 完成后看到实际结果
-   A "收工仪式" panel: summarises today's agents, tasks done,
-   and wins. Generates a plain-text digest the user can copy.
+   ADHD FOCUS SPACE — Daily Wrap-Up v3.0 (Morandi)
+   End-of-day digest: agents, tasks, wins
+   Coral/sage/slumber palette, English text
    ============================================================ */
 
 import { useState } from "react";
 import { CheckCircle2, ClipboardCopy, Cpu, Sparkles, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
+
+const M = {
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
+  sage:     "oklch(0.52 0.07 145)",
+  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
+  sageBdr:  "oklch(0.52 0.07 145 / 0.28)",
+  pink:     "oklch(0.62 0.06 20)",
+  pinkBg:   "oklch(0.62 0.06 20 / 0.08)",
+  pinkBdr:  "oklch(0.62 0.06 20 / 0.28)",
+  slumber:  "oklch(0.55 0.018 70)",
+  ink:      "oklch(0.28 0.018 65)",
+  muted:    "oklch(0.55 0.018 70)",
+  border:   "oklch(0.88 0.014 75)",
+  card:     "oklch(0.975 0.012 80)",
+  bg:       "oklch(0.972 0.010 78)",
+};
 
 interface DailyWrapUpProps {
   tasks: Task[];
@@ -23,112 +39,111 @@ interface DailyWrapUpProps {
 export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) {
   const [copied, setCopied] = useState(false);
 
-  const today = new Date().toDateString();
-  const todayStr = new Date().toLocaleDateString("zh-CN", { month: "long", day: "numeric", weekday: "long" });
+  const today    = new Date().toDateString();
+  const todayStr = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
 
-  const doneTasks = tasks.filter((t) => t.done);
-  const activeTasks = tasks.filter((t) => !t.done);
-  const todayWins = wins.filter((w) => new Date(w.createdAt).toDateString() === today);
-  const todayAgents = agents.filter((a) => new Date(a.startedAt).toDateString() === today);
-  const doneAgents = todayAgents.filter((a) => a.status === "done");
+  const doneTasks     = tasks.filter((t) => t.done);
+  const activeTasks   = tasks.filter((t) => !t.done);
+  const todayWins     = wins.filter((w) => new Date(w.createdAt).toDateString() === today);
+  const todayAgents   = agents.filter((a) => new Date(a.startedAt).toDateString() === today);
+  const doneAgents    = todayAgents.filter((a) => a.status === "done");
   const runningAgents = todayAgents.filter((a) => a.status === "running");
+  const workDone      = doneTasks.filter((t) => t.context === "work");
+  const personalDone  = doneTasks.filter((t) => t.context === "personal");
 
-  const workDone = doneTasks.filter((t) => t.context === "work");
-  const personalDone = doneTasks.filter((t) => t.context === "personal");
+  const score      = Math.min(100, doneTasks.length * 15 + todayWins.length * 10 + doneAgents.length * 10);
+  const scoreLabel = score >= 80 ? "Supercharged day! 🚀" : score >= 50 ? "Solid work today 💪" : score >= 20 ? "Progress made — keep going 🌱" : "Rest is productive too ☕";
 
-  // Generate plain-text digest
   const generateDigest = () => {
-    const lines: string[] = [
-      `📋 ${todayStr} 日终复盘`,
-      `${"─".repeat(30)}`,
+    const lines = [
+      `📋 Daily Wrap-Up — ${todayStr}`,
+      "─".repeat(32),
       "",
-      `✅ 完成任务 (${doneTasks.length})`,
-      ...doneTasks.map((t) => `  • [${t.context === "work" ? "工作" : "个人"}] ${t.text}`),
+      `✅ Tasks completed (${doneTasks.length})`,
+      ...doneTasks.map((t) => `  • [${t.context}] ${t.text}`),
       "",
-      `🤖 AI Agent 汇报 (${todayAgents.length} 个)`,
-      ...todayAgents.map((a) => `  • ${a.name}：${a.task} [${a.status}]${a.notes ? `\n    → ${a.notes}` : ""}`),
+      `🤖 AI Agents today (${todayAgents.length})`,
+      ...todayAgents.map((a) => `  • ${a.name}: ${a.task} [${a.status}]${a.notes ? `\n    → ${a.notes}` : ""}`),
       "",
-      `🌟 今日 Wins (${todayWins.length})`,
+      `🌟 Wins (${todayWins.length})`,
       ...todayWins.map((w) => `  ${w.emoji} ${w.text}`),
       "",
       activeTasks.length > 0
-        ? `⏳ 明日待办 (${activeTasks.length})\n${activeTasks.slice(0, 5).map((t) => `  • ${t.text}`).join("\n")}`
-        : "🎉 所有任务已清空！",
+        ? `⏳ Still pending (${activeTasks.length})\n${activeTasks.slice(0, 5).map((t) => `  • ${t.text}`).join("\n")}`
+        : "🎉 All tasks cleared!",
       "",
-      runningAgents.length > 0
-        ? `⚠️  仍在运行的 Agent：${runningAgents.map((a) => a.name).join("、")}`
-        : "",
+      runningAgents.length > 0 ? `⚠️  Still running: ${runningAgents.map((a) => a.name).join(", ")}` : "",
     ];
-    return lines.filter((l) => l !== undefined).join("\n");
+    return lines.filter(Boolean).join("\n");
   };
 
   const copyDigest = async () => {
     try {
       await navigator.clipboard.writeText(generateDigest());
       setCopied(true);
-      toast.success("复盘内容已复制到剪贴板！");
+      toast.success("Copied to clipboard!");
       setTimeout(() => setCopied(false), 3000);
     } catch {
-      toast.error("复制失败，请手动选取文本");
+      toast.error("Copy failed — please select text manually.");
     }
   };
 
-  const score = Math.min(100, doneTasks.length * 15 + todayWins.length * 10 + doneAgents.length * 10);
-  const scoreLabel = score >= 80 ? "超级高效！🚀" : score >= 50 ? "今天干得不错 💪" : score >= 20 ? "有进展，明天继续 🌱" : "休息也是生产力 ☕";
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: "oklch(0.18 0.01 60 / 0.30)", backdropFilter: "blur(4px)" }}
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-border overflow-hidden max-h-[90vh] flex flex-col"
+        className="w-full max-w-lg overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
+        style={{ background: M.card, border: `1px solid ${M.border}` }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="p-5 border-b border-border" style={{ background: "oklch(0.65 0.14 185 / 0.06)" }}>
+        <div className="p-5" style={{ borderBottom: `1px solid ${M.border}`, background: M.coralBg }}>
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-xs text-muted-foreground">{todayStr}</p>
-              <h2 className="text-xl font-display font-bold text-foreground mt-0.5">今日复盘 🌙</h2>
-              <p className="text-sm text-muted-foreground mt-1">{scoreLabel}</p>
+              <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>{todayStr}</p>
+              <h2 className="text-xl font-bold italic mt-0.5" style={{ fontFamily: "'Playfair Display', serif", color: M.ink }}>
+                Daily Wrap-Up
+              </h2>
+              <p className="text-sm mt-1" style={{ color: M.coral, fontFamily: "'DM Sans', sans-serif" }}>{scoreLabel}</p>
             </div>
-            <button onClick={onClose} className="text-muted-foreground hover:text-foreground p-1 rounded-lg hover:bg-muted transition-colors">
+            <button onClick={onClose} className="p-1 transition-colors" style={{ color: M.muted }}>
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Score bar */}
           <div className="mt-3">
-            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-              <span>今日效率分</span>
-              <span className="font-medium text-foreground">{score} / 100</span>
+            <div className="flex justify-between text-xs mb-1" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+              <span>Today's score</span>
+              <span className="font-medium" style={{ color: M.ink }}>{score} / 100</span>
             </div>
-            <div className="h-2 rounded-full bg-muted overflow-hidden">
-              <div
-                className="h-full rounded-full transition-all duration-700"
-                style={{ width: `${score}%`, background: "oklch(0.65 0.14 185)" }}
-              />
+            <div className="h-1.5 w-full" style={{ background: M.border }}>
+              <div className="h-full transition-all duration-700" style={{ width: `${score}%`, background: M.coral }} />
             </div>
           </div>
         </div>
 
-        {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-
-          {/* Tasks done */}
-          <Section icon={<CheckCircle2 className="w-4 h-4" />} title={`完成任务 (${doneTasks.length})`} color="oklch(0.6 0.12 145)">
+        {/* Body */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+          {/* Tasks */}
+          <Section icon={<CheckCircle2 className="w-4 h-4" />} title={`Tasks completed (${doneTasks.length})`} color={M.sage}>
             {doneTasks.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">今天还没完成任务，明天加油！</p>
+              <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No tasks completed yet — tomorrow's a new start.</p>
             ) : (
-              <div className="space-y-1.5">
+              <div className="space-y-2">
                 {workDone.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-[oklch(0.5_0.18_260)] mb-1">工作</p>
-                    {workDone.map((t) => <TaskRow key={t.id} text={t.text} />)}
+                    <p className="text-xs font-medium mb-1" style={{ color: "oklch(0.42 0.06 250)", fontFamily: "'DM Sans', sans-serif" }}>Work</p>
+                    {workDone.map((t) => <TaskRow key={t.id} text={t.text} color={M.sage} />)}
                   </div>
                 )}
                 {personalDone.length > 0 && (
                   <div>
-                    <p className="text-xs font-medium text-[oklch(0.45_0.18_310)] mb-1">个人</p>
-                    {personalDone.map((t) => <TaskRow key={t.id} text={t.text} />)}
+                    <p className="text-xs font-medium mb-1" style={{ color: M.pink, fontFamily: "'DM Sans', sans-serif" }}>Personal</p>
+                    {personalDone.map((t) => <TaskRow key={t.id} text={t.text} color={M.pink} />)}
                   </div>
                 )}
               </div>
@@ -136,23 +151,27 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
           </Section>
 
           {/* Agents */}
-          <Section icon={<Cpu className="w-4 h-4" />} title={`AI Agent 汇报 (${todayAgents.length})`} color="oklch(0.55 0.14 185)">
+          <Section icon={<Cpu className="w-4 h-4" />} title={`AI Agents today (${todayAgents.length})`} color={M.coral}>
             {todayAgents.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">今天没有运行 Agent。</p>
+              <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No agents logged today.</p>
             ) : (
               <div className="space-y-2">
                 {todayAgents.map((a) => {
-                  const statusColors: Record<string, string> = { running: "oklch(0.65 0.14 185)", paused: "oklch(0.75 0.15 75)", done: "oklch(0.6 0.12 145)", failed: "oklch(0.65 0.22 15)" };
+                  const sc: Record<string, string> = { running: M.coral, paused: M.slumber, done: M.sage, failed: "oklch(0.55 0.09 35)" };
                   return (
-                    <div key={a.id} className="flex items-start gap-2 p-2.5 rounded-lg bg-muted/40 border border-border">
-                      <div className="w-2 h-2 rounded-full mt-1.5 shrink-0" style={{ background: statusColors[a.status] }} />
+                    <div key={a.id} className="flex items-start gap-2 p-2.5" style={{ background: M.bg, border: `1px solid ${M.border}` }}>
+                      <div className="w-2 h-2 mt-1.5 shrink-0" style={{ background: sc[a.status] }} />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-medium">{a.name}</span>
-                          <span className="text-xs capitalize" style={{ color: statusColors[a.status] }}>{a.status}</span>
+                          <span className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{a.name}</span>
+                          <span className="text-xs capitalize" style={{ color: sc[a.status], fontFamily: "'DM Sans', sans-serif" }}>{a.status}</span>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">{a.task}</p>
-                        {a.notes && <p className="text-xs text-foreground mt-1 bg-white rounded p-1.5 border border-border">→ {a.notes}</p>}
+                        <p className="text-xs truncate" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>{a.task}</p>
+                        {a.notes && (
+                          <p className="text-xs mt-1 p-1.5" style={{ color: M.ink, background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}>
+                            → {a.notes}
+                          </p>
+                        )}
                       </div>
                     </div>
                   );
@@ -162,13 +181,13 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
           </Section>
 
           {/* Wins */}
-          <Section icon={<Sparkles className="w-4 h-4" />} title={`今日 Wins (${todayWins.length})`} color="oklch(0.6 0.15 75)">
+          <Section icon={<Sparkles className="w-4 h-4" />} title={`Wins today (${todayWins.length})`} color={M.pink}>
             {todayWins.length === 0 ? (
-              <p className="text-sm text-muted-foreground italic">今天还没有记录 Win，完成任务后会自动添加。</p>
+              <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No wins logged yet — completing tasks adds them automatically.</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {todayWins.map((w) => (
-                  <div key={w.id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[oklch(0.75_0.15_75_/_0.08)] border border-[oklch(0.75_0.15_75_/_0.25)] text-sm">
+                  <div key={w.id} className="flex items-center gap-1.5 px-3 py-1.5 text-sm" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
                     <span>{w.emoji}</span>
                     <span>{w.text}</span>
                   </div>
@@ -177,28 +196,34 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
             )}
           </Section>
 
-          {/* Tomorrow's pending */}
+          {/* Pending */}
           {activeTasks.length > 0 && (
-            <Section icon={<span className="text-base">⏳</span>} title={`明日待办 (${activeTasks.length})`} color="oklch(0.55 0.08 255)">
+            <Section icon={<span className="text-base">⏳</span>} title={`Still pending (${activeTasks.length})`} color={M.slumber}>
               <div className="space-y-1.5">
-                {activeTasks.slice(0, 6).map((t) => <TaskRow key={t.id} text={t.text} />)}
-                {activeTasks.length > 6 && <p className="text-xs text-muted-foreground">…还有 {activeTasks.length - 6} 项</p>}
+                {activeTasks.slice(0, 6).map((t) => <TaskRow key={t.id} text={t.text} color={M.slumber} />)}
+                {activeTasks.length > 6 && <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>…and {activeTasks.length - 6} more</p>}
               </div>
             </Section>
           )}
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-border flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={onClose}>关闭</Button>
-          <Button
-            className="flex-1 gap-2"
-            style={{ background: "oklch(0.65 0.14 185)" }}
+        <div className="p-4 flex gap-3" style={{ borderTop: `1px solid ${M.border}` }}>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2 text-sm font-medium transition-all hover:opacity-80"
+            style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Close
+          </button>
+          <button
             onClick={copyDigest}
+            className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium transition-all hover:opacity-90"
+            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
           >
             <ClipboardCopy className="w-4 h-4" />
-            {copied ? "已复制！" : "复制复盘文本"}
-          </Button>
+            {copied ? "Copied!" : "Copy summary"}
+          </button>
         </div>
       </div>
     </div>
@@ -210,18 +235,18 @@ function Section({ icon, title, color, children }: { icon: React.ReactNode; titl
     <div>
       <div className="flex items-center gap-2 mb-2" style={{ color }}>
         {icon}
-        <p className="text-sm font-semibold">{title}</p>
+        <p className="text-sm font-semibold" style={{ fontFamily: "'DM Sans', sans-serif" }}>{title}</p>
       </div>
       {children}
     </div>
   );
 }
 
-function TaskRow({ text }: { text: string }) {
+function TaskRow({ text, color }: { text: string; color: string }) {
   return (
     <div className="flex items-center gap-2 py-1">
-      <CheckCircle2 className="w-3.5 h-3.5 text-[oklch(0.5_0.12_145)] shrink-0" />
-      <span className="text-sm text-foreground">{text}</span>
+      <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color }} />
+      <span className="text-sm" style={{ color: "oklch(0.28 0.018 65)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
     </div>
   );
 }

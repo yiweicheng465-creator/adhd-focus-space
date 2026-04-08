@@ -1,15 +1,20 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Editorial Design System v2.0
-   Design Movement: Warm Editorial Minimalism
-   Inspired by: Portfolio/zine layouts, hand-drawn line art,
-   warm cream paper, editorial serif typography
+   ADHD FOCUS SPACE — Morandi / Modern Terra Design System v3.0
    
-   Core Principles:
-   1. Cream/parchment background — warm, not clinical white
-   2. Serif display type (Playfair Display) + clean body (DM Sans)
-   3. Thin 1px borders, no heavy shadows, lots of breathing room
-   4. Ink-black text on warm cream — high contrast, easy to scan
-   5. Accent: single warm terracotta/rust for interactive elements
+   Palette (Morandi + Sherwin-Williams Modern Terra):
+   ─ Parchment:     oklch(0.972 0.010 78)   — main background
+   ─ Cream:         oklch(0.985 0.007 80)   — card/panel bg
+   ─ Slumber:       oklch(0.78 0.018 75)    — warm grey, muted UI
+   ─ Pinky Beige:   oklch(0.82 0.025 20)    — soft rose-beige accent
+   ─ Caribbean Coral (muted): oklch(0.58 0.10 35) — primary CTA
+   ─ Griffin:       oklch(0.38 0.018 75)    — dark charcoal text
+   ─ Sage:          oklch(0.68 0.06 145)    — secondary accent
+   ─ Lavender mist: oklch(0.80 0.025 300)   — personal context
+   
+   Rules:
+   - NO teal, NO bright green, NO vivid red, NO blue
+   - All interactive elements use muted coral or sage
+   - Text is always Griffin charcoal on parchment
    ============================================================ */
 
 @import "tailwindcss";
@@ -57,61 +62,97 @@
 }
 
 :root {
-  /* ── Warm Editorial Palette ── */
-  --radius: 0.25rem;  /* Very subtle rounding — editorial feel */
+  --radius: 0.2rem;
 
-  /* Background: warm parchment cream */
-  --background: oklch(0.975 0.012 80);
-  --foreground: oklch(0.18 0.01 60);
+  /* ── Morandi Backgrounds ── */
+  --background:          oklch(0.972 0.010 78);   /* parchment */
+  --foreground:          oklch(0.28 0.018 65);    /* griffin charcoal */
+  --card:                oklch(0.985 0.007 80);   /* cream */
+  --card-foreground:     oklch(0.28 0.018 65);
+  --popover:             oklch(0.985 0.007 80);
+  --popover-foreground:  oklch(0.28 0.018 65);
 
-  /* Card: slightly warmer cream */
-  --card: oklch(0.985 0.008 80);
-  --card-foreground: oklch(0.18 0.01 60);
+  /* ── Primary: muted coral (Caribbean Coral desaturated) ── */
+  --primary:             oklch(0.55 0.09 35);
+  --primary-foreground:  oklch(0.97 0.005 80);
 
-  --popover: oklch(0.985 0.008 80);
-  --popover-foreground: oklch(0.18 0.01 60);
+  /* ── Secondary: slumber grey ── */
+  --secondary:           oklch(0.93 0.014 75);
+  --secondary-foreground: oklch(0.38 0.018 65);
 
-  /* Primary: terracotta/rust — warm accent */
-  --primary: oklch(0.52 0.14 35);
-  --primary-foreground: oklch(0.98 0.005 80);
+  /* ── Muted ── */
+  --muted:               oklch(0.93 0.012 78);
+  --muted-foreground:    oklch(0.55 0.018 70);
 
-  --secondary: oklch(0.94 0.012 80);
-  --secondary-foreground: oklch(0.3 0.01 60);
+  /* ── Accent: soft sage ── */
+  --accent:              oklch(0.90 0.022 140);
+  --accent-foreground:   oklch(0.32 0.05 140);
 
-  --muted: oklch(0.94 0.012 80);
-  --muted-foreground: oklch(0.52 0.015 70);
+  /* ── Destructive: muted rose ── */
+  --destructive:         oklch(0.60 0.12 20);
+  --destructive-foreground: oklch(0.97 0.005 80);
 
-  /* Accent: warm sage green */
-  --accent: oklch(0.92 0.018 140);
-  --accent-foreground: oklch(0.25 0.04 140);
+  /* ── Borders ── */
+  --border:              oklch(0.88 0.014 75);
+  --input:               oklch(0.88 0.014 75);
+  --ring:                oklch(0.55 0.09 35 / 0.35);
 
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  /* ── Charts (all muted Morandi tones) ── */
+  --chart-1:             oklch(0.55 0.09 35);    /* coral */
+  --chart-2:             oklch(0.68 0.06 145);   /* sage */
+  --chart-3:             oklch(0.72 0.04 75);    /* slumber */
+  --chart-4:             oklch(0.75 0.05 300);   /* lavender */
+  --chart-5:             oklch(0.62 0.06 220);   /* steel blue */
 
-  /* Borders: very subtle warm gray */
-  --border: oklch(0.88 0.012 75);
-  --input: oklch(0.88 0.012 75);
-  --ring: oklch(0.52 0.14 35 / 0.4);
-
-  /* Charts */
-  --chart-1: oklch(0.52 0.14 35);
-  --chart-2: oklch(0.62 0.1 140);
-  --chart-3: oklch(0.65 0.1 220);
-  --chart-4: oklch(0.7 0.12 75);
-  --chart-5: oklch(0.55 0.1 310);
-
-  /* Sidebar: warm slightly darker cream */
-  --sidebar: oklch(0.955 0.018 78);
-  --sidebar-foreground: oklch(0.18 0.01 60);
-  --sidebar-primary: oklch(0.52 0.14 35);
-  --sidebar-primary-foreground: oklch(0.98 0.005 80);
-  --sidebar-accent: oklch(0.93 0.015 78);
-  --sidebar-accent-foreground: oklch(0.18 0.01 60);
-  --sidebar-border: oklch(0.87 0.014 75);
-  --sidebar-ring: oklch(0.52 0.14 35 / 0.4);
+  /* ── Sidebar ── */
+  --sidebar:             oklch(0.955 0.016 76);
+  --sidebar-foreground:  oklch(0.28 0.018 65);
+  --sidebar-primary:     oklch(0.55 0.09 35);
+  --sidebar-primary-foreground: oklch(0.97 0.005 80);
+  --sidebar-accent:      oklch(0.93 0.014 75);
+  --sidebar-accent-foreground: oklch(0.28 0.018 65);
+  --sidebar-border:      oklch(0.87 0.014 75);
+  --sidebar-ring:        oklch(0.55 0.09 35 / 0.35);
 }
 
-/* No dark mode for editorial — the warmth is the point */
+/* ── Morandi semantic color tokens (use in components) ── */
+:root {
+  /* Primary coral */
+  --m-coral:         oklch(0.55 0.09 35);
+  --m-coral-light:   oklch(0.55 0.09 35 / 0.10);
+  --m-coral-border:  oklch(0.55 0.09 35 / 0.30);
+
+  /* Sage green */
+  --m-sage:          oklch(0.62 0.07 145);
+  --m-sage-light:    oklch(0.62 0.07 145 / 0.10);
+  --m-sage-border:   oklch(0.62 0.07 145 / 0.30);
+
+  /* Slumber grey */
+  --m-slumber:       oklch(0.72 0.018 75);
+  --m-slumber-light: oklch(0.72 0.018 75 / 0.15);
+
+  /* Pinky beige */
+  --m-pink:          oklch(0.78 0.04 20);
+  --m-pink-light:    oklch(0.78 0.04 20 / 0.12);
+  --m-pink-border:   oklch(0.78 0.04 20 / 0.35);
+
+  /* Lavender (personal context) */
+  --m-lavender:      oklch(0.72 0.05 300);
+  --m-lavender-light: oklch(0.72 0.05 300 / 0.10);
+  --m-lavender-border: oklch(0.72 0.05 300 / 0.30);
+
+  /* Work context (muted indigo) */
+  --m-indigo:        oklch(0.58 0.08 255);
+  --m-indigo-light:  oklch(0.58 0.08 255 / 0.08);
+  --m-indigo-border: oklch(0.58 0.08 255 / 0.25);
+
+  /* Griffin charcoal */
+  --m-ink:           oklch(0.28 0.018 65);
+  --m-muted:         oklch(0.55 0.018 70);
+  --m-border:        oklch(0.88 0.014 75);
+  --m-bg:            oklch(0.972 0.010 78);
+  --m-card:          oklch(0.985 0.007 80);
+}
 
 @layer base {
   * {
@@ -119,6 +160,7 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
   }
   button:not(:disabled),
@@ -142,79 +184,77 @@
     padding-left: 1rem;
     padding-right: 1rem;
   }
-
-  .flex {
-    min-height: 0;
-    min-width: 0;
-  }
+  .flex { min-height: 0; min-width: 0; }
 
   @media (min-width: 640px) {
-    .container {
-      padding-left: 1.5rem;
-      padding-right: 1.5rem;
-    }
+    .container { padding-left: 1.5rem; padding-right: 1.5rem; }
   }
-
   @media (min-width: 1024px) {
-    .container {
-      padding-left: 2rem;
-      padding-right: 2rem;
-      max-width: 1280px;
-    }
+    .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
 
-  /* Editorial display typography */
+  /* Editorial display type */
   .font-display {
-    font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+    font-family: 'Playfair Display', Georgia, serif;
   }
 
-  /* Thin editorial divider */
-  .editorial-divider {
-    border: none;
-    border-top: 1px solid oklch(0.82 0.015 75);
-    margin: 1.5rem 0;
-  }
-
-  /* Editorial label — small caps style */
+  /* Small caps label */
   .editorial-label {
     font-family: 'DM Sans', system-ui, sans-serif;
     font-size: 0.65rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.52 0.015 70);
+    color: oklch(0.55 0.018 70);
   }
 
-  /* Terracotta accent underline */
-  .accent-underline {
-    text-decoration: underline;
-    text-decoration-color: oklch(0.52 0.14 35 / 0.5);
-    text-underline-offset: 3px;
+  /* Morandi card base */
+  .m-card {
+    background: oklch(0.985 0.007 80);
+    border: 1px solid oklch(0.88 0.014 75);
+  }
+
+  /* Morandi primary button */
+  .m-btn-primary {
+    background: oklch(0.55 0.09 35);
+    color: oklch(0.97 0.005 80);
+    border: none;
+    transition: opacity 0.15s;
+  }
+  .m-btn-primary:hover { opacity: 0.88; }
+
+  /* Morandi ghost button */
+  .m-btn-ghost {
+    background: transparent;
+    border: 1px solid oklch(0.88 0.014 75);
+    color: oklch(0.55 0.018 70);
+    transition: all 0.15s;
+  }
+  .m-btn-ghost:hover {
+    border-color: oklch(0.55 0.09 35 / 0.5);
+    color: oklch(0.28 0.018 65);
   }
 }
 
 /* ── Animations ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
 }
-
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-16px); }
+  from { opacity: 0; transform: translateX(-14px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-
 @keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.95); }
+  from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: scale(1); }
 }
 
-.animate-fade-up    { animation: fadeUp 0.4s ease forwards; }
-.animate-fade-in    { animation: fadeIn 0.3s ease forwards; }
-.animate-slide-left { animation: slideInLeft 0.35s ease forwards; }
-.animate-scale-in   { animation: scaleIn 0.3s ease forwards; }
+.animate-fade-up    { animation: fadeUp 0.35s ease forwards; }
+.animate-fade-in    { animation: fadeIn 0.25s ease forwards; }
+.animate-slide-left { animation: slideInLeft 0.3s ease forwards; }
+.animate-scale-in   { animation: scaleIn 0.28s ease forwards; }
