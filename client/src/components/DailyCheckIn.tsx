@@ -89,12 +89,21 @@ function BlobGood({ fill, stroke }: { fill: string; stroke: string }) {
   );
 }
 function BlobGlowing({ fill, stroke }: { fill: string; stroke: string }) {
+  const pts = Array.from({ length: 8 }, (_, i) => {
+    const outerAngle = (i * 45 - 90) * (Math.PI / 180);
+    const innerAngle = ((i * 45 + 22.5) - 90) * (Math.PI / 180);
+    const ox = 40 + 38 * Math.cos(outerAngle);
+    const oy = 40 + 38 * Math.sin(outerAngle);
+    const ix = 40 + 22 * Math.cos(innerAngle);
+    const iy = 40 + 22 * Math.sin(innerAngle);
+    return `${ox.toFixed(1)},${oy.toFixed(1)} ${ix.toFixed(1)},${iy.toFixed(1)}`;
+  }).join(" ");
   return (
     <svg viewBox="0 0 80 80" fill="none">
-      <path d="M40 4 L44 18 L56 10 L52 24 L68 22 L58 32 L74 38 L60 42 L68 56 L54 52 L52 68 L40 58 L28 68 L26 52 L12 56 L20 42 L6 38 L22 32 L12 22 L28 24 L24 10 L36 18 Z" fill={fill} stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M26 34 Q29 28 32 34" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M48 34 Q51 28 54 34" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" fill="none" />
-      <path d="M27 50 Q40 62 53 50" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <polygon points={pts} fill={fill} stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M29 36 Q32 31 35 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M45 36 Q48 31 51 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M30 48 Q40 57 50 48" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
