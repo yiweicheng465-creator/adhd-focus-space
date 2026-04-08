@@ -23,17 +23,17 @@ import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Bot, Brain, CheckSquare, Clock, LayoutDashboard, Moon, Sparkles, Target } from "lucide-react";
+import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Flower2 } from "lucide-react";
 
 type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
   focus:      { title: "Focus Timer",  icon: Clock           },
-  tasks:      { title: "My Tasks",     icon: CheckSquare     },
+  tasks:      { title: "My Tasks",     icon: Star     },
   wins:       { title: "Daily Wins",   icon: Sparkles        },
   braindump:  { title: "Brain Dump",   icon: Brain           },
-  goals:      { title: "Weekly Goals", icon: Target          },
+  goals:      { title: "Weekly Goals", icon: Flower2          },
   agents:     { title: "AI Agents",    icon: Bot             },
 };
 

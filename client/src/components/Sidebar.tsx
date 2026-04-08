@@ -6,8 +6,9 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Bot, Brain, CheckSquare, Clock,
-  LayoutDashboard, Sparkles, Target,
+  Bot, Brain, Clock,
+  LayoutDashboard, Sparkles,
+  Flower2, Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,10 +20,10 @@ interface SidebarProps {
 const NAV = [
   { id: "dashboard", short: "HOME",   Icon: LayoutDashboard, title: "Dashboard"   },
   { id: "focus",     short: "FOCUS",  Icon: Clock,           title: "Focus Timer"  },
-  { id: "tasks",     short: "TASKS",  Icon: CheckSquare,     title: "My Tasks"     },
+  { id: "tasks",     short: "TASKS",  Icon: Star,            title: "My Tasks"     },
   { id: "wins",      short: "WINS",   Icon: Sparkles,        title: "Daily Wins"   },
   { id: "braindump", short: "DUMP",   Icon: Brain,           title: "Brain Dump"   },
-  { id: "goals",     short: "GOALS",  Icon: Target,          title: "Goals"        },
+  { id: "goals",     short: "GOALS",  Icon: Flower2,         title: "Goals"        },
   { id: "agents",    short: "AGENTS", Icon: Bot,             title: "AI Agents"    },
 ];
 

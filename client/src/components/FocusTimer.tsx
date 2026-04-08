@@ -250,41 +250,65 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* ── Main instrument panel ── */}
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-        {/* SVG Dial — outer ring flat, inner center button is 3D */}
-        <div style={{ flexShrink: 0 }}>
+        {/* SVG Dial — flat watch-face, wide soft shadow ring countdown, raised center button */}
+        <div style={{ flexShrink: 0, position: "relative" }}>
+          {/* Wide soft shadow ring — shows remaining time as orange halo, fades as time depletes */}
+          <div style={{
+            position: "absolute", inset: 0, borderRadius: "50%",
+            boxShadow: isRunning
+              ? `0 0 ${6 + arcProgress * 28}px ${arcProgress * 18}px rgba(196,113,74,${(arcProgress * 0.22).toFixed(2)})`
+              : "none",
+            transition: "box-shadow 1s linear",
+            pointerEvents: "none",
+          }} />
           <svg
             width="192" height="192" viewBox="0 0 192 192"
             style={{ cursor: isRunning ? "default" : "pointer", display: "block" }}
             onClick={() => addTime(1)}
             onContextMenu={(e) => { e.preventDefault(); addTime(5); }}
           >
-            {/* SVG filter for orange glow on remaining ticks */}
             <defs>
-              <filter id="tickGlow" x="-100%" y="-100%" width="300%" height="300%">
-                <feGaussianBlur stdDeviation="1.5" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              {/* Radial gradient for raised center button dome */}
+              <radialGradient id="btnDome" cx="38%" cy="35%" r="65%">
+                <stop offset="0%" stopColor="#FFFAF5" />
+                <stop offset="55%" stopColor="#F5EDE3" />
+                <stop offset="100%" stopColor="#DDD0C0" />
+              </radialGradient>
+              <filter id="btnShadow" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#B8A898" floodOpacity="0.45" />
               </filter>
             </defs>
 
             {/* ── Flat watch-face style dial ── */}
-            {/* Outer bezel ring — warm tan groove */}
+            {/* Outer bezel ring — warm tan */}
             <circle cx={CX} cy={CY} r={R} fill="#E8DDD0" />
-            {/* Flat white inner face — flush to bezel, no gap */}
+            {/* Flat cream inner face — flush to bezel */}
             <circle cx={CX} cy={CY} r={R} fill="#FAF6F0" />
-            {/* Subtle inner shadow ring for depth */}
+            {/* Bezel border */}
             <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
 
-            {/* Tick marks — orange glow on remaining ticks (countdown) */}
+            {/* Tick marks — all neutral, no glow (shadow ring handles countdown) */}
             {ticks.map((t, i) => (
               <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                stroke={t.isRemaining ? (isRunning ? meta.stroke : "#C8B8A4") : "#D8CEC4"}
-                strokeWidth={t.major ? (t.isRemaining && isRunning ? 2 : 1.5) : (t.isRemaining && isRunning ? 1 : 0.7)}
-                filter={t.isRemaining && isRunning ? "url(#tickGlow)" : undefined}
-                opacity={t.isRemaining ? 1 : 0.5}
+                stroke={t.major ? "#8C7B6B" : "#C8B8A4"}
+                strokeWidth={t.major ? 1.5 : 0.7}
               />
             ))}
 
-            {/* Center cross hair — on top of inner button */}
+            {/* Raised center button — dome gradient + drop shadow */}
+            <circle
+              cx={CX} cy={CY} r={R - 22}
+              fill="url(#btnDome)"
+              filter="url(#btnShadow)"
+              stroke="#D4C4B0" strokeWidth="0.8"
+            />
+            {/* Highlight arc on raised button */}
+            <path
+              d={`M ${CX - (R-22) * 0.55} ${CY - (R-22) * 0.45} A ${R-22} ${R-22} 0 0 1 ${CX + (R-22) * 0.45} ${CY - (R-22) * 0.55}`}
+              fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="2" strokeLinecap="round"
+            />
+
+            {/* Center cross hair */}
             <line x1={CX - 5} y1={CY} x2={CX + 5} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
             <line x1={CX} y1={CY - 5} x2={CX} y2={CY + 5} stroke="#C8B8A4" strokeWidth="0.8" />
 
