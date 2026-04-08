@@ -243,7 +243,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* ── Main instrument panel ── */}
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-        {/* SVG Dial — left click +1 min, right click +5 min (when stopped) */}
+        {/* SVG Dial — 3D bevel knob, left click +1 min, right click +5 min (when stopped) */}
         <div style={{ flexShrink: 0 }}>
           <svg
             width="192" height="192" viewBox="0 0 192 192"
@@ -251,24 +251,62 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             onClick={() => addTime(1)}
             onContextMenu={(e) => { e.preventDefault(); addTime(5); }}
           >
-            {!isRunning && <title>Click +1 min · Right-click +5 min</title>}
-            {/* Tick marks */}
+            <defs>
+              {/* Outer bezel gradient — top-left highlight, bottom-right shadow */}
+              <radialGradient id="bezelGrad" cx="38%" cy="32%" r="65%">
+                <stop offset="0%"   stopColor="#F5EDE3" />
+                <stop offset="45%"  stopColor="#E2D5C5" />
+                <stop offset="100%" stopColor="#B8A898" />
+              </radialGradient>
+              {/* Inner knob face — soft 3D dome */}
+              <radialGradient id="knobGrad" cx="35%" cy="28%" r="70%">
+                <stop offset="0%"   stopColor="#FBF6EF" />
+                <stop offset="55%"  stopColor="#F0E8DC" />
+                <stop offset="100%" stopColor="#D8CCBE" />
+              </radialGradient>
+              {/* Inner shadow ring — darkens bottom edge for depth */}
+              <radialGradient id="innerShadow" cx="50%" cy="50%" r="50%">
+                <stop offset="72%" stopColor="transparent" />
+                <stop offset="100%" stopColor="rgba(60,40,20,0.18)" />
+              </radialGradient>
+              {/* Rim highlight — thin bright arc at top-left */}
+              <radialGradient id="rimHighlight" cx="30%" cy="22%" r="55%">
+                <stop offset="0%"   stopColor="rgba(255,255,255,0.55)" />
+                <stop offset="60%"  stopColor="rgba(255,255,255,0)" />
+              </radialGradient>
+              {/* Drop shadow filter */}
+              <filter id="dialShadow" x="-8%" y="-8%" width="116%" height="116%">
+                <feDropShadow dx="2" dy="4" stdDeviation="5" floodColor="#3D2E1E" floodOpacity="0.22" />
+              </filter>
+            </defs>
+
+            {/* Tick marks (outside the knob) */}
             {ticks.map((t, i) => (
               <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
                 stroke={t.major ? "#3D2E1E" : "#D4C4B0"}
                 strokeWidth={t.major ? 1.5 : 0.7}
               />
             ))}
-            {/* Track ring */}
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#E8DDD0" strokeWidth="2" />
-            {/* Glow fill */}
-            <circle cx={CX} cy={CY} r={R - 8} fill={meta.glow} />
-            {/* Progress arc */}
+
+            {/* Outer bezel ring — raised rim */}
+            <circle cx={CX} cy={CY} r={R + 1} fill="url(#bezelGrad)" filter="url(#dialShadow)" />
+            {/* Bezel rim highlight (top-left arc) */}
+            <circle cx={CX} cy={CY} r={R + 1} fill="url(#rimHighlight)" />
+
+            {/* Track ring border */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
+
+            {/* 3D knob face — dome gradient */}
+            <circle cx={CX} cy={CY} r={R - 2} fill="url(#knobGrad)" />
+            {/* Inner shadow overlay for depth */}
+            <circle cx={CX} cy={CY} r={R - 2} fill="url(#innerShadow)" />
+
+            {/* Progress arc on top */}
             <circle
               cx={CX} cy={CY} r={R}
               fill="none"
               stroke={meta.stroke}
-              strokeWidth="2.5"
+              strokeWidth="3"
               strokeLinecap="square"
               strokeDasharray={CIRC}
               strokeDashoffset={dashOff}
@@ -279,13 +317,15 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             {progress > 0.005 && (
               <circle cx={dotX} cy={dotY} r="4.5" fill={meta.stroke} />
             )}
+
             {/* Center cross hair */}
-            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#D4C4B0" strokeWidth="0.8" />
-            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#D4C4B0" strokeWidth="0.8" />
+            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
+            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#C8B8A4" strokeWidth="0.8" />
+
             {/* +1 / +5 hint text when stopped */}
             {!isRunning && (
               <>
-                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.7">+1 MIN</text>
+                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.75">+1 MIN</text>
                 <text x={CX} y={CY + 27} textAnchor="middle" fontSize="6" fill="#8C7B6B" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.08em" opacity="0.55">R-CLICK +5</text>
               </>
             )}

@@ -221,31 +221,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
             );
           })}
 
-          <div className="w-px h-4" style={{ background: M.border }} />
-
-          {(["work", "personal"] as ItemContext[]).map((ctx) => {
-            const cfg  = getContextConfig(ctx);
-            const Icon = cfg.icon;
-            const isActive = newTaskContext === ctx;
-            return (
-              <button
-                key={ctx}
-                onClick={() => setNewTaskContext(ctx)}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
-                style={{
-                  background:  isActive ? cfg.bg : "transparent",
-                  color:       isActive ? cfg.color : M.muted,
-                  border:      `1px solid ${isActive ? cfg.border : M.border}`,
-                  fontFamily:  "'DM Sans', sans-serif",
-                  outline:     isActive ? `2px solid ${cfg.color}25` : undefined,
-                  outlineOffset: "2px",
-                }}
-              >
-                <Icon className="w-3 h-3" />
-                {cfg.label}
-              </button>
-            );
-          })}
+          {/* Category is set via #hashtag in the input — no duplicate buttons needed */}
         </div>
       </div>
 
