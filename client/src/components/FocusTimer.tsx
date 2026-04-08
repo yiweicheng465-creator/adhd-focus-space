@@ -46,7 +46,10 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   const editRef     = useRef<HTMLInputElement>(null);
 
   const totalSec  = durations[mode] * 60;
+  // progress counts UP (0→1) — used for barcode fill
   const progress  = totalSec > 0 ? 1 - timeLeft / totalSec : 0;
+  // arcProgress counts DOWN (1→0) — used for the dial arc (countdown)
+  const arcProgress = totalSec > 0 ? timeLeft / totalSec : 1;
   const dashOff   = CIRC * (1 - progress);
   const meta      = MODE_META[mode];
 
@@ -118,10 +121,11 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     return { angle, major, x1: CX + r1 * Math.cos(angle), y1: CY + r1 * Math.sin(angle), x2: CX + r2 * Math.cos(angle), y2: CY + r2 * Math.sin(angle) };
   });
 
-  // Dot position on arc
-  const dotAngle = progress * 2 * Math.PI - Math.PI / 2;
-  const dotX = CX + R * Math.cos(dotAngle);
-  const dotY = CY + R * Math.sin(dotAngle);
+  // Dot position — tracks the TRAILING edge of the countdown arc
+  // arcProgress=1 → dot at 12 o'clock (start), arcProgress=0 → dot at 12 o'clock (end)
+  const dotAngle = arcProgress * 2 * Math.PI - Math.PI / 2;
+  const dotX = CX + (R - 5) * Math.cos(dotAngle);
+  const dotY = CY + (R - 5) * Math.sin(dotAngle);
 
   // Add time to current timer (only when stopped)
   const addTime = (mins: number) => {
@@ -259,60 +263,31 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               />
             ))}
 
-            {/* SVG defs: dome gradient + filters */}
-            <defs>
-              {/* Convex dome gradient — bright top-left, warm shadow bottom-right */}
-              <radialGradient id="domeGrad" cx="35%" cy="28%" r="70%">
-                <stop offset="0%" stopColor="#FEFCF8" />
-                <stop offset="40%" stopColor="#F5EDE3" />
-                <stop offset="80%" stopColor="#E8D8C8" />
-                <stop offset="100%" stopColor="#D8C8B4" />
-              </radialGradient>
-              {/* Outer groove ring gradient */}
-              <radialGradient id="grooveGrad" cx="50%" cy="50%" r="50%">
-                <stop offset="85%" stopColor="#E0D0BC" />
-                <stop offset="100%" stopColor="#F5EDE3" />
-              </radialGradient>
-              {/* Drop shadow filter for the dome */}
-              <filter id="domeShadow" x="-15%" y="-15%" width="130%" height="130%">
-                <feDropShadow dx="0" dy="4" stdDeviation="5" floodColor="#B8A898" floodOpacity="0.5" />
-              </filter>
-              <filter id="domeShadowPressed" x="-15%" y="-15%" width="130%" height="130%">
-                <feDropShadow dx="0" dy="1" stdDeviation="2" floodColor="#B8A898" floodOpacity="0.3" />
-              </filter>
-            </defs>
+            {/* ── Flat watch-face style dial ── */}
+            {/* Outer bezel ring — warm tan groove */}
+            <circle cx={CX} cy={CY} r={R} fill="#E0D0BC" />
+            {/* Inner bezel shadow line */}
+            <circle cx={CX} cy={CY} r={R - 1} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
+            {/* Flat white inner face */}
+            <circle cx={CX} cy={CY} r={R - 10} fill="#FAF6F0" />
+            {/* Subtle inner face border */}
+            <circle cx={CX} cy={CY} r={R - 10} fill="none" stroke="#D8C8B4" strokeWidth="0.6" />
 
-            {/* Outer groove ring — slightly darker, recessed look */}
-            <circle cx={CX} cy={CY} r={R} fill="#E8D8C8" />
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
-
-            {/* Full-size convex dome button — same radius as R, raised */}
-            <circle cx={CX} cy={CY} r={R - 8}
-              fill="url(#domeGrad)"
-              filter={isRunning ? "url(#domeShadowPressed)" : "url(#domeShadow)"}
-            />
-            {/* Thin border on dome edge */}
-            <circle cx={CX} cy={CY} r={R - 8} fill="none" stroke="#D8C8B4" strokeWidth="0.8" />
-            {/* Top-left specular highlight */}
-            <ellipse cx={CX - (R-8)*0.22} cy={CY - (R-8)*0.28} rx={(R-8)*0.28} ry={(R-8)*0.18}
-              fill="rgba(255,255,255,0.45)" transform={`rotate(-30 ${CX} ${CY})`}
-            />
-
-            {/* Progress arc on top */}
+            {/* COUNTDOWN arc — starts full (arcProgress=1), depletes to zero */}
             <circle
-              cx={CX} cy={CY} r={R - 3}
+              cx={CX} cy={CY} r={R - 5}
               fill="none"
               stroke={meta.stroke}
-              strokeWidth="3"
-              strokeLinecap="square"
-              strokeDasharray={2 * Math.PI * (R - 3)}
-              strokeDashoffset={(2 * Math.PI * (R - 3)) * (1 - progress)}
+              strokeWidth="4"
+              strokeLinecap="butt"
+              strokeDasharray={2 * Math.PI * (R - 5)}
+              strokeDashoffset={(2 * Math.PI * (R - 5)) * (1 - arcProgress)}
               transform={`rotate(-90 ${CX} ${CY})`}
               style={{ transition: "stroke-dashoffset 0.6s linear" }}
             />
-            {/* Progress dot */}
-            {progress > 0.005 && (
-              <circle cx={dotX} cy={dotY} r="4.5" fill={meta.stroke} />
+            {/* Dot at trailing edge of countdown arc */}
+            {arcProgress < 0.995 && arcProgress > 0.005 && (
+              <circle cx={dotX} cy={dotY} r="4" fill={meta.stroke} />
             )}
 
             {/* Center cross hair — on top of inner button */}
