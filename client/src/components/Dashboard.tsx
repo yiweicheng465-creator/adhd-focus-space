@@ -198,11 +198,8 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
         </div>{/* end illustration+content row */}
       </div>
 
-      {/* ── Unified stats panel ── */}
-      <div style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
-
-        {/* Top row: 4 key stats as inline segments */}
-        <div className="grid grid-cols-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+      {/* ── Stats row ── */}
+      <div className="grid grid-cols-4" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
           {[
             { icon: <Flame className="w-3.5 h-3.5" />, label: "Urgent",  value: urgentTasks.length,  section: "tasks",  accent: "oklch(0.58 0.18 20)" },
             { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Active", value: activeTasks.length, section: "tasks", accent: TC },
@@ -225,54 +222,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
             </button>
           ))}
         </div>
-
-        {/* Bottom row: category breakdown as compact horizontal bars */}
-        {activeContext === "all" && (
-          <div className="px-5 py-4">
-            <p style={{ fontSize: "0.60rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.10em", textTransform: "uppercase", color: MUTED, marginBottom: 10 }}>By category</p>
-            <div className="flex flex-col gap-2.5">
-              {(allCategories ?? ["work", "personal"]).map((ctx) => {
-                const cfg = getContextConfig(ctx);
-                const Icon = cfg.icon;
-                const taskCount = tasks.filter((t) => !t.done && t.context === ctx).length;
-                const agentCount = agents.filter((a) => a.status === "running" && a.context === ctx).length;
-                const total = activeTasks.length || 1;
-                const pct = Math.round((taskCount / total) * 100);
-                return (
-                  <button
-                    key={ctx}
-                    onClick={() => setActiveContext(ctx as ActiveContext)}
-                    className="flex items-center gap-3 group w-full text-left"
-                  >
-                    {/* Icon + label */}
-                    <div className="flex items-center gap-1.5 w-24 shrink-0">
-                      <Icon className="w-3 h-3 shrink-0" style={{ color: cfg.color }} />
-                      <span style={{ fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif", color: cfg.color, fontWeight: 600, textTransform: "capitalize" }}>{cfg.label}</span>
-                    </div>
-                    {/* Bar */}
-                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: cfg.border }}>
-                      <div
-                        className="h-full rounded-full transition-all duration-500"
-                        style={{ width: `${pct}%`, background: cfg.color, minWidth: taskCount > 0 ? 6 : 0 }}
-                      />
-                    </div>
-                    {/* Counts */}
-                    <div className="flex items-center gap-3 shrink-0">
-                      <span style={{ fontSize: "0.70rem", fontFamily: "'DM Sans', sans-serif", color: INK, fontWeight: 600, minWidth: 16, textAlign: "right" }}>{taskCount}</span>
-                      <span style={{ fontSize: "0.62rem", color: MUTED, fontFamily: "'DM Sans', sans-serif" }}>tasks</span>
-                      {agentCount > 0 && (
-                        <span style={{ fontSize: "0.62rem", color: cfg.color, fontFamily: "'DM Sans', sans-serif", background: cfg.bg, border: `1px solid ${cfg.border}`, padding: "1px 6px", borderRadius: 4 }}>
-                          {agentCount} agent{agentCount > 1 ? "s" : ""}
-                        </span>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </div>
 
       {/* ── Bottom: Focus timer + Next up ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
