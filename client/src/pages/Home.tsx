@@ -37,19 +37,43 @@ import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide
 import { PixelDump } from "@/components/PixelIcons";
 
 
-/* ── Compact mood pill for the header ── */
+/* ── Compact mood pill SVG faces (same as MoodCheckIn) ── */
+function PillFaceDrained({ active }: { active: boolean }) {
+  const fill = active ? "#B8B4C8" : "#CCC8D8"; const c = "#5A5570";
+  return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill={fill} /><ellipse cx="28" cy="37" rx="4.5" ry="2.5" fill={c} /><ellipse cx="52" cy="37" rx="4.5" ry="2.5" fill={c} /><line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round" /></svg>;
+}
+function PillFaceLow({ active }: { active: boolean }) {
+  const fill = active ? "#C0B8D4" : "#D4CEEA"; const c = "#5A5070";
+  return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><rect x="8" y="8" width="64" height="64" rx="22" fill={fill} /><circle cx="28" cy="37" r="3" fill={c} /><circle cx="52" cy="37" r="3" fill={c} /><path d="M30 52 Q40 47 50 52" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
+}
+function PillFaceOkay({ active }: { active: boolean }) {
+  const fill = active ? "#A89070" : "#C4AA88"; const c = "#4A3820";
+  return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill={fill} /><circle cx="28" cy="35" r="3.5" fill={c} /><circle cx="52" cy="35" r="3.5" fill={c} /><circle cx="40" cy="44" r="1.8" fill={c} opacity="0.7" /><line x1="30" y1="53" x2="50" y2="53" stroke={c} strokeWidth="2" strokeLinecap="round" /></svg>;
+}
+function PillFaceGood({ active }: { active: boolean }) {
+  const fill = active ? "#90C8A8" : "#B0D8C0"; const c = "#2A5840";
+  return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill={fill} /><path d="M24 36 Q28 31 32 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M48 36 Q52 31 56 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M30 50 Q40 57 50 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
+}
+function PillFaceGlowing({ active }: { active: boolean }) {
+  const fill = active ? "#F0A878" : "#F8C8A0"; const c = "#7A3818";
+  const pts = Array.from({ length: 20 }, (_, i) => { const a = (i * Math.PI) / 10 - Math.PI / 2; const r = i % 2 === 0 ? 38 : 28; return `${40 + r * Math.cos(a)},${40 + r * Math.sin(a)}`; }).join(" ");
+  return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><polygon points={pts} fill={fill} /><path d="M26 37 Q30 32 34 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M46 37 Q50 32 54 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M28 50 Q40 60 52 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
+}
+
+const PILL_FACES = [PillFaceDrained, PillFaceLow, PillFaceOkay, PillFaceGood, PillFaceGlowing];
 const MOOD_DATA = [
-  { value: 1, label: "Drained",  emoji: "😶", color: "oklch(0.62 0.06 280)" },
-  { value: 2, label: "Low",      emoji: "😕", color: "oklch(0.60 0.08 290)" },
-  { value: 3, label: "Okay",     emoji: "😐", color: "oklch(0.55 0.08 60)"  },
-  { value: 4, label: "Good",     emoji: "🙂", color: "oklch(0.48 0.12 155)" },
-  { value: 5, label: "Glowing",  emoji: "😊", color: "oklch(0.58 0.14 40)"  },
+  { value: 1, label: "Drained", color: "oklch(0.50 0.06 280)" },
+  { value: 2, label: "Low",     color: "oklch(0.48 0.08 290)" },
+  { value: 3, label: "Okay",    color: "oklch(0.45 0.08 60)"  },
+  { value: 4, label: "Good",    color: "oklch(0.40 0.12 155)" },
+  { value: 5, label: "Glowing", color: "oklch(0.52 0.14 40)"  },
 ];
 
 function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (v: number) => void }) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const current = MOOD_DATA.find((m) => m.value === mood);
+  const CurrentFace = mood ? PILL_FACES[mood - 1] : null;
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +99,11 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         }}
         title="How are you feeling?"
       >
-        <span style={{ fontSize: "0.85rem" }}>{current ? current.emoji : "🙂"}</span>
+        <span style={{ width: 18, height: 18, display: "inline-flex", flexShrink: 0 }}>
+          {CurrentFace ? <CurrentFace active={true} /> : (
+            <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill="#B0D8C0" /><path d="M24 36 Q28 31 32 36" stroke="#2A5840" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M48 36 Q52 31 56 36" stroke="#2A5840" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M30 50 Q40 57 50 50" stroke="#2A5840" strokeWidth="2" strokeLinecap="round" fill="none" /></svg>
+          )}
+        </span>
         <span className="hidden sm:inline">{current ? current.label : "Mood"}</span>
       </button>
       {open && (
@@ -88,22 +116,27 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
             boxShadow: "0 4px 16px oklch(0.18 0.01 60 / 0.10)",
           }}
         >
-          {MOOD_DATA.map((m) => (
-            <button
-              key={m.value}
-              onClick={() => { onMoodChange(m.value); setOpen(false); }}
-              title={m.label}
-              className="flex flex-col items-center gap-0.5 px-2 py-1.5 transition-all"
-              style={{
-                borderRadius: 8,
-                background: mood === m.value ? "oklch(0.965 0.012 78)" : "transparent",
-                border: mood === m.value ? `1px solid ${m.color}40` : "1px solid transparent",
-              }}
-            >
-              <span style={{ fontSize: "1.2rem" }}>{m.emoji}</span>
-              <span style={{ fontSize: "0.60rem", color: m.color, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{m.label}</span>
-            </button>
-          ))}
+          {MOOD_DATA.map((m, i) => {
+            const FaceComp = PILL_FACES[i];
+            return (
+              <button
+                key={m.value}
+                onClick={() => { onMoodChange(m.value); setOpen(false); }}
+                title={m.label}
+                className="flex flex-col items-center gap-1 px-2 py-1.5 transition-all"
+                style={{
+                  borderRadius: 8,
+                  background: mood === m.value ? "oklch(0.965 0.012 78)" : "transparent",
+                  border: mood === m.value ? `1px solid ${m.color}60` : "1px solid transparent",
+                }}
+              >
+                <span style={{ width: 32, height: 32, display: "inline-flex" }}>
+                  <FaceComp active={mood === m.value} />
+                </span>
+                <span style={{ fontSize: "0.60rem", color: m.color, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}>{m.label}</span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>
