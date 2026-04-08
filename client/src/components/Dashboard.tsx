@@ -198,79 +198,80 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
         </div>{/* end illustration+content row */}
       </div>
 
-      {/* ── Category breakdown — dynamic, shows all known categories ── */}
-      {activeContext === "all" && (
-        <div
-          className="grid gap-4"
-          style={{ gridTemplateColumns: `repeat(${Math.min((allCategories ?? ["work","personal"]).length, 4)}, minmax(0, 1fr))` }}
-        >
-          {(allCategories ?? ["work", "personal"]).map((ctx) => {
-            const cfg = getContextConfig(ctx);
-            const Icon = cfg.icon;
-            return (
-              <button
-                key={ctx}
-                onClick={() => setActiveContext(ctx as ActiveContext)}
-                className="p-5 text-left transition-all hover:opacity-90 relative overflow-hidden"
-                style={{ background: cfg.bg, border: `1px solid ${cfg.border}` }}
-              >
-                {/* Geometric accent line */}
-                <div className="absolute top-0 left-0 w-full h-0.5" style={{ background: cfg.color, opacity: 0.4 }} />
-                <div className="flex items-center gap-2 mb-3">
-                  <Icon className="w-3.5 h-3.5" style={{ color: cfg.color }} />
-                  <span className="editorial-label" style={{ color: cfg.color }}>{cfg.label}</span>
-                </div>
-                <div className="flex items-end gap-6">
-                  <div>
-                    <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color: cfg.color }}>
-                      {tasks.filter((t) => !t.done && t.context === ctx).length}
-                    </p>
-                    <p className="editorial-label">tasks</p>
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color: cfg.color }}>
-                      {agents.filter((a) => a.status === "running" && a.context === ctx).length}
-                    </p>
-                    <p className="editorial-label">agents</p>
-                  </div>
-                </div>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* ── Unified stats panel ── */}
+      <div style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
 
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { icon: <Flame className="w-4 h-4" />,        label: "Urgent",   value: urgentTasks.length,  section: "tasks" },
-          { icon: <CheckCircle2 className="w-4 h-4" />, label: "Active",   value: activeTasks.length,  section: "tasks" },
-          { icon: <Sparkles className="w-4 h-4" />,     label: "Wins",     value: todayWins.length,    section: "wins"  },
-          { icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><line x1="5" y1="2" x2="5" y2="18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M5 2 L15 5.5 L5 9 Z" fill="currentColor" opacity="0.85" /></svg>, label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
-        ].map(({ icon, label, value, section }) => (
-          <button
-            key={label}
-            onClick={() => onNavigate(section)}
-            className="p-5 text-left transition-all relative overflow-hidden group"
-            style={{ border: `1px solid ${BORDER}`, background: CREAM }}
-          >
-            {/* Hover accent */}
-            <div
-              className="absolute bottom-0 left-0 w-full h-0.5 transition-all duration-300 group-hover:opacity-100 opacity-0"
-              style={{ background: TC }}
-            />
-            <div className="flex items-center gap-2 mb-3" style={{ color: TC }}>
-              {icon}
-              <span className="editorial-label">{label}</span>
-            </div>
-            <p
-              className="text-3xl font-bold italic"
-              style={{ fontFamily: "'Playfair Display', serif", color: INK }}
+        {/* Top row: 4 key stats as inline segments */}
+        <div className="grid grid-cols-4" style={{ borderBottom: `1px solid ${BORDER}` }}>
+          {[
+            { icon: <Flame className="w-3.5 h-3.5" />, label: "Urgent",  value: urgentTasks.length,  section: "tasks",  accent: "oklch(0.58 0.18 20)" },
+            { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Active", value: activeTasks.length, section: "tasks", accent: TC },
+            { icon: <Sparkles className="w-3.5 h-3.5" />, label: "Wins today", value: todayWins.length, section: "wins", accent: "oklch(0.55 0.14 75)" },
+            { icon: <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5"><line x1="5" y1="2" x2="5" y2="18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M5 2 L15 5.5 L5 9 Z" fill="currentColor" opacity="0.85" /></svg>, label: "Goals avg", value: `${avgGoalProg}%`, section: "goals", accent: "oklch(0.48 0.12 155)" },
+          ].map(({ icon, label, value, section, accent }, i, arr) => (
+            <button
+              key={label}
+              onClick={() => onNavigate(section)}
+              className="flex flex-col gap-1.5 px-5 py-4 text-left transition-all hover:opacity-80 relative group"
+              style={{ borderRight: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}
             >
-              {value}
-            </p>
-          </button>
-        ))}
+              <div className="flex items-center gap-1.5" style={{ color: accent }}>
+                {icon}
+                <span style={{ fontSize: "0.62rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{label}</span>
+              </div>
+              <p className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif", color: INK, fontStyle: "italic" }}>{value}</p>
+              {/* Bottom accent bar on hover */}
+              <div className="absolute bottom-0 left-0 h-0.5 w-0 group-hover:w-full transition-all duration-300" style={{ background: accent }} />
+            </button>
+          ))}
+        </div>
+
+        {/* Bottom row: category breakdown as compact horizontal bars */}
+        {activeContext === "all" && (
+          <div className="px-5 py-4">
+            <p style={{ fontSize: "0.60rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.10em", textTransform: "uppercase", color: MUTED, marginBottom: 10 }}>By category</p>
+            <div className="flex flex-col gap-2.5">
+              {(allCategories ?? ["work", "personal"]).map((ctx) => {
+                const cfg = getContextConfig(ctx);
+                const Icon = cfg.icon;
+                const taskCount = tasks.filter((t) => !t.done && t.context === ctx).length;
+                const agentCount = agents.filter((a) => a.status === "running" && a.context === ctx).length;
+                const total = activeTasks.length || 1;
+                const pct = Math.round((taskCount / total) * 100);
+                return (
+                  <button
+                    key={ctx}
+                    onClick={() => setActiveContext(ctx as ActiveContext)}
+                    className="flex items-center gap-3 group w-full text-left"
+                  >
+                    {/* Icon + label */}
+                    <div className="flex items-center gap-1.5 w-24 shrink-0">
+                      <Icon className="w-3 h-3 shrink-0" style={{ color: cfg.color }} />
+                      <span style={{ fontSize: "0.72rem", fontFamily: "'DM Sans', sans-serif", color: cfg.color, fontWeight: 600, textTransform: "capitalize" }}>{cfg.label}</span>
+                    </div>
+                    {/* Bar */}
+                    <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ background: cfg.border }}>
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${pct}%`, background: cfg.color, minWidth: taskCount > 0 ? 6 : 0 }}
+                      />
+                    </div>
+                    {/* Counts */}
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span style={{ fontSize: "0.70rem", fontFamily: "'DM Sans', sans-serif", color: INK, fontWeight: 600, minWidth: 16, textAlign: "right" }}>{taskCount}</span>
+                      <span style={{ fontSize: "0.62rem", color: MUTED, fontFamily: "'DM Sans', sans-serif" }}>tasks</span>
+                      {agentCount > 0 && (
+                        <span style={{ fontSize: "0.62rem", color: cfg.color, fontFamily: "'DM Sans', sans-serif", background: cfg.bg, border: `1px solid ${cfg.border}`, padding: "1px 6px", borderRadius: 4 }}>
+                          {agentCount} agent{agentCount > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ── Bottom: Focus timer + Next up ── */}
