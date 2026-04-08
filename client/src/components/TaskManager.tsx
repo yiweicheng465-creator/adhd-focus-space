@@ -121,7 +121,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
   const addTask = () => {
     if (!newTaskText.trim()) return;
     const { cleanText, tag } = parseHashtag(newTaskText);
-    const context = tag ?? newTaskContext;
+    // If a hashtag was typed, use it. Otherwise use the currently active tab
+    // (unless it's "all", in which case fall back to the manual context selector).
+    const context = tag ?? (activeContext !== "all" ? (activeContext as ItemContext) : newTaskContext);
     const task: Task = {
       id: nanoid(), text: cleanText || newTaskText.trim(),
       priority: newTaskPriority, context,
