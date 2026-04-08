@@ -163,35 +163,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
           </div>
         )}
 
-        {/* Category selector — shows all known categories */}
-        {!liveTag && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span style={LABEL}>Category:</span>
-            {knownCategories.map((ctx) => {
-              const cfg  = getContextConfig(ctx);
-              const Icon = cfg.icon;
-              const isActive = newGoalCtx === ctx;
-              return (
-                <button
-                  key={ctx}
-                  onClick={() => setNewGoalCtx(ctx)}
-                  className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
-                  style={{
-                    background:  isActive ? cfg.bg : "transparent",
-                    color:       isActive ? cfg.color : M.muted,
-                    border:      `1px solid ${isActive ? cfg.border : M.border}`,
-                    fontFamily:  "'DM Sans', sans-serif",
-                    cursor: "pointer",
-                    borderRadius: 0,
-                  }}
-                >
-                  <Icon className="w-3 h-3" />
-                  {cfg.label}
-                </button>
-              );
-            })}
-          </div>
-        )}
+        {/* Category is set via #hashtag in the input or the ContextSwitcher tabs above */}
       </div>
 
       {/* Goals list */}
