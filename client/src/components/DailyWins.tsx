@@ -1,20 +1,29 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Daily Wins Tracker v3.0 (Morandi)
-   Warm pinky-beige for today's wins, slumber for totals
+   ADHD FOCUS SPACE — Daily Wins Tracker v4.0 (Pixel Icons)
+   No emoji — all icons are pixel-art SVG in Morandi palette
    ============================================================ */
 
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Award, Plus, Sparkles, Trophy } from "lucide-react";
+import { Plus } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
+import { PixelTrophy, PixelStar, PixelFire, PixelTarget, PixelLightning, PixelCheck } from "@/components/PixelIcons";
 
 export interface Win {
-  id: string; text: string; emoji: string; createdAt: Date;
+  id: string; text: string; iconIdx: number; createdAt: Date;
 }
 
-const WIN_EMOJIS = ["🌟", "🎯", "💪", "🚀", "✅", "🏆", "⚡", "🎉", "🔥", "💎"];
+// Pixel icon options for wins — no emoji
+const WIN_ICONS = [
+  { key: "trophy",    Component: PixelTrophy,    label: "Trophy"    },
+  { key: "star",      Component: PixelStar,      label: "Star"      },
+  { key: "fire",      Component: PixelFire,      label: "Fire"      },
+  { key: "target",    Component: PixelTarget,    label: "Target"    },
+  { key: "lightning", Component: PixelLightning, label: "Lightning" },
+  { key: "check",     Component: PixelCheck,     label: "Check"     },
+];
 
 const M = {
   coral:    "oklch(0.55 0.09 35)",
@@ -39,12 +48,12 @@ interface DailyWinsProps {
 
 export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
   const [newWin,          setNewWin]          = useState("");
-  const [selectedEmoji,   setSelectedEmoji]   = useState(WIN_EMOJIS[0]);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [selectedIcon,    setSelectedIcon]    = useState(0);
+  const [showIconPicker,  setShowIconPicker]  = useState(false);
 
   const addWin = () => {
     if (!newWin.trim()) return;
-    onWinsChange([{ id: nanoid(), text: newWin.trim(), emoji: selectedEmoji, createdAt: new Date() }, ...wins]);
+    onWinsChange([{ id: nanoid(), text: newWin.trim(), iconIdx: selectedIcon, createdAt: new Date() }, ...wins]);
     setNewWin("");
     toast.success("Win logged! You're doing great.", { duration: 3000 });
   };
@@ -55,13 +64,15 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
     return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
   });
 
+  const SelectedIconComp = WIN_ICONS[selectedIcon]?.Component ?? PixelTrophy;
+
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Header stats */}
       <div className="grid grid-cols-2 gap-3">
         <div className="p-3" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}` }}>
           <div className="flex items-center gap-2 mb-1">
-            <Trophy className="w-4 h-4" style={{ color: M.pink }} />
+            <PixelTrophy size={14} color={M.pink} />
             <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Today</span>
           </div>
           <p className="text-2xl font-bold" style={{ color: M.pink, fontFamily: "'Playfair Display', serif" }}>{todayWins.length}</p>
@@ -69,7 +80,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
         </div>
         <div className="p-3" style={{ background: M.slumBg, border: `1px solid ${M.slumBdr}` }}>
           <div className="flex items-center gap-2 mb-1">
-            <Award className="w-4 h-4" style={{ color: M.slumber }} />
+            <PixelStar size={14} color={M.slumber} />
             <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Total</span>
           </div>
           <p className="text-2xl font-bold" style={{ color: M.slumber, fontFamily: "'Playfair Display', serif" }}>{wins.length}</p>
@@ -80,12 +91,14 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
       {/* Add win */}
       <div className="flex flex-col gap-2">
         <div className="flex gap-2">
+          {/* Icon picker button */}
           <button
-            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="w-10 h-10 flex items-center justify-center text-lg transition-all shrink-0"
+            onClick={() => setShowIconPicker(!showIconPicker)}
+            className="w-10 h-10 flex items-center justify-center transition-all shrink-0"
             style={{ border: `1px solid ${M.border}`, background: M.card }}
+            title="Choose icon"
           >
-            {selectedEmoji}
+            <SelectedIconComp size={16} color={M.coral} />
           </button>
           <Input
             value={newWin}
@@ -103,19 +116,20 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
           </button>
         </div>
 
-        {showEmojiPicker && (
+        {showIconPicker && (
           <div className="flex flex-wrap gap-2 p-3" style={{ background: M.card, border: `1px solid ${M.border}` }}>
-            {WIN_EMOJIS.map((emoji) => (
+            {WIN_ICONS.map((icon, idx) => (
               <button
-                key={emoji}
-                onClick={() => { setSelectedEmoji(emoji); setShowEmojiPicker(false); }}
-                className={cn("w-8 h-8 flex items-center justify-center text-lg transition-all")}
+                key={icon.key}
+                onClick={() => { setSelectedIcon(idx); setShowIconPicker(false); }}
+                className="w-9 h-9 flex items-center justify-center transition-all"
+                title={icon.label}
                 style={{
-                  background:  selectedEmoji === emoji ? M.pinkBg : "transparent",
-                  border:      `1px solid ${selectedEmoji === emoji ? M.pinkBdr : "transparent"}`,
+                  background:  selectedIcon === idx ? M.pinkBg : "transparent",
+                  border:      `1px solid ${selectedIcon === idx ? M.pinkBdr : M.border}`,
                 }}
               >
-                {emoji}
+                <icon.Component size={16} color={selectedIcon === idx ? M.coral : M.muted} />
               </button>
             ))}
           </div>
@@ -126,15 +140,15 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {wins.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
-              <polygon points="20,4 24,15 37,15 27,23 31,35 20,27 9,35 13,23 3,15 16,15" fill="none" stroke={M.muted} strokeWidth="1" strokeLinejoin="round" />
-            </svg>
+            <PixelTrophy size={32} color={M.muted} />
             <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Log your first win.</p>
           </div>
         )}
 
         {wins.map((win) => {
           const isToday = todayWins.some((w) => w.id === win.id);
+          const iconIdx = typeof win.iconIdx === "number" ? win.iconIdx : 0;
+          const IconComp = WIN_ICONS[iconIdx % WIN_ICONS.length]?.Component ?? PixelTrophy;
           return (
             <div
               key={win.id}
@@ -145,7 +159,10 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
                 opacity:    isToday ? 1 : 0.65,
               }}
             >
-              <span className="text-xl flex-shrink-0">{win.emoji}</span>
+              {/* Pixel icon instead of emoji */}
+              <div className="flex-shrink-0 mt-0.5">
+                <IconComp size={18} color={isToday ? M.coral : M.muted} />
+              </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium leading-snug" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{win.text}</p>
                 <p className="text-xs mt-0.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
@@ -153,7 +170,10 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
                 </p>
               </div>
               {isToday && (
-                <span className="text-xs font-medium shrink-0" style={{ color: M.pink, fontFamily: "'DM Sans', sans-serif" }}>Today ✨</span>
+                <div className="shrink-0 flex items-center gap-1">
+                  <span className="text-xs font-medium" style={{ color: M.pink, fontFamily: "'DM Sans', sans-serif" }}>Today</span>
+                  <PixelStar size={10} color={M.pink} />
+                </div>
               )}
             </div>
           );

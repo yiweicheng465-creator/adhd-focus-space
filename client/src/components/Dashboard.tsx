@@ -16,7 +16,8 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { Bot, Briefcase, CheckCircle2, Clock, Cpu, Flame, Flower2, Sparkles, User, Zap } from "lucide-react";
+import { Cpu, Zap } from "lucide-react";
+import { PixelFire, PixelCheck, PixelStar, PixelTarget, PixelClockMini, PixelLightning, PixelTrophy } from "@/components/PixelIcons";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 
@@ -245,10 +246,10 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
       {/* ── Stats row ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { icon: <Flame className="w-4 h-4" />,        label: "Urgent",   value: urgentTasks.length,  section: "tasks" },
-          { icon: <CheckCircle2 className="w-4 h-4" />, label: "Active",   value: activeTasks.length,  section: "tasks" },
-          { icon: <Sparkles className="w-4 h-4" />,     label: "Wins",     value: todayWins.length,    section: "wins"  },
-          { icon: <Flower2 className="w-4 h-4" />,      label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
+          { icon: <PixelFire size={16} color={TC} />,      label: "Urgent",   value: urgentTasks.length,  section: "tasks" },
+          { icon: <PixelCheck size={16} color={TC} />,     label: "Active",   value: activeTasks.length,  section: "tasks" },
+          { icon: <PixelStar size={16} color={TC} />,      label: "Wins",     value: todayWins.length,    section: "wins"  },
+          { icon: <PixelTarget size={16} color={TC} />,    label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
         ].map(({ icon, label, value, section }) => (
           <button
             key={label}
@@ -280,7 +281,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
         {/* Focus timer */}
         <div className="p-7" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
           <div className="flex items-center gap-2 mb-5">
-            <Clock className="w-3.5 h-3.5" style={{ color: TC }} />
+            <PixelClockMini size={14} color={TC} />
             <p className="editorial-label">Focus Timer</p>
           </div>
           <FocusTimer onSessionComplete={onSessionComplete} />
@@ -290,7 +291,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
         <div className="p-7 flex flex-col" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5" style={{ color: TC }} />
+              <PixelLightning size={14} color={TC} />
               <p className="editorial-label">Next Up</p>
             </div>
             <button className="m-btn-link" onClick={() => onNavigate("tasks")}>All tasks</button>
@@ -390,7 +391,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
             )}
             {uncovered.length > 0 && (
               <div className="flex items-center gap-2 p-2.5" style={{ background: "oklch(0.65 0.2 15 / 0.05)", border: "1px solid oklch(0.65 0.2 15 / 0.2)" }}>
-                <Flame className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.55 0.2 15)" }} />
+                <PixelFire size={14} color="oklch(0.55 0.2 15)" />
                 <p className="text-xs" style={{ color: "oklch(0.45 0.18 15)" }}>
                   {uncovered.length} task{uncovered.length > 1 ? "s" : ""} uncovered
                 </p>
@@ -405,7 +406,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
         <div className="p-5" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.12 75)" }} />
+              <PixelStar size={14} color="oklch(0.55 0.12 75)" />
               <p className="editorial-label">Today · {todayWins.length} win{todayWins.length > 1 ? "s" : ""}</p>
             </div>
             <button className="m-btn-link" onClick={() => onNavigate("wins")}>Log more</button>
@@ -417,7 +418,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
                 className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
                 style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.985 0.008 80)", color: INK }}
               >
-                <span>{w.emoji}</span>
+                <PixelTrophy size={12} color="oklch(0.55 0.12 75)" />
                 <span>{w.text}</span>
               </div>
             ))}

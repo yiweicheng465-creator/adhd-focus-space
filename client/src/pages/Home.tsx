@@ -96,7 +96,7 @@ export default function Home() {
       const win: Win = {
         id: `task-${Date.now()}`,
         text: newlyDone[0].text.length > 40 ? newlyDone[0].text.slice(0, 40) + "…" : newlyDone[0].text,
-        emoji: "✅",
+        iconIdx: 5, // check icon
         createdAt: new Date(),
       };
       setWins((prev) => [win, ...prev]);
@@ -110,7 +110,7 @@ export default function Home() {
     const win: Win = {
       id: `session-${Date.now()}`,
       text: `Focus session #${focusSessions + 1} complete`,
-      emoji: "⚡",
+        iconIdx: 4, // lightning icon
       createdAt: new Date(),
     };
     setWins((prev) => [win, ...prev]);

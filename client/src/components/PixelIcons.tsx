@@ -226,3 +226,179 @@ export function PixelAgents({ size = 20, active, color }: PixelIconProps) {
     </svg>
   );
 }
+
+/* ════════════════════════════════════════════════════
+   URGENT — Pixel flame / fire icon
+   ════════════════════════════════════════════════════ */
+export function PixelFire({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Flame body */}
+      <rect x="6" y="1" width="4" height="2" fill={c} />
+      <rect x="5" y="3" width="6" height="2" fill={c} />
+      <rect x="4" y="5" width="8" height="2" fill={c} />
+      <rect x="3" y="7" width="10" height="3" fill={c} />
+      <rect x="4" y="10" width="8" height="2" fill={c} />
+      <rect x="5" y="12" width="6" height="2" fill={c} />
+      {/* Inner lighter core */}
+      <rect x="6" y="6" width="4" height="4" fill={c} opacity="0.4" />
+      {/* Tip */}
+      <rect x="7" y="2" width="2" height="1" fill={c} opacity="0.6" />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   ACTIVE — Pixel checkmark in circle
+   ════════════════════════════════════════════════════ */
+export function PixelCheck({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Circle */}
+      <rect x="4" y="1" width="8" height="2" fill={c} />
+      <rect x="2" y="3" width="2" height="10" fill={c} />
+      <rect x="12" y="3" width="2" height="10" fill={c} />
+      <rect x="4" y="13" width="8" height="2" fill={c} />
+      {/* Checkmark */}
+      <rect x="5" y="8" width="2" height="2" fill={c} />
+      <rect x="7" y="10" width="2" height="2" fill={c} />
+      <rect x="9" y="6" width="2" height="4" fill={c} />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   WINS / STAR — Pixel 4-point star
+   ════════════════════════════════════════════════════ */
+export function PixelStar({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Vertical beam */}
+      <rect x="7" y="1" width="2" height="14" fill={c} />
+      {/* Horizontal beam */}
+      <rect x="1" y="7" width="14" height="2" fill={c} />
+      {/* Diagonal dots */}
+      <rect x="4" y="4" width="2" height="2" fill={c} opacity="0.6" />
+      <rect x="10" y="4" width="2" height="2" fill={c} opacity="0.6" />
+      <rect x="4" y="10" width="2" height="2" fill={c} opacity="0.6" />
+      <rect x="10" y="10" width="2" height="2" fill={c} opacity="0.6" />
+      {/* Center */}
+      <rect x="6" y="6" width="4" height="4" fill={c} />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   GOALS — Pixel target / bullseye
+   ════════════════════════════════════════════════════ */
+export function PixelTarget({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Outer ring */}
+      <rect x="3" y="1" width="10" height="2" fill={c} />
+      <rect x="1" y="3" width="2" height="10" fill={c} />
+      <rect x="13" y="3" width="2" height="10" fill={c} />
+      <rect x="3" y="13" width="10" height="2" fill={c} />
+      {/* Middle ring */}
+      <rect x="5" y="4" width="6" height="1" fill={c} />
+      <rect x="4" y="5" width="1" height="6" fill={c} />
+      <rect x="11" y="5" width="1" height="6" fill={c} />
+      <rect x="5" y="11" width="6" height="1" fill={c} />
+      {/* Center dot */}
+      <rect x="6" y="6" width="4" height="4" fill={c} />
+      <rect x="7" y="7" width="2" height="2" fill="white" opacity="0.5" />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   NEXT UP — Pixel lightning bolt
+   ════════════════════════════════════════════════════ */
+export function PixelLightning({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Lightning bolt */}
+      <rect x="9" y="1" width="4" height="2" fill={c} />
+      <rect x="7" y="3" width="4" height="2" fill={c} />
+      <rect x="5" y="5" width="6" height="2" fill={c} />
+      <rect x="5" y="7" width="8" height="2" fill={c} />
+      <rect x="3" y="9" width="6" height="2" fill={c} />
+      <rect x="3" y="11" width="4" height="2" fill={c} />
+      <rect x="3" y="13" width="2" height="2" fill={c} />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   FOCUS TIMER (mini) — Pixel clock face
+   ════════════════════════════════════════════════════ */
+export function PixelClockMini({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Clock circle */}
+      <rect x="3" y="1" width="10" height="2" fill={c} />
+      <rect x="1" y="3" width="2" height="10" fill={c} />
+      <rect x="13" y="3" width="2" height="10" fill={c} />
+      <rect x="3" y="13" width="10" height="2" fill={c} />
+      {/* Hour hand (12 o'clock) */}
+      <rect x="7" y="4" width="2" height="4" fill={c} />
+      {/* Minute hand (3 o'clock) */}
+      <rect x="8" y="7" width="4" height="2" fill={c} />
+      {/* Center dot */}
+      <rect x="7" y="7" width="2" height="2" fill={c} />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   WIN ITEM — Pixel trophy cup (small, for list items)
+   ════════════════════════════════════════════════════ */
+export function PixelTrophy({ size = 16, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 16 16" fill="none" shapeRendering="crispEdges">
+      {/* Cup */}
+      <rect x="4" y="2" width="8" height="7" fill="none" stroke={c} strokeWidth="1.5" />
+      {/* Handles */}
+      <rect x="2" y="3" width="2" height="4" fill="none" stroke={c} strokeWidth="1" />
+      <rect x="12" y="3" width="2" height="4" fill="none" stroke={c} strokeWidth="1" />
+      {/* Stem */}
+      <rect x="7" y="9" width="2" height="3" fill={c} />
+      {/* Base */}
+      <rect x="5" y="12" width="6" height="2" fill={c} />
+      {/* Star on cup */}
+      <rect x="7" y="4" width="2" height="1" fill={c} />
+      <rect x="6" y="5" width="4" height="1" fill={c} />
+      <rect x="7" y="6" width="2" height="1" fill={c} />
+    </svg>
+  );
+}
+
+/* ════════════════════════════════════════════════════
+   BRAIN DUMP header — Pixel brain/cloud
+   ════════════════════════════════════════════════════ */
+export function PixelBrain({ size = 20, color }: PixelIconProps) {
+  const c = color || PX;
+  return (
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
+      {/* Main brain/cloud body */}
+      <rect x="4" y="7" width="12" height="8" fill="none" stroke={c} strokeWidth="1.5" />
+      {/* Top bumps */}
+      <rect x="4" y="5" width="4" height="3" fill="none" stroke={c} strokeWidth="1" />
+      <rect x="8" y="3" width="4" height="5" fill="none" stroke={c} strokeWidth="1" />
+      <rect x="12" y="5" width="4" height="3" fill="none" stroke={c} strokeWidth="1" />
+      {/* Brain squiggles inside */}
+      <rect x="6" y="9" width="3" height="1" fill={c} opacity="0.5" />
+      <rect x="11" y="9" width="3" height="1" fill={c} opacity="0.5" />
+      <rect x="6" y="11" width="8" height="1" fill={c} opacity="0.3" />
+      {/* Bottom */}
+      <rect x="7" y="15" width="6" height="2" fill={c} opacity="0.4" />
+    </svg>
+  );
+}

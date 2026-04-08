@@ -66,7 +66,7 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
       ...todayAgents.map((a) => `  • ${a.name}: ${a.task} [${a.status}]${a.notes ? `\n    → ${a.notes}` : ""}`),
       "",
       `🌟 Wins (${todayWins.length})`,
-      ...todayWins.map((w) => `  ${w.emoji} ${w.text}`),
+      ...todayWins.map((w) => `  • ${w.text}`),
       "",
       activeTasks.length > 0
         ? `⏳ Still pending (${activeTasks.length})\n${activeTasks.slice(0, 5).map((t) => `  • ${t.text}`).join("\n")}`
@@ -188,7 +188,6 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
               <div className="flex flex-wrap gap-2">
                 {todayWins.map((w) => (
                   <div key={w.id} className="flex items-center gap-1.5 px-3 py-1.5 text-sm" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-                    <span>{w.emoji}</span>
                     <span>{w.text}</span>
                   </div>
                 ))}

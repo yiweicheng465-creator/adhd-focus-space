@@ -5,6 +5,7 @@
 
 import { useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import { PixelBrain } from "@/components/PixelIcons";
 import { cn } from "@/lib/utils";
 import { ArrowRight, Hash, Tag, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
@@ -134,15 +135,8 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
 
       {/* Header — minimal, geometric */}
       <div className="flex items-center gap-3 mb-1">
-        {/* Geometric brain icon */}
-        <svg width="28" height="28" viewBox="0 0 28 28" style={{ opacity: 0.55, flexShrink: 0 }}>
-          <circle cx="14" cy="14" r="12" fill="none" stroke={M.coral} strokeWidth="1" />
-          <circle cx="14" cy="14" r="5" fill="none" stroke={M.coral} strokeWidth="0.8" />
-          <line x1="14" y1="2" x2="14" y2="9" stroke={M.coral} strokeWidth="0.8" />
-          <line x1="14" y1="19" x2="14" y2="26" stroke={M.coral} strokeWidth="0.8" />
-          <line x1="2" y1="14" x2="9" y2="14" stroke={M.coral} strokeWidth="0.8" />
-          <line x1="19" y1="14" x2="26" y2="14" stroke={M.coral} strokeWidth="0.8" />
-        </svg>
+        {/* Pixel brain icon */}
+        <PixelBrain size={28} color={M.coral} />
         <div>
           <p className="text-sm font-semibold italic" style={{ color: M.ink, fontFamily: "'Playfair Display', serif" }}>Brain Dump</p>
           <p className="editorial-label" style={{ color: M.muted }}>Use <span style={{ color: M.coral }}>#tags</span> to organise</p>
@@ -254,14 +248,7 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
         {entries.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
-            <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
-              <circle cx="20" cy="20" r="17" fill="none" stroke={M.muted} strokeWidth="1" />
-              <circle cx="20" cy="20" r="6" fill="none" stroke={M.muted} strokeWidth="0.8" />
-              <line x1="20" y1="3" x2="20" y2="14" stroke={M.muted} strokeWidth="0.8" />
-              <line x1="20" y1="26" x2="20" y2="37" stroke={M.muted} strokeWidth="0.8" />
-              <line x1="3" y1="20" x2="14" y2="20" stroke={M.muted} strokeWidth="0.8" />
-              <line x1="26" y1="20" x2="37" y2="20" stroke={M.muted} strokeWidth="0.8" />
-            </svg>
+            <div style={{ opacity: 0.3 }}><PixelBrain size={40} color={M.muted} /></div>
             <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Empty. Let your thoughts flow.</p>
           </div>
         )}

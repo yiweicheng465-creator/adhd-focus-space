@@ -184,7 +184,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
         id: nanoid(), text: t, priority: "focus", context: "work", done: false, createdAt: new Date(),
       })),
       newWins: wins.map((w) => ({
-        id: nanoid(), text: w, emoji: "⭐", createdAt: new Date(),
+        id: nanoid(), text: w, iconIdx: 0, createdAt: new Date(),
       })),
       newAgents: agents.map((a) => ({
         id: nanoid(), name: a.name, task: a.task, status: "running",
