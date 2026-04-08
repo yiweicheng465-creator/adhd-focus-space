@@ -10,7 +10,7 @@
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { RotateCcw, Play, Pause, SkipForward, Settings, Check, X } from "lucide-react";
+import { RotateCcw, Play, Pause, Settings, Check, X } from "lucide-react";
 
 type TimerMode = "focus" | "short" | "long";
 type BalloonState = "idle" | "running" | "paused" | "popping" | "popped" | "complete";
@@ -501,16 +501,35 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         ))}
       </div>
 
+      {/* MM:SS Countdown */}
+      {(running || balloonState === "paused") && (
+        <div style={{ textAlign: "center", margin: "2px 0" }}>
+          <span style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 28,
+            fontWeight: 700,
+            letterSpacing: "0.06em",
+            color: remaining <= 60 ? "#C0392B" : "#2a1f14",
+            transition: "color 0.5s",
+          }}>{mm}:{ss}</span>
+        </div>
+      )}
+
       {/* Controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* Reset */}
-        <button onClick={handleReset} title="Reset" style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          width: 36, height: 36, borderRadius: "50%",
-          background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", cursor: "pointer",
-        }}>
-          <RotateCcw size={13} />
-        </button>
+        {/* Quit — pops the balloon */}
+        {(running || balloonState === "paused") && (
+          <button onClick={handleReset} title="Quit session" style={{
+            display: "flex", alignItems: "center", gap: 5,
+            padding: "7px 14px", borderRadius: 999,
+            background: "transparent", border: "1px solid #D4C4B0",
+            color: "#8C7B6B", cursor: "pointer",
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+            letterSpacing: "0.12em",
+          }}>
+            <RotateCcw size={11} /> QUIT
+          </button>
+        )}
 
         {/* Play / Pause */}
         {balloonState !== "complete" && balloonState !== "popped" && balloonState !== "popping" && (
@@ -528,15 +547,6 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {balloonState === "paused" ? "RESUME" : "START"}</>}
           </button>
         )}
-
-        {/* Skip */}
-        <button onClick={handleSkip} title="Skip to end" style={{
-          display: "flex", alignItems: "center", justifyContent: "center",
-          width: 36, height: 36, borderRadius: "50%",
-          background: "transparent", border: "1px solid #D4C4B0", color: "#8C7B6B", cursor: "pointer",
-        }}>
-          <SkipForward size={13} />
-        </button>
 
         {/* Session dots */}
         <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>

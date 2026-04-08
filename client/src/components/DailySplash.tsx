@@ -1,6 +1,6 @@
 /* ============================================================
    ADHD FOCUS SPACE — DailySplash
-   Design: Dreamy aura gradient opening animation, shown once per day
+   Design: Dreamy aura gradient opening animation, shown every page load
    - Duration: ~7s hold + 1.2s fade-out = ~8.2s total
    - Daily rotating motivation sentences (deterministic by date)
    - Tap anywhere to skip
@@ -237,18 +237,19 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
   );
 }
 
-/** Returns true if the splash should be shown today */
+/** Returns true if the splash should be shown — every page load */
 export function shouldShowSplash(): boolean {
   try {
-    return !localStorage.getItem(getTodayKey());
+    // Use sessionStorage so it shows on every fresh page load
+    return !sessionStorage.getItem('adhd-splash-shown');
   } catch {
-    return false;
+    return true;
   }
 }
 
-/** Mark today's splash as seen */
+/** Mark splash as seen for this session */
 export function markSplashSeen(): void {
   try {
-    localStorage.setItem(getTodayKey(), "1");
+    sessionStorage.setItem('adhd-splash-shown', '1');
   } catch { /* ignore */ }
 }
