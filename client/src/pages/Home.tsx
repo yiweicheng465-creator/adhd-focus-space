@@ -33,7 +33,7 @@ import {
 } from "@/components/PageDecor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
+import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Trash2 } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
 
 // Simple flag icon for Goals — replaces complex flower
@@ -154,6 +154,20 @@ export default function Home() {
     ...agents.map((a) => a.context),
   ])).filter(Boolean).filter((c) => !deletedCategories.includes(c));
 
+  /** Clear all test data — wipes tasks, wins, goals, agents but keeps settings */
+  const handleClearTestData = () => {
+    if (!confirm("Clear all tasks, wins, goals, and agents? This cannot be undone.")) return;
+    setTasks([]);
+    setWins([]);
+    setGoals([]);
+    setAgents([]);
+    setMood(null);
+    setDeletedCategories([]);
+    // Also clear daily check-in suppression so it shows fresh
+    localStorage.removeItem("adhd-checkin-date");
+    toast.success("All test data cleared. Fresh start!", { duration: 3000 });
+  };
+
   /** Delete a custom category: reassign all its items to "personal", then hide the tag */
   const handleDeleteCategory = (ctx: string) => {
     if (ctx === "work" || ctx === "personal") return; // protect built-ins
@@ -222,6 +236,17 @@ export default function Home() {
             >
               <Moon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Wrap up</span>
+            </button>
+
+            {/* Clear test data */}
+            <button
+              onClick={handleClearTestData}
+              title="Clear all test data"
+              className="flex items-center gap-1.5 text-xs transition-colors hover:text-foreground"
+              style={{ color: "oklch(0.62 0.06 15)" }}
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Clear data</span>
             </button>
           </div>
         </header>
