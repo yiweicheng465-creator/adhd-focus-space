@@ -16,7 +16,7 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { Bot, Briefcase, CheckCircle2, Clock, Cpu, Flame, Sparkles, Target, User, Zap } from "lucide-react";
+import { Bot, Briefcase, CheckCircle2, Clock, Cpu, Flame, Flower2, Sparkles, User, Zap } from "lucide-react";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 
@@ -248,7 +248,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
           { icon: <Flame className="w-4 h-4" />,        label: "Urgent",   value: urgentTasks.length,  section: "tasks" },
           { icon: <CheckCircle2 className="w-4 h-4" />, label: "Active",   value: activeTasks.length,  section: "tasks" },
           { icon: <Sparkles className="w-4 h-4" />,     label: "Wins",     value: todayWins.length,    section: "wins"  },
-          { icon: <Target className="w-4 h-4" />,       label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
+          { icon: <Flower2 className="w-4 h-4" />,      label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
         ].map(({ icon, label, value, section }) => (
           <button
             key={label}

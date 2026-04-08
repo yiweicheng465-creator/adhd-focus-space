@@ -36,12 +36,12 @@ function LogoMark() {
       style={{ background: "oklch(0.975 0.010 72)" }}
     >
       <img
-        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-logo-blob2-8QDj2kgAG624iuGTX4JAY6.webp"
+        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-TE2ZmkKpxooE7jm3Qqw2wh.webp"
         alt="ADHD Focus Space logo"
         className="w-10 h-10 object-contain"
         style={{
           mixBlendMode: "multiply",
-          filter: "saturate(1.1)",
+          filter: "saturate(1.05)",
         }}
       />
     </div>
