@@ -60,14 +60,15 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
       <button
         onClick={() => setOpen(true)}
         title="Quick add task (⌘K)"
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 flex items-center justify-center shadow-lg transition-all duration-200 hover:scale-110 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 flex items-center justify-center transition-all duration-200 hover:opacity-80 active:scale-95"
         style={{
-          background: M.coral,
+          background: M.ink,
           opacity: open ? 0 : 1,
           pointerEvents: open ? "none" : "auto",
+          border: `1px solid ${M.ink}`,
         }}
       >
-        <Plus className="w-6 h-6" style={{ color: "oklch(0.97 0.005 80)" }} />
+        <Plus className="w-5 h-5" style={{ color: "oklch(0.97 0.005 80)" }} />
       </button>
 
       {/* Backdrop + modal */}
@@ -120,10 +121,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
                   <button
                     key={ex}
                     onClick={() => { setText(ex); inputRef.current?.focus(); }}
-                    className="text-xs px-3 py-1.5 transition-all"
-                    style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.coralBdr; (e.currentTarget as HTMLButtonElement).style.color = M.coral; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.border; (e.currentTarget as HTMLButtonElement).style.color = M.muted; }}
+                    className="m-chip"
                   >
                     {ex}
                   </button>
@@ -138,12 +136,11 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
                 <button
                   onClick={submit}
                   disabled={!text.trim()}
-                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:opacity-90 active:scale-95"
-                  style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+                  className="m-btn-primary disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  <Plus className="w-4 h-4" />
+                  <Plus className="w-3.5 h-3.5" />
                   Add task
-                  <kbd className="text-xs opacity-70 ml-1">↵</kbd>
+                  <kbd className="text-xs opacity-60 ml-1">↵</kbd>
                 </button>
               </div>
             </div>

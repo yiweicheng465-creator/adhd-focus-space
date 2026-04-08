@@ -78,10 +78,9 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
           <span className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>⌘ + Enter to capture</span>
           <button
             onClick={dump}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:opacity-88"
-            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+            className="m-btn-primary"
           >
-            <Brain className="w-4 h-4" />
+            <Brain className="w-3.5 h-3.5" />
             Dump It
           </button>
         </div>
@@ -95,8 +94,7 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
           </p>
           <button
             onClick={clearAll}
-            className="text-xs transition-colors hover:opacity-70"
-            style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+            className="m-btn-link"
           >
             Clear all
           </button>
@@ -146,8 +144,7 @@ export function BrainDump({ onConvertToTask }: BrainDumpProps) {
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                 <button
                   onClick={() => convertToTask(entry)}
-                  className="flex items-center gap-1 h-7 px-2 text-xs font-medium transition-all"
-                  style={{ border: `1px solid ${M.coralBdr}`, color: M.coral, background: M.coralBg, fontFamily: "'DM Sans', sans-serif" }}
+                  className="m-chip active"
                 >
                   <ArrowRight className="w-3 h-3" />
                   Task

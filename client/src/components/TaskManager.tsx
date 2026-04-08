@@ -151,10 +151,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
           />
           <button
             onClick={addTask}
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium shrink-0 transition-all hover:opacity-88"
-            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+            className="m-btn-primary shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Add
           </button>
         </div>
@@ -168,14 +167,17 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
               <button
                 key={p}
                 onClick={() => setNewTaskPriority(p)}
-                className="flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all"
+                className="flex items-center gap-1.5 px-3 py-1 transition-all"
                 style={{
                   background:  isActive ? bg : "transparent",
                   color:       isActive ? color : M.muted,
                   border:      `1px solid ${isActive ? border : M.border}`,
                   fontFamily:  "'DM Sans', sans-serif",
-                  outline:     isActive ? `2px solid ${color}25` : undefined,
-                  outlineOffset: "2px",
+                  fontSize:    "0.62rem",
+                  fontWeight:  isActive ? 600 : 400,
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  borderRadius: 0,
                 }}
               >
                 <Icon className="w-3 h-3" />
@@ -230,6 +232,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all" }: Ta
                 borderBottom: isAct ? `2px solid ${M.coral}` : "2px solid transparent",
                 fontFamily:   "'DM Sans', sans-serif",
                 fontWeight:   isAct ? 600 : 400,
+                fontSize:     "0.68rem",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
               }}
             >
               {label}

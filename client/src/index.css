@@ -62,7 +62,7 @@
 }
 
 :root {
-  --radius: 0.2rem;
+  --radius: 0.1rem; /* near-square — editorial, no pill shapes */
 
   /* ── Morandi Backgrounds ── */
   --background:          oklch(0.972 0.010 78);   /* parchment */
@@ -214,25 +214,129 @@
     border: 1px solid oklch(0.88 0.014 75);
   }
 
-  /* Morandi primary button */
-  .m-btn-primary {
-    background: oklch(0.55 0.09 35);
-    color: oklch(0.97 0.005 80);
-    border: none;
-    transition: opacity 0.15s;
-  }
-  .m-btn-primary:hover { opacity: 0.88; }
+  /* ── Editorial Button System (inspired by VJ Type + Little Valley Studio) ──
+     Rules: square corners, all-caps tracking-wide, flat/no shadow,
+     primary = solid dark fill, ghost = thin 1px border only            */
 
-  /* Morandi ghost button */
+  /* Primary: solid coral fill, white text, square */
+  .m-btn-primary {
+    background: oklch(0.52 0.09 35);
+    color: oklch(0.97 0.005 80);
+    border: 1px solid oklch(0.52 0.09 35);
+    border-radius: 0;
+    padding: 0.55rem 1.25rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: background 0.18s, color 0.18s;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .m-btn-primary:hover {
+    background: oklch(0.44 0.09 35);
+    border-color: oklch(0.44 0.09 35);
+  }
+
+  /* Primary dark: solid griffin charcoal, white text */
+  .m-btn-dark {
+    background: oklch(0.28 0.018 65);
+    color: oklch(0.97 0.005 80);
+    border: 1px solid oklch(0.28 0.018 65);
+    border-radius: 0;
+    padding: 0.55rem 1.25rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: background 0.18s;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .m-btn-dark:hover {
+    background: oklch(0.20 0.018 65);
+    border-color: oklch(0.20 0.018 65);
+  }
+
+  /* Ghost: transparent, 1px border, dark text — VJ Type 'TRIALS' style */
   .m-btn-ghost {
     background: transparent;
-    border: 1px solid oklch(0.88 0.014 75);
-    color: oklch(0.55 0.018 70);
-    transition: all 0.15s;
+    border: 1px solid oklch(0.72 0.018 75);
+    color: oklch(0.38 0.018 65);
+    border-radius: 0;
+    padding: 0.5rem 1.1rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    transition: border-color 0.18s, color 0.18s;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
   }
   .m-btn-ghost:hover {
-    border-color: oklch(0.55 0.09 35 / 0.5);
-    color: oklch(0.28 0.018 65);
+    border-color: oklch(0.52 0.09 35);
+    color: oklch(0.52 0.09 35);
+  }
+
+  /* Inline text-link button — Little Valley Studio 'TAKE ME THERE' style */
+  .m-btn-link {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid oklch(0.72 0.018 75);
+    border-radius: 0;
+    padding: 0 0 0.1rem 0;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.68rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: oklch(0.38 0.018 65);
+    transition: border-color 0.18s, color 0.18s;
+    box-shadow: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .m-btn-link:hover {
+    border-color: oklch(0.52 0.09 35);
+    color: oklch(0.52 0.09 35);
+  }
+
+  /* Chip/tag button — compact, square, for filters */
+  .m-chip {
+    background: transparent;
+    border: 1px solid oklch(0.82 0.012 75);
+    border-radius: 0;
+    padding: 0.25rem 0.65rem;
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: oklch(0.50 0.018 70);
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .m-chip:hover, .m-chip.active {
+    background: oklch(0.52 0.09 35);
+    border-color: oklch(0.52 0.09 35);
+    color: oklch(0.97 0.005 80);
+  }
+  .m-chip.active-sage {
+    background: oklch(0.62 0.07 145);
+    border-color: oklch(0.62 0.07 145);
+    color: oklch(0.97 0.005 80);
   }
 }
 

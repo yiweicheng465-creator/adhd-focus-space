@@ -209,19 +209,11 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
 
         {/* Footer */}
         <div className="p-4 flex gap-3" style={{ borderTop: `1px solid ${M.border}` }}>
-          <button
-            onClick={onClose}
-            className="flex-1 py-2 text-sm font-medium transition-all hover:opacity-80"
-            style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
-          >
+          <button onClick={onClose} className="m-btn-ghost flex-1">
             Close
           </button>
-          <button
-            onClick={copyDigest}
-            className="flex-1 flex items-center justify-center gap-2 py-2 text-sm font-medium transition-all hover:opacity-90"
-            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
-          >
-            <ClipboardCopy className="w-4 h-4" />
+          <button onClick={copyDigest} className="m-btn-primary flex-1 justify-center">
+            <ClipboardCopy className="w-3.5 h-3.5" />
             {copied ? "Copied!" : "Copy summary"}
           </button>
         </div>

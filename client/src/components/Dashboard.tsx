@@ -209,7 +209,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
           <button
             key={label}
             onClick={() => onNavigate(section)}
-            className="p-5 text-left transition-all hover:opacity-90"
+            className="p-5 text-left transition-all"
             style={{ border: `1px solid ${BORDER}`, background: CREAM }}
           >
             <div className="flex items-center gap-2 mb-3" style={{ color: TC }}>
@@ -246,7 +246,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
               </span>
             )}
           </div>
-          <span className="text-xs" style={{ color: TC }}>Manage →</span>
+          <button className="m-btn-link" onClick={() => onNavigate("agents")}>Manage</button>
         </div>
 
         {todayAgents.length === 0 ? (
@@ -299,13 +299,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
               <Zap className="w-3.5 h-3.5" style={{ color: TC }} />
               <p className="editorial-label">Next Up</p>
             </div>
-            <button
-              onClick={() => onNavigate("tasks")}
-              className="text-xs transition-colors hover:opacity-70"
-              style={{ color: TC }}
-            >
-              View all →
-            </button>
+            <button className="m-btn-link" onClick={() => onNavigate("tasks")}>View all</button>
           </div>
 
           {activeTasks.length === 0 ? (
@@ -313,8 +307,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
               <CheckCircle2 className="w-8 h-8 mb-3 opacity-20" />
               <p className="text-sm" style={{ color: MUTED }}>All clear! Add tasks to get started.</p>
               <button
-                className="mt-4 px-4 py-2 text-sm font-medium transition-all hover:opacity-90"
-                style={{ background: TC, color: "white" }}
+                className="m-btn-primary mt-4"
                 onClick={() => onNavigate("tasks")}
               >
                 Add a task
@@ -351,9 +344,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
               <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.12 75)" }} />
               <p className="editorial-label">Today's Wins ({todayWins.length})</p>
             </div>
-            <button onClick={() => onNavigate("wins")} className="text-xs" style={{ color: "oklch(0.55 0.12 75)" }}>
-              Log more →
-            </button>
+            <button className="m-btn-link" onClick={() => onNavigate("wins")}>Log more</button>
           </div>
           <div className="flex flex-wrap gap-2">
             {todayWins.map((w) => (

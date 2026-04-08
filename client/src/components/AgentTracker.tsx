@@ -281,10 +281,9 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
 
         <button
           onClick={addAgent}
-          className="self-start flex items-center gap-2 px-5 py-2 text-sm font-medium transition-all hover:opacity-88"
-          style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+          className="m-btn-primary self-start"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5" />
           Start Agent
         </button>
       </div>
@@ -299,12 +298,15 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
-              className="px-4 py-2 capitalize transition-all"
+              className="px-4 py-2 transition-all"
               style={{
                 color:        isAct ? (cfg ? cfg.color : M.ink) : M.muted,
                 borderBottom: isAct ? `2px solid ${cfg ? cfg.color : M.coral}` : "2px solid transparent",
                 fontFamily:   "'DM Sans', sans-serif",
                 fontWeight:   isAct ? 600 : 400,
+                fontSize:     "0.68rem",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
               }}
             >
               {s === "all" ? "All" : STATUS_CONFIG[s].label} ({count})
@@ -390,8 +392,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                         placeholder="What did this agent produce? Any key outputs?"
                       />
                       <div className="flex gap-2">
-                        <button onClick={saveNote} className="px-4 py-1.5 text-xs font-medium" style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}>Save</button>
-                        <button onClick={() => setNoteEditing(null)} className="px-4 py-1.5 text-xs font-medium" style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Cancel</button>
+                        <button onClick={saveNote} className="m-btn-primary">Save</button>
+                        <button onClick={() => setNoteEditing(null)} className="m-btn-ghost">Cancel</button>
                       </div>
                     </div>
                   ) : (
@@ -413,15 +415,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                         <button
                           key={s}
                           onClick={() => onAgentsChange(agents.map((a) => a.id === agent.id ? { ...a, status: s, endedAt: s === "done" || s === "failed" ? new Date() : undefined } : a))}
-                          className={cn("flex items-center gap-1.5 px-3 py-1 text-xs font-medium transition-all")}
-                          style={{
-                            background:  c.bg,
-                            color:       c.color,
-                            border:      `1px solid ${c.border}`,
-                            fontFamily:  "'DM Sans', sans-serif",
-                            outline:     agent.status === s ? `2px solid ${c.color}30` : undefined,
-                            outlineOffset: "2px",
-                          }}
+                          className={cn("m-chip", agent.status === s && "active")}
                         >
                           <SI className="w-3 h-3" />
                           {c.label}

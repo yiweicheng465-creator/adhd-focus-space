@@ -129,10 +129,9 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
           />
           <button
             onClick={addGoal}
-            className="px-4 py-2 text-sm font-medium transition-all hover:opacity-88"
-            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+            className="m-btn-primary shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
 
@@ -232,10 +231,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
                     key={delta}
                     onClick={() => updateProgress(goal.id, delta)}
                     disabled={done}
-                    className="text-xs px-2 py-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                    style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
-                    onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.coralBdr; (e.currentTarget as HTMLButtonElement).style.color = M.coral; }}
-                    onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = M.border; (e.currentTarget as HTMLButtonElement).style.color = M.muted; }}
+                    className="m-chip disabled:opacity-30 disabled:cursor-not-allowed"
                   >
                     +{delta}%
                   </button>
@@ -243,10 +239,9 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all" }: GoalsPro
                 <button
                   onClick={() => updateProgress(goal.id, -10)}
                   disabled={goal.progress <= 0}
-                  className="text-xs px-2 py-0.5 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-                  style={{ border: `1px solid ${M.border}`, color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+                  className="m-chip disabled:opacity-30 disabled:cursor-not-allowed"
                 >
-                  -10%
+                  −10%
                 </button>
               </div>
             </div>

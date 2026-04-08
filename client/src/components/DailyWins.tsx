@@ -97,10 +97,9 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
           />
           <button
             onClick={addWin}
-            className="px-4 py-2 text-sm font-medium shrink-0 transition-all hover:opacity-88"
-            style={{ background: M.coral, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+            className="m-btn-primary shrink-0"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
 
