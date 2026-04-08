@@ -130,15 +130,15 @@ function BalloonScene({
   const eyeOffX = rx * 0.28;
   const smileR = rx * 0.30;
 
-  // Needle tip always tracks balloon right edge
+  // Needle tip always tracks balloon right edge — starts close (20px gap), moves in as time passes
   const progressFromScale = Math.max(0, Math.min(1, (1 - balloonScale) / 0.85));
-  const needleGap = touching ? -4 : Math.max(8, 80 - progressFromScale * 72);
+  const needleGap = touching ? -4 : Math.max(6, 22 - progressFromScale * 16);
   const balloonRightEdge = cx + rx;
   const needleTipX = balloonRightEdge + needleGap;
-  const needleEyeX = needleTipX + 130;
+  const needleEyeX = needleTipX + 110;
   const needleY = cy;
 
-  const svgW = 340;
+  const svgW = 310;
   const svgH = 270;
 
   return (
@@ -160,20 +160,20 @@ function BalloonScene({
       {/* Smiley face — crayon style, closed arc eyes + smile */}
       {s > 0.45 && (
         <g opacity={Math.min(1, (s - 0.45) * 5)}>
-          {/* Left eye — closed happy arc */}
+          {/* Left eye — cute downward arc ᵕ (like picture 2) */}
           <path
-            d={`M ${cx - eyeOffX - rx * 0.11} ${eyeY} Q ${cx - eyeOffX} ${eyeY - ry * 0.13} ${cx - eyeOffX + rx * 0.11} ${eyeY}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+            d={`M ${cx - eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx - eyeOffX} ${eyeY + ry * 0.10} ${cx - eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
           />
-          {/* Right eye — closed happy arc */}
+          {/* Right eye — cute downward arc ᵕ */}
           <path
-            d={`M ${cx + eyeOffX - rx * 0.11} ${eyeY} Q ${cx + eyeOffX} ${eyeY - ry * 0.13} ${cx + eyeOffX + rx * 0.11} ${eyeY}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+            d={`M ${cx + eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx + eyeOffX} ${eyeY + ry * 0.10} ${cx + eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
           />
-          {/* Smile arc */}
+          {/* Gentle smile — soft and content */}
           <path
-            d={`M ${cx - smileR} ${cy + ry * 0.20} Q ${cx} ${cy + ry * 0.48} ${cx + smileR} ${cy + ry * 0.20}`}
-            fill="none" stroke={STROKE} strokeWidth={sw * 0.9} strokeLinecap="round" opacity="0.82"
+            d={`M ${cx - smileR * 0.7} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.42} ${cx + smileR * 0.7} ${cy + ry * 0.28}`}
+            fill="none" stroke={STROKE} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.80"
           />
         </g>
       )}

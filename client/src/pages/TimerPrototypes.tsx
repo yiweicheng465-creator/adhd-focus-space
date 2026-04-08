@@ -5,6 +5,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
+import { PaperTearTimer } from "@/components/PaperTearTimer";
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 const DEMO_TOTAL = 25 * 60; // 25 min demo
@@ -1550,10 +1551,19 @@ export default function TimerPrototypes() {
             Pale cream balloon with a soft radial glow and minimal dot eyes. Quiet and calming. Needle barely visible until you pause.
           </p>
         </div>
+        {/* J — Paper Tear */}
+        <div>
+          <p className="proto-label">J — Paper Tear <span className="proto-badge">New</span> <span className="proto-badge-rec">Cathartic</span></p>
+          <PaperTearTimer durationMinutes={1} />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            A piece of paper with your worries written on it. As you focus, the bottom strips tear off one by one. Quit and the paper recovers. Complete the session and the whole page tears away in a satisfying cascade.
+          </p>
+        </div>
+
       {/* Footer CTA */}
       <div style={{ maxWidth: 960, margin: "48px auto 0", padding: "24px", background: "#fff", borderRadius: 16, textAlign: "center", boxShadow: "0 2px 12px rgba(92,61,46,0.06)" }}>
         <p style={{ color: "#5C3D2E", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>Which design do you prefer?</p>
-        <p style={{ color: "#8B9E7A", fontSize: 13, margin: 0 }}>Reply with A, B, C, D, E, or F — or mix elements from multiple designs — and I'll build it into the main app.</p>
+        <p style={{ color: "#8B9E7A", fontSize: 13, margin: 0 }}>Reply with A–J — or mix elements from multiple designs — and I'll build it into the main app.</p>
       </div>
     </div>
   );
