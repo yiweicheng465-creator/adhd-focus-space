@@ -75,9 +75,11 @@ function WinSvgIcon({ idx, size = 22, color }: { idx: number; size?: number; col
   return icons[idx % icons.length] ?? icons[0];
 }
 
-// Circular wins ring
+// ── Grouped arc-segment wins ring (like health score reference) ──
 function WinsRing({ wins }: { wins: Win[] }) {
-  const [hovered, setHovered] = useState<string | null>(null);
+  const [hoveredCat, setHoveredCat] = useState<number | null>(null);
+  const [hoveredWin, setHoveredWin] = useState<string | null>(null);
+
   if (wins.length === 0) {
     return (
       <p className="text-sm italic" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif" }}>
@@ -85,67 +87,181 @@ function WinsRing({ wins }: { wins: Win[] }) {
       </p>
     );
   }
-  const cx = 110, cy = 110, r = 76;
+
   const total = wins.length;
+  const cx = 120, cy = 120;
+  // Track arc radius and icon radius separately
+  const arcR = 82;   // arc stroke center
+  const iconR = 82;  // icon position radius
+
+  // Group wins by category index
+  const groups: { idx: number; wins: Win[] }[] = [];
+  wins.forEach((w) => {
+    const idx = typeof w.iconIdx === "number" ? w.iconIdx % WIN_CAT_COLORS.length : 0;
+    const existing = groups.find((g) => g.idx === idx);
+    if (existing) existing.wins.push(w);
+    else groups.push({ idx, wins: [w] });
+  });
+
+  // Sort groups by category index for consistent ordering
+  groups.sort((a, b) => a.idx - b.idx);
+
+  // Compute arc spans — proportional to win count, with small gaps between
+  const GAP_DEG = groups.length > 1 ? 6 : 0; // degrees gap between arcs
+  const totalGap = GAP_DEG * groups.length;
+  const availableDeg = 360 - totalGap;
+
+  // Each arc gets proportional share of the circle
+  let currentAngle = -90; // start at top
+  const arcSegments = groups.map((g) => {
+    const proportion = g.wins.length / total;
+    const arcDeg = availableDeg * proportion;
+    const startAngle = currentAngle;
+    const endAngle = currentAngle + arcDeg;
+    const midAngle = (startAngle + endAngle) / 2;
+    currentAngle = endAngle + GAP_DEG;
+    return { ...g, startAngle, endAngle, midAngle, arcDeg };
+  });
+
+  // Convert degrees to SVG arc path
+  function polarToXY(angleDeg: number, radius: number) {
+    const rad = (angleDeg * Math.PI) / 180;
+    return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
+  }
+
+  function describeArc(startDeg: number, endDeg: number, radius: number, strokeWidth: number) {
+    const start = polarToXY(startDeg, radius);
+    const end = polarToXY(endDeg, radius);
+    const largeArc = endDeg - startDeg > 180 ? 1 : 0;
+    return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
+  }
+
+  const SIZE = 240;
+  const STROKE = 18; // arc thickness
+
   return (
     <div className="flex flex-col items-center gap-3">
-      <div style={{ position: "relative", width: 220, height: 220 }}>
-        {/* Dashed circle guide */}
-        <svg width="220" height="220" style={{ position: "absolute", inset: 0 }}>
-          <circle cx={cx} cy={cy} r={r} fill="none" stroke="oklch(0.88 0.014 75)" strokeWidth="1" strokeDasharray="4 4" />
-          <text x={cx} y={cy - 6} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fill: "oklch(0.28 0.018 65)" }}>{total}</text>
-          <text x={cx} y={cy + 14} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fill: "oklch(0.55 0.018 70)", textTransform: "uppercase", letterSpacing: 1 }}>wins</text>
+      <div style={{ position: "relative", width: SIZE, height: SIZE }}>
+        <svg width={SIZE} height={SIZE} style={{ position: "absolute", inset: 0, overflow: "visible" }}>
+          {/* Background dashed guide ring */}
+          <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="oklch(0.90 0.010 75)" strokeWidth="1" strokeDasharray="3 5" />
+
+          {/* Arc segments */}
+          {arcSegments.map((seg) => {
+            const color = WIN_CAT_COLORS[seg.idx];
+            const isHov = hoveredCat === seg.idx;
+            const arcPath = describeArc(seg.startAngle, seg.endAngle, arcR, STROKE);
+            return (
+              <path
+                key={seg.idx}
+                d={arcPath}
+                fill="none"
+                stroke={color}
+                strokeWidth={isHov ? STROKE + 4 : STROKE}
+                strokeLinecap="round"
+                opacity={isHov ? 1 : 0.82}
+                style={{ transition: "stroke-width 0.2s, opacity 0.2s", cursor: "pointer" }}
+                onMouseEnter={() => setHoveredCat(seg.idx)}
+                onMouseLeave={() => setHoveredCat(null)}
+              />
+            );
+          })}
+
+          {/* Center count */}
+          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fill: "oklch(0.28 0.018 65)", fontWeight: 700 }}>{total}</text>
+          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "oklch(0.55 0.018 70)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
         </svg>
-        {wins.map((w, i) => {
-          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
-          const x = cx + r * Math.cos(angle);
-          const y = cy + r * Math.sin(angle);
-          const idx = typeof w.iconIdx === "number" ? w.iconIdx % WIN_CAT_COLORS.length : 0;
-          const color = WIN_CAT_COLORS[idx];
-          const label = WIN_CAT_LABELS[idx];
-          const isHov = hovered === w.id;
+
+        {/* Category icons at arc midpoints */}
+        {arcSegments.map((seg) => {
+          const color = WIN_CAT_COLORS[seg.idx];
+          const label = WIN_CAT_LABELS[seg.idx];
+          const isHov = hoveredCat === seg.idx;
+          const { x, y } = polarToXY(seg.midAngle, iconR);
+          // Icon circle size scales with win count
+          const iconSize = Math.min(32, 22 + seg.wins.length * 2);
+          const circleR = iconSize / 2 + 4;
+
           return (
             <div
-              key={w.id}
-              style={{ position: "absolute", left: x - 18, top: y - 18, zIndex: isHov ? 10 : 1 }}
-              onMouseEnter={() => setHovered(w.id)}
-              onMouseLeave={() => setHovered(null)}
+              key={seg.idx}
+              style={{
+                position: "absolute",
+                left: x - circleR,
+                top: y - circleR,
+                width: circleR * 2,
+                height: circleR * 2,
+                zIndex: isHov ? 20 : 5,
+              }}
+              onMouseEnter={() => setHoveredCat(seg.idx)}
+              onMouseLeave={() => setHoveredCat(null)}
             >
-              <div
-                style={{
-                  width: 36, height: 36, borderRadius: "50%",
-                  background: `${color}22`,
-                  border: `2px solid ${color}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  cursor: "default",
-                  transition: "transform 0.15s",
-                  transform: isHov ? "scale(1.25)" : "scale(1)",
-                  boxShadow: isHov ? `0 2px 12px ${color}55` : "none",
-                }}
-              >
-                <WinSvgIcon idx={idx} size={18} color={color} />
+              {/* Icon bubble */}
+              <div style={{
+                width: "100%",
+                height: "100%",
+                borderRadius: "50%",
+                background: `${color}18`,
+                border: `2.5px solid ${color}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                transition: "transform 0.2s, box-shadow 0.2s",
+                transform: isHov ? "scale(1.2)" : "scale(1)",
+                boxShadow: isHov ? `0 3px 14px ${color}55` : "none",
+                cursor: "default",
+                backdropFilter: "blur(2px)",
+              }}>
+                <WinSvgIcon idx={seg.idx} size={iconSize} color={color} />
+                {/* Count badge */}
+                {seg.wins.length > 1 && (
+                  <div style={{
+                    position: "absolute",
+                    top: -4, right: -4,
+                    width: 16, height: 16,
+                    borderRadius: "50%",
+                    background: color,
+                    color: "white",
+                    fontSize: 9,
+                    fontWeight: 700,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontFamily: "'DM Sans', sans-serif",
+                    border: "1.5px solid white",
+                  }}>{seg.wins.length}</div>
+                )}
               </div>
+
+              {/* Hover tooltip showing all wins in category */}
               {isHov && (
                 <div style={{
                   position: "absolute",
-                  bottom: "calc(100% + 6px)",
+                  bottom: "calc(100% + 8px)",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "oklch(0.18 0.01 60 / 0.92)",
+                  background: "oklch(0.18 0.01 60 / 0.94)",
                   color: "white",
-                  borderRadius: 6,
-                  padding: "5px 10px",
+                  borderRadius: 8,
+                  padding: "7px 12px",
                   whiteSpace: "nowrap",
                   fontSize: 11,
                   fontFamily: "'DM Sans', sans-serif",
                   pointerEvents: "none",
-                  zIndex: 20,
-                  maxWidth: 160,
-                  textAlign: "center",
-                  lineHeight: 1.4,
+                  zIndex: 30,
+                  maxWidth: 200,
+                  textAlign: "left",
+                  lineHeight: 1.5,
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.25)",
                 }}>
-                  <div style={{ fontWeight: 600, fontSize: 10, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
-                  <div>{w.text}</div>
+                  <div style={{ fontWeight: 700, fontSize: 10, opacity: 0.7, textTransform: "uppercase", letterSpacing: 1, marginBottom: 4 }}>
+                    {label} · {seg.wins.length} {seg.wins.length === 1 ? "win" : "wins"}
+                  </div>
+                  {seg.wins.map((w) => (
+                    <div key={w.id} style={{ paddingLeft: 6, borderLeft: `2px solid ${color}`, marginBottom: 2, opacity: 0.9 }}>
+                      {w.text}
+                    </div>
+                  ))}
                 </div>
               )}
             </div>

@@ -1,23 +1,57 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Daily Check-In Prompt v2.0
-   ADHD principle: Conversational onboarding reduces friction
-   Auto-opens once per day (localStorage key = today's date).
-   Multi-step conversational flow — one question at a time.
-   Skip button always visible.
+   ADHD FOCUS SPACE — Daily Check-In v3.0
+   Fixes:
+   - X = dismiss temporarily (re-shows same day on reload)
+   - Skip for today / Finish = suppress all day (localStorage)
+   - Back button to navigate to previous steps
+   - Wins include category selector (8 categories)
+   - Wins tagged as yesterday's date
+   - Agent creation: separate name + task fields
+   - Mood faces match the geometric design (same as MoodCheckIn)
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { cn } from "@/lib/utils";
-import { ArrowRight, SkipForward, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, SkipForward, X } from "lucide-react";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
-import type { Goal } from "./Goals";
 
+/* ── localStorage keys ── */
+function getTodayKey() {
+  return `adhd-checkin-skip-${new Date().toDateString()}`;
+}
+function getXKey() {
+  return `adhd-checkin-x-${new Date().toDateString()}`;
+}
+
+export function useDailyCheckIn() {
+  const [show, setShow] = useState(false);
+
+  useEffect(() => {
+    // Show unless user clicked Skip/Finish today
+    const skipped = localStorage.getItem(getTodayKey());
+    if (!skipped) {
+      const t = setTimeout(() => setShow(true), 600);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
+  const dismiss = (permanent: boolean) => {
+    if (permanent) {
+      localStorage.setItem(getTodayKey(), "1");
+    }
+    setShow(false);
+  };
+
+  return { show, dismiss };
+}
+
+/* ── Types ── */
 interface DailyCheckInProps {
   onComplete: (data: CheckInResult) => void;
   onSkip: () => void;
+  onClose: () => void; // X button — temporary dismiss
 }
 
 export interface CheckInResult {
@@ -29,117 +63,78 @@ export interface CheckInResult {
   focusNote: string;
 }
 
-type Step =
-  | "greeting"
-  | "mood"
-  | "tasks"
-  | "agents"
-  | "wins"
-  | "focus"
-  | "done";
-
-const MOODS = [
-  { value: 1, label: "Drained",  fill: "oklch(0.72 0.035 260)", stroke: "oklch(0.50 0.04 260)"  },
-  { value: 2, label: "Low",      fill: "oklch(0.76 0.045 310)", stroke: "oklch(0.52 0.05 310)"  },
-  { value: 3, label: "Okay",     fill: "oklch(0.80 0.04 75)",  stroke: "oklch(0.55 0.04 75)"   },
-  { value: 4, label: "Good",     fill: "oklch(0.75 0.07 145)", stroke: "oklch(0.50 0.08 145)"  },
-  { value: 5, label: "Glowing",  fill: "oklch(0.78 0.10 55)",  stroke: "oklch(0.55 0.12 45)"   },
-];
-
-/* ── Inline blob face renderers ── */
-function BlobDrained({ fill, stroke }: { fill: string; stroke: string }) {
-  return (
-    <svg viewBox="0 0 80 80" fill="none">
-      <path d="M40 8 C58 6 74 18 74 36 C74 56 62 74 40 74 C18 74 6 56 6 36 C6 18 22 10 40 8Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
-      <path d="M27 34 Q29 31 31 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M49 34 Q51 31 53 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
-      <path d="M31 50 Q40 48 49 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-function BlobLow({ fill, stroke }: { fill: string; stroke: string }) {
-  return (
-    <svg viewBox="0 0 80 80" fill="none">
-      <path d="M18 12 C10 12 6 20 6 30 L6 52 C6 64 14 74 28 74 L52 74 C66 74 74 64 74 52 L74 30 C74 20 70 12 62 12 Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
-      <circle cx="28" cy="35" r="2.5" fill={stroke} />
-      <circle cx="52" cy="35" r="2.5" fill={stroke} />
-      <path d="M30 52 Q40 46 50 52" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-function BlobOkay({ fill, stroke }: { fill: string; stroke: string }) {
-  return (
-    <svg viewBox="0 0 80 80" fill="none">
-      <path d="M40 7 C56 5 75 20 75 40 C75 60 58 75 40 75 C22 75 5 60 5 40 C5 20 24 9 40 7Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
-      <ellipse cx="28" cy="34" rx="3" ry="3.5" fill={stroke} />
-      <ellipse cx="52" cy="34" rx="3" ry="3.5" fill={stroke} />
-      <path d="M39 40 L39 46 L43 46" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <line x1="30" y1="54" x2="50" y2="54" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" />
-    </svg>
-  );
-}
-function BlobGood({ fill, stroke }: { fill: string; stroke: string }) {
-  return (
-    <svg viewBox="0 0 80 80" fill="none">
-      <path d="M40 6 C52 4 72 16 74 32 C76 48 68 72 48 76 C28 80 4 64 4 44 C4 24 20 8 40 6Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
-      <path d="M25 35 Q28 30 31 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      <path d="M49 35 Q52 30 55 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      <path d="M29 50 Q40 58 51 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-function BlobGlowing({ fill, stroke }: { fill: string; stroke: string }) {
-  const pts = Array.from({ length: 8 }, (_, i) => {
-    const outerAngle = (i * 45 - 90) * (Math.PI / 180);
-    const innerAngle = ((i * 45 + 22.5) - 90) * (Math.PI / 180);
-    const ox = 40 + 38 * Math.cos(outerAngle);
-    const oy = 40 + 38 * Math.sin(outerAngle);
-    const ix = 40 + 22 * Math.cos(innerAngle);
-    const iy = 40 + 22 * Math.sin(innerAngle);
-    return `${ox.toFixed(1)},${oy.toFixed(1)} ${ix.toFixed(1)},${iy.toFixed(1)}`;
-  }).join(" ");
-  return (
-    <svg viewBox="0 0 80 80" fill="none">
-      <polygon points={pts} fill={fill} stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" />
-      <path d="M29 36 Q32 31 35 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      <path d="M45 36 Q48 31 51 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      <path d="M30 48 Q40 57 50 48" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
-    </svg>
-  );
-}
-const BLOB_FACES = [BlobDrained, BlobLow, BlobOkay, BlobGood, BlobGlowing];
-
+type Step = "greeting" | "mood" | "tasks" | "agents" | "wins" | "focus" | "done";
 const STEP_ORDER: Step[] = ["greeting", "mood", "tasks", "agents", "wins", "focus", "done"];
 
-function getStorageKey() {
-  return `adhd-checkin-${new Date().toDateString()}`;
+/* ── Win categories (matches DailyWins) ── */
+const WIN_CATS = [
+  { idx: 0, label: "Health",    color: "oklch(0.60 0.10 15)",  emoji: "❤️" },
+  { idx: 1, label: "Study",     color: "oklch(0.52 0.08 230)", emoji: "📚" },
+  { idx: 2, label: "Work",      color: "oklch(0.50 0.07 145)", emoji: "💼" },
+  { idx: 3, label: "Social",    color: "oklch(0.58 0.09 55)",  emoji: "👥" },
+  { idx: 4, label: "Creative",  color: "oklch(0.55 0.10 300)", emoji: "✨" },
+  { idx: 5, label: "Mindful",   color: "oklch(0.55 0.07 185)", emoji: "🌿" },
+  { idx: 6, label: "Fitness",   color: "oklch(0.53 0.09 35)",  emoji: "⚡" },
+  { idx: 7, label: "Nutrition", color: "oklch(0.52 0.10 130)", emoji: "🍎" },
+];
+
+/* ── Geometric mood faces (matching MoodCheckIn) ── */
+const MOODS = [
+  { value: 1, label: "Drained", fill: "#B8B4C8", stroke: "#5A5570", shadow: "rgba(180,175,200,0.4)" },
+  { value: 2, label: "Low",     fill: "#C0B8D4", stroke: "#5A5070", shadow: "rgba(175,165,195,0.4)" },
+  { value: 3, label: "Okay",    fill: "#A89070", stroke: "#4A3820", shadow: "rgba(160,140,110,0.4)" },
+  { value: 4, label: "Good",    fill: "#90C8A8", stroke: "#2A5840", shadow: "rgba(140,195,165,0.4)" },
+  { value: 5, label: "Glowing", fill: "#F0A878", stroke: "#7A3818", shadow: "rgba(240,160,120,0.4)" },
+];
+
+function FaceDrained({ active }: { active: boolean }) {
+  const fill = active ? "#B8B4C8" : "#CCC8D8"; const c = "#5A5570";
+  return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>;
 }
-
-export function useDailyCheckIn() {
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    // Always show for testing — remove the once-per-day guard
-    const t = setTimeout(() => setShow(true), 600);
-    return () => clearTimeout(t);
-  }, []);
-
-  const dismiss = () => {
-    setShow(false);
-  };
-
-  return { show, dismiss };
+function FaceLow({ active }: { active: boolean }) {
+  const fill = active ? "#C0B8D4" : "#D4CEEA"; const c = "#5A5070";
+  return <svg viewBox="0 0 80 80" fill="none"><rect x="8" y="8" width="64" height="64" rx="22" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><path d="M30 52 Q40 47 50 52" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/></svg>;
 }
+function FaceOkay({ active }: { active: boolean }) {
+  const fill = active ? "#A89070" : "#C4AA88"; const c = "#4A3820";
+  return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>;
+}
+function FaceGood({ active }: { active: boolean }) {
+  const fill = active ? "#90C8A8" : "#B0D8C0"; const c = "#2A5840";
+  return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><path d="M24 36 Q28 31 32 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M48 36 Q52 31 56 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M30 50 Q40 57 50 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/></svg>;
+}
+function FaceGlowing({ active }: { active: boolean }) {
+  const fill = active ? "#F0A878" : "#F8C8A0"; const c = "#7A3818";
+  const numRays = 10; const outerR = 38, innerR = 28;
+  const points = Array.from({ length: numRays * 2 }, (_, i) => {
+    const angle = (i * Math.PI) / numRays - Math.PI / 2;
+    const r = i % 2 === 0 ? outerR : innerR;
+    return `${40 + r * Math.cos(angle)},${40 + r * Math.sin(angle)}`;
+  }).join(" ");
+  return <svg viewBox="0 0 80 80" fill="none"><polygon points={points} fill={fill}/><path d="M26 37 Q30 32 34 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M46 37 Q50 32 54 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M28 50 Q40 60 52 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/></svg>;
+}
+const FACE_COMPONENTS = [FaceDrained, FaceLow, FaceOkay, FaceGood, FaceGlowing];
 
-export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
+/* ── Main component ── */
+export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps) {
   const [step, setStep] = useState<Step>("greeting");
   const [mood, setMood] = useState<number | null>(null);
+
+  // Tasks
   const [taskInput, setTaskInput] = useState("");
-  const [tasks, setTasks] = useState<string[]>([]);
-  const [agentInput, setAgentInput] = useState("");
+  const [taskContext, setTaskContext] = useState<"work" | "personal">("work");
+  const [tasks, setTasks] = useState<{ text: string; context: "work" | "personal" }[]>([]);
+
+  // Agents
+  const [agentName, setAgentName] = useState("");
+  const [agentTask, setAgentTask] = useState("");
   const [agents, setAgents] = useState<{ name: string; task: string }[]>([]);
+
+  // Wins (with category)
   const [winInput, setWinInput] = useState("");
-  const [wins, setWins] = useState<string[]>([]);
+  const [winCatIdx, setWinCatIdx] = useState(0);
+  const [wins, setWins] = useState<{ text: string; catIdx: number }[]>([]);
+
   const [focusNote, setFocusNote] = useState("");
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
@@ -152,43 +147,66 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
 
   const addTask = () => {
     if (taskInput.trim()) {
-      setTasks((p) => [...p, taskInput.trim()]);
+      setTasks((p) => [...p, { text: taskInput.trim(), context: taskContext }]);
       setTaskInput("");
     }
   };
 
   const addAgent = () => {
-    const parts = agentInput.trim().split(" — ");
-    if (parts[0]) {
-      setAgents((p) => [...p, { name: parts[0], task: parts[1] || "General task" }]);
-      setAgentInput("");
+    if (agentName.trim()) {
+      setAgents((p) => [...p, { name: agentName.trim(), task: agentTask.trim() || "General task" }]);
+      setAgentName("");
+      setAgentTask("");
     }
   };
 
   const addWin = () => {
     if (winInput.trim()) {
-      setWins((p) => [...p, winInput.trim()]);
+      setWins((p) => [...p, { text: winInput.trim(), catIdx: winCatIdx }]);
       setWinInput("");
     }
   };
 
-  const next = () => {
+  const goNext = () => {
     const idx = STEP_ORDER.indexOf(step);
     if (idx < STEP_ORDER.length - 1) setStep(STEP_ORDER[idx + 1]);
   };
 
+  const goBack = () => {
+    const idx = STEP_ORDER.indexOf(step);
+    if (idx > 0) setStep(STEP_ORDER[idx - 1]);
+  };
+
   const finish = () => {
+    // Yesterday's date for wins (since we ask "wins from yesterday")
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    yesterday.setHours(23, 59, 0, 0);
+
     const result: CheckInResult = {
       mood,
       newTasks: tasks.map((t) => ({
-        id: nanoid(), text: t, priority: "focus", context: "work", done: false, createdAt: new Date(),
+        id: nanoid(),
+        text: t.text,
+        priority: "focus",
+        context: t.context,
+        done: false,
+        createdAt: new Date(),
       })),
       newWins: wins.map((w) => ({
-        id: nanoid(), text: w, iconIdx: 0, createdAt: new Date(),
+        id: nanoid(),
+        text: w.text,
+        iconIdx: w.catIdx,
+        createdAt: yesterday, // tag as yesterday
       })),
       newAgents: agents.map((a) => ({
-        id: nanoid(), name: a.name, task: a.task, status: "running",
-        context: "work", startedAt: new Date(), notes: "",
+        id: nanoid(),
+        name: a.name,
+        task: a.task,
+        status: "running" as const,
+        context: "work" as const,
+        startedAt: new Date(),
+        notes: "",
       })),
       goalUpdates: [],
       focusNote,
@@ -197,6 +215,21 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
   };
 
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+  const greeting = (() => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning,";
+    if (h < 17) return "Good afternoon,";
+    if (h < 21) return "Good evening,";
+    return "Good night,";
+  })();
+
+  const M = {
+    ink: "oklch(0.18 0.01 60)",
+    muted: "oklch(0.52 0.015 70)",
+    border: "oklch(0.87 0.014 75)",
+    accent: "oklch(0.52 0.14 35)",
+    bg: "oklch(0.975 0.012 80)",
+  };
 
   return (
     <div
@@ -205,39 +238,37 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
     >
       <div
         className="w-full max-w-lg animate-scale-in overflow-hidden"
-        style={{
-          background: "oklch(0.975 0.012 80)",
-          border: "1px solid oklch(0.87 0.014 75)",
-        }}
+        style={{ background: M.bg, border: `1px solid ${M.border}` }}
       >
         {/* Progress bar */}
         <div className="h-[2px] w-full" style={{ background: "oklch(0.88 0.012 75)" }}>
           <div
             className="h-full transition-all duration-500"
-            style={{ width: `${progress}%`, background: "oklch(0.52 0.14 35)" }}
+            style={{ width: `${progress}%`, background: M.accent }}
           />
         </div>
 
         {/* Header */}
         <div className="flex items-start justify-between px-8 pt-7 pb-0">
           <div>
-            <p className="editorial-label">{today}</p>
+            <p className="text-[10px] tracking-widest uppercase font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>{today}</p>
             <h2
               className="text-2xl mt-1 font-bold italic"
-              style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+              style={{ fontFamily: "'Playfair Display', serif", color: M.ink }}
             >
-              {step === "greeting" && (() => { const h = new Date().getHours(); if (h < 12) return "Good morning,"; if (h < 17) return "Good afternoon,"; if (h < 21) return "Good evening,"; return "Good night,"; })()}
+              {step === "greeting" && greeting}
               {step === "mood"     && "How are you feeling?"}
               {step === "tasks"    && "What's on your plate?"}
               {step === "agents"   && "Any AI agents running?"}
-              {step === "wins"     && "Any wins from yesterday?"}
+              {step === "wins"     && "Wins from yesterday?"}
               {step === "focus"    && "One thing to focus on?"}
               {step === "done"     && "You're all set."}
             </h2>
           </div>
+          {/* X = temporary dismiss (re-shows on next reload) */}
           <button
-            onClick={onSkip}
-            title="Skip for today"
+            onClick={onClose}
+            title="Close (will show again today)"
             className="text-muted-foreground hover:text-foreground p-1 transition-colors mt-1"
           >
             <X className="w-4 h-4" />
@@ -245,7 +276,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
         </div>
 
         {/* Step content */}
-        <div className="px-8 py-6 min-h-[200px]">
+        <div className="px-8 py-6 min-h-[220px]">
 
           {/* GREETING */}
           {step === "greeting" && (
@@ -259,7 +290,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                 <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>
                   Let's set up your day in just a few quick questions. No pressure — answer what you can, skip anything you don't have yet.
                 </p>
-                <p className="text-sm mt-3 italic" style={{ color: "oklch(0.52 0.015 70)" }}>
+                <p className="text-sm mt-3 italic" style={{ color: M.muted }}>
                   "Your brain is not broken — it just works differently."
                 </p>
               </div>
@@ -271,7 +302,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
             <div className="flex flex-col gap-4">
               <div className="flex items-end justify-between gap-2">
                 {MOODS.map((m, i) => {
-                  const BlobFace = BLOB_FACES[i];
+                  const FaceIcon = FACE_COMPONENTS[i];
                   const isSelected = mood === m.value;
                   return (
                     <button
@@ -280,19 +311,16 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                       className="flex flex-col items-center gap-1.5 flex-1 transition-all duration-200 focus:outline-none"
                       style={{
                         transform: isSelected ? "scale(1.18) translateY(-4px)" : "scale(1)",
-                        filter: isSelected ? `drop-shadow(0 6px 12px ${m.fill})` : "none",
+                        filter: isSelected ? `drop-shadow(0 6px 12px ${m.shadow})` : "none",
                         opacity: mood !== null && !isSelected ? 0.55 : 1,
                       }}
                     >
                       <div className="w-12 h-12">
-                        <BlobFace fill={m.fill} stroke={m.stroke} />
+                        <FaceIcon active={isSelected} />
                       </div>
                       <span
-                        className="text-[9px] font-medium tracking-wide transition-all duration-200"
-                        style={{
-                          color: isSelected ? m.stroke : "transparent",
-                          fontFamily: "'DM Sans', sans-serif",
-                        }}
+                        className="text-[9px] font-medium tracking-wide"
+                        style={{ color: isSelected ? M.ink : "transparent", fontFamily: "'DM Sans', sans-serif" }}
                       >
                         {m.label}
                       </span>
@@ -300,7 +328,6 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                   );
                 })}
               </div>
-              {/* Progress bar */}
               <div className="flex gap-1">
                 {MOODS.map((m) => (
                   <div
@@ -316,10 +343,10 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
           {/* TASKS */}
           {step === "tasks" && (
             <div>
-              <p className="text-sm mb-3" style={{ color: "oklch(0.52 0.015 70)" }}>
-                Type one task and press Enter. Add as many as you like, or skip.
+              <p className="text-sm mb-3" style={{ color: M.muted }}>
+                Add tasks for today. Press Enter to add each one.
               </p>
-              <div className="flex gap-2 mb-3">
+              <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
                   value={taskInput}
@@ -327,22 +354,33 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                   onKeyDown={(e) => e.key === "Enter" && addTask()}
                   placeholder="e.g. Reply to Alice's email…"
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", color: "oklch(0.18 0.01 60)" }}
+                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
+                <select
+                  value={taskContext}
+                  onChange={(e) => setTaskContext(e.target.value as "work" | "personal")}
+                  className="px-2 py-2 text-xs bg-transparent focus:outline-none"
+                  style={{ border: `1px solid ${M.border}`, color: M.muted }}
+                >
+                  <option value="work">Work</option>
+                  <option value="personal">Personal</option>
+                </select>
                 <button
                   onClick={addTask}
-                  className="px-3 py-2 text-sm"
-                  style={{ background: "oklch(0.52 0.14 35)", color: "white" }}
+                  className="px-3 py-2 text-sm font-bold"
+                  style={{ background: M.accent, color: "white" }}
                 >
                   +
                 </button>
               </div>
               {tasks.length > 0 && (
-                <ul className="space-y-1.5">
+                <ul className="space-y-1.5 mt-3">
                   {tasks.map((t, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span style={{ color: "oklch(0.52 0.14 35)" }}>—</span>
-                      {t}
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: t.context === "work" ? "oklch(0.52 0.07 145 / 0.15)" : "oklch(0.60 0.06 300 / 0.15)", color: t.context === "work" ? "oklch(0.50 0.07 145)" : "oklch(0.55 0.10 300)" }}>
+                        {t.context}
+                      </span>
+                      {t.text}
                       <button onClick={() => setTasks((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>
                   ))}
@@ -354,33 +392,45 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
           {/* AGENTS */}
           {step === "agents" && (
             <div>
-              <p className="text-sm mb-3" style={{ color: "oklch(0.52 0.015 70)" }}>
-                Format: <span className="font-medium">Agent name — what it's doing</span>. E.g. "Manus — research competitors"
+              <p className="text-sm mb-3" style={{ color: M.muted }}>
+                Log any AI agents you have running. Name and what they're doing.
               </p>
-              <div className="flex gap-2 mb-3">
+              <div className="flex flex-col gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
-                  value={agentInput}
-                  onChange={(e) => setAgentInput(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && addAgent()}
-                  placeholder="Manus — writing blog post draft…"
-                  className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", color: "oklch(0.18 0.01 60)" }}
+                  value={agentName}
+                  onChange={(e) => setAgentName(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && agentTask ? addAgent() : undefined}
+                  placeholder="Agent name (e.g. Manus, Claude…)"
+                  className="w-full px-3 py-2 text-sm bg-transparent focus:outline-none"
+                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
-                <button
-                  onClick={addAgent}
-                  className="px-3 py-2 text-sm"
-                  style={{ background: "oklch(0.52 0.14 35)", color: "white" }}
-                >
-                  +
-                </button>
+                <div className="flex gap-2">
+                  <input
+                    value={agentTask}
+                    onChange={(e) => setAgentTask(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addAgent()}
+                    placeholder="What is it doing? (e.g. writing blog post draft)"
+                    className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
+                    style={{ border: `1px solid ${M.border}`, color: M.ink }}
+                  />
+                  <button
+                    onClick={addAgent}
+                    className="px-3 py-2 text-sm font-bold"
+                    style={{ background: M.accent, color: "white" }}
+                  >
+                    +
+                  </button>
+                </div>
               </div>
               {agents.length > 0 && (
-                <ul className="space-y-1.5">
+                <ul className="space-y-1.5 mt-3">
                   {agents.map((a, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span style={{ color: "oklch(0.52 0.14 35)" }}>—</span>
-                      <span className="font-medium">{a.name}</span>: {a.task}
+                      <span style={{ color: M.accent }}>⚡</span>
+                      <span className="font-medium">{a.name}</span>
+                      <span style={{ color: M.muted }}>—</span>
+                      {a.task}
                       <button onClick={() => setAgents((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>
                   ))}
@@ -392,35 +442,58 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
           {/* WINS */}
           {step === "wins" && (
             <div>
-              <p className="text-sm mb-3" style={{ color: "oklch(0.52 0.015 70)" }}>
-                What did you accomplish yesterday? Even small things count.
+              <p className="text-sm mb-3" style={{ color: M.muted }}>
+                What did you accomplish yesterday? Pick a category and describe it.
               </p>
-              <div className="flex gap-2 mb-3">
+              {/* Category selector */}
+              <div className="flex flex-wrap gap-1.5 mb-3">
+                {WIN_CATS.map((cat) => (
+                  <button
+                    key={cat.idx}
+                    onClick={() => setWinCatIdx(cat.idx)}
+                    className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-full transition-all"
+                    style={{
+                      background: winCatIdx === cat.idx ? `${cat.color}22` : "transparent",
+                      border: `1.5px solid ${winCatIdx === cat.idx ? cat.color : "oklch(0.88 0.012 75)"}`,
+                      color: winCatIdx === cat.idx ? cat.color : M.muted,
+                    }}
+                  >
+                    {cat.emoji} {cat.label}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
                   value={winInput}
                   onChange={(e) => setWinInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addWin()}
-                  placeholder="e.g. Finished the report draft…"
+                  placeholder={`e.g. ${WIN_CATS[winCatIdx].label === "Health" ? "Went for a 30-min walk" : WIN_CATS[winCatIdx].label === "Work" ? "Finished the project proposal" : "Completed something meaningful"}…`}
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", color: "oklch(0.18 0.01 60)" }}
+                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
                 <button
                   onClick={addWin}
-                  className="px-3 py-2 text-sm"
-                  style={{ background: "oklch(0.52 0.14 35)", color: "white" }}
+                  className="px-3 py-2 text-sm font-bold"
+                  style={{ background: M.accent, color: "white" }}
                 >
                   +
                 </button>
               </div>
               {wins.length > 0 && (
-                <ul className="space-y-1.5">
-                  {wins.map((w, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span>⭐</span> {w}
-                      <button onClick={() => setWins((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
-                    </li>
-                  ))}
+                <ul className="space-y-1.5 mt-3">
+                  {wins.map((w, i) => {
+                    const cat = WIN_CATS[w.catIdx];
+                    return (
+                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}18`, color: cat.color, border: `1px solid ${cat.color}44` }}>
+                          {cat.emoji} {cat.label}
+                        </span>
+                        {w.text}
+                        <button onClick={() => setWins((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </div>
@@ -429,7 +502,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
           {/* FOCUS NOTE */}
           {step === "focus" && (
             <div>
-              <p className="text-sm mb-3" style={{ color: "oklch(0.52 0.015 70)" }}>
+              <p className="text-sm mb-3" style={{ color: M.muted }}>
                 One sentence. What's the single most important thing today?
               </p>
               <textarea
@@ -439,7 +512,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                 placeholder="Today I will…"
                 rows={3}
                 className="w-full px-3 py-2 text-sm bg-transparent focus:outline-none resize-none"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", color: "oklch(0.18 0.01 60)" }}
+                style={{ border: `1px solid ${M.border}`, color: M.ink }}
               />
             </div>
           )}
@@ -453,10 +526,10 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                 className="w-20 opacity-80 shrink-0"
               />
               <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                {mood && <p>Mood: {MOODS.find((m) => m.value === mood)?.label}</p>}
+                {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
                 {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
                 {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
-                {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} recorded</p>}
+                {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} from yesterday recorded</p>}
                 {focusNote && <p className="italic">"{focusNote}"</p>}
                 {!mood && !tasks.length && !agents.length && !wins.length && !focusNote && (
                   <p className="italic text-muted-foreground">Nothing added — that's okay. Your space is ready.</p>
@@ -469,21 +542,35 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
         {/* Footer */}
         <div
           className="flex items-center justify-between px-8 py-5"
-          style={{ borderTop: "1px solid oklch(0.88 0.012 75)" }}
+          style={{ borderTop: `1px solid ${M.border}` }}
         >
-          <button
-            onClick={onSkip}
-            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <SkipForward className="w-3.5 h-3.5" />
-            Skip for today
-          </button>
+          {/* Left: Back (if not on greeting) or Skip */}
+          <div className="flex items-center gap-3">
+            {stepIndex > 0 && step !== "done" && (
+              <button
+                onClick={goBack}
+                className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+                Back
+              </button>
+            )}
+            {/* Skip for today = permanent suppress */}
+            <button
+              onClick={onSkip}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <SkipForward className="w-3.5 h-3.5" />
+              Skip for today
+            </button>
+          </div>
 
+          {/* Right: Next / Finish */}
           {step !== "done" ? (
             <button
-              onClick={next}
+              onClick={goNext}
               className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:opacity-90 active:scale-95"
-              style={{ background: "oklch(0.52 0.14 35)", color: "white" }}
+              style={{ background: M.accent, color: "white" }}
             >
               {step === "greeting" ? "Let's go" : "Next"}
               <ArrowRight className="w-4 h-4" />
@@ -492,7 +579,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
             <button
               onClick={finish}
               className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:opacity-90 active:scale-95"
-              style={{ background: "oklch(0.52 0.14 35)", color: "white" }}
+              style={{ background: M.accent, color: "white" }}
             >
               Open my workspace
               <ArrowRight className="w-4 h-4" />

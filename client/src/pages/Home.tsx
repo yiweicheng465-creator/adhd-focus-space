@@ -87,7 +87,7 @@ export default function Home() {
     if (data.newTasks.length) setTasks((p) => [...data.newTasks, ...p]);
     if (data.newWins.length) setWins((p) => [...data.newWins, ...p]);
     if (data.newAgents.length) setAgents((p) => [...data.newAgents, ...p]);
-    dismissCheckIn();
+    dismissCheckIn(true);
     toast.success("Workspace ready.", { duration: 2500 });
   };
 
@@ -415,7 +415,8 @@ export default function Home() {
       {showCheckIn && (
         <DailyCheckIn
           onComplete={handleCheckInComplete}
-          onSkip={dismissCheckIn}
+          onSkip={() => dismissCheckIn(true)}
+          onClose={() => dismissCheckIn(false)}
         />
       )}
     </div>
