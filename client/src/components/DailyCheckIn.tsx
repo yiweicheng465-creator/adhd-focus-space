@@ -39,12 +39,66 @@ type Step =
   | "done";
 
 const MOODS = [
-  { value: 1, emoji: "😴", label: "Exhausted" },
-  { value: 2, emoji: "😔", label: "Low"       },
-  { value: 3, emoji: "😐", label: "Okay"      },
-  { value: 4, emoji: "🙂", label: "Good"      },
-  { value: 5, emoji: "🚀", label: "Energized" },
+  { value: 1, label: "Drained",  fill: "oklch(0.72 0.035 260)", stroke: "oklch(0.50 0.04 260)"  },
+  { value: 2, label: "Low",      fill: "oklch(0.76 0.045 310)", stroke: "oklch(0.52 0.05 310)"  },
+  { value: 3, label: "Okay",     fill: "oklch(0.80 0.04 75)",  stroke: "oklch(0.55 0.04 75)"   },
+  { value: 4, label: "Good",     fill: "oklch(0.75 0.07 145)", stroke: "oklch(0.50 0.08 145)"  },
+  { value: 5, label: "Glowing",  fill: "oklch(0.78 0.10 55)",  stroke: "oklch(0.55 0.12 45)"   },
 ];
+
+/* ── Inline blob face renderers ── */
+function BlobDrained({ fill, stroke }: { fill: string; stroke: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none">
+      <path d="M40 8 C58 6 74 18 74 36 C74 56 62 74 40 74 C18 74 6 56 6 36 C6 18 22 10 40 8Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <path d="M27 34 Q29 31 31 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M49 34 Q51 31 53 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+      <path d="M31 50 Q40 48 49 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+function BlobLow({ fill, stroke }: { fill: string; stroke: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none">
+      <path d="M18 12 C10 12 6 20 6 30 L6 52 C6 64 14 74 28 74 L52 74 C66 74 74 64 74 52 L74 30 C74 20 70 12 62 12 Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <circle cx="28" cy="35" r="2.5" fill={stroke} />
+      <circle cx="52" cy="35" r="2.5" fill={stroke} />
+      <path d="M30 52 Q40 46 50 52" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+function BlobOkay({ fill, stroke }: { fill: string; stroke: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none">
+      <path d="M40 7 C56 5 75 20 75 40 C75 60 58 75 40 75 C22 75 5 60 5 40 C5 20 24 9 40 7Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <ellipse cx="28" cy="34" rx="3" ry="3.5" fill={stroke} />
+      <ellipse cx="52" cy="34" rx="3" ry="3.5" fill={stroke} />
+      <path d="M39 40 L39 46 L43 46" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+      <line x1="30" y1="54" x2="50" y2="54" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
+function BlobGood({ fill, stroke }: { fill: string; stroke: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none">
+      <path d="M40 6 C52 4 72 16 74 32 C76 48 68 72 48 76 C28 80 4 64 4 44 C4 24 20 8 40 6Z" fill={fill} stroke={stroke} strokeWidth="1.2" />
+      <path d="M25 35 Q28 30 31 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M49 35 Q52 30 55 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M29 50 Q40 58 51 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+function BlobGlowing({ fill, stroke }: { fill: string; stroke: string }) {
+  return (
+    <svg viewBox="0 0 80 80" fill="none">
+      <path d="M40 4 L44 18 L56 10 L52 24 L68 22 L58 32 L74 38 L60 42 L68 56 L54 52 L52 68 L40 58 L28 68 L26 52 L12 56 L20 42 L6 38 L22 32 L12 22 L28 24 L24 10 L36 18 Z" fill={fill} stroke={stroke} strokeWidth="1.2" strokeLinejoin="round" />
+      <path d="M26 34 Q29 28 32 34" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M48 34 Q51 28 54 34" stroke={stroke} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M27 50 Q40 62 53 50" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+    </svg>
+  );
+}
+const BLOB_FACES = [BlobDrained, BlobLow, BlobOkay, BlobGood, BlobGlowing];
 
 const STEP_ORDER: Step[] = ["greeting", "mood", "tasks", "agents", "wins", "focus", "done"];
 
@@ -210,23 +264,48 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
 
           {/* MOOD */}
           {step === "mood" && (
-            <div className="flex flex-wrap gap-3">
-              {MOODS.map((m) => (
-                <button
-                  key={m.value}
-                  onClick={() => setMood(m.value)}
-                  className={cn(
-                    "flex flex-col items-center gap-1.5 px-4 py-3 transition-all",
-                    "border",
-                    mood === m.value
-                      ? "border-[oklch(0.52_0.14_35)] bg-[oklch(0.52_0.14_35_/_0.07)]"
-                      : "border-[oklch(0.88_0.012_75)] hover:border-[oklch(0.52_0.14_35_/_0.5)]"
-                  )}
-                >
-                  <span className="text-2xl">{m.emoji}</span>
-                  <span className="editorial-label">{m.label}</span>
-                </button>
-              ))}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-end justify-between gap-2">
+                {MOODS.map((m, i) => {
+                  const BlobFace = BLOB_FACES[i];
+                  const isSelected = mood === m.value;
+                  return (
+                    <button
+                      key={m.value}
+                      onClick={() => setMood(m.value)}
+                      className="flex flex-col items-center gap-1.5 flex-1 transition-all duration-200 focus:outline-none"
+                      style={{
+                        transform: isSelected ? "scale(1.18) translateY(-4px)" : "scale(1)",
+                        filter: isSelected ? `drop-shadow(0 6px 12px ${m.fill})` : "none",
+                        opacity: mood !== null && !isSelected ? 0.55 : 1,
+                      }}
+                    >
+                      <div className="w-12 h-12">
+                        <BlobFace fill={m.fill} stroke={m.stroke} />
+                      </div>
+                      <span
+                        className="text-[9px] font-medium tracking-wide transition-all duration-200"
+                        style={{
+                          color: isSelected ? m.stroke : "transparent",
+                          fontFamily: "'DM Sans', sans-serif",
+                        }}
+                      >
+                        {m.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+              {/* Progress bar */}
+              <div className="flex gap-1">
+                {MOODS.map((m) => (
+                  <div
+                    key={m.value}
+                    className="flex-1 h-0.5 transition-all duration-300"
+                    style={{ background: mood !== null && m.value <= mood ? m.fill : "oklch(0.88 0.012 75)" }}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
@@ -370,7 +449,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
                 className="w-20 opacity-80 shrink-0"
               />
               <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                {mood && <p>Mood: {MOODS.find((m) => m.value === mood)?.emoji} {MOODS.find((m) => m.value === mood)?.label}</p>}
+                {mood && <p>Mood: {MOODS.find((m) => m.value === mood)?.label}</p>}
                 {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
                 {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
                 {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} recorded</p>}
