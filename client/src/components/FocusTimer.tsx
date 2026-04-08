@@ -243,32 +243,8 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* ── Main instrument panel ── */}
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-        {/* SVG Dial — flat slab 3D style matching START/RESET buttons */}
-        <div
-            onMouseDown={(e) => {
-            if (!isRunning) {
-              (e.currentTarget as HTMLDivElement).style.transform = "translateY(4px)";
-              (e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 0 #C8B8A4, 0 2px 4px rgba(100,80,60,0.10)";
-            }
-          }}
-          onMouseUp={(e) => {
-            (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)";
-          }}
-          style={{
-            flexShrink: 0,
-            borderRadius: "50%",
-            boxShadow: isRunning
-              ? "0 2px 0 #C8B8A4, 0 3px 8px rgba(100,80,60,0.12)"
-              : "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)",
-            transform: "translateY(0)",
-            transition: "box-shadow 0.1s, transform 0.1s",
-          }}
-        >
+        {/* SVG Dial — outer ring flat, inner center button is 3D */}
+        <div style={{ flexShrink: 0 }}>
           <svg
             width="192" height="192" viewBox="0 0 192 192"
             style={{ cursor: isRunning ? "default" : "pointer", display: "block" }}
@@ -283,12 +259,38 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               />
             ))}
 
-            {/* Beige knob face — matching RESET button cream fill */}
+            {/* SVG filter for inner button drop-shadow */}
+            <defs>
+              <filter id="btn3d" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="3" stdDeviation="3" floodColor="#C8B8A4" floodOpacity="0.7" />
+              </filter>
+              <filter id="btn3d-pressed" x="-20%" y="-20%" width="140%" height="140%">
+                <feDropShadow dx="0" dy="1" stdDeviation="1" floodColor="#C8B8A4" floodOpacity="0.4" />
+              </filter>
+              <radialGradient id="btnBevel" cx="38%" cy="32%" r="65%">
+                <stop offset="0%" stopColor="#FDFAF6" />
+                <stop offset="60%" stopColor="#F5EDE3" />
+                <stop offset="100%" stopColor="#E8D8C8" />
+              </radialGradient>
+            </defs>
+
+            {/* Outer beige knob face — flat, no shadow */}
             <circle cx={CX} cy={CY} r={R} fill="#F5EDE3" />
             {/* Thin warm border */}
             <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1.5" />
-            {/* Subtle inner ring for definition */}
-            <circle cx={CX} cy={CY} r={R - 6} fill="none" stroke="rgba(100,80,60,0.06)" strokeWidth="1" />
+
+            {/* Inner 3D raised center button */}
+            <circle cx={CX} cy={CY} r={R - 28}
+              fill="url(#btnBevel)"
+              stroke="#D4C4B0"
+              strokeWidth="1"
+              filter={isRunning ? "url(#btn3d-pressed)" : "url(#btn3d)"}
+            />
+            {/* Top-left highlight arc for bevel illusion */}
+            <path
+              d={`M ${CX - (R-28) * 0.6} ${CY - (R-28) * 0.2} A ${R-28} ${R-28} 0 0 1 ${CX + (R-28) * 0.2} ${CY - (R-28) * 0.65}`}
+              fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="1.5" strokeLinecap="round"
+            />
 
             {/* Progress arc on top */}
             <circle
@@ -307,9 +309,9 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               <circle cx={dotX} cy={dotY} r="4.5" fill={meta.stroke} />
             )}
 
-            {/* Center cross hair */}
-            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
-            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#C8B8A4" strokeWidth="0.8" />
+            {/* Center cross hair — on top of inner button */}
+            <line x1={CX - 5} y1={CY} x2={CX + 5} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
+            <line x1={CX} y1={CY - 5} x2={CX} y2={CY + 5} stroke="#C8B8A4" strokeWidth="0.8" />
 
             {/* +1 / +5 hint text when stopped */}
             {!isRunning && (
