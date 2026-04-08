@@ -245,26 +245,26 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
         {/* SVG Dial — flat slab 3D style matching START/RESET buttons */}
         <div
-          onMouseDown={(e) => {
+            onMouseDown={(e) => {
             if (!isRunning) {
               (e.currentTarget as HTMLDivElement).style.transform = "translateY(4px)";
-              (e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 0 #1a1208, 0 2px 4px rgba(0,0,0,0.18)";
+              (e.currentTarget as HTMLDivElement).style.boxShadow = "0 1px 0 #C8B8A4, 0 2px 4px rgba(100,80,60,0.10)";
             }
           }}
           onMouseUp={(e) => {
             (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #1a1208, 0 6px 14px rgba(0,0,0,0.28)";
+            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)";
           }}
           onMouseLeave={(e) => {
             (e.currentTarget as HTMLDivElement).style.transform = "translateY(0)";
-            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #1a1208, 0 6px 14px rgba(0,0,0,0.28)";
+            (e.currentTarget as HTMLDivElement).style.boxShadow = "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)";
           }}
           style={{
             flexShrink: 0,
             borderRadius: "50%",
             boxShadow: isRunning
-              ? "0 2px 0 #1a1208, 0 3px 8px rgba(0,0,0,0.22)"
-              : "0 5px 0 #1a1208, 0 6px 14px rgba(0,0,0,0.28)",
+              ? "0 2px 0 #C8B8A4, 0 3px 8px rgba(100,80,60,0.12)"
+              : "0 5px 0 #C8B8A4, 0 6px 14px rgba(100,80,60,0.18)",
             transform: "translateY(0)",
             transition: "box-shadow 0.1s, transform 0.1s",
           }}
@@ -278,16 +278,17 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             {/* Tick marks (outside the knob) */}
             {ticks.map((t, i) => (
               <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                stroke={t.major ? "#FAF6F1" : "rgba(250,246,241,0.35)"}
+                stroke={t.major ? "#3D2E1E" : "#D4C4B0"}
                 strokeWidth={t.major ? 1.5 : 0.7}
               />
             ))}
 
-            {/* Flat dark knob face — same dark ink as button background */}
-            <circle cx={CX} cy={CY} r={R} fill="#3D2E1E" />
-
+            {/* Beige knob face — matching RESET button cream fill */}
+            <circle cx={CX} cy={CY} r={R} fill="#F5EDE3" />
+            {/* Thin warm border */}
+            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1.5" />
             {/* Subtle inner ring for definition */}
-            <circle cx={CX} cy={CY} r={R - 6} fill="none" stroke="rgba(250,246,241,0.08)" strokeWidth="1" />
+            <circle cx={CX} cy={CY} r={R - 6} fill="none" stroke="rgba(100,80,60,0.06)" strokeWidth="1" />
 
             {/* Progress arc on top */}
             <circle
@@ -307,14 +308,14 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
             )}
 
             {/* Center cross hair */}
-            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="rgba(250,246,241,0.3)" strokeWidth="0.8" />
-            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="rgba(250,246,241,0.3)" strokeWidth="0.8" />
+            <line x1={CX - 6} y1={CY} x2={CX + 6} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
+            <line x1={CX} y1={CY - 6} x2={CX} y2={CY + 6} stroke="#C8B8A4" strokeWidth="0.8" />
 
             {/* +1 / +5 hint text when stopped */}
             {!isRunning && (
               <>
-                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill={meta.stroke} fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.9">+1 MIN</text>
-                <text x={CX} y={CY + 27} textAnchor="middle" fontSize="6" fill="rgba(250,246,241,0.5)" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.08em">R-CLICK +5</text>
+                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.85">+1 MIN</text>
+                <text x={CX} y={CY + 27} textAnchor="middle" fontSize="6" fill="#8C7B6B" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.08em" opacity="0.6">R-CLICK +5</text>
               </>
             )}
           </svg>
