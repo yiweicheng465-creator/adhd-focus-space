@@ -110,17 +110,12 @@ export function useDailyCheckIn() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    // Show once per day
-    const done = localStorage.getItem(getStorageKey());
-    if (!done) {
-      // Small delay so the page renders first
-      const t = setTimeout(() => setShow(true), 600);
-      return () => clearTimeout(t);
-    }
+    // Always show for testing — remove the once-per-day guard
+    const t = setTimeout(() => setShow(true), 600);
+    return () => clearTimeout(t);
   }, []);
 
   const dismiss = () => {
-    localStorage.setItem(getStorageKey(), "1");
     setShow(false);
   };
 
