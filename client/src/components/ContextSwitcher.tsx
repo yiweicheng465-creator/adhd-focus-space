@@ -103,21 +103,26 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
         const isActive = active === id;
         const cfg      = id !== "all" ? getContextConfig(id) : null;
 
-        const isCustom = id !== "all" && !builtins.includes(id);
+        const isCustom = id !== "all" && !builtins.includes(id) && !!onDeleteContext;
         return (
-          <div key={id} className="flex items-center" style={{ position: "relative" }}>
+          <div
+            key={id}
+            className="group flex items-center"
+            style={{ position: "relative" }}
+          >
             <button
               onClick={() => onChange(id)}
-              className="flex items-center gap-1.5 px-3 py-2 text-xs font-medium transition-all justify-center shrink-0"
+              className="flex items-center gap-1.5 text-xs font-medium transition-all justify-center shrink-0"
               style={{
-                background:  isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
-                color:       isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
-                border:      `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
-                borderRight: isCustom && onDeleteContext ? "none" : undefined,
-                fontFamily:  "'DM Sans', sans-serif",
+                background:    isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
+                color:         isActive ? (cfg ? cfg.color : "oklch(0.28 0.018 65)") : "oklch(0.58 0.015 70)",
+                border:        `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
+                fontFamily:    "'DM Sans', sans-serif",
                 letterSpacing: "0.04em",
-                cursor: "pointer",
-                borderRadius: 0,
+                cursor:        "pointer",
+                borderRadius:  0,
+                /* padding: leave room for × on the right when custom */
+                padding:       isCustom ? "8px 6px 8px 12px" : "8px 12px",
               }}
             >
               <Icon className="w-3 h-3" />
@@ -133,30 +138,26 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
                   {counts[id]}
                 </span>
               )}
+              {/* × lives INSIDE the same button rectangle, hidden until group hover */}
+              {isCustom && (
+                <span
+                  onClick={(e) => { e.stopPropagation(); onDeleteContext!(id); }}
+                  title={`Delete #${id} tag`}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ml-0.5"
+                  style={{
+                    width: 14,
+                    height: 14,
+                    color: "oklch(0.58 0.015 70)",
+                    cursor: "pointer",
+                    flexShrink: 0,
+                  }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.55 0.18 25)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.58 0.015 70)"; }}
+                >
+                  <X style={{ width: 10, height: 10 }} />
+                </span>
+              )}
             </button>
-            {isCustom && onDeleteContext && (
-              <button
-                onClick={(e) => { e.stopPropagation(); onDeleteContext(id); }}
-                title={`Delete #${id} tag`}
-                className="flex items-center justify-center transition-all"
-                style={{
-                  width: 20,
-                  height: "100%",
-                  minHeight: 30,
-                  background: isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent",
-                  color: "oklch(0.58 0.015 70)",
-                  border: `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.72 0.014 75)") : "oklch(0.88 0.014 75)"}`,
-                  borderLeft: "none",
-                  cursor: "pointer",
-                  borderRadius: 0,
-                  padding: 0,
-                }}
-                onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.55 0.18 25)"; (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.18 25 / 0.08)"; }}
-                onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.58 0.015 70)"; (e.currentTarget as HTMLButtonElement).style.background = isActive ? (cfg ? cfg.bg : "oklch(0.93 0.012 78)") : "transparent"; }}
-              >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            )}
           </div>
         );
       })}
