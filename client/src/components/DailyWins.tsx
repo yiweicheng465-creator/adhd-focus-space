@@ -1,18 +1,25 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Daily Wins Tracker v5.0
+   ADHD FOCUS SPACE — Daily Wins Tracker v6.0
    Icons: lifestyle SVG (health, study, work, social, creative,
           mindfulness, fitness, nutrition) — no pixel text
    Each logged win has a clickable icon to change category.
+   Archiving: wins can be archived (hidden from main list but
+   still count toward totals). Archived wins can be permanently
+   deleted from the archive view.
    ============================================================ */
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { Input } from "@/components/ui/input";
-import { Plus } from "lucide-react";
+import { Plus, Archive, Trash2, ArchiveRestore, ChevronDown, ChevronUp } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 
 export interface Win {
-  id: string; text: string; iconIdx: number; createdAt: Date;
+  id: string;
+  text: string;
+  iconIdx: number;
+  createdAt: Date;
+  archived?: boolean;
 }
 
 // ── Lifestyle SVG icons ────────────────────────────────────────────────────────
@@ -21,7 +28,6 @@ interface IconProps { size?: number; color?: string }
 function IconHealth({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Heart with pulse line */}
       <path d="M12 21C12 21 3 14.5 3 8.5a4.5 4.5 0 0 1 9-0.5 4.5 4.5 0 0 1 9 0.5C21 14.5 12 21 12 21z" />
       <polyline points="6,12 9,9 11,14 13,10 15,12 18,12" strokeWidth="1.4" />
     </svg>
@@ -31,7 +37,6 @@ function IconHealth({ size = 20, color = "#888" }: IconProps) {
 function IconStudy({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Open book */}
       <path d="M2 6s2-1 6-1 6 1 6 1v13s-2-1-6-1-6 1-6 1V6z" />
       <path d="M14 6s2-1 6-1v13s-2-1-6-1" />
       <line x1="12" y1="6" x2="12" y2="19" />
@@ -42,7 +47,6 @@ function IconStudy({ size = 20, color = "#888" }: IconProps) {
 function IconWork({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Briefcase */}
       <rect x="2" y="8" width="20" height="13" rx="2" />
       <path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
       <line x1="2" y1="14" x2="22" y2="14" />
@@ -53,7 +57,6 @@ function IconWork({ size = 20, color = "#888" }: IconProps) {
 function IconSocial({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Two people */}
       <circle cx="9" cy="7" r="3" />
       <path d="M3 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
       <circle cx="18" cy="7" r="2.5" />
@@ -65,7 +68,6 @@ function IconSocial({ size = 20, color = "#888" }: IconProps) {
 function IconCreative({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Palette */}
       <circle cx="12" cy="12" r="9" />
       <circle cx="8.5" cy="10" r="1.5" fill={color} stroke="none" />
       <circle cx="15.5" cy="10" r="1.5" fill={color} stroke="none" />
@@ -78,7 +80,6 @@ function IconCreative({ size = 20, color = "#888" }: IconProps) {
 function IconMindful({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Lotus / meditation */}
       <path d="M12 20c0 0-7-5-7-10a7 7 0 0 1 14 0c0 5-7 10-7 10z" />
       <path d="M12 20c0 0 4-3 4-7" strokeWidth="1.2" opacity="0.5" />
       <path d="M12 20c0 0-4-3-4-7" strokeWidth="1.2" opacity="0.5" />
@@ -90,7 +91,6 @@ function IconMindful({ size = 20, color = "#888" }: IconProps) {
 function IconFitness({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Dumbbell */}
       <line x1="6" y1="12" x2="18" y2="12" />
       <rect x="2" y="9" width="4" height="6" rx="1" />
       <rect x="18" y="9" width="4" height="6" rx="1" />
@@ -103,7 +103,6 @@ function IconFitness({ size = 20, color = "#888" }: IconProps) {
 function IconNutrition({ size = 20, color = "#888" }: IconProps) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-      {/* Apple */}
       <path d="M12 3c-1 0-3 1-3 3 0 0 1-1 3-1s3 1 3 1c0-2-2-3-3-3z" fill={color} stroke="none" opacity="0.4" />
       <path d="M12 5c-4 0-6 3-6 7 0 5 3 8 6 8s6-3 6-8c0-4-2-7-6-7z" />
       <line x1="12" y1="3" x2="13" y2="1" />
@@ -133,6 +132,9 @@ const M = {
   slumber:  "oklch(0.55 0.018 70)",
   slumBg:   "oklch(0.72 0.018 75 / 0.15)",
   slumBdr:  "oklch(0.72 0.018 75 / 0.40)",
+  archiveBg:  "oklch(0.70 0.04 220 / 0.10)",
+  archiveBdr: "oklch(0.60 0.06 220 / 0.30)",
+  archiveClr: "oklch(0.48 0.07 220)",
   ink:      "oklch(0.28 0.018 65)",
   muted:    "oklch(0.55 0.018 70)",
   border:   "oklch(0.88 0.014 75)",
@@ -225,6 +227,187 @@ function IconPickerPopover({
   );
 }
 
+// ── Win card ───────────────────────────────────────────────────────────────────
+function WinCard({
+  win,
+  isToday,
+  isArchiveView,
+  editingWinId,
+  setEditingWinId,
+  winPickerBtnRefs,
+  setWinBtnRef,
+  onChangeIcon,
+  onArchive,
+  onUnarchive,
+  onDelete,
+}: {
+  win: Win;
+  isToday: boolean;
+  isArchiveView: boolean;
+  editingWinId: string | null;
+  setEditingWinId: (id: string | null) => void;
+  winPickerBtnRefs: React.MutableRefObject<Map<string, HTMLButtonElement>>;
+  setWinBtnRef: (id: string) => (el: HTMLButtonElement | null) => void;
+  onChangeIcon: (winId: string, idx: number) => void;
+  onArchive: (winId: string) => void;
+  onUnarchive: (winId: string) => void;
+  onDelete: (winId: string) => void;
+}) {
+  const iconIdx = typeof win.iconIdx === "number" ? win.iconIdx % WIN_ICONS.length : 0;
+  const iconDef = WIN_ICONS[iconIdx];
+  const isEditing = editingWinId === win.id;
+
+  return (
+    <div
+      className="flex items-start gap-3 p-3 transition-all group"
+      style={{
+        background: isArchiveView
+          ? M.archiveBg
+          : isToday
+          ? M.pinkBg
+          : "oklch(0.93 0.012 78 / 0.4)",
+        border: `1px solid ${isArchiveView ? M.archiveBdr : isToday ? M.pinkBdr : M.border}`,
+        opacity: isArchiveView ? 0.75 : isToday ? 1 : 0.65,
+        borderRadius: 6,
+      }}
+    >
+      {/* Clickable icon — opens picker to change category (only in main view) */}
+      <div style={{ position: "relative", flexShrink: 0, marginTop: 2 }}>
+        <button
+          ref={setWinBtnRef(win.id)}
+          onClick={() => !isArchiveView && setEditingWinId(isEditing ? null : win.id)}
+          title={isArchiveView ? iconDef.label : "Click to change category"}
+          style={{
+            width: 28,
+            height: 28,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            borderRadius: 6,
+            border: `1px solid ${isEditing ? iconDef.color : "transparent"}`,
+            background: isEditing ? `${iconDef.color}15` : "transparent",
+            cursor: isArchiveView ? "default" : "pointer",
+            transition: "background 0.12s, border-color 0.12s",
+          }}
+          onMouseEnter={(e) => {
+            if (!isArchiveView) (e.currentTarget as HTMLButtonElement).style.background = `${iconDef.color}15`;
+          }}
+          onMouseLeave={(e) => {
+            if (!isEditing && !isArchiveView) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+          }}
+        >
+          <iconDef.Component size={16} color={isArchiveView ? M.archiveClr : iconDef.color} />
+        </button>
+        {isEditing && !isArchiveView && (
+          <IconPickerPopover
+            current={iconIdx}
+            onSelect={(idx) => onChangeIcon(win.id, idx)}
+            onClose={() => setEditingWinId(null)}
+            anchorRef={{ current: winPickerBtnRefs.current.get(win.id) ?? null }}
+          />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <p
+          className="text-sm font-medium leading-snug"
+          style={{
+            color: isArchiveView ? M.muted : M.ink,
+            fontFamily: "'DM Sans', sans-serif",
+            textDecoration: isArchiveView ? "line-through" : "none",
+          }}
+        >
+          {win.text}
+        </p>
+        <p className="text-xs mt-0.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+          {isToday && !isArchiveView
+            ? "Today"
+            : new Date(win.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          {" · "}
+          <span style={{ color: isArchiveView ? M.archiveClr : iconDef.color, opacity: 0.8 }}>
+            {iconDef.label}
+          </span>
+          {isArchiveView && (
+            <span style={{ color: M.archiveClr, opacity: 0.7 }}> · archived</span>
+          )}
+        </p>
+      </div>
+
+      {/* Action buttons — appear on hover */}
+      <div
+        className="shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        {isArchiveView ? (
+          <>
+            {/* Unarchive */}
+            <button
+              onClick={() => onUnarchive(win.id)}
+              title="Restore to wins"
+              style={{
+                width: 26,
+                height: 26,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 5,
+                border: `1px solid ${M.archiveBdr}`,
+                background: "transparent",
+                cursor: "pointer",
+                color: M.archiveClr,
+              }}
+            >
+              <ArchiveRestore size={13} />
+            </button>
+            {/* Permanent delete */}
+            <button
+              onClick={() => {
+                if (confirm("Permanently delete this win? This cannot be undone.")) {
+                  onDelete(win.id);
+                }
+              }}
+              title="Delete permanently"
+              style={{
+                width: 26,
+                height: 26,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: 5,
+                border: "1px solid oklch(0.65 0.12 15 / 0.30)",
+                background: "transparent",
+                cursor: "pointer",
+                color: "oklch(0.55 0.12 15)",
+              }}
+            >
+              <Trash2 size={13} />
+            </button>
+          </>
+        ) : (
+          /* Archive button */
+          <button
+            onClick={() => onArchive(win.id)}
+            title="Archive this win"
+            style={{
+              width: 26,
+              height: 26,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              borderRadius: 5,
+              border: `1px solid ${M.border}`,
+              background: "transparent",
+              cursor: "pointer",
+              color: M.muted,
+            }}
+          >
+            <Archive size={13} />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Props ──────────────────────────────────────────────────────────────────────
 interface DailyWinsProps {
   wins: Win[];
@@ -236,14 +419,18 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
   const [newWin,         setNewWin]         = useState("");
   const [selectedIcon,   setSelectedIcon]   = useState(0);
   const [showNewPicker,  setShowNewPicker]  = useState(false);
-  // Which win item has its picker open: win id or null
   const [editingWinId,   setEditingWinId]   = useState<string | null>(null);
+  const [showArchive,    setShowArchive]    = useState(false);
   const newPickerBtnRef = useRef<HTMLButtonElement>(null);
   const winPickerBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
   const setWinBtnRef = useCallback((id: string) => (el: HTMLButtonElement | null) => {
     if (el) winPickerBtnRefs.current.set(id, el);
     else winPickerBtnRefs.current.delete(id);
   }, []);
+
+  // Separate active vs archived
+  const activeWins   = wins.filter((w) => !w.archived);
+  const archivedWins = wins.filter((w) => w.archived);
 
   const addWin = () => {
     if (!newWin.trim()) return;
@@ -256,33 +443,54 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
     onWinsChange(wins.map((w) => w.id === winId ? { ...w, iconIdx: idx } : w));
   };
 
-  const todayWins = wins.filter((w) => {
-    const today = new Date();
-    const d     = new Date(w.createdAt);
-    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-  });
+  const archiveWin = (winId: string) => {
+    onWinsChange(wins.map((w) => w.id === winId ? { ...w, archived: true } : w));
+    toast("Win archived.", { duration: 2000 });
+  };
+
+  const unarchiveWin = (winId: string) => {
+    onWinsChange(wins.map((w) => w.id === winId ? { ...w, archived: false } : w));
+    toast("Win restored.", { duration: 2000 });
+  };
+
+  const deleteWin = (winId: string) => {
+    onWinsChange(wins.filter((w) => w.id !== winId));
+    toast("Win permanently deleted.", { duration: 2000 });
+  };
+
+  const todayStr = new Date().toDateString();
+  const todayWins = activeWins.filter((w) => new Date(w.createdAt).toDateString() === todayStr);
 
   const SelectedIconDef = WIN_ICONS[selectedIcon] ?? WIN_ICONS[0];
 
   return (
     <div className="flex flex-col gap-4 h-full">
       {/* Header stats */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-3" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}` }}>
+      <div className="grid grid-cols-3 gap-3">
+        <div className="p-3" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}`, borderRadius: 6 }}>
           <div className="flex items-center gap-2 mb-1">
             <IconHealth size={14} color={M.pink} />
             <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Today</span>
           </div>
           <p className="text-2xl font-bold" style={{ color: M.pink, fontFamily: "'Playfair Display', serif" }}>{todayWins.length}</p>
-          <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>wins logged</p>
+          <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>wins today</p>
         </div>
-        <div className="p-3" style={{ background: M.slumBg, border: `1px solid ${M.slumBdr}` }}>
+        <div className="p-3" style={{ background: M.slumBg, border: `1px solid ${M.slumBdr}`, borderRadius: 6 }}>
           <div className="flex items-center gap-2 mb-1">
             <IconFitness size={14} color={M.slumber} />
             <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Total</span>
           </div>
+          {/* Total counts ALL wins including archived */}
           <p className="text-2xl font-bold" style={{ color: M.slumber, fontFamily: "'Playfair Display', serif" }}>{wins.length}</p>
           <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>all time</p>
+        </div>
+        <div className="p-3" style={{ background: M.archiveBg, border: `1px solid ${M.archiveBdr}`, borderRadius: 6 }}>
+          <div className="flex items-center gap-2 mb-1">
+            <Archive size={14} color={M.archiveClr} />
+            <span className="text-xs font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Archived</span>
+          </div>
+          <p className="text-2xl font-bold" style={{ color: M.archiveClr, fontFamily: "'Playfair Display', serif" }}>{archivedWins.length}</p>
+          <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>stored away</p>
         </div>
       </div>
 
@@ -318,7 +526,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
             value={newWin}
             onChange={(e) => setNewWin(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addWin()}
-                  placeholder="What did you accomplish?"
+            placeholder="What did you accomplish?"
             className="flex-1"
             style={{ background: M.card, border: `1px solid ${M.border}`, fontFamily: "'DM Sans', sans-serif" }}
           />
@@ -328,88 +536,92 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
         </div>
       </div>
 
-      {/* Wins list */}
+      {/* ── Active wins list ── */}
       <div className="flex-1 overflow-y-auto space-y-2 pr-1">
-        {wins.length === 0 && (
+        {activeWins.length === 0 && !showArchive && (
           <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
             <IconHealth size={32} color={M.muted} />
             <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Log your first win.</p>
           </div>
         )}
 
-        {wins.map((win) => {
-          const isToday   = todayWins.some((w) => w.id === win.id);
-          const iconIdx   = typeof win.iconIdx === "number" ? win.iconIdx % WIN_ICONS.length : 0;
-          const iconDef   = WIN_ICONS[iconIdx];
-          const isEditing = editingWinId === win.id;
-
+        {activeWins.map((win) => {
+          const isToday = new Date(win.createdAt).toDateString() === todayStr;
           return (
-            <div
+            <WinCard
               key={win.id}
-              className="flex items-start gap-3 p-3 transition-all"
-              style={{
-                background: isToday ? M.pinkBg : "oklch(0.93 0.012 78 / 0.4)",
-                border:     `1px solid ${isToday ? M.pinkBdr : M.border}`,
-                opacity:    isToday ? 1 : 0.65,
-                borderRadius: 6,
-              }}
-            >
-              {/* Clickable icon — opens picker to change category */}
-              <div style={{ position: "relative", flexShrink: 0, marginTop: 2 }}>
-                <button
-                  ref={setWinBtnRef(win.id)}
-                  onClick={() => setEditingWinId(isEditing ? null : win.id)}
-                  title="Click to change category"
-                  style={{
-                    width: 28,
-                    height: 28,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    borderRadius: 6,
-                    border: `1px solid ${isEditing ? iconDef.color : "transparent"}`,
-                    background: isEditing ? `${iconDef.color}15` : "transparent",
-                    cursor: "pointer",
-                    transition: "background 0.12s, border-color 0.12s",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = `${iconDef.color}15`;
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isEditing) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  }}
-                >
-                  <iconDef.Component size={16} color={iconDef.color} />
-                </button>
-                {isEditing && (
-                  <IconPickerPopover
-                    current={iconIdx}
-                    onSelect={(idx) => changeWinIcon(win.id, idx)}
-                    onClose={() => setEditingWinId(null)}
-                    anchorRef={{ current: winPickerBtnRefs.current.get(win.id) ?? null }}
-                  />
-                )}
-              </div>
-
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium leading-snug" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{win.text}</p>
-                <p className="text-xs mt-0.5" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-                  {isToday ? "Today" : new Date(win.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                  {" · "}
-                  <span style={{ color: iconDef.color, opacity: 0.8 }}>{iconDef.label}</span>
-                </p>
-              </div>
-
-              {isToday && (
-                <div className="shrink-0 flex items-center gap-1">
-                  <span className="text-xs font-medium" style={{ color: M.pink, fontFamily: "'DM Sans', sans-serif" }}>Today</span>
-                  <IconHealth size={10} color={M.pink} />
-                </div>
-              )}
-            </div>
+              win={win}
+              isToday={isToday}
+              isArchiveView={false}
+              editingWinId={editingWinId}
+              setEditingWinId={setEditingWinId}
+              winPickerBtnRefs={winPickerBtnRefs}
+              setWinBtnRef={setWinBtnRef}
+              onChangeIcon={changeWinIcon}
+              onArchive={archiveWin}
+              onUnarchive={unarchiveWin}
+              onDelete={deleteWin}
+            />
           );
         })}
       </div>
+
+      {/* ── Archive section ── */}
+      {archivedWins.length > 0 && (
+        <div>
+          {/* Archive toggle header */}
+          <button
+            onClick={() => setShowArchive((v) => !v)}
+            className="w-full flex items-center justify-between px-3 py-2 transition-colors"
+            style={{
+              background: M.archiveBg,
+              border: `1px solid ${M.archiveBdr}`,
+              borderRadius: 6,
+              color: M.archiveClr,
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: 13,
+              fontWeight: 500,
+            }}
+          >
+            <div className="flex items-center gap-2">
+              <Archive size={14} />
+              <span>Archive ({archivedWins.length})</span>
+            </div>
+            {showArchive ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+          </button>
+
+          {/* Archive list */}
+          {showArchive && (
+            <div className="mt-2 space-y-2">
+              <p
+                className="text-xs px-1 pb-1"
+                style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}
+              >
+                Archived wins still count toward your total. Restore or permanently delete them here.
+              </p>
+              {archivedWins.map((win) => {
+                const isToday = new Date(win.createdAt).toDateString() === todayStr;
+                return (
+                  <WinCard
+                    key={win.id}
+                    win={win}
+                    isToday={isToday}
+                    isArchiveView={true}
+                    editingWinId={editingWinId}
+                    setEditingWinId={setEditingWinId}
+                    winPickerBtnRefs={winPickerBtnRefs}
+                    setWinBtnRef={setWinBtnRef}
+                    onChangeIcon={changeWinIcon}
+                    onArchive={archiveWin}
+                    onUnarchive={unarchiveWin}
+                    onDelete={deleteWin}
+                  />
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

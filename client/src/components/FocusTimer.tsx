@@ -161,15 +161,15 @@ function BalloonScene({
       {/* When running: show MM:SS countdown inside balloon; otherwise show face */}
       {s > 0.45 && (
         isRunning ? (
-          /* Countdown text centered in balloon */
+          /* Countdown text centered in balloon — font scales with balloon, capped small */
           <text
             x={cx}
-            y={cy + ry * 0.12}
+            y={cy}
             textAnchor="middle"
             dominantBaseline="middle"
             fontFamily="'JetBrains Mono', monospace"
             fontWeight="700"
-            fontSize={Math.round(rx * 0.58)}
+            fontSize={Math.min(26, Math.max(10, Math.round(rx * 0.30)))}
             fill={STROKE}
             opacity="0.82"
           >
