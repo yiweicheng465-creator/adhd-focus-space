@@ -168,29 +168,16 @@ export function PixelDump({ size = 20, active, color }: PixelIconProps) {
 }
 
 /* ════════════════════════════════════════════════════
-   GOALS — Cute pixel flower / target with face
+   GOALS — Simple upward arrow / flag
    ════════════════════════════════════════════════════ */
 export function PixelGoals({ size = 20, active, color }: PixelIconProps) {
   const c = color || (active ? "#C8603A" : PX);
   return (
-    <svg width={size} height={size} viewBox="0 0 20 20" fill="none" shapeRendering="crispEdges">
-      {/* Flower petals — pixel squares around center */}
-      <rect x="8" y="1" width="4" height="4" fill={c} opacity="0.6" />
-      <rect x="8" y="15" width="4" height="4" fill={c} opacity="0.6" />
-      <rect x="1" y="8" width="4" height="4" fill={c} opacity="0.6" />
-      <rect x="15" y="8" width="4" height="4" fill={c} opacity="0.6" />
-      {/* Diagonal petals */}
-      <rect x="3" y="3" width="3" height="3" fill={c} opacity="0.4" />
-      <rect x="14" y="3" width="3" height="3" fill={c} opacity="0.4" />
-      <rect x="3" y="14" width="3" height="3" fill={c} opacity="0.4" />
-      <rect x="14" y="14" width="3" height="3" fill={c} opacity="0.4" />
-      {/* Center circle */}
-      <rect x="6" y="6" width="8" height="8" fill={c} opacity="0.15" stroke={c} strokeWidth="1" />
-      {/* Eyes */}
-      <rect x="8" y="9" width="1.5" height="1.5" fill={c} />
-      <rect x="10.5" y="9" width="1.5" height="1.5" fill={c} />
-      {/* Smile */}
-      <rect x="8" y="11.5" width="4" height="1" fill={c} />
+    <svg width={size} height={size} viewBox="0 0 20 20" fill="none">
+      {/* Flag pole */}
+      <line x1="5" y1="3" x2="5" y2="17" stroke={c} strokeWidth="1.8" strokeLinecap="round" />
+      {/* Flag */}
+      <path d="M5 3 L15 6.5 L5 10 Z" fill={c} opacity="0.85" />
     </svg>
   );
 }

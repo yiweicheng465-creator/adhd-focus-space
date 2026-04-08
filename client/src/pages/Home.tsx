@@ -33,8 +33,18 @@ import {
 } from "@/components/PageDecor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
-import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Flower2 } from "lucide-react";
+import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
+
+// Simple flag icon for Goals — replaces complex flower
+function GoalFlagIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="none" className={className} style={style}>
+      <line x1="5" y1="2" x2="5" y2="18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path d="M5 2 L15 5.5 L5 9 Z" fill="currentColor" opacity="0.85" />
+    </svg>
+  );
+}
 
 type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
 
@@ -44,7 +54,7 @@ const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> 
   tasks:      { title: "My Tasks",     icon: Star     },
   wins:       { title: "Daily Wins",   icon: Sparkles        },
   braindump:  { title: "Brain Dump",   icon: Brain           },
-  goals:      { title: "Weekly Goals", icon: Flower2          },
+  goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
 };
 

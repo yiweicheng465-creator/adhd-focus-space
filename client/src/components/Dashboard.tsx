@@ -16,7 +16,7 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { CheckCircle2, Clock, Flame, Flower2, Sparkles, Zap } from "lucide-react";
+import { CheckCircle2, Clock, Flame, Sparkles, Zap } from "lucide-react";
 import { PixelAgents } from "@/components/PixelIcons";
 import { PixelTrophy } from "@/components/PixelIcons";
 
@@ -253,7 +253,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onMoodChange, onNa
           { icon: <Flame className="w-4 h-4" />,        label: "Urgent",   value: urgentTasks.length,  section: "tasks" },
           { icon: <CheckCircle2 className="w-4 h-4" />, label: "Active",   value: activeTasks.length,  section: "tasks" },
           { icon: <Sparkles className="w-4 h-4" />,     label: "Wins",     value: todayWins.length,    section: "wins"  },
-          { icon: <Flower2 className="w-4 h-4" />,      label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
+          { icon: <svg viewBox="0 0 20 20" fill="none" className="w-4 h-4"><line x1="5" y1="2" x2="5" y2="18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M5 2 L15 5.5 L5 9 Z" fill="currentColor" opacity="0.85" /></svg>, label: "Goals",    value: `${avgGoalProg}%`,   section: "goals" },
         ].map(({ icon, label, value, section }) => (
           <button
             key={label}

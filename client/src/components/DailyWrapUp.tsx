@@ -89,10 +89,10 @@ function WinsRing({ wins }: { wins: Win[] }) {
   }
 
   const total = wins.length;
-  const cx = 120, cy = 120;
-  // Track arc radius and icon radius separately
-  const arcR = 82;   // arc stroke center
-  const iconR = 82;  // icon position radius
+  // Larger SVG to give room for icons outside the arc
+  const SIZE = 280;
+  const cx = 140, cy = 140;
+  const arcR = 80;   // arc stroke center radius
 
   // Group wins by category index
   const groups: { idx: number; wins: Win[] }[] = [];
@@ -106,20 +106,22 @@ function WinsRing({ wins }: { wins: Win[] }) {
   // Sort groups by category index for consistent ordering
   groups.sort((a, b) => a.idx - b.idx);
 
-  // Compute arc spans — proportional to win count, with small gaps between
-  const GAP_DEG = groups.length > 1 ? 6 : 0; // degrees gap between arcs
+  // Compute arc spans — proportional to win count, with LARGER gaps to prevent overlap
+  // Minimum arc size ensures even single wins get a visible segment
+  const MIN_ARC_DEG = 18; // minimum degrees per segment so it's always visible
+  const GAP_DEG = groups.length > 1 ? 10 : 0; // generous gap between arcs
   const totalGap = GAP_DEG * groups.length;
-  const availableDeg = 360 - totalGap;
+  const totalMinArc = MIN_ARC_DEG * groups.length;
+  const availableDeg = Math.max(0, 360 - totalGap - totalMinArc);
 
-  // Each arc gets proportional share of the circle
   let currentAngle = -90; // start at top
   const arcSegments = groups.map((g) => {
     const proportion = g.wins.length / total;
-    const arcDeg = availableDeg * proportion;
-    const startAngle = currentAngle;
-    const endAngle = currentAngle + arcDeg;
+    const arcDeg = MIN_ARC_DEG + availableDeg * proportion;
+    const startAngle = currentAngle + GAP_DEG / 2; // center the gap
+    const endAngle = startAngle + arcDeg;
     const midAngle = (startAngle + endAngle) / 2;
-    currentAngle = endAngle + GAP_DEG;
+    currentAngle = endAngle + GAP_DEG / 2;
     return { ...g, startAngle, endAngle, midAngle, arcDeg };
   });
 
@@ -129,37 +131,38 @@ function WinsRing({ wins }: { wins: Win[] }) {
     return { x: cx + radius * Math.cos(rad), y: cy + radius * Math.sin(rad) };
   }
 
-  function describeArc(startDeg: number, endDeg: number, radius: number, strokeWidth: number) {
+  function describeArc(startDeg: number, endDeg: number, radius: number) {
     const start = polarToXY(startDeg, radius);
     const end = polarToXY(endDeg, radius);
     const largeArc = endDeg - startDeg > 180 ? 1 : 0;
     return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
   }
 
-  const SIZE = 240;
-  const STROKE = 18; // arc thickness
+  const STROKE = 14; // thinner arc so icons don't overlap the stroke
+  // Icons sit OUTSIDE the arc ring to avoid overlapping segments
+  const ICON_ORBIT_R = arcR + STROKE / 2 + 16; // outside the arc
 
   return (
     <div className="flex flex-col items-center gap-3">
       <div style={{ position: "relative", width: SIZE, height: SIZE }}>
-        <svg width={SIZE} height={SIZE} style={{ position: "absolute", inset: 0, overflow: "visible" }}>
-          {/* Background dashed guide ring */}
+        <svg width={SIZE} height={SIZE} style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
+          {/* Background guide ring */}
           <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="oklch(0.90 0.010 75)" strokeWidth="1" strokeDasharray="3 5" />
 
-          {/* Arc segments */}
+          {/* Arc segments — use butt caps so gaps are clean */}
           {arcSegments.map((seg) => {
             const color = WIN_CAT_COLORS[seg.idx];
             const isHov = hoveredCat === seg.idx;
-            const arcPath = describeArc(seg.startAngle, seg.endAngle, arcR, STROKE);
+            const arcPath = describeArc(seg.startAngle, seg.endAngle, arcR);
             return (
               <path
                 key={seg.idx}
                 d={arcPath}
                 fill="none"
                 stroke={color}
-                strokeWidth={isHov ? STROKE + 4 : STROKE}
-                strokeLinecap="round"
-                opacity={isHov ? 1 : 0.82}
+                strokeWidth={isHov ? STROKE + 3 : STROKE}
+                strokeLinecap="butt"
+                opacity={isHov ? 1 : 0.80}
                 style={{ transition: "stroke-width 0.2s, opacity 0.2s", cursor: "pointer" }}
                 onMouseEnter={() => setHoveredCat(seg.idx)}
                 onMouseLeave={() => setHoveredCat(null)}
@@ -172,15 +175,15 @@ function WinsRing({ wins }: { wins: Win[] }) {
           <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "oklch(0.55 0.018 70)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
         </svg>
 
-        {/* Category icons at arc midpoints */}
+        {/* Category icons — positioned OUTSIDE the arc ring, fixed small size */}
         {arcSegments.map((seg) => {
           const color = WIN_CAT_COLORS[seg.idx];
           const label = WIN_CAT_LABELS[seg.idx];
           const isHov = hoveredCat === seg.idx;
-          const { x, y } = polarToXY(seg.midAngle, iconR);
-          // Icon circle size scales with win count
-          const iconSize = Math.min(32, 22 + seg.wins.length * 2);
-          const circleR = iconSize / 2 + 4;
+          const { x, y } = polarToXY(seg.midAngle, ICON_ORBIT_R);
+          // Fixed small icon size — no scaling to prevent overlap
+          const iconSize = 14;
+          const circleR = 13; // fixed bubble radius
 
           return (
             <div

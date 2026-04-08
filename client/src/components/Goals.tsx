@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Plus, Target, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Trash2, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
@@ -205,7 +205,11 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
             >
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div className="flex items-start gap-2 flex-1 min-w-0">
-                  <Target className="w-4 h-4 mt-0.5 shrink-0" style={{ color: done ? M.sage : M.coral }} />
+                  {/* Simple flag icon */}
+                  <svg width="14" height="14" viewBox="0 0 20 20" fill="none" className="mt-0.5 shrink-0">
+                    <line x1="5" y1="2" x2="5" y2="18" stroke={done ? M.sage : M.coral} strokeWidth="1.8" strokeLinecap="round" />
+                    <path d="M5 2 L15 5.5 L5 9 Z" fill={done ? M.sage : M.coral} opacity="0.85" />
+                  </svg>
                   <p
                     className={cn("text-sm font-medium leading-snug", done && "line-through")}
                     style={{ color: done ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
