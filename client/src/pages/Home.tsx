@@ -21,6 +21,15 @@ import { DailyWrapUp } from "@/components/DailyWrapUp";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import {
+  DashboardDecor,
+  FocusDecor,
+  TasksDecor,
+  WinsDecor,
+  BrainDumpDecor,
+  GoalsDecor,
+  AgentsDecor,
+} from "@/components/PageDecor";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star, Flower2 } from "lucide-react";
@@ -192,6 +201,8 @@ export default function Home() {
             </div>
 
             {activeSection === "dashboard" && (
+              <div className="relative">
+                <DashboardDecor />
               <Dashboard
                 tasks={tasks}
                 wins={wins}
@@ -203,10 +214,12 @@ export default function Home() {
                 onSessionComplete={handleSessionComplete}
                 allCategories={allCategories}
               />
+              </div>
             )}
 
             {activeSection === "focus" && (
-              <div className="flex flex-col items-center gap-6 py-4">
+              <div className="flex flex-col items-center gap-6 py-4 relative">
+                <FocusDecor />
                 {/* Atmospheric sunset panel behind the timer */}
                 <div
                   className="w-full relative overflow-hidden"
@@ -293,42 +306,57 @@ export default function Home() {
 
             {activeSection === "tasks" && (
               <div
-                className="p-8 min-h-[600px] flex flex-col"
+                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
                 style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
               >
-                <TaskManager tasks={tasks} onTasksChange={handleTasksChange} />
+                <TasksDecor />
+                <div className="relative z-10">
+                  <TaskManager tasks={tasks} onTasksChange={handleTasksChange} />
+                </div>
               </div>
             )}
 
             {activeSection === "wins" && (
               <div
-                className="p-8 min-h-[600px] flex flex-col"
+                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
                 style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
               >
-                <DailyWins wins={wins} onWinsChange={setWins} />
+                <WinsDecor />
+                <div className="relative z-10">
+                  <DailyWins wins={wins} onWinsChange={setWins} />
+                </div>
               </div>
             )}
 
             {activeSection === "braindump" && (
               <div
-                className="p-8 min-h-[600px] flex flex-col"
+                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
                 style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
               >
-                <BrainDump onConvertToTask={handleConvertToTask} />
+                <BrainDumpDecor />
+                <div className="relative z-10">
+                  <BrainDump onConvertToTask={handleConvertToTask} />
+                </div>
               </div>
             )}
 
             {activeSection === "goals" && (
               <div
-                className="p-8 min-h-[600px] flex flex-col"
+                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
                 style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
               >
-                <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} />
+                <GoalsDecor />
+                <div className="relative z-10">
+                  <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} />
+                </div>
               </div>
             )}
 
             {activeSection === "agents" && (
-              <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} allCategories={allCategories} />
+              <div className="relative">
+                <AgentsDecor />
+                <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} allCategories={allCategories} />
+              </div>
             )}
           </div>
         </div>

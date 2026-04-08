@@ -1,52 +1,20 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Mood Check-In v4.0
-   Design: Hand-drawn SVG blob faces — organic shapes, expressive
-   features, Morandi-tinted fills. Inspired by the "slide to mood"
-   aesthetic with illustrated blob characters.
-   
-   5 moods, each with:
-   - Unique organic blob shape (SVG path)
-   - Hand-drawn eyes + mouth expression
-   - Distinct Morandi color
-   - Subtle scale + shadow on selection
+   ADHD FOCUS SPACE — Mood Check-In v5.0
+   Design: Korean-style cute blob characters (기쁨/행복/평온/피곤/우울)
+   Soft pastel fills, hand-drawn organic shapes, expressive faces.
+   Mapped: Drained→피곤(tired), Low→우울(depressed), Okay→평온(calm),
+           Good→기쁨(joy), Glowing→행복(happy)
    ============================================================ */
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
-/* ── Morandi-tinted blob colors ── */
 const MOODS = [
-  {
-    value: 1, label: "Drained",
-    fill:   "oklch(0.72 0.035 260)",   // dusty lavender-blue
-    stroke: "oklch(0.50 0.04 260)",
-    shadow: "oklch(0.72 0.035 260 / 0.35)",
-  },
-  {
-    value: 2, label: "Low",
-    fill:   "oklch(0.76 0.045 310)",   // muted mauve-pink
-    stroke: "oklch(0.52 0.05 310)",
-    shadow: "oklch(0.76 0.045 310 / 0.35)",
-  },
-  {
-    value: 3, label: "Okay",
-    fill:   "oklch(0.80 0.04 75)",     // warm parchment-tan
-    stroke: "oklch(0.55 0.04 75)",
-    shadow: "oklch(0.80 0.04 75 / 0.35)",
-  },
-  {
-    value: 4, label: "Good",
-    fill:   "oklch(0.75 0.07 145)",    // sage green
-    stroke: "oklch(0.50 0.08 145)",
-    shadow: "oklch(0.75 0.07 145 / 0.35)",
-  },
-  {
-    value: 5, label: "Glowing",
-    fill:   "oklch(0.78 0.10 55)",     // warm amber-peach
-    stroke: "oklch(0.55 0.12 45)",
-    shadow: "oklch(0.78 0.10 55 / 0.35)",
-  },
+  { value: 1, label: "Drained", kr: "피곤", shadow: "rgba(180,175,185,0.4)" },
+  { value: 2, label: "Low",     kr: "우울", shadow: "rgba(175,170,185,0.4)" },
+  { value: 3, label: "Okay",    kr: "평온", shadow: "rgba(160,200,175,0.4)" },
+  { value: 4, label: "Good",    kr: "기쁨", shadow: "rgba(240,200,60,0.4)"  },
+  { value: 5, label: "Glowing", kr: "행복", shadow: "rgba(240,160,175,0.4)" },
 ];
 
 const MESSAGES: Record<number, string> = {
@@ -57,128 +25,125 @@ const MESSAGES: Record<number, string> = {
   5: "You're glowing — channel it.",
 };
 
-/* ── Hand-drawn blob face SVGs ── */
-
-/* 1 — Drained: droopy blob, half-closed eyes, flat mouth */
-function BlobDrained({ fill, stroke }: { fill: string; stroke: string }) {
+/* ── 1. Drained / 피곤 — pale grey flat oval, sleepy half-closed eyes, zzz ── */
+function KoreanBlobDrained({ active }: { active: boolean }) {
+  const fill = active ? "#D0CBCA" : "#E8E4E2";
+  const c = "#6B6560";
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Blob shape — slightly squished, droopy */}
-      <path
-        d="M40 8 C58 6 74 18 74 36 C74 56 62 74 40 74 C18 74 6 56 6 36 C6 18 22 10 40 8Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth="1.2"
-      />
-      {/* Left eye — half-closed line */}
-      <path d="M27 34 Q29 31 31 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Right eye — half-closed line */}
-      <path d="M49 34 Q51 31 53 34" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
-      {/* Mouth — flat/slightly down */}
-      <path d="M31 50 Q40 48 49 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    <svg viewBox="0 0 80 72" fill="none">
+      {/* Flat oval body */}
+      <ellipse cx="40" cy="42" rx="34" ry="24" fill={fill} />
+      {/* Sleepy half-closed eyes — filled ovals with droopy lids */}
+      <ellipse cx="28" cy="40" rx="5" ry="3.5" fill={c} />
+      <ellipse cx="52" cy="40" rx="5" ry="3.5" fill={c} />
+      {/* Droopy eyelid lines */}
+      <path d="M23 38 Q28 35 33 38" stroke={c} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      <path d="M47 38 Q52 35 57 38" stroke={c} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+      {/* Flat mouth */}
+      <path d="M32 52 Q40 50 48 52" stroke={c} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+      {/* zzz */}
+      <text x="58" y="26" fontSize="7" fill="#B0A8A5" fontFamily="serif" opacity="0.9">z</text>
+      <text x="63" y="20" fontSize="5.5" fill="#B0A8A5" fontFamily="serif" opacity="0.7">z</text>
+      <text x="67" y="15" fontSize="4" fill="#B0A8A5" fontFamily="serif" opacity="0.5">z</text>
     </svg>
   );
 }
 
-/* 2 — Low: rounded rectangle blob, sad eyes, downward curve */
-function BlobLow({ fill, stroke }: { fill: string; stroke: string }) {
+/* ── 2. Low / 우울 — grey teardrop blob, sad dots, tears, frown ── */
+function KoreanBlobLow({ active }: { active: boolean }) {
+  const fill = active ? "#C4C0CC" : "#D8D4DC";
+  const c = "#5A5060";
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Blob shape — soft rounded rectangle */}
-      <path
-        d="M18 12 C10 12 6 20 6 30 L6 52 C6 64 14 74 28 74 L52 74 C66 74 74 64 74 52 L74 30 C74 20 70 12 62 12 Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth="1.2"
-      />
-      {/* Left eye — dot */}
-      <circle cx="28" cy="35" r="2.5" fill={stroke} />
-      {/* Right eye — dot */}
-      <circle cx="52" cy="35" r="2.5" fill={stroke} />
-      {/* Mouth — gentle frown */}
-      <path d="M30 52 Q40 46 50 52" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    <svg viewBox="0 0 80 72" fill="none">
+      {/* Rounded blob body */}
+      <path d="M40 10 C60 10 70 24 70 40 C70 56 58 64 40 64 C22 64 10 56 10 40 C10 24 20 10 40 10Z" fill={fill} />
+      {/* Sad dot eyes */}
+      <circle cx="28" cy="37" r="3.5" fill={c} />
+      <circle cx="52" cy="37" r="3.5" fill={c} />
+      {/* Tear drops */}
+      <path d="M27 41 Q26 47 27.5 49" stroke="#8BBCD4" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M53 41 Q52 47 53.5 49" stroke="#8BBCD4" strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      {/* Frown */}
+      <path d="M30 53 Q40 48 50 53" stroke={c} strokeWidth="1.8" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
-/* 3 — Okay: circle blob, neutral eyes, straight mouth */
-function BlobOkay({ fill, stroke }: { fill: string; stroke: string }) {
+/* ── 3. Okay / 평온 — mint green cloud blob, gentle curved eyes, soft smile ── */
+function KoreanBlobOkay({ active }: { active: boolean }) {
+  const fill = active ? "#A8D4B8" : "#C8E8D4";
+  const c = "#3A6848";
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Blob shape — slightly wobbly circle */}
-      <path
-        d="M40 7 C56 5 75 20 75 40 C75 60 58 75 40 75 C22 75 5 60 5 40 C5 20 24 9 40 7Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth="1.2"
-      />
-      {/* Left eye — small oval */}
-      <ellipse cx="28" cy="34" rx="3" ry="3.5" fill={stroke} />
-      {/* Right eye — small oval */}
-      <ellipse cx="52" cy="34" rx="3" ry="3.5" fill={stroke} />
-      {/* Nose — tiny L shape, hand-drawn feel */}
-      <path d="M39 40 L39 46 L43 46" stroke={stroke} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      {/* Mouth — straight line */}
-      <line x1="30" y1="54" x2="50" y2="54" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" />
+    <svg viewBox="0 0 80 72" fill="none">
+      {/* Cloud-like blob */}
+      <path d="M18 46 C14 46 10 42 10 38 C10 34 13 31 17 31 C17 25 22 20 28 20 C31 17 35 16 40 16 C50 16 58 24 58 34 C62 34 70 38 70 44 C70 50 64 54 57 54 L23 54 C20 54 18 50 18 46Z" fill={fill} />
+      {/* Calm curved eyes */}
+      <path d="M26 37 Q29 34 32 37" stroke={c} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      <path d="M48 37 Q51 34 54 37" stroke={c} strokeWidth="2.2" strokeLinecap="round" fill="none" />
+      {/* Gentle smile */}
+      <path d="M32 46 Q40 50 48 46" stroke={c} strokeWidth="1.8" strokeLinecap="round" fill="none" />
     </svg>
   );
 }
 
-/* 4 — Good: star-burst blob, happy eyes, gentle smile */
-function BlobGood({ fill, stroke }: { fill: string; stroke: string }) {
+/* ── 4. Good / 기쁨 — warm yellow round blob, happy squint eyes, big smile ── */
+function KoreanBlobGood({ active }: { active: boolean }) {
+  const fill = active ? "#F0C830" : "#F8E060";
+  const c = "#5A4820";
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Blob shape — slightly irregular, upbeat */}
-      <path
-        d="M40 6 C52 4 72 16 74 32 C76 48 68 72 48 76 C28 80 4 64 4 44 C4 24 20 8 40 6Z"
-        fill={fill}
-        stroke={stroke}
-        strokeWidth="1.2"
-      />
-      {/* Left eye — upward arc (happy squint) */}
-      <path d="M25 35 Q28 30 31 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      {/* Right eye — upward arc */}
-      <path d="M49 35 Q52 30 55 35" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      {/* Mouth — gentle smile */}
-      <path d="M29 50 Q40 58 51 50" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" fill="none" />
+    <svg viewBox="0 0 80 72" fill="none">
+      {/* Round cheerful blob */}
+      <path d="M40 8 C58 8 72 20 72 38 C72 54 58 64 40 64 C22 64 8 54 8 38 C8 20 22 8 40 8Z" fill={fill} />
+      {/* Happy squint eyes — upward arcs */}
+      <path d="M24 34 Q28 29 32 34" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M48 34 Q52 29 56 34" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {/* Big smile */}
+      <path d="M27 46 Q40 56 53 46" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Rosy cheeks */}
+      <ellipse cx="20" cy="44" rx="5.5" ry="3" fill="#F0A080" opacity="0.45" />
+      <ellipse cx="60" cy="44" rx="5.5" ry="3" fill="#F0A080" opacity="0.45" />
     </svg>
   );
 }
 
-/* 5 — Glowing: 8-point sun-star with wide spikes, roomy face center */
-function BlobGlowing({ fill, stroke }: { fill: string; stroke: string }) {
-  // 8-point star: outer radius 38, inner radius 22, center 40,40
-  // Points computed at every 45deg, tips at outer, valleys at inner
-  const pts = Array.from({ length: 8 }, (_, i) => {
-    const outerAngle = (i * 45 - 90) * (Math.PI / 180);
-    const innerAngle = ((i * 45 + 22.5) - 90) * (Math.PI / 180);
-    const ox = 40 + 38 * Math.cos(outerAngle);
-    const oy = 40 + 38 * Math.sin(outerAngle);
-    const ix = 40 + 22 * Math.cos(innerAngle);
-    const iy = 40 + 22 * Math.sin(innerAngle);
-    return `${ox.toFixed(1)},${oy.toFixed(1)} ${ix.toFixed(1)},${iy.toFixed(1)}`;
-  }).join(" ");
+/* ── 5. Glowing / 행복 — soft pink round blob, happy eyes, wide smile, hearts ── */
+function KoreanBlobGlowing({ active }: { active: boolean }) {
+  const fill = active ? "#F0A0B0" : "#F8C8D4";
+  const c = "#8B3050";
   return (
-    <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* 8-point sun star — wide tips, generous inner circle */}
-      <polygon
-        points={pts}
-        fill={fill}
-        stroke={stroke}
-        strokeWidth="1.2"
-        strokeLinejoin="round"
-      />
-      {/* Left eye — happy squint arc, well inside the inner circle */}
-      <path d="M29 36 Q32 31 35 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      {/* Right eye — happy squint arc */}
-      <path d="M45 36 Q48 31 51 36" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" fill="none" />
-      {/* Mouth — wide relaxed smile */}
-      <path d="M30 48 Q40 57 50 48" stroke={stroke} strokeWidth="2" strokeLinecap="round" fill="none" />
+    <svg viewBox="0 0 80 72" fill="none">
+      {/* Round pink blob */}
+      <path d="M40 8 C58 8 72 22 72 40 C72 56 58 66 40 66 C22 66 8 56 8 40 C8 22 22 8 40 8Z" fill={fill} />
+      {/* Happy arc eyes */}
+      <path d="M24 36 Q28 31 32 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      <path d="M48 36 Q52 31 56 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" />
+      {/* Wide smile */}
+      <path d="M25 48 Q40 60 55 48" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" />
+      {/* Rosy cheeks */}
+      <ellipse cx="19" cy="45" rx="6" ry="3.5" fill="#E07080" opacity="0.38" />
+      <ellipse cx="61" cy="45" rx="6" ry="3.5" fill="#E07080" opacity="0.38" />
+      {/* Small hearts */}
+      <path d="M35 17 C35 15 37 14 37 16 C37 14 39 15 39 17 C39 19 37 21 37 21 C37 21 35 19 35 17Z" fill="#E07080" opacity="0.75" />
+      <path d="M41 13 C41 11.5 42.5 10.5 42.5 12 C42.5 10.5 44 11.5 44 13 C44 14.5 42.5 16 42.5 16 C42.5 16 41 14.5 41 13Z" fill="#E07080" opacity="0.55" />
     </svg>
   );
 }
 
-const BLOB_COMPONENTS = [BlobDrained, BlobLow, BlobOkay, BlobGood, BlobGlowing];
+const BLOB_COMPONENTS = [
+  KoreanBlobDrained,
+  KoreanBlobLow,
+  KoreanBlobOkay,
+  KoreanBlobGood,
+  KoreanBlobGlowing,
+];
+
+const MOOD_COLORS = [
+  { fill: "#E8E4E2", stroke: "#6B6560", bar: "#C8C4C0" },
+  { fill: "#D8D4DC", stroke: "#5A5060", bar: "#B8B0C0" },
+  { fill: "#C8E8D4", stroke: "#3A6848", bar: "#90C8A8" },
+  { fill: "#F8E060", stroke: "#5A4820", bar: "#E8C030" },
+  { fill: "#F8C8D4", stroke: "#8B3050", bar: "#E89090" },
+];
 
 const M = {
   ink:    "oklch(0.28 0.018 65)",
@@ -201,6 +166,7 @@ export function MoodCheckIn({ currentMood, onMoodChange }: MoodCheckInProps) {
 
   const displayMood = hovered ?? currentMood;
   const displayData = MOODS.find((m) => m.value === displayMood);
+  const displayColor = displayMood ? MOOD_COLORS[displayMood - 1] : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -212,20 +178,21 @@ export function MoodCheckIn({ currentMood, onMoodChange }: MoodCheckInProps) {
         >
           How are you feeling?
         </p>
-        {displayData && (
+        {displayData && displayColor && (
           <span
             className="text-xs transition-all duration-200"
-            style={{ color: displayData.stroke, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
+            style={{ color: displayColor.stroke, fontFamily: "'DM Sans', sans-serif", fontWeight: 500 }}
           >
             {displayData.label}
           </span>
         )}
       </div>
 
-      {/* Blob faces row */}
-      <div className="flex items-end justify-between gap-2">
+      {/* Korean blob faces row */}
+      <div className="flex items-end justify-between gap-1">
         {MOODS.map((mood, i) => {
           const BlobFace = BLOB_COMPONENTS[i];
+          const colors = MOOD_COLORS[i];
           const isSelected = currentMood === mood.value;
           const isHovered  = hovered === mood.value;
           const isActive   = isSelected || isHovered;
@@ -236,28 +203,25 @@ export function MoodCheckIn({ currentMood, onMoodChange }: MoodCheckInProps) {
               onClick={() => selectMood(mood.value)}
               onMouseEnter={() => setHovered(mood.value)}
               onMouseLeave={() => setHovered(null)}
-              className="flex flex-col items-center gap-1.5 flex-1 transition-all duration-200 focus:outline-none"
+              className="flex flex-col items-center gap-1 flex-1 transition-all duration-200 focus:outline-none"
               style={{
-                transform: isActive ? "scale(1.18) translateY(-4px)" : "scale(1)",
-                filter: isActive
-                  ? `drop-shadow(0 6px 12px ${mood.shadow})`
-                  : "none",
-                opacity: currentMood !== null && !isSelected && !isHovered ? 0.55 : 1,
+                transform: isActive ? "scale(1.22) translateY(-5px)" : "scale(1)",
+                filter: isActive ? `drop-shadow(0 6px 14px ${MOODS[i].shadow})` : "none",
+                opacity: currentMood !== null && !isSelected && !isHovered ? 0.5 : 1,
               }}
               aria-label={mood.label}
             >
               {/* Blob SVG */}
-              <div className="w-12 h-12 sm:w-14 sm:h-14">
-                <BlobFace fill={mood.fill} stroke={mood.stroke} />
+              <div className="w-12 h-10 sm:w-14 sm:h-12">
+                <BlobFace active={isActive} />
               </div>
-
-              {/* Label — only visible on hover/select */}
+              {/* Label — visible on hover/select */}
               <span
                 className="text-[9px] font-medium tracking-wide transition-all duration-200"
                 style={{
-                  color: isActive ? mood.stroke : "transparent",
+                  color: isActive ? colors.stroke : "transparent",
                   fontFamily: "'DM Sans', sans-serif",
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.06em",
                 }}
               >
                 {mood.label}
@@ -267,15 +231,15 @@ export function MoodCheckIn({ currentMood, onMoodChange }: MoodCheckInProps) {
         })}
       </div>
 
-      {/* Thin progress bar showing selected mood position */}
+      {/* Thin progress bar */}
       <div className="flex gap-1 mt-1">
-        {MOODS.map((mood) => (
+        {MOODS.map((mood, i) => (
           <div
             key={mood.value}
             className="flex-1 h-0.5 transition-all duration-300"
             style={{
               background: currentMood !== null && mood.value <= currentMood
-                ? mood.fill
+                ? MOOD_COLORS[i].bar
                 : M.border,
             }}
           />

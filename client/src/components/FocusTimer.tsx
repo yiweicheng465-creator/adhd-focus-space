@@ -74,6 +74,12 @@ function SecuraDial({ cx, cy, R, arcProgress, isRunning, ticks, meta, onAddTime 
 
   const wedgePath = describeWedge(cx, cy, WEDGE_R, arcProgress);
 
+  // 2D flat colors — no gradients, no shadows
+  const BEZEL_FILL = "#EDE0CE";     // warm beige flat
+  const FACE_FILL  = "#FAF6F0";     // cream
+  const KNOB_FILL  = "#4A3728";     // flat dark brown
+  const KNOB_RING  = "#3A2A1A";     // knob border
+
   return (
     <svg
       width={cx * 2} height={cy * 2} viewBox={`0 0 ${cx * 2} ${cy * 2}`}
@@ -82,45 +88,26 @@ function SecuraDial({ cx, cy, R, arcProgress, isRunning, ticks, meta, onAddTime 
       onContextMenu={(e) => { e.preventDefault(); onAddTime(5); }}
     >
       <defs>
-        {/* Knob radial gradient — warm dark beige, textured */}
-        <radialGradient id="knobGrad" cx="38%" cy="32%" r="70%">
-          <stop offset="0%" stopColor="#6B5A4A" />
-          <stop offset="50%" stopColor="#4A3728" />
-          <stop offset="100%" stopColor="#2E2018" />
-        </radialGradient>
-        {/* Bezel gradient — subtle warm depth */}
-        <radialGradient id="bezelGrad" cx="50%" cy="30%" r="70%">
-          <stop offset="0%" stopColor="#F0E8DC" />
-          <stop offset="100%" stopColor="#DDD0C0" />
-        </radialGradient>
-        <filter id="knobShadow" x="-25%" y="-25%" width="150%" height="150%">
-          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#1A1008" floodOpacity="0.5" />
-        </filter>
-        <filter id="wedgeGlow" x="-10%" y="-10%" width="120%" height="120%">
-          <feGaussianBlur stdDeviation="1.5" result="blur" />
-          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-        </filter>
         {/* Clip to keep wedge inside the face circle */}
         <clipPath id="faceClip">
           <circle cx={cx} cy={cy} r={WEDGE_R} />
         </clipPath>
       </defs>
 
-      {/* Outer bezel — warm tan ring */}
-      <circle cx={cx} cy={cy} r={R} fill="url(#bezelGrad)" />
+      {/* Outer bezel — flat warm beige ring */}
+      <circle cx={cx} cy={cy} r={R} fill={BEZEL_FILL} />
       <circle cx={cx} cy={cy} r={R} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
 
-      {/* Face — cream white */}
-      <circle cx={cx} cy={cy} r={WEDGE_R} fill="#FAF6F0" />
+      {/* Face — flat cream */}
+      <circle cx={cx} cy={cy} r={WEDGE_R} fill={FACE_FILL} />
 
       {/* Filled wedge sector — terracotta, depletes clockwise */}
       {arcProgress > 0 && (
         <path
           d={wedgePath}
           fill={meta.stroke}
-          opacity="0.88"
+          opacity="0.85"
           clipPath="url(#faceClip)"
-          filter={isRunning ? "url(#wedgeGlow)" : undefined}
           style={{ transition: isRunning ? "d 1s linear" : "none" }}
         />
       )}
@@ -136,50 +123,27 @@ function SecuraDial({ cx, cy, R, arcProgress, isRunning, ticks, meta, onAddTime 
         />
       ))}
 
-      {/* Knob groove ring */}
+      {/* Knob groove ring — flat 2D */}
       <circle cx={cx} cy={cy} r={KNOB_R + 4}
-        fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="4" />
-      <circle cx={cx} cy={cy} r={KNOB_R + 4}
-        fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+        fill="none" stroke="#8C7B6B" strokeWidth="2" opacity="0.4" />
 
-      {/* Dark center knob */}
+      {/* Flat center knob — no gradient, no shadow */}
       <circle cx={cx} cy={cy} r={KNOB_R}
-        fill="url(#knobGrad)"
-        filter="url(#knobShadow)"
-        stroke="#1A1008" strokeWidth="0.8"
+        fill={KNOB_FILL}
+        stroke={KNOB_RING} strokeWidth="1"
       />
-      {/* Knob texture lines (like Secura's ridged edge) */}
-      {Array.from({ length: 16 }, (_, i) => {
-        const a = (i / 16) * 2 * Math.PI;
-        const r1 = KNOB_R - 4;
-        const r2 = KNOB_R - 1;
-        return (
-          <line key={i}
-            x1={cx + r1 * Math.cos(a)} y1={cy + r1 * Math.sin(a)}
-            x2={cx + r2 * Math.cos(a)} y2={cy + r2 * Math.sin(a)}
-            stroke="rgba(255,255,255,0.12)" strokeWidth="1"
-          />
-        );
-      })}
-      {/* Knob specular highlight */}
-      <ellipse cx={cx - KNOB_R * 0.22} cy={cy - KNOB_R * 0.28}
-        rx={KNOB_R * 0.28} ry={KNOB_R * 0.18}
-        fill="rgba(255,255,255,0.18)"
-      />
-      {/* Arrow indicator on knob */}
-      <path
-        d={`M ${cx} ${cy - KNOB_R * 0.45} L ${cx - 4} ${cy - KNOB_R * 0.15} L ${cx + 4} ${cy - KNOB_R * 0.15} Z`}
-        fill="rgba(255,255,255,0.5)"
-      />
+
+      {/* Simple dot indicator on knob */}
+      <circle cx={cx} cy={cy - KNOB_R * 0.55} r="2.5" fill="rgba(255,255,255,0.6)" />
 
       {/* +1 / +5 hint text when stopped */}
       {!isRunning && (
         <>
           <text x={cx} y={cy + KNOB_R * 0.35} textAnchor="middle" fontSize="6.5"
-            fill="rgba(255,255,255,0.7)" fontFamily="'JetBrains Mono', monospace"
+            fill="rgba(255,255,255,0.65)" fontFamily="'JetBrains Mono', monospace"
             letterSpacing="0.08em">+1 MIN</text>
           <text x={cx} y={cy + KNOB_R * 0.55} textAnchor="middle" fontSize="5.5"
-            fill="rgba(255,255,255,0.45)" fontFamily="'JetBrains Mono', monospace"
+            fill="rgba(255,255,255,0.4)" fontFamily="'JetBrains Mono', monospace"
             letterSpacing="0.06em">R-CLICK +5</text>
         </>
       )}

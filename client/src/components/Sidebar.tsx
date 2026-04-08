@@ -1,16 +1,20 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Sidebar v3.0 (Morandi)
-   Logo: SVG mark — overlapping circles with serif "A"
+   ADHD FOCUS SPACE — Sidebar v4.0 (Pixel Icons)
+   Icons: cute pixel-art SVG characters in beige/terracotta
    Colors: parchment bg, coral active, griffin charcoal text
    ============================================================ */
 
 import React, { useEffect, useState } from "react";
-import {
-  Bot, Brain, Clock,
-  LayoutDashboard, Sparkles,
-  Flower2, Star,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  PixelHome,
+  PixelFocus,
+  PixelTasks,
+  PixelWins,
+  PixelDump,
+  PixelGoals,
+  PixelAgents,
+} from "@/components/PixelIcons";
 
 interface SidebarProps {
   activeSection: string;
@@ -18,31 +22,27 @@ interface SidebarProps {
 }
 
 const NAV = [
-  { id: "dashboard", short: "HOME",   Icon: LayoutDashboard, title: "Dashboard"   },
-  { id: "focus",     short: "FOCUS",  Icon: Clock,           title: "Focus Timer"  },
-  { id: "tasks",     short: "TASKS",  Icon: Star,            title: "My Tasks"     },
-  { id: "wins",      short: "WINS",   Icon: Sparkles,        title: "Daily Wins"   },
-  { id: "braindump", short: "DUMP",   Icon: Brain,           title: "Brain Dump"   },
-  { id: "goals",     short: "GOALS",  Icon: Flower2,         title: "Goals"        },
-  { id: "agents",    short: "AGENTS", Icon: Bot,             title: "AI Agents"    },
+  { id: "dashboard", short: "HOME",   PixelIcon: PixelHome,   title: "Dashboard"   },
+  { id: "focus",     short: "FOCUS",  PixelIcon: PixelFocus,  title: "Focus Timer"  },
+  { id: "tasks",     short: "TASKS",  PixelIcon: PixelTasks,  title: "My Tasks"     },
+  { id: "wins",      short: "WINS",   PixelIcon: PixelWins,   title: "Daily Wins"   },
+  { id: "braindump", short: "DUMP",   PixelIcon: PixelDump,   title: "Brain Dump"   },
+  { id: "goals",     short: "GOALS",  PixelIcon: PixelGoals,  title: "Goals"        },
+  { id: "agents",    short: "AGENTS", PixelIcon: PixelAgents, title: "AI Agents"    },
 ];
 
-/* ── Logo mark: refined editorial monogram ── */
+/* ── Logo mark ── */
 function LogoMark() {
   return (
     <div
       className="w-10 h-10 flex items-center justify-center"
       title="ADHD Focus Space"
-      style={{ background: "oklch(0.975 0.010 72)" }}
     >
       <img
-        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-TE2ZmkKpxooE7jm3Qqw2wh.webp"
+        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
         alt="ADHD Focus Space logo"
         className="w-10 h-10 object-contain"
-        style={{
-          mixBlendMode: "multiply",
-          filter: "saturate(1.05)",
-        }}
+        style={{ filter: "saturate(1.05)" }}
       />
     </div>
   );
@@ -85,7 +85,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
 
       {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-2">
-        {NAV.map(({ id, short, Icon, title }) => {
+        {NAV.map(({ id, short, PixelIcon, title }) => {
           const active = activeSection === id;
           return (
             <button
@@ -111,9 +111,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
                   style={{ background: "oklch(0.55 0.09 35)" }}
                 />
               )}
-              <Icon
-                className="w-[15px] h-[15px]"
-                style={{ color: active ? "oklch(0.55 0.09 35)" : "oklch(0.58 0.018 70)" }}
+              <PixelIcon
+                size={18}
+                active={active}
               />
               <span
                 className="text-[7px] mt-1 tracking-[0.12em] font-medium"
@@ -129,7 +129,7 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         })}
       </nav>
 
-      {/* Bottom: sunset accent + time */}
+      {/* Bottom: time */}
       <div className="mt-auto flex flex-col items-center gap-2 pb-1">
         {/* Tiny geometric diamond */}
         <svg width="8" height="8" viewBox="0 0 8 8" style={{ opacity: 0.3 }}>
