@@ -33,6 +33,160 @@ const CIRC = 2 * Math.PI * R;
 const GROOVE_R = 70;
 const GROOVE_CIRC = 2 * Math.PI * GROOVE_R;
 
+// ── SecuraDial: Secura-style filled wedge countdown dial ──
+interface SecuraDialProps {
+  cx: number; cy: number; R: number;
+  arcProgress: number;  // 1 = full, 0 = empty
+  isRunning: boolean;
+  ticks: Array<{ angle: number; major: boolean; x1: number; y1: number; x2: number; y2: number }>;
+  meta: { stroke: string; glow: string; label: string };
+  onAddTime: (mins: number) => void;
+}
+
+function describeWedge(cx: number, cy: number, r: number, progress: number): string {
+  // progress: 1 = full circle, 0 = empty. Wedge starts at 12 o'clock, fills clockwise.
+  if (progress <= 0) return "";
+  if (progress >= 1) {
+    // Full circle — use two arcs to avoid degenerate path
+    return [
+      `M ${cx} ${cy - r}`,
+      `A ${r} ${r} 0 1 1 ${cx - 0.001} ${cy - r}`,
+      "Z",
+    ].join(" ");
+  }
+  const angle = progress * 2 * Math.PI - Math.PI / 2; // end angle (clockwise from 12)
+  const ex = cx + r * Math.cos(angle);
+  const ey = cy + r * Math.sin(angle);
+  const largeArc = progress > 0.5 ? 1 : 0;
+  return [
+    `M ${cx} ${cy}`,
+    `L ${cx} ${cy - r}`,           // line to 12 o'clock
+    `A ${r} ${r} 0 ${largeArc} 1 ${ex} ${ey}`, // arc clockwise to end point
+    "Z",
+  ].join(" ");
+}
+
+function SecuraDial({ cx, cy, R, arcProgress, isRunning, ticks, meta, onAddTime }: SecuraDialProps) {
+  // Knob radius — large dark center knob like Secura
+  const KNOB_R = R * 0.38;
+  // Wedge fills from center to inner edge of tick ring
+  const WEDGE_R = R - 10;
+
+  const wedgePath = describeWedge(cx, cy, WEDGE_R, arcProgress);
+
+  return (
+    <svg
+      width={cx * 2} height={cy * 2} viewBox={`0 0 ${cx * 2} ${cy * 2}`}
+      style={{ cursor: isRunning ? "default" : "pointer", display: "block" }}
+      onClick={() => onAddTime(1)}
+      onContextMenu={(e) => { e.preventDefault(); onAddTime(5); }}
+    >
+      <defs>
+        {/* Knob radial gradient — warm dark beige, textured */}
+        <radialGradient id="knobGrad" cx="38%" cy="32%" r="70%">
+          <stop offset="0%" stopColor="#6B5A4A" />
+          <stop offset="50%" stopColor="#4A3728" />
+          <stop offset="100%" stopColor="#2E2018" />
+        </radialGradient>
+        {/* Bezel gradient — subtle warm depth */}
+        <radialGradient id="bezelGrad" cx="50%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#F0E8DC" />
+          <stop offset="100%" stopColor="#DDD0C0" />
+        </radialGradient>
+        <filter id="knobShadow" x="-25%" y="-25%" width="150%" height="150%">
+          <feDropShadow dx="0" dy="3" stdDeviation="4" floodColor="#1A1008" floodOpacity="0.5" />
+        </filter>
+        <filter id="wedgeGlow" x="-10%" y="-10%" width="120%" height="120%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+        {/* Clip to keep wedge inside the face circle */}
+        <clipPath id="faceClip">
+          <circle cx={cx} cy={cy} r={WEDGE_R} />
+        </clipPath>
+      </defs>
+
+      {/* Outer bezel — warm tan ring */}
+      <circle cx={cx} cy={cy} r={R} fill="url(#bezelGrad)" />
+      <circle cx={cx} cy={cy} r={R} fill="none" stroke="#C8B8A4" strokeWidth="1.5" />
+
+      {/* Face — cream white */}
+      <circle cx={cx} cy={cy} r={WEDGE_R} fill="#FAF6F0" />
+
+      {/* Filled wedge sector — terracotta, depletes clockwise */}
+      {arcProgress > 0 && (
+        <path
+          d={wedgePath}
+          fill={meta.stroke}
+          opacity="0.88"
+          clipPath="url(#faceClip)"
+          filter={isRunning ? "url(#wedgeGlow)" : undefined}
+          style={{ transition: isRunning ? "d 1s linear" : "none" }}
+        />
+      )}
+
+      {/* Face border (on top of wedge) */}
+      <circle cx={cx} cy={cy} r={WEDGE_R} fill="none" stroke="#D4C4B0" strokeWidth="0.8" />
+
+      {/* Tick marks — inside the bezel band */}
+      {ticks.map((t, i) => (
+        <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
+          stroke={t.major ? "#5A4A3A" : "#8C7B6B"}
+          strokeWidth={t.major ? 1.8 : 0.8}
+        />
+      ))}
+
+      {/* Knob groove ring */}
+      <circle cx={cx} cy={cy} r={KNOB_R + 4}
+        fill="none" stroke="rgba(0,0,0,0.15)" strokeWidth="4" />
+      <circle cx={cx} cy={cy} r={KNOB_R + 4}
+        fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="1" />
+
+      {/* Dark center knob */}
+      <circle cx={cx} cy={cy} r={KNOB_R}
+        fill="url(#knobGrad)"
+        filter="url(#knobShadow)"
+        stroke="#1A1008" strokeWidth="0.8"
+      />
+      {/* Knob texture lines (like Secura's ridged edge) */}
+      {Array.from({ length: 16 }, (_, i) => {
+        const a = (i / 16) * 2 * Math.PI;
+        const r1 = KNOB_R - 4;
+        const r2 = KNOB_R - 1;
+        return (
+          <line key={i}
+            x1={cx + r1 * Math.cos(a)} y1={cy + r1 * Math.sin(a)}
+            x2={cx + r2 * Math.cos(a)} y2={cy + r2 * Math.sin(a)}
+            stroke="rgba(255,255,255,0.12)" strokeWidth="1"
+          />
+        );
+      })}
+      {/* Knob specular highlight */}
+      <ellipse cx={cx - KNOB_R * 0.22} cy={cy - KNOB_R * 0.28}
+        rx={KNOB_R * 0.28} ry={KNOB_R * 0.18}
+        fill="rgba(255,255,255,0.18)"
+      />
+      {/* Arrow indicator on knob */}
+      <path
+        d={`M ${cx} ${cy - KNOB_R * 0.45} L ${cx - 4} ${cy - KNOB_R * 0.15} L ${cx + 4} ${cy - KNOB_R * 0.15} Z`}
+        fill="rgba(255,255,255,0.5)"
+      />
+
+      {/* +1 / +5 hint text when stopped */}
+      {!isRunning && (
+        <>
+          <text x={cx} y={cy + KNOB_R * 0.35} textAnchor="middle" fontSize="6.5"
+            fill="rgba(255,255,255,0.7)" fontFamily="'JetBrains Mono', monospace"
+            letterSpacing="0.08em">+1 MIN</text>
+          <text x={cx} y={cy + KNOB_R * 0.55} textAnchor="middle" fontSize="5.5"
+            fill="rgba(255,255,255,0.45)" fontFamily="'JetBrains Mono', monospace"
+            letterSpacing="0.06em">R-CLICK +5</text>
+        </>
+      )}
+    </svg>
+  );
+}
+
 interface FocusTimerProps {
   onSessionComplete?: () => void;
 }
@@ -254,133 +408,23 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
       {/* ── Main instrument panel ── */}
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
 
-        {/* SVG Dial — flat watch-face, wide soft shadow ring countdown, raised center button */}
+        {/* SVG Dial — Secura-style filled wedge countdown */}
         <div style={{ flexShrink: 0, position: "relative" }}>
-          {/* Outer ambient glow — subtle warm halo when running */}
+          {/* Outer ambient glow when running */}
           <div style={{
             position: "absolute", inset: -4, borderRadius: "50%",
-            boxShadow: isRunning
-              ? `0 0 18px 6px ${meta.glow}`
-              : "none",
+            boxShadow: isRunning ? `0 0 20px 8px ${meta.glow}` : "none",
             transition: "box-shadow 1.5s ease",
             pointerEvents: "none",
           }} />
-          <svg
-            width="192" height="192" viewBox="0 0 192 192"
-            style={{ cursor: isRunning ? "default" : "pointer", display: "block" }}
-            onClick={() => addTime(1)}
-            onContextMenu={(e) => { e.preventDefault(); addTime(5); }}
-          >
-            <defs>
-              {/* Radial gradient for raised center button dome */}
-              <radialGradient id="btnDome" cx="38%" cy="35%" r="65%">
-                <stop offset="0%" stopColor="#FFFAF5" />
-                <stop offset="55%" stopColor="#F5EDE3" />
-                <stop offset="100%" stopColor="#DDD0C0" />
-              </radialGradient>
-              <filter id="btnShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="2" stdDeviation="3" floodColor="#B8A898" floodOpacity="0.45" />
-              </filter>
-              {/* Soft glow filter for the countdown ring */}
-              <filter id="ringGlow" x="-30%" y="-30%" width="160%" height="160%">
-                <feGaussianBlur stdDeviation="2.5" result="blur" />
-                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
-              </filter>
-            </defs>
-
-            {/* ── Flat watch-face style dial ── */}
-            {/* Outer bezel ring — warm tan band */}
-            <circle cx={CX} cy={CY} r={R} fill="#E8DDD0" />
-            {/* Flat cream inner face */}
-            <circle cx={CX} cy={CY} r={R - 8} fill="#FAF6F0" />
-            {/* Bezel outer border */}
-            <circle cx={CX} cy={CY} r={R} fill="none" stroke="#D4C4B0" strokeWidth="1" />
-            {/* Inner face border */}
-            <circle cx={CX} cy={CY} r={R - 8} fill="none" stroke="#D4C4B0" strokeWidth="0.7" />
-
-            {/* ── Groove countdown ring — sits between inner face edge (r=74) and dome (r=60) ── */}
-            {/* Background track (full circle, very faint warm groove) */}
-            <circle
-              cx={CX} cy={CY} r={GROOVE_R}
-              fill="none"
-              stroke="#DDD0C0"
-              strokeWidth="3"
-              opacity="0.5"
-            />
-            {/* Countdown arc: full at start, depletes clockwise to nothing */}
-            <circle
-              cx={CX} cy={CY} r={GROOVE_R}
-              fill="none"
-              stroke={meta.stroke}
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeDasharray={GROOVE_CIRC}
-              strokeDashoffset={GROOVE_CIRC * (1 - arcProgress)}
-              transform={`rotate(-90 ${CX} ${CY})`}
-              opacity={arcProgress > 0 ? 0.9 : 0}
-              filter={isRunning ? "url(#ringGlow)" : undefined}
-              style={{ transition: isRunning ? "stroke-dashoffset 1s linear" : "none" }}
-            />
-            {/* Leading dot at 12 o'clock (start position marker) */}
-            <circle cx={CX} cy={CY - GROOVE_R} r={2} fill="#C8B8A4" opacity="0.4" />
-            {/* Trailing dot tracks the end of the arc */}
-            {arcProgress > 0.01 && arcProgress < 0.99 && (
-              <circle
-                cx={CX + GROOVE_R * Math.cos(arcProgress * 2 * Math.PI - Math.PI / 2)}
-                cy={CY + GROOVE_R * Math.sin(arcProgress * 2 * Math.PI - Math.PI / 2)}
-                r={3.5}
-                fill={meta.stroke}
-                opacity="0.95"
-                filter={isRunning ? "url(#ringGlow)" : undefined}
-              />
-            )}
-
-            {/* Tick marks — all neutral, no glow (shadow ring handles countdown) */}
-            {ticks.map((t, i) => (
-              <line key={i} x1={t.x1} y1={t.y1} x2={t.x2} y2={t.y2}
-                stroke={t.major ? "#8C7B6B" : "#C8B8A4"}
-                strokeWidth={t.major ? 1.5 : 0.7}
-              />
-            ))}
-
-            {/* Groove shadow ring around the dome — creates sunken-ring illusion */}
-            <circle
-              cx={CX} cy={CY} r={R - 18}
-              fill="none"
-              stroke="rgba(0,0,0,0.08)"
-              strokeWidth="5"
-            />
-            <circle
-              cx={CX} cy={CY} r={R - 18}
-              fill="none"
-              stroke="rgba(255,255,255,0.5)"
-              strokeWidth="1.5"
-            />
-            {/* Raised center button — dome gradient + drop shadow */}
-            <circle
-              cx={CX} cy={CY} r={R - 22}
-              fill="url(#btnDome)"
-              filter="url(#btnShadow)"
-              stroke="#D4C4B0" strokeWidth="0.8"
-            />
-            {/* Highlight arc on raised button (top-left specular) */}
-            <path
-              d={`M ${CX - (R-22) * 0.55} ${CY - (R-22) * 0.45} A ${R-22} ${R-22} 0 0 1 ${CX + (R-22) * 0.45} ${CY - (R-22) * 0.55}`}
-              fill="none" stroke="rgba(255,255,255,0.75)" strokeWidth="2.5" strokeLinecap="round"
-            />
-
-            {/* Center cross hair */}
-            <line x1={CX - 5} y1={CY} x2={CX + 5} y2={CY} stroke="#C8B8A4" strokeWidth="0.8" />
-            <line x1={CX} y1={CY - 5} x2={CX} y2={CY + 5} stroke="#C8B8A4" strokeWidth="0.8" />
-
-            {/* +1 / +5 hint text when stopped */}
-            {!isRunning && (
-              <>
-                <text x={CX} y={CY + 18} textAnchor="middle" fontSize="7" fill="#C4714A" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.1em" opacity="0.85">+1 MIN</text>
-                <text x={CX} y={CY + 27} textAnchor="middle" fontSize="6" fill="#8C7B6B" fontFamily="'JetBrains Mono', monospace" letterSpacing="0.08em" opacity="0.6">R-CLICK +5</text>
-              </>
-            )}
-          </svg>
+          <SecuraDial
+            cx={CX} cy={CY} R={R}
+            arcProgress={arcProgress}
+            isRunning={isRunning}
+            ticks={ticks}
+            meta={meta}
+            onAddTime={addTime}
+          />
         </div>
 
         {/* Right panel: digits + barcode + controls */}
