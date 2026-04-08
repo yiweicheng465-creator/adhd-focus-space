@@ -11,6 +11,150 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
 
+// ── Win category colours (must match DailyWins WIN_ICONS order) ──
+const WIN_CAT_COLORS = [
+  "oklch(0.60 0.10 15)",   // health
+  "oklch(0.52 0.08 230)",  // study
+  "oklch(0.50 0.07 145)",  // work
+  "oklch(0.58 0.09 55)",   // social
+  "oklch(0.55 0.10 300)",  // creative
+  "oklch(0.55 0.07 185)",  // mindful
+  "oklch(0.53 0.09 35)",   // fitness
+  "oklch(0.52 0.10 130)",  // nutrition
+];
+const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
+
+// Inline SVG icons matching DailyWins (simplified)
+function WinSvgIcon({ idx, size = 22, color }: { idx: number; size?: number; color: string }) {
+  const icons = [
+    // 0 health: heart
+    <svg key="h" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <path d="M10 16s-7-4.5-7-8.5A4 4 0 0110 4a4 4 0 017 3.5C17 11.5 10 16 10 16z" fill={color} opacity="0.9"/>
+    </svg>,
+    // 1 study: open book
+    <svg key="s" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <path d="M3 5h6v11H3z" fill={color} opacity="0.85"/>
+      <path d="M11 5h6v11h-6z" fill={color} opacity="0.6"/>
+      <line x1="9" y1="5" x2="11" y2="5" stroke={color} strokeWidth="1.5"/>
+      <line x1="9" y1="16" x2="11" y2="16" stroke={color} strokeWidth="1.5"/>
+    </svg>,
+    // 2 work: briefcase
+    <svg key="w" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <rect x="2" y="7" width="16" height="10" rx="2" fill={color} opacity="0.85"/>
+      <path d="M7 7V5a1 1 0 011-1h4a1 1 0 011 1v2" stroke={color} strokeWidth="1.5" fill="none"/>
+      <line x1="2" y1="12" x2="18" y2="12" stroke="white" strokeWidth="1" opacity="0.6"/>
+    </svg>,
+    // 3 social: two people
+    <svg key="so" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <circle cx="7" cy="6" r="3" fill={color} opacity="0.85"/>
+      <circle cx="13" cy="6" r="3" fill={color} opacity="0.6"/>
+      <path d="M1 17c0-3 2.5-5 6-5s6 2 6 5" fill={color} opacity="0.85"/>
+      <path d="M13 12c2.5 0 5 1.5 5 5" stroke={color} strokeWidth="1.5" fill="none" opacity="0.6"/>
+    </svg>,
+    // 4 creative: star
+    <svg key="cr" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <polygon points="10,2 12.4,7.5 18.5,8 14,12 15.5,18 10,15 4.5,18 6,12 1.5,8 7.6,7.5" fill={color} opacity="0.9"/>
+    </svg>,
+    // 5 mindful: lotus
+    <svg key="m" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <path d="M10 16 C10 16 4 12 4 7 C4 4 7 3 10 6 C13 3 16 4 16 7 C16 12 10 16 10 16Z" fill={color} opacity="0.85"/>
+      <path d="M10 16 C6 14 2 10 3 6" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
+      <path d="M10 16 C14 14 18 10 17 6" stroke={color} strokeWidth="1" fill="none" opacity="0.5"/>
+    </svg>,
+    // 6 fitness: lightning
+    <svg key="f" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <polygon points="12,2 5,11 10,11 8,18 15,9 10,9" fill={color} opacity="0.9"/>
+    </svg>,
+    // 7 nutrition: apple
+    <svg key="n" viewBox="0 0 20 20" width={size} height={size} fill="none">
+      <path d="M10 5 C6 5 3 8 3 12 C3 16 6 18 10 18 C14 18 17 16 17 12 C17 8 14 5 10 5Z" fill={color} opacity="0.85"/>
+      <path d="M10 5 C10 3 12 2 13 2" stroke={color} strokeWidth="1.5" strokeLinecap="round" fill="none"/>
+    </svg>,
+  ];
+  return icons[idx % icons.length] ?? icons[0];
+}
+
+// Circular wins ring
+function WinsRing({ wins }: { wins: Win[] }) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  if (wins.length === 0) {
+    return (
+      <p className="text-sm italic" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif" }}>
+        No wins logged yet — completing tasks adds them automatically.
+      </p>
+    );
+  }
+  const cx = 110, cy = 110, r = 76;
+  const total = wins.length;
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div style={{ position: "relative", width: 220, height: 220 }}>
+        {/* Dashed circle guide */}
+        <svg width="220" height="220" style={{ position: "absolute", inset: 0 }}>
+          <circle cx={cx} cy={cy} r={r} fill="none" stroke="oklch(0.88 0.014 75)" strokeWidth="1" strokeDasharray="4 4" />
+          <text x={cx} y={cy - 6} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 28, fill: "oklch(0.28 0.018 65)" }}>{total}</text>
+          <text x={cx} y={cy + 14} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, fill: "oklch(0.55 0.018 70)", textTransform: "uppercase", letterSpacing: 1 }}>wins</text>
+        </svg>
+        {wins.map((w, i) => {
+          const angle = (i / total) * 2 * Math.PI - Math.PI / 2;
+          const x = cx + r * Math.cos(angle);
+          const y = cy + r * Math.sin(angle);
+          const idx = typeof w.iconIdx === "number" ? w.iconIdx % WIN_CAT_COLORS.length : 0;
+          const color = WIN_CAT_COLORS[idx];
+          const label = WIN_CAT_LABELS[idx];
+          const isHov = hovered === w.id;
+          return (
+            <div
+              key={w.id}
+              style={{ position: "absolute", left: x - 18, top: y - 18, zIndex: isHov ? 10 : 1 }}
+              onMouseEnter={() => setHovered(w.id)}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <div
+                style={{
+                  width: 36, height: 36, borderRadius: "50%",
+                  background: `${color}22`,
+                  border: `2px solid ${color}`,
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  cursor: "default",
+                  transition: "transform 0.15s",
+                  transform: isHov ? "scale(1.25)" : "scale(1)",
+                  boxShadow: isHov ? `0 2px 12px ${color}55` : "none",
+                }}
+              >
+                <WinSvgIcon idx={idx} size={18} color={color} />
+              </div>
+              {isHov && (
+                <div style={{
+                  position: "absolute",
+                  bottom: "calc(100% + 6px)",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  background: "oklch(0.18 0.01 60 / 0.92)",
+                  color: "white",
+                  borderRadius: 6,
+                  padding: "5px 10px",
+                  whiteSpace: "nowrap",
+                  fontSize: 11,
+                  fontFamily: "'DM Sans', sans-serif",
+                  pointerEvents: "none",
+                  zIndex: 20,
+                  maxWidth: 160,
+                  textAlign: "center",
+                  lineHeight: 1.4,
+                }}>
+                  <div style={{ fontWeight: 600, fontSize: 10, opacity: 0.7, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
+                  <div>{w.text}</div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const M = {
   coral:    "oklch(0.55 0.09 35)",
   coralBg:  "oklch(0.55 0.09 35 / 0.08)",
@@ -182,17 +326,7 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
 
           {/* Wins */}
           <Section icon={<Sparkles className="w-4 h-4" />} title={`Wins today (${todayWins.length})`} color={M.pink}>
-            {todayWins.length === 0 ? (
-              <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>No wins logged yet — completing tasks adds them automatically.</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {todayWins.map((w) => (
-                  <div key={w.id} className="flex items-center gap-1.5 px-3 py-1.5 text-sm" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-                    <span>{w.text}</span>
-                  </div>
-                ))}
-              </div>
-            )}
+            <WinsRing wins={todayWins} />
           </Section>
 
           {/* Pending */}

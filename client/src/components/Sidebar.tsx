@@ -67,6 +67,44 @@ function LiveTime() {
   );
 }
 
+/* Calendar icon link to /monthly */
+function MonthlyLink() {
+  const [location, navigate] = useLocation();
+  const active = location === "/monthly";
+  return (
+    <button
+      onClick={() => navigate("/monthly")}
+      title="Monthly Progress"
+      className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
+      style={{ background: active ? "oklch(0.55 0.09 35 / 0.09)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.55 0.09 35 / 0.04)"; }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
+    >
+      {active && (
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.55 0.09 35)" }} />
+      )}
+      {/* Calendar SVG */}
+      <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+        <rect x="2" y="4" width="14" height="12" rx="2" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4"/>
+        <line x1="2" y1="8" x2="16" y2="8" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.2"/>
+        <line x1="6" y1="2" x2="6" y2="6" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4" strokeLinecap="round"/>
+        <line x1="12" y1="2" x2="12" y2="6" stroke={active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)"} strokeWidth="1.4" strokeLinecap="round"/>
+        <circle cx="6" cy="11" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+        <circle cx="9" cy="11" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+        <circle cx="12" cy="11" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+        <circle cx="6" cy="14" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+        <circle cx="9" cy="14" r="1" fill={active ? "oklch(0.55 0.09 35)" : "oklch(0.72 0.015 70)"} />
+      </svg>
+      <span
+        className="text-[7px] mt-1 tracking-[0.12em] font-medium"
+        style={{ fontFamily: "'DM Sans', sans-serif", color: active ? "oklch(0.55 0.09 35)" : "oklch(0.65 0.015 70)" }}
+      >
+        MTH
+      </span>
+    </button>
+  );
+}
+
 /* Beaker icon link to /timer-prototypes */
 function PrototypesLink() {
   const [location, navigate] = useLocation();
@@ -157,8 +195,9 @@ export function Sidebar({ activeSection, onSectionChange }: SidebarProps) {
         })}
       </nav>
 
-      {/* Prototypes link — bottom of nav */}
+      {/* Monthly + Prototypes links — bottom of nav */}
       <div className="w-full px-2 mt-1">
+        <MonthlyLink />
         <PrototypesLink />
       </div>
 

@@ -226,7 +226,7 @@ export function DailyCheckIn({ onComplete, onSkip }: DailyCheckInProps) {
               className="text-2xl mt-1 font-bold italic"
               style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
             >
-              {step === "greeting" && "Good morning,"}
+              {step === "greeting" && (() => { const h = new Date().getHours(); if (h < 12) return "Good morning,"; if (h < 17) return "Good afternoon,"; if (h < 21) return "Good evening,"; return "Good night,"; })()}
               {step === "mood"     && "How are you feeling?"}
               {step === "tasks"    && "What's on your plate?"}
               {step === "agents"   && "Any AI agents running?"}

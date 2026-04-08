@@ -22,6 +22,7 @@ interface BrainDumpEntry {
 
 interface BrainDumpProps {
   onConvertToTask: (task: Task) => void;
+  onDump?: () => void;
   initialText?: string;
   onInitialTextConsumed?: () => void;
 }
@@ -80,7 +81,7 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
   );
 }
 
-export function BrainDump({ onConvertToTask, initialText, onInitialTextConsumed }: BrainDumpProps) {
+export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
   const [currentThought, setCurrentThought] = useState("");
   const [entries,        setEntries]        = useState<BrainDumpEntry[]>([]);
   const [activeTag,      setActiveTag]      = useState<string | null>(null);
@@ -106,6 +107,7 @@ export function BrainDump({ onConvertToTask, initialText, onInitialTextConsumed 
       ...entries,
     ]);
     setCurrentThought("");
+    onDump?.();
     const tagMsg = tags.length > 0 ? ` Tagged: ${tags.map((t) => `#${t}`).join(", ")}` : "";
     toast.success(`Thought captured.${tagMsg}`, { duration: 2500 });
   };

@@ -18,6 +18,7 @@ import { AgentTracker, type Agent } from "@/components/AgentTracker";
 import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
+import { recordWrapUp, recordDumpEntry } from "@/components/MonthlyProgress";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -123,6 +124,12 @@ export default function Home() {
   const handleConvertToTask = (task: Task) => {
     setTasks((prev) => [task, ...prev]);
     toast.success("Added to tasks.", { duration: 2000 });
+  };
+
+  const handleDumpEntry = (task: Task) => {
+    // Record that a brain dump entry was added today
+    recordDumpEntry();
+    handleConvertToTask(task);
   };
 
   const meta = SECTION_META[activeSection];
@@ -356,6 +363,7 @@ export default function Home() {
                 <div className="relative z-10">
                   <BrainDump
                     onConvertToTask={handleConvertToTask}
+                    onDump={recordDumpEntry}
                     initialText={pendingDump ?? undefined}
                     onInitialTextConsumed={() => setPendingDump(null)}
                   />
@@ -390,7 +398,18 @@ export default function Home() {
       <ConfettiCelebration trigger={confettiTrigger} onComplete={() => setConfettiTrigger(false)} />
 
       {wrapUpOpen && (
-        <DailyWrapUp tasks={tasks} wins={wins} agents={agents} onClose={() => setWrapUpOpen(false)} />
+        <DailyWrapUp
+          tasks={tasks}
+          wins={wins}
+          agents={agents}
+          onClose={() => {
+            const todayWins = wins.filter(w => new Date(w.createdAt).toDateString() === new Date().toDateString());
+            const todayDone = tasks.filter(t => t.done && new Date(t.createdAt).toDateString() === new Date().toDateString());
+            const score = Math.min(100, todayDone.length * 15 + todayWins.length * 10 + 20);
+            recordWrapUp(mood, score);
+            setWrapUpOpen(false);
+          }}
+        />
       )}
 
       {showCheckIn && (
