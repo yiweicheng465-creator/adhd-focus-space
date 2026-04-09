@@ -15,6 +15,7 @@ import {
   ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
+import type { Goal } from "./Goals";
 
 export type TaskPriority = "focus" | "urgent" | "normal";
 
@@ -25,6 +26,8 @@ export interface Task {
   context: ItemContext;
   done: boolean;
   createdAt: Date;
+  /** Optional: ID of a Goal this task contributes to */
+  goalId?: string;
 }
 
 /* Morandi priority palette */
@@ -78,6 +81,8 @@ interface TaskManagerProps {
   allCategories?: string[];
   /** Called when user wants to delete a custom tag */
   onDeleteCategory?: (ctx: string) => void;
+  /** All goals — used for 'Contributes to goal' dropdown */
+  goals?: Goal[];
 }
 
 /* Parse hashtags from input text — returns { cleanText, tag }
@@ -92,10 +97,11 @@ function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
   return { cleanText, tag: match[2].toLowerCase() };
 }
 
-export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allCategories, onDeleteCategory }: TaskManagerProps) {
+export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allCategories, onDeleteCategory, goals = [] }: TaskManagerProps) {
   const [newTaskText,     setNewTaskText]     = useState("");
   const [newTaskPriority, setNewTaskPriority] = useState<TaskPriority>("focus");
   const [newTaskContext,  setNewTaskContext]  = useState<ItemContext>("work");
+  const [newTaskGoalId,   setNewTaskGoalId]   = useState<string | null>(null);
   const [completingId,    setCompletingId]    = useState<string | null>(null);
   const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
   const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
@@ -128,9 +134,11 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
       id: nanoid(), text: cleanText || newTaskText.trim(),
       priority: newTaskPriority, context,
       done: false, createdAt: new Date(),
+      ...(newTaskGoalId ? { goalId: newTaskGoalId } : {}),
     };
     onTasksChange([task, ...tasks]);
     setNewTaskText("");
+    setNewTaskGoalId(null);
     if (tag) toast.success(`Task added to #${tag}.`, { duration: 2000 });
     else toast.success("Task added.", { duration: 2000 });
   };
@@ -240,7 +248,35 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
             );
           })}
 
-          {/* Category is set via #hashtag in the input — no duplicate buttons needed */}
+          {/* Contributes to goal — only shown when goals exist */}
+          {goals.length > 0 && (
+            <select
+              value={newTaskGoalId ?? ""}
+              onChange={(e) => setNewTaskGoalId(e.target.value || null)}
+              style={{
+                background: newTaskGoalId ? "oklch(0.52 0.07 145 / 0.10)" : "transparent",
+                color: newTaskGoalId ? "oklch(0.40 0.09 145)" : M.muted,
+                border: `1px solid ${newTaskGoalId ? "oklch(0.52 0.07 145 / 0.40)" : M.border}`,
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "0.62rem",
+                fontWeight: newTaskGoalId ? 600 : 400,
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
+                borderRadius: 0,
+                padding: "3px 8px",
+                cursor: "pointer",
+                outline: "none",
+                maxWidth: 180,
+              }}
+            >
+              <option value="">↳ Goal (optional)</option>
+              {goals.filter((g) => g.progress < 100).map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.text.length > 28 ? g.text.slice(0, 28) + "…" : g.text}
+                </option>
+              ))}
+            </select>
+          )}
         </div>
       </div>
 
@@ -335,6 +371,19 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 >
                   {task.text}
                 </p>
+                {task.goalId && (() => {
+                  const linkedGoal = goals.find((g) => g.id === task.goalId);
+                  return linkedGoal ? (
+                    <span style={{
+                      fontSize: "0.62rem",
+                      color: task.done ? M.muted : "oklch(0.40 0.09 145)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      letterSpacing: "0.06em",
+                    }}>
+                      ↳ {linkedGoal.text.length > 30 ? linkedGoal.text.slice(0, 30) + "…" : linkedGoal.text}
+                    </span>
+                  ) : null;
+                })()}
               </div>
 
               {/* Context badge — tiny dot + label */}

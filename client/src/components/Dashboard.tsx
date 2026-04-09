@@ -199,6 +199,51 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
       </div>
 
 
+      {/* ── Stats row: Tasks · Wins · Agents ── */}
+      <div className="grid grid-cols-3" style={{ border: `1px solid ${BORDER}`, background: CREAM, position: "relative", zIndex: 1 }}>
+        {[
+          {
+            label: "Tasks",
+            value: activeTasks.length,
+            sub: urgentTasks.length > 0 ? `${urgentTasks.length} urgent` : "none urgent",
+            section: "tasks",
+            accent: "oklch(0.58 0.18 20)",
+            icon: <Flame className="w-3.5 h-3.5" />,
+          },
+          {
+            label: "Wins Today",
+            value: todayWins.length,
+            sub: wins.filter((w) => !w.archived).length + " total",
+            section: "wins",
+            accent: "oklch(0.55 0.14 75)",
+            icon: <Sparkles className="w-3.5 h-3.5" />,
+          },
+          {
+            label: "Agents",
+            value: runningAgents.length,
+            sub: runningAgents.length > 0 ? "running now" : "none running",
+            section: "agents",
+            accent: TC,
+            icon: <Zap className="w-3.5 h-3.5" />,
+          },
+        ].map(({ label, value, sub, section, accent, icon }, i, arr) => (
+          <button
+            key={label}
+            onClick={() => onNavigate(section)}
+            className="flex flex-col gap-1 px-6 py-4 text-left transition-all hover:opacity-80 relative group cursor-pointer"
+            style={{ borderRight: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}
+          >
+            <div className="flex items-center gap-1.5" style={{ color: accent }}>
+              {icon}
+              <span style={{ fontSize: "0.62rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{label}</span>
+            </div>
+            <p className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif", color: INK, fontStyle: "italic" }}>{value}</p>
+            <p style={{ fontSize: "0.7rem", color: MUTED, fontFamily: "'DM Sans', sans-serif" }}>{sub}</p>
+            <div className="absolute bottom-0 left-0 h-0.5 w-0 group-hover:w-full transition-all duration-300" style={{ background: accent }} />
+          </button>
+        ))}
+      </div>
+
       {/* ── Bottom: Focus timer + Next up ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Focus timer */}

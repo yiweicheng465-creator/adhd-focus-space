@@ -208,7 +208,7 @@ export default function Home() {
     toast.success("Workspace ready.", { duration: 2500 });
   };
 
-  /* ── Task completion with confetti ── */
+  /* ── Task completion with confetti + goal auto-nudge ── */
   const handleTasksChange = (newTasks: Task[]) => {
     const newlyDone = newTasks.filter(
       (t) => t.done && !tasks.find((old) => old.id === t.id)?.done
@@ -222,6 +222,28 @@ export default function Home() {
         createdAt: new Date(),
       };
       setWins((prev) => [win, ...prev]);
+
+      // Auto-nudge linked goals: +10% progress per completed linked task
+      const goalNudges: Record<string, number> = {};
+      newlyDone.forEach((t) => {
+        if (t.goalId) goalNudges[t.goalId] = (goalNudges[t.goalId] ?? 0) + 10;
+      });
+      if (Object.keys(goalNudges).length > 0) {
+        setGoals((prev) =>
+          prev.map((g) =>
+            goalNudges[g.id]
+              ? { ...g, progress: Math.min(100, g.progress + goalNudges[g.id]) }
+              : g
+          )
+        );
+        const nudgedGoal = goals.find((g) => goalNudges[g.id]);
+        if (nudgedGoal) {
+          toast.success(
+            `→ Goal nudged: “${nudgedGoal.text.length > 35 ? nudgedGoal.text.slice(0, 35) + "…" : nudgedGoal.text}” +10%`,
+            { duration: 3500 }
+          );
+        }
+      }
     }
     setTasks(newTasks);
   };
@@ -472,7 +494,7 @@ export default function Home() {
               >
                 <TasksDecor />
                 <div className="relative z-10">
-                  <TaskManager tasks={tasks} onTasksChange={handleTasksChange} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} />
+                  <TaskManager tasks={tasks} onTasksChange={handleTasksChange} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} goals={goals} />
                 </div>
               </div>
             )}
