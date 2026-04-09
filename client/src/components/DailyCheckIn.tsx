@@ -163,7 +163,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
 
   const addGoal = () => {
     if (!goalInput.trim()) return;
-    setNewGoals((p) => [...p, { text: goalInput.trim(), context: goalContext }]);
+    const { cleanText, tag } = parseHashtag(goalInput);
+    const context = (tag ?? goalContext) as "work" | "personal";
+    setNewGoals((p) => [...p, { text: cleanText || goalInput.trim(), context }]);
     setGoalInput("");
   };
 
@@ -381,25 +383,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "goals" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Add a goal to work toward today. Select a group, then press Enter.
+                Add goals for today. Use #work or #personal to tag, then press Enter.
               </p>
-              {/* Context selector */}
-              <div className="flex gap-2 mb-3">
-                {(["work", "personal"] as const).map((ctx) => (
-                  <button
-                    key={ctx}
-                    onClick={() => setGoalContext(ctx)}
-                    className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
-                    style={{
-                      background: goalContext === ctx ? M.accent : "transparent",
-                      color: goalContext === ctx ? "white" : M.muted,
-                      border: `1.5px solid ${goalContext === ctx ? M.accent : M.border}`,
-                    }}
-                  >
-                    {ctx}
-                  </button>
-                ))}
-              </div>
               <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
@@ -416,9 +401,6 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                 <ul className="space-y-1.5 mt-3">
                   {newGoals.map((g, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: g.context === "work" ? "oklch(0.52 0.07 145 / 0.15)" : "oklch(0.60 0.06 300 / 0.15)", color: g.context === "work" ? "oklch(0.50 0.07 145)" : "oklch(0.55 0.10 300)" }}>
-                        {g.context}
-                      </span>
                       🎯 {g.text}
                       <button onClick={() => setNewGoals((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>

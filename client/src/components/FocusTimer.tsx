@@ -575,9 +575,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               }} />
             );
           })}
-          <span style={{ fontSize: 8, letterSpacing: "0.14em", color: stage >= 8 ? "#C8603A" : "#8C7B6B", marginLeft: 4, fontFamily: "'JetBrains Mono', monospace", transition: "color 0.4s" }}>
-            {stage}/10
-          </span>
+
         </div>
       )}
 
@@ -640,7 +638,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
           ))}
-          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+
         </div>
       </div>
 
