@@ -23,6 +23,12 @@ if (typeof document !== "undefined" && !document.getElementById(URGENCY_STYLE_ID
       50% { filter: drop-shadow(0 0 14px #E8603A) drop-shadow(0 0 6px #FF8C5A); }
     }
     .balloon-urgency { animation: balloonUrgencyPulse 0.9s ease-in-out infinite; }
+    @keyframes balloonBreathe {
+      0%,100% { transform: scale(1); }
+      40%      { transform: scale(1.045); }
+      70%      { transform: scale(0.975); }
+    }
+    .balloon-breathe { animation: balloonBreathe 3.6s ease-in-out infinite; transform-origin: center bottom; }
   `;
   document.head.appendChild(s);
 }
@@ -169,12 +175,14 @@ function BalloonScene({
   const urgentFill = stage >= 10 ? "#E83A1A" : stage >= 9 ? "#E85A2A" : "#E87040";
   const activeFill = isUrgent ? urgentFill : FILL;
 
+  const isIdle = !isRunning && stage === 0;
+
   return (
     <svg
       width={svgW}
       height={svgH}
       viewBox={`0 0 ${svgW} ${svgH}`}
-      className={isUrgent ? "balloon-urgency" : ""}
+      className={isUrgent ? "balloon-urgency" : isIdle ? "balloon-breathe" : ""}
       style={{ display: "block", overflow: "visible", maxWidth: "100%", transition: "filter 0.5s" }}
     >
       {/* Balloon fill — urgency shifts to red/orange at stages 8-10 */}

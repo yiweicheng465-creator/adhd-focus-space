@@ -130,12 +130,14 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   // Tasks
   const [taskInput, setTaskInput] = useState("");
   const [taskContext, setTaskContext] = useState<"work" | "personal">("work");
-  const [tasks, setTasks] = useState<{ text: string; context: "work" | "personal" }[]>([]);
+  const [taskCustomTag, setTaskCustomTag] = useState("");
+  const [taskGoalIdx, setTaskGoalIdx] = useState<number | null>(null); // index into newGoals
+  const [tasks, setTasks] = useState<{ text: string; context: string; goalIdx: number | null }[]>([]);
 
   // Agents
   const [agentName, setAgentName] = useState("");
-  const [agentTask, setAgentTask] = useState("");
-  const [agents, setAgents] = useState<{ name: string; task: string }[]>([]);
+  const [agentLinkedTaskIdx, setAgentLinkedTaskIdx] = useState<number | null>(null); // index into tasks
+  const [agents, setAgents] = useState<{ name: string; task: string; linkedTaskIdx: number | null }[]>([]);
 
   // Wins (with category)
   const [winInput, setWinInput] = useState("");
@@ -167,17 +169,20 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
 
   const addTask = () => {
     if (!taskInput.trim()) return;
-    const { cleanText, tag } = parseHashtag(taskInput);
-    const context = (tag ?? taskContext) as "work" | "personal";
-    setTasks((p) => [...p, { text: cleanText || taskInput.trim(), context }]);
+    // Custom tag overrides the toggle; hashtag in text overrides custom tag
+    const { cleanText, tag: hashTag } = parseHashtag(taskInput);
+    const effectiveContext = hashTag ?? (taskCustomTag.trim() ? taskCustomTag.trim().replace(/^#/, "") : taskContext);
+    setTasks((p) => [...p, { text: cleanText || taskInput.trim(), context: effectiveContext, goalIdx: taskGoalIdx }]);
     setTaskInput("");
+    setTaskCustomTag("");
   };
 
   const addAgent = () => {
     if (agentName.trim()) {
-      setAgents((p) => [...p, { name: agentName.trim(), task: agentTask.trim() || "General task" }]);
+      const linkedTask = agentLinkedTaskIdx !== null ? tasks[agentLinkedTaskIdx]?.text || "General task" : "General task";
+      setAgents((p) => [...p, { name: agentName.trim(), task: linkedTask, linkedTaskIdx: agentLinkedTaskIdx }]);
       setAgentName("");
-      setAgentTask("");
+      setAgentLinkedTaskIdx(null);
     }
   };
 
@@ -204,10 +209,13 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
     yesterday.setDate(yesterday.getDate() - 1);
     yesterday.setHours(23, 59, 0, 0);
 
+    // Pre-assign IDs to goals so tasks can reference them
+    const goalIds = newGoals.map(() => nanoid());
+
     const result: CheckInResult = {
       mood,
-      newGoals: newGoals.map((g) => ({
-        id: nanoid(),
+      newGoals: newGoals.map((g, i) => ({
+        id: goalIds[i],
         text: g.text,
         progress: 0,
         context: g.context,
@@ -217,9 +225,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         id: nanoid(),
         text: t.text,
         priority: "focus",
-        context: t.context,
+        context: (t.context === "work" || t.context === "personal" ? t.context : "personal") as "work" | "personal",
         done: false,
         createdAt: new Date(),
+        goalId: t.goalIdx !== null && goalIds[t.goalIdx] ? goalIds[t.goalIdx] : undefined,
       })),
       newWins: wins.map((w) => ({
         id: nanoid(),
@@ -425,23 +434,48 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               <p className="text-sm mb-3" style={{ color: M.muted }}>
                 Add tasks for today. Select a group, then press Enter.
               </p>
-              {/* Context selector */}
-              <div className="flex gap-2 mb-3">
+              {/* Row 1: Context toggle + custom tag */}
+              <div className="flex items-center gap-2 mb-2">
                 {(["work", "personal"] as const).map((ctx) => (
                   <button
                     key={ctx}
                     onClick={() => setTaskContext(ctx)}
                     className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
                     style={{
-                      background: taskContext === ctx ? M.accent : "transparent",
-                      color: taskContext === ctx ? "white" : M.muted,
-                      border: `1.5px solid ${taskContext === ctx ? M.accent : M.border}`,
+                      background: taskContext === ctx && !taskCustomTag ? M.accent : "transparent",
+                      color: taskContext === ctx && !taskCustomTag ? "white" : M.muted,
+                      border: `1.5px solid ${taskContext === ctx && !taskCustomTag ? M.accent : M.border}`,
                     }}
                   >
                     {ctx}
                   </button>
                 ))}
+                <input
+                  value={taskCustomTag}
+                  onChange={(e) => setTaskCustomTag(e.target.value)}
+                  placeholder="#custom-tag"
+                  className="px-2 py-1.5 text-xs bg-transparent focus:outline-none w-28"
+                  style={{ border: `1.5px solid ${taskCustomTag ? M.accent : M.border}`, color: M.ink }}
+                />
               </div>
+              {/* Row 2: Goal link dropdown (only if goals were set) */}
+              {newGoals.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px]" style={{ color: M.muted }}>↳ Goal:</span>
+                  <select
+                    value={taskGoalIdx ?? ""}
+                    onChange={(e) => setTaskGoalIdx(e.target.value === "" ? null : Number(e.target.value))}
+                    className="flex-1 px-2 py-1 text-xs bg-transparent focus:outline-none"
+                    style={{ border: `1px solid ${M.border}`, color: taskGoalIdx !== null ? M.ink : M.muted }}
+                  >
+                    <option value="">None</option>
+                    {newGoals.map((g, i) => (
+                      <option key={i} value={i}>{g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              {/* Row 3: Input + add */}
               <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
@@ -452,23 +486,20 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
                   style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
-                <button
-                  onClick={addTask}
-                  className="px-3 py-2 text-sm font-bold"
-                  style={{ background: M.accent, color: "white" }}
-                >
-                  +
-                </button>
+                <button onClick={addTask} className="px-3 py-2 text-sm font-bold" style={{ background: M.accent, color: "white" }}>+</button>
               </div>
               {tasks.length > 0 && (
-                <ul className="space-y-1.5 mt-3">
+                <ul className="space-y-1.5 mt-3 max-h-28 overflow-y-auto">
                   {tasks.map((t, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: t.context === "work" ? "oklch(0.52 0.07 145 / 0.15)" : "oklch(0.60 0.06 300 / 0.15)", color: t.context === "work" ? "oklch(0.50 0.07 145)" : "oklch(0.55 0.10 300)" }}>
-                        {t.context}
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.52 0.07 145 / 0.12)", color: M.muted }}>
+                        #{t.context}
                       </span>
-                      {t.text}
-                      <button onClick={() => setTasks((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
+                      {t.goalIdx !== null && newGoals[t.goalIdx] && (
+                        <span className="text-[9px]" style={{ color: M.accent }}>↳ {newGoals[t.goalIdx].text.length > 20 ? newGoals[t.goalIdx].text.slice(0, 20) + "…" : newGoals[t.goalIdx].text}</span>
+                      )}
+                      <span className="truncate">{t.text}</span>
+                      <button onClick={() => setTasks((p) => p.filter((_, j) => j !== i))} className="ml-auto shrink-0 text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>
                   ))}
                 </ul>
@@ -480,8 +511,25 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "agents" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Log any AI agents you have running. Press Enter to add each one.
+                Log any AI agents you have running. Optionally link to a task.
               </p>
+              {/* Task link dropdown */}
+              {tasks.length > 0 && (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px]" style={{ color: M.muted }}>↳ Task:</span>
+                  <select
+                    value={agentLinkedTaskIdx ?? ""}
+                    onChange={(e) => setAgentLinkedTaskIdx(e.target.value === "" ? null : Number(e.target.value))}
+                    className="flex-1 px-2 py-1 text-xs bg-transparent focus:outline-none"
+                    style={{ border: `1px solid ${M.border}`, color: agentLinkedTaskIdx !== null ? M.ink : M.muted }}
+                  >
+                    <option value="">No linked task</option>
+                    {tasks.map((t, i) => (
+                      <option key={i} value={i}>{t.text.length > 45 ? t.text.slice(0, 45) + "…" : t.text}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
@@ -492,13 +540,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
                   style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
-                <button
-                  onClick={addAgent}
-                  className="px-3 py-2 text-sm font-bold"
-                  style={{ background: M.accent, color: "white" }}
-                >
-                  +
-                </button>
+                <button onClick={addAgent} className="px-3 py-2 text-sm font-bold" style={{ background: M.accent, color: "white" }}>+</button>
               </div>
               {agents.length > 0 && (
                 <ul className="space-y-1.5 mt-3">
@@ -506,9 +548,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
                       <span style={{ color: M.accent }}>⚡</span>
                       <span className="font-medium">{a.name}</span>
-                      <span style={{ color: M.muted }}>—</span>
-                      {a.task}
-                      <button onClick={() => setAgents((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
+                      {a.task !== "General task" && (
+                        <span className="text-[9px] truncate max-w-[140px]" style={{ color: M.muted }}>— {a.task}</span>
+                      )}
+                      <button onClick={() => setAgents((p) => p.filter((_, j) => j !== i))} className="ml-auto shrink-0 text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>
                   ))}
                 </ul>
