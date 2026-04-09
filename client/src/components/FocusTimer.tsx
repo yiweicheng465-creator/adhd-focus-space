@@ -450,6 +450,10 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedRef = useRef(false);
   const editRef = useRef<HTMLInputElement>(null);
+  // Timestamp when the current running session started (or resumed)
+  const startedAtRef = useRef<number | null>(null);
+  // Remaining seconds at the moment the timer was last started/resumed
+  const remainingAtStartRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
@@ -531,22 +535,30 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
     }
   }, [mode, onSessionComplete, stripStates]);
 
-  // Countdown
+  // Timestamp-based countdown — survives tab switches / browser throttling
   useEffect(() => {
-    if (running && remaining > 0) {
-      intervalRef.current = setInterval(() => {
-        setRemaining(r => {
-          if (r <= 1) {
-            clearInterval(intervalRef.current!);
-            handleComplete(true);
-            return 0;
-          }
-          return r - 1;
-        });
-      }, 1000);
+    if (!running) {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+      return;
     }
+    // Record the wall-clock start time and remaining seconds at that moment
+    startedAtRef.current = Date.now();
+    remainingAtStartRef.current = remaining;
+
+    intervalRef.current = setInterval(() => {
+      if (startedAtRef.current === null) return;
+      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+      const newRemaining = Math.max(0, remainingAtStartRef.current - elapsed);
+      setRemaining(newRemaining);
+      if (newRemaining <= 0) {
+        clearInterval(intervalRef.current!);
+        handleComplete(true);
+      }
+    }, 500); // poll every 500ms for responsiveness
+
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [running, remaining, handleComplete]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [running]); // only restart when running changes — elapsed calc uses refs
 
   const resetStrips = () => setStripStates(STRIPS.map(() => "attached"));
 
@@ -576,6 +588,15 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
   const handleStartPause = () => {
     if (phase === "complete" || phase === "quit" || phase === "recovering") return;
     const next = !running;
+    if (!next) {
+      // Pausing: capture remaining time from timestamp before stopping
+      if (startedAtRef.current !== null) {
+        const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
+        const snapped = Math.max(0, remainingAtStartRef.current - elapsed);
+        setRemaining(snapped);
+        remainingAtStartRef.current = snapped;
+      }
+    }
     setRunning(next);
     setPhase(next ? "running" : "paused");
   };

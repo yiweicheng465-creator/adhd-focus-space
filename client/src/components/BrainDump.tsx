@@ -328,7 +328,7 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
                   className={cn("text-sm leading-relaxed", entry.converted && "line-through")}
                   style={{ color: entry.converted ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
                 >
-                  <HighlightedText text={entry.text} activeTag={activeTag} />
+                  {entry.text}
                 </p>
                 <p className="text-xs mt-1" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
                   {new Date(entry.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
