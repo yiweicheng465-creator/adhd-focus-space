@@ -261,69 +261,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
         </div>
       </div>
 
-      {/* ── AI Agents panel ── */}
-      <div
-        className="p-6 cursor-pointer transition-all hover:opacity-95"
-        style={{ border: `1px solid ${runningAgents.length > 0 ? TC_BORDER : BORDER}`, background: runningAgents.length > 0 ? TC_LIGHT : CREAM }}
-        onClick={() => onNavigate("agents")}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <PixelAgents size={14} active={true} color={TC} />
-            <p className="editorial-label">AI Agents</p>
-            {runningAgents.length > 0 && (
-              <span
-                className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5"
-                style={{ background: TC_LIGHT, color: TC, border: `1px solid ${TC_BORDER}` }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: TC }} />
-                {runningAgents.length} live
-              </span>
-            )}
-          </div>
-          <button className="m-btn-link" onClick={(e) => { e.stopPropagation(); onNavigate("agents"); }}>Manage</button>
-        </div>
-
-        {todayAgents.length === 0 ? (
-          <div className="flex items-center gap-4 py-2">
-            {/* Geometric bot placeholder */}
-            <svg width="32" height="32" viewBox="0 0 32 32" style={{ opacity: 0.18, flexShrink: 0 }}>
-              <rect x="6" y="10" width="20" height="16" fill="none" stroke={INK} strokeWidth="1" />
-              <circle cx="12" cy="18" r="2.5" fill="none" stroke={INK} strokeWidth="1" />
-              <circle cx="20" cy="18" r="2.5" fill="none" stroke={INK} strokeWidth="1" />
-              <line x1="16" y1="10" x2="16" y2="6" stroke={INK} strokeWidth="1" />
-              <circle cx="16" cy="5" r="1.5" fill={INK} />
-            </svg>
-            <p className="text-sm" style={{ color: MUTED }}>No agents today.</p>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {todayAgents.slice(0, 3).map((a) => {
-              const sc: Record<string, string> = { running: TC, paused: "oklch(0.65 0.12 75)", done: "oklch(0.5 0.12 145)", failed: "oklch(0.6 0.2 15)" };
-              return (
-                <div key={a.id} className="flex items-center gap-3 p-3" style={{ border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80)" }}>
-                  <div className="w-1.5 h-1.5 shrink-0" style={{ background: sc[a.status] }} />
-                  <span className="text-sm font-medium shrink-0" style={{ color: INK }}>{a.name}</span>
-                  <span className="text-sm truncate flex-1" style={{ color: MUTED }}>{a.task}</span>
-                  <span className="text-xs shrink-0 capitalize" style={{ color: sc[a.status] }}>{a.status}</span>
-                </div>
-              );
-            })}
-            {todayAgents.length > 3 && (
-              <p className="text-xs text-center pt-1" style={{ color: MUTED }}>+{todayAgents.length - 3} more</p>
-            )}
-            {uncovered.length > 0 && (
-              <div className="flex items-center gap-2 p-2.5" style={{ background: "oklch(0.65 0.2 15 / 0.05)", border: "1px solid oklch(0.65 0.2 15 / 0.2)" }}>
-                <Flame className="w-3.5 h-3.5 shrink-0" style={{ color: "oklch(0.55 0.2 15)" }} />
-                <p className="text-xs" style={{ color: "oklch(0.45 0.18 15)" }}>
-                  {uncovered.length} task{uncovered.length > 1 ? "s" : ""} uncovered
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-
       {/* ── Today's wins ── */}
       {todayWins.length > 0 && (
         <div className="p-5" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>
