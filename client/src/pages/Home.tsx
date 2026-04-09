@@ -234,21 +234,35 @@ export default function Home() {
         }
       });
       if (Object.keys(goalNudges).length > 0) {
-        setGoals((prev) =>
-          prev.map((g) =>
-            goalNudges[g.id]
-              ? { ...g, progress: Math.min(100, g.progress + goalNudges[g.id]) }
-              : g
-          )
-        );
+        // Check which goals will hit 100% after this nudge
+        const goalsThatComplete: string[] = [];
+        setGoals((prev) => {
+          const updated = prev.map((g) => {
+            if (!goalNudges[g.id]) return g;
+            const newProgress = Math.min(100, g.progress + goalNudges[g.id]);
+            if (newProgress >= 100 && g.progress < 100) goalsThatComplete.push(g.id);
+            return { ...g, progress: newProgress };
+          });
+          return updated;
+        });
         const nudgedGoal = goals.find((g) => goalNudges[g.id]);
         if (nudgedGoal) {
           const totalLinked = newTasks.filter((t) => t.goalId === nudgedGoal.id).length;
           const pct = totalLinked > 0 ? Math.round(100 / totalLinked) : 10;
-          toast.success(
-            `→ Goal: "${nudgedGoal.text.length > 35 ? nudgedGoal.text.slice(0, 35) + "…" : nudgedGoal.text}" +${pct}%`,
-            { duration: 3500 }
-          );
+          const newProgress = Math.min(100, nudgedGoal.progress + (goalNudges[nudgedGoal.id] ?? 0));
+          if (newProgress >= 100) {
+            // Goal achieved! Trigger special full-screen confetti + celebration toast
+            setTimeout(() => setConfettiTrigger(true), 300);
+            toast.success(
+              `🎉 Goal achieved: "${nudgedGoal.text.length > 40 ? nudgedGoal.text.slice(0, 40) + "…" : nudgedGoal.text}"`,
+              { duration: 6000, style: { fontSize: "13px", fontWeight: 600 } }
+            );
+          } else {
+            toast.success(
+              `→ Goal: "${nudgedGoal.text.length > 35 ? nudgedGoal.text.slice(0, 35) + "…" : nudgedGoal.text}" +${pct}%`,
+              { duration: 3500 }
+            );
+          }
         }
       }
     }

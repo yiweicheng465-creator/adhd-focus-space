@@ -12,6 +12,21 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { RotateCcw, Play, Pause, Settings, Check, X } from "lucide-react";
 
+// Inject urgency pulse keyframe once
+const URGENCY_STYLE_ID = "balloon-urgency-pulse";
+if (typeof document !== "undefined" && !document.getElementById(URGENCY_STYLE_ID)) {
+  const s = document.createElement("style");
+  s.id = URGENCY_STYLE_ID;
+  s.textContent = `
+    @keyframes balloonUrgencyPulse {
+      0%,100% { filter: drop-shadow(0 0 0px #C8603A); }
+      50% { filter: drop-shadow(0 0 14px #E8603A) drop-shadow(0 0 6px #FF8C5A); }
+    }
+    .balloon-urgency { animation: balloonUrgencyPulse 0.9s ease-in-out infinite; }
+  `;
+  document.head.appendChild(s);
+}
+
 type TimerMode = "focus" | "short" | "long";
 type BalloonState = "idle" | "running" | "paused" | "popping" | "popped" | "complete";
 
@@ -101,7 +116,7 @@ function PopBurst() {
 
 // ── BalloonScene: unified SVG with balloon + needle ───────────────────────────
 function BalloonScene({
-  balloonScale, timeLabel, showNeedle, touching, mode, isRunning,
+  balloonScale, timeLabel, showNeedle, touching, mode, isRunning, stage,
 }: {
   balloonScale: number;
   timeLabel: string;
@@ -109,6 +124,7 @@ function BalloonScene({
   touching: boolean;
   mode: TimerMode;
   isRunning: boolean;
+  stage: number;
 }) {
   const s = Math.max(0.18, balloonScale);
   // Balloon deflates — stays centered, shrinks symmetrically
@@ -148,16 +164,21 @@ function BalloonScene({
 
   const svgW = 310;
   const svgH = 270;
+  const isUrgent = stage >= 8 && isRunning;
+  // Urgency: balloon fill shifts toward red/orange at stages 8-10
+  const urgentFill = stage >= 10 ? "#E83A1A" : stage >= 9 ? "#E85A2A" : "#E87040";
+  const activeFill = isUrgent ? urgentFill : FILL;
 
   return (
     <svg
       width={svgW}
       height={svgH}
       viewBox={`0 0 ${svgW} ${svgH}`}
-      style={{ display: "block", overflow: "visible", maxWidth: "100%" }}
+      className={isUrgent ? "balloon-urgency" : ""}
+      style={{ display: "block", overflow: "visible", maxWidth: "100%", transition: "filter 0.5s" }}
     >
-      {/* Balloon fill — slightly transparent for crayon look */}
-      <path d={bPath} fill={FILL} opacity="0.90" />
+      {/* Balloon fill — urgency shifts to red/orange at stages 8-10 */}
+      <path d={bPath} fill={activeFill} opacity="0.90" style={{ transition: "fill 0.6s" }} />
       {/* Inner crayon texture — soft inner glow */}
       {s > 0.5 && (
         <path d={bPath} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={sw * 3} strokeLinejoin="round" strokeLinecap="round" />
@@ -372,7 +393,8 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   };
 
   const handleReset = () => {
-    const wasRunning = running && progress > 0.05;
+    // Always pop if the timer was running (even in first 1-2 min)
+    const wasRunning = running || balloonState === "paused";
     clearInterval(intervalRef.current!);
     setRunning(false);
     completedRef.current = false;
@@ -509,6 +531,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               touching={touching}
               mode={mode}
               isRunning={running}
+              stage={stage}
             />
           )}
         </div>
@@ -524,6 +547,31 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
           {statusMsg}
         </p>
       </div>
+
+      {/* Stage indicator — 10 dots showing which deflation stage we're on */}
+      {(balloonState === "running" || balloonState === "paused") && (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, margin: "2px 0" }}>
+          {Array.from({ length: 10 }).map((_, i) => {
+            const passed = i < stage;
+            const isUrgentDot = i >= 7;
+            return (
+              <div key={i} style={{
+                width: passed ? 8 : 6,
+                height: passed ? 8 : 6,
+                borderRadius: "50%",
+                background: passed
+                  ? (isUrgentDot ? (i >= 9 ? "#E83A1A" : i >= 8 ? "#E85A2A" : "#E87040") : accentColor)
+                  : "#E8DDD0",
+                transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
+                boxShadow: passed && isUrgentDot ? `0 0 5px ${i >= 9 ? "#E83A1A" : "#E87040"}` : "none",
+              }} />
+            );
+          })}
+          <span style={{ fontSize: 8, letterSpacing: "0.14em", color: stage >= 8 ? "#C8603A" : "#8C7B6B", marginLeft: 4, fontFamily: "'JetBrains Mono', monospace", transition: "color 0.4s" }}>
+            {stage}/10
+          </span>
+        </div>
+      )}
 
       {/* Progress segments */}
       <div style={{ display: "flex", gap: 3 }}>
