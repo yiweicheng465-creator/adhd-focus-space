@@ -198,30 +198,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
         </div>{/* end illustration+content row */}
       </div>
 
-      {/* ── Stats row ── */}
-      <div className="grid grid-cols-4" style={{ border: `1px solid ${BORDER}`, background: CREAM, position: "relative", zIndex: 1 }}>
-          {[
-            { icon: <Flame className="w-3.5 h-3.5" />, label: "Urgent",  value: urgentTasks.length,  section: "tasks",  accent: "oklch(0.58 0.18 20)" },
-            { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Active", value: activeTasks.length, section: "tasks", accent: TC },
-            { icon: <Sparkles className="w-3.5 h-3.5" />, label: "Wins today", value: todayWins.length, section: "wins", accent: "oklch(0.55 0.14 75)" },
-            { icon: <svg viewBox="0 0 20 20" fill="none" className="w-3.5 h-3.5"><line x1="5" y1="2" x2="5" y2="18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" /><path d="M5 2 L15 5.5 L5 9 Z" fill="currentColor" opacity="0.85" /></svg>, label: "Goals avg", value: `${avgGoalProg}%`, section: "goals", accent: "oklch(0.48 0.12 155)" },
-          ].map(({ icon, label, value, section, accent }, i, arr) => (
-            <button
-              key={label}
-              onClick={() => onNavigate(section)}
-              className="flex flex-col gap-1.5 px-5 py-4 text-left transition-all hover:opacity-80 relative group cursor-pointer"
-              style={{ borderRight: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}
-            >
-              <div className="flex items-center gap-1.5" style={{ color: accent }}>
-                {icon}
-                <span style={{ fontSize: "0.62rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase", fontWeight: 600 }}>{label}</span>
-              </div>
-              <p className="text-2xl font-bold" style={{ fontFamily: "'Playfair Display', serif", color: INK, fontStyle: "italic" }}>{value}</p>
-              {/* Bottom accent bar on hover */}
-              <div className="absolute bottom-0 left-0 h-0.5 w-0 group-hover:w-full transition-all duration-300" style={{ background: accent }} />
-            </button>
-          ))}
-        </div>
 
       {/* ── Bottom: Focus timer + Next up ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
