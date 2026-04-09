@@ -432,33 +432,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "tasks" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Add tasks for today. Select a group, then press Enter.
+                Add tasks for today. Press Enter to add each one.
               </p>
-              {/* Row 1: Context toggle + custom tag */}
-              <div className="flex items-center gap-2 mb-2">
-                {(["work", "personal"] as const).map((ctx) => (
-                  <button
-                    key={ctx}
-                    onClick={() => setTaskContext(ctx)}
-                    className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
-                    style={{
-                      background: taskContext === ctx && !taskCustomTag ? M.accent : "transparent",
-                      color: taskContext === ctx && !taskCustomTag ? "white" : M.muted,
-                      border: `1.5px solid ${taskContext === ctx && !taskCustomTag ? M.accent : M.border}`,
-                    }}
-                  >
-                    {ctx}
-                  </button>
-                ))}
-                <input
-                  value={taskCustomTag}
-                  onChange={(e) => setTaskCustomTag(e.target.value)}
-                  placeholder="#custom-tag"
-                  className="px-2 py-1.5 text-xs bg-transparent focus:outline-none w-28"
-                  style={{ border: `1.5px solid ${taskCustomTag ? M.accent : M.border}`, color: M.ink }}
-                />
-              </div>
-              {/* Row 2: Goal link dropdown (only if goals were set) */}
+              {/* Goal link dropdown (only if goals were set) */}
               {newGoals.length > 0 && (
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[10px]" style={{ color: M.muted }}>↳ Goal:</span>
