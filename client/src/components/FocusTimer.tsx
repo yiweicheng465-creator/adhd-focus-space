@@ -111,10 +111,10 @@ function BalloonScene({
   isRunning: boolean;
 }) {
   const s = Math.max(0.20, balloonScale);
-  // As balloon shrinks, it floats upward — making deflation very visible
+  // As balloon inflates, it stays centered — grows outward toward the needle
   const cx = 110;
-  // At full size cy=110; as it shrinks it rises toward cy=55
-  const cy = 110 - (1 - s) * 55;
+  // Keep cy fixed so balloon grows symmetrically (doesn't drift up)
+  const cy = 110;
   const rx = 72 * s, ry = 84 * s;
   const knotY = cy + ry;
   const knotSize = 9 * s;
@@ -134,11 +134,12 @@ function BalloonScene({
   const eyeOffX = rx * 0.28;
   const smileR = rx * 0.30;
 
-  // Needle tip always tracks balloon right edge — starts close (20px gap), moves in as time passes
-  const progressFromScale = Math.max(0, Math.min(1, (1 - balloonScale) / 0.85));
-  const needleGap = touching ? -4 : Math.max(6, 22 - progressFromScale * 16);
+  // Needle is FIXED in space — balloon grows toward it
+  // At s=0.35 (start): rx=25.2, balloonRightEdge=135.2, needle at ~220 → big gap
+  // At s=1.0 (end):   rx=72,   balloonRightEdge=182, needle at ~188 → almost touching
+  const NEEDLE_TIP_FIXED = 188; // fixed x position of needle tip
   const balloonRightEdge = cx + rx;
-  const needleTipX = balloonRightEdge + needleGap;
+  const needleTipX = touching ? balloonRightEdge + 2 : NEEDLE_TIP_FIXED;
   const needleEyeX = needleTipX + 110;
   const needleY = cy;
 
@@ -277,8 +278,9 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  // Balloon deflates from 1.0 → 0.20 as focus progresses (more dramatic shrink)
-  const balloonScale = balloonState === "popped" ? 0 : 1 - progress * 0.80;
+  // Balloon INFLATES from 0.35 → 1.0 as focus progresses — starts small, grows fat
+  // Needle stays fixed; balloon expands toward it so it gets closer and closer
+  const balloonScale = balloonState === "popped" ? 0 : 0.35 + progress * 0.65;
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
