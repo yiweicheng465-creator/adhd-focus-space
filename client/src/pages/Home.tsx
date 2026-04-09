@@ -547,7 +547,7 @@ export default function Home() {
               >
                 <GoalsDecor />
                 <div className="relative z-10">
-                  <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} />
+                  <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} tasks={tasks} onTasksChange={handleTasksChange} />
                 </div>
               </div>
             )}

@@ -6,13 +6,14 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, TrendingUp } from "lucide-react";
+import { Plus, Trash2, TrendingUp, CheckCircle2, Circle } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
   ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
+import type { Task } from "./TaskManager";
 
 /* Parse hashtag from goal input — same logic as TaskManager */
 function parseHashtag(raw: string): { cleanText: string; tag: string | null } {
@@ -60,9 +61,13 @@ interface GoalsProps {
   allCategories?: string[];
   /** Called when user wants to delete a custom tag */
   onDeleteCategory?: (ctx: string) => void;
+  /** All tasks — used to show linked tasks under each goal */
+  tasks?: Task[];
+  /** Called when a task is toggled from the goal card */
+  onTasksChange?: (tasks: Task[]) => void;
 }
 
-export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategories, onDeleteCategory }: GoalsProps) {
+export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategories, onDeleteCategory, tasks = [], onTasksChange }: GoalsProps) {
   const [newGoal,       setNewGoal]       = useState("");
   const [newGoalCtx,    setNewGoalCtx]    = useState<ItemContext>("work");
   const [activeContext, setActiveContext] = useState<ActiveContext>(defaultContext);
@@ -262,6 +267,61 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                   −10%
                 </button>
               </div>
+
+              {/* Linked tasks */}
+              {(() => {
+                const linked = tasks.filter((t) => t.goalId === goal.id);
+                if (linked.length === 0) return null;
+                return (
+                  <div className="mt-3 pt-3" style={{ borderTop: `1px solid ${M.border}` }}>
+                    <p style={{ fontSize: "0.58rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.10em", textTransform: "uppercase", color: M.muted, marginBottom: 6 }}>Contributing tasks</p>
+                    <div className="flex flex-col gap-1">
+                      {linked.map((t) => (
+                        <div
+                          key={t.id}
+                          className="flex items-center gap-2 px-2 py-1.5 transition-all"
+                          style={{
+                            background: t.done ? "oklch(0.97 0.006 78)" : "oklch(0.975 0.010 78)",
+                            border: `1px solid ${t.done ? M.sageBdr : M.border}`,
+                            opacity: t.done ? 0.7 : 1,
+                          }}
+                        >
+                          <button
+                            onClick={() => {
+                              if (!onTasksChange) return;
+                              const updated = tasks.map((task) =>
+                                task.id === t.id ? { ...task, done: !task.done } : task
+                              );
+                              onTasksChange(updated);
+                            }}
+                            className="shrink-0 transition-all hover:scale-110"
+                            style={{ color: t.done ? M.sage : "oklch(0.80 0.012 75)" }}
+                          >
+                            {t.done
+                              ? <CheckCircle2 className="w-3.5 h-3.5" />
+                              : <Circle className="w-3.5 h-3.5" />}
+                          </button>
+                          <span
+                            style={{
+                              fontSize: "0.75rem",
+                              fontFamily: "'DM Sans', sans-serif",
+                              color: t.done ? M.muted : M.ink,
+                              textDecoration: t.done ? "line-through" : "none",
+                              flex: 1,
+                              minWidth: 0,
+                            }}
+                          >
+                            {t.text}
+                          </span>
+                          {t.done && (
+                            <span style={{ fontSize: "0.58rem", color: M.sage, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em" }}>+10%</span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           );
         })}
