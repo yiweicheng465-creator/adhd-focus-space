@@ -346,16 +346,28 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            {/* Running agents indicator — only show when agents are active */}
-            {runningAgents > 0 && (
-              <button
-                onClick={() => setActiveSection("agents")}
-                className="hidden sm:flex items-center gap-1.5 text-xs hover:text-foreground transition-colors"
-                style={{ color: "oklch(0.52 0.14 35)" }}
-              >
-                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.52 0.14 35)" }} />
-                {runningAgents} agent{runningAgents > 1 ? "s" : ""} live
-              </button>
+            {/* Dashboard quick-stats in header — clickable, only shown on dashboard */}
+            {activeSection === "dashboard" && (
+              <div className="hidden sm:flex items-center" style={{ border: "1px solid oklch(0.88 0.012 75)", borderRadius: 0 }}>
+                {[
+                  { label: "Tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section, color: "oklch(0.58 0.18 20)" },
+                  { label: "Wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section, color: "oklch(0.50 0.12 75)" },
+                  { label: "Agents", value: agents.filter((a) => a.status === "running").length, section: "agents" as Section, color: "oklch(0.52 0.14 35)" },
+                ].map(({ label, value, section, color }, i, arr) => (
+                  <button
+                    key={label}
+                    onClick={() => setActiveSection(section)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 transition-all hover:opacity-70 cursor-pointer"
+                    style={{
+                      borderRight: i < arr.length - 1 ? "1px solid oklch(0.88 0.012 75)" : "none",
+                      background: "transparent",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.68rem", fontWeight: 700, fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)", fontStyle: "italic" }}>{value}</span>
+                    <span style={{ fontSize: "0.58rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase", color, fontWeight: 600 }}>{label}</span>
+                  </button>
+                ))}
+              </div>
             )}
 
             {/* Mood pill */}
