@@ -16,6 +16,7 @@ import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
+import type { Goal } from "./Goals";
 
 /* ── localStorage keys ── */
 function getTodayKey() {
@@ -59,12 +60,13 @@ export interface CheckInResult {
   newTasks: Task[];
   newWins: Win[];
   newAgents: Agent[];
+  newGoals: Goal[];
   goalUpdates: { id: string; progress: number }[];
   focusNote: string;
 }
 
-type Step = "greeting" | "mood" | "tasks" | "agents" | "wins" | "focus" | "done";
-const STEP_ORDER: Step[] = ["greeting", "mood", "tasks", "agents", "wins", "focus", "done"];
+type Step = "greeting" | "mood" | "goals" | "tasks" | "agents" | "wins" | "done";
+const STEP_ORDER: Step[] = ["greeting", "mood", "goals", "tasks", "agents", "wins", "done"];
 
 /* ── Win categories (matches DailyWins) ── */
 const WIN_CATS = [
@@ -120,6 +122,11 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   const [step, setStep] = useState<Step>("greeting");
   const [mood, setMood] = useState<number | null>(null);
 
+  // Goals
+  const [goalInput, setGoalInput] = useState("");
+  const [goalContext, setGoalContext] = useState<"work" | "personal">("work");
+  const [newGoals, setNewGoals] = useState<{ text: string; context: "work" | "personal" }[]>([]);
+
   // Tasks
   const [taskInput, setTaskInput] = useState("");
   const [taskContext, setTaskContext] = useState<"work" | "personal">("work");
@@ -135,7 +142,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   const [winCatIdx, setWinCatIdx] = useState(0);
   const [wins, setWins] = useState<{ text: string; catIdx: number }[]>([]);
 
-  const [focusNote, setFocusNote] = useState("");
+  const focusNote = "";
   const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
 
   const stepIndex = STEP_ORDER.indexOf(step);
@@ -150,6 +157,12 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
     if (!match) return { cleanText: raw.trim(), tag: null };
     const cleanText = raw.replace(/(^|\s)#[\w-]+(\s|$)/g, " ").replace(/\s{2,}/g, " ").trim();
     return { cleanText, tag: match[2].toLowerCase() };
+  };
+
+  const addGoal = () => {
+    if (!goalInput.trim()) return;
+    setNewGoals((p) => [...p, { text: goalInput.trim(), context: goalContext }]);
+    setGoalInput("");
   };
 
   const addTask = () => {
@@ -193,6 +206,13 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
 
     const result: CheckInResult = {
       mood,
+      newGoals: newGoals.map((g) => ({
+        id: nanoid(),
+        text: g.text,
+        progress: 0,
+        context: g.context,
+        createdAt: new Date(),
+      })),
       newTasks: tasks.map((t) => ({
         id: nanoid(),
         text: t.text,
@@ -217,7 +237,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         notes: "",
       })),
       goalUpdates: [],
-      focusNote,
+      focusNote: "",
     };
     onComplete(result);
   };
@@ -266,10 +286,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             >
               {step === "greeting" && greeting}
               {step === "mood"     && "How are you feeling?"}
+              {step === "goals"    && "Set a goal for today?"}
               {step === "tasks"    && "What's on your plate?"}
               {step === "agents"   && "Any AI agents running?"}
               {step === "wins"     && "Wins from yesterday?"}
-              {step === "focus"    && "One thing to focus on?"}
               {step === "done"     && "You're all set."}
             </h2>
           </div>
@@ -348,21 +368,89 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             </div>
           )}
 
+          {/* GOALS */}
+          {step === "goals" && (
+            <div>
+              <p className="text-sm mb-3" style={{ color: M.muted }}>
+                Add a goal to work toward today. Select a group, then press Enter.
+              </p>
+              {/* Context selector */}
+              <div className="flex gap-2 mb-3">
+                {(["work", "personal"] as const).map((ctx) => (
+                  <button
+                    key={ctx}
+                    onClick={() => setGoalContext(ctx)}
+                    className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
+                    style={{
+                      background: goalContext === ctx ? M.accent : "transparent",
+                      color: goalContext === ctx ? "white" : M.muted,
+                      border: `1.5px solid ${goalContext === ctx ? M.accent : M.border}`,
+                    }}
+                  >
+                    {ctx}
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-2 mb-2">
+                <input
+                  ref={inputRef as React.RefObject<HTMLInputElement>}
+                  value={goalInput}
+                  onChange={(e) => setGoalInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && addGoal()}
+                  placeholder="e.g. Launch the new feature by Friday…"
+                  className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
+                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
+                />
+                <button onClick={addGoal} className="px-3 py-2 text-sm font-bold" style={{ background: M.accent, color: "white" }}>+</button>
+              </div>
+              {newGoals.length > 0 && (
+                <ul className="space-y-1.5 mt-3">
+                  {newGoals.map((g, i) => (
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: g.context === "work" ? "oklch(0.52 0.07 145 / 0.15)" : "oklch(0.60 0.06 300 / 0.15)", color: g.context === "work" ? "oklch(0.50 0.07 145)" : "oklch(0.55 0.10 300)" }}>
+                        {g.context}
+                      </span>
+                      🎯 {g.text}
+                      <button onClick={() => setNewGoals((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+
           {/* TASKS */}
           {step === "tasks" && (
             <div>
               <p className="text-sm mb-3" style={{ color: M.muted }}>
-                Add tasks for today. Press Enter to add each one. Use <span style={{ color: M.accent }}>#work</span> or <span style={{ color: M.accent }}>#personal</span> to categorize.
+                Add tasks for today. Select a group, then press Enter.
               </p>
+              {/* Context selector */}
+              <div className="flex gap-2 mb-3">
+                {(["work", "personal"] as const).map((ctx) => (
+                  <button
+                    key={ctx}
+                    onClick={() => setTaskContext(ctx)}
+                    className="px-3 py-1.5 text-xs font-medium capitalize transition-all"
+                    style={{
+                      background: taskContext === ctx ? M.accent : "transparent",
+                      color: taskContext === ctx ? "white" : M.muted,
+                      border: `1.5px solid ${taskContext === ctx ? M.accent : M.border}`,
+                    }}
+                  >
+                    {ctx}
+                  </button>
+                ))}
+              </div>
               <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
                   value={taskInput}
                   onChange={(e) => setTaskInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTask()}
-                  placeholder="e.g. Reply to Alice's email… or add #work #yoga"
+                  placeholder="e.g. Reply to Alice's email…"
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
-                  style={{ border: `1px solid ${taskInput.includes("#") ? M.accent : M.border}`, color: M.ink, transition: "border-color 0.2s" }}
+                  style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
                 <button
                   onClick={addTask}
@@ -488,24 +576,6 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             </div>
           )}
 
-          {/* FOCUS NOTE */}
-          {step === "focus" && (
-            <div>
-              <p className="text-sm mb-3" style={{ color: M.muted }}>
-                One sentence. What's the single most important thing today?
-              </p>
-              <textarea
-                ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                value={focusNote}
-                onChange={(e) => setFocusNote(e.target.value)}
-                placeholder="Today I will…"
-                rows={3}
-                className="w-full px-3 py-2 text-sm bg-transparent focus:outline-none resize-none"
-                style={{ border: `1px solid ${M.border}`, color: M.ink }}
-              />
-            </div>
-          )}
-
           {/* DONE */}
           {step === "done" && (
             <div className="flex gap-6 items-start">
@@ -516,11 +586,11 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               />
               <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
                 {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
+                {newGoals.length > 0 && <p>{newGoals.length} goal{newGoals.length > 1 ? "s" : ""} added</p>}
                 {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
                 {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
                 {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} from yesterday recorded</p>}
-                {focusNote && <p className="italic">"{focusNote}"</p>}
-                {!mood && !tasks.length && !agents.length && !wins.length && !focusNote && (
+                {!mood && !newGoals.length && !tasks.length && !agents.length && !wins.length && (
                   <p className="italic text-muted-foreground">Nothing added — that's okay. Your space is ready.</p>
                 )}
               </div>

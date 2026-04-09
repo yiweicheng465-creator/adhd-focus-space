@@ -201,6 +201,7 @@ export default function Home() {
 
   const handleCheckInComplete = (data: CheckInResult) => {
     if (data.mood) setMood(data.mood);
+    if (data.newGoals?.length) setGoals((p) => [...data.newGoals, ...p]);
     if (data.newTasks.length) setTasks((p) => [...data.newTasks, ...p]);
     if (data.newWins.length) setWins((p) => [...data.newWins, ...p]);
     if (data.newAgents.length) setAgents((p) => [...data.newAgents, ...p]);
