@@ -1,14 +1,53 @@
 /* ============================================================
    ADHD FOCUS SPACE — PaperTearTimer Prototype
-   Design: A piece of paper with "tasks/worries" written on it.
-   As you focus, the bottom strips tear off one by one (like
-   a tear-off flyer). Quit = paper recovers. Complete = whole
-   page is torn away in a satisfying cascade.
+   Design: A notebook page. As you focus, bottom strips tear off
+   one by one with a dramatic rip animation — sliding sideways
+   and rotating off screen. The jagged tear edge stays visible
+   on the remaining paper. Quit = paper recovers.
+   Complete = whole page tears away in a cascade.
+
+   Key fix: strips are HTML divs (not SVG <g>), so CSS transforms
+   actually animate and strips truly disappear from the layout.
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from "react";
 
-// ── Tear strip content ────────────────────────────────────────────────────────
+// ── Inject keyframes once ─────────────────────────────────────────────────────
+const STYLE_ID = "paper-tear-keyframes";
+if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
+  const s = document.createElement("style");
+  s.id = STYLE_ID;
+  s.textContent = `
+    @keyframes tearAway {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
+      30%  { transform: translateY(8px) rotate(-2deg); opacity: 0.9; }
+      100% { transform: translateY(120px) rotate(-18deg) translateX(-40px); opacity: 0; max-height: 0px; }
+    }
+    @keyframes tearAwayRight {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
+      30%  { transform: translateY(8px) rotate(3deg); opacity: 0.9; }
+      100% { transform: translateY(130px) rotate(22deg) translateX(50px); opacity: 0; max-height: 0px; }
+    }
+    @keyframes stripShake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-3px) rotate(-1deg); }
+      40%     { transform: translateX(4px) rotate(1.5deg); }
+      60%     { transform: translateX(-2px) rotate(-0.5deg); }
+      80%     { transform: translateX(2px); }
+    }
+    @keyframes paperFlyAway {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-160%) rotate(-12deg); opacity: 0; }
+    }
+    .strip-tearing-left  { animation: tearAway 0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
+    .strip-tearing-right { animation: tearAwayRight 0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
+    .strip-shake         { animation: stripShake 0.3s ease-in-out; }
+    .paper-fly-away      { animation: paperFlyAway 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
+  `;
+  document.head.appendChild(s);
+}
+
+// ── Strip content ─────────────────────────────────────────────────────────────
 const STRIPS = [
   "overthinking",
   "email backlog",
@@ -20,100 +59,129 @@ const STRIPS = [
   "the mental noise",
 ];
 
-// ── Jagged tear path generator ────────────────────────────────────────────────
-function makeTearPath(width: number, y: number, seed: number): string {
+// ── Jagged tear SVG edge ──────────────────────────────────────────────────────
+function JaggedEdge({ width, seed, flip = false }: { width: number; seed: number; flip?: boolean }) {
+  const h = 10;
+  const steps = 24;
   const pts: string[] = [];
-  const steps = 18;
-  pts.push(`M 0 ${y}`);
-  for (let i = 1; i <= steps; i++) {
-    const x = (i / steps) * width;
-    // Pseudo-random jagged offset based on seed + position
-    const jag = ((Math.sin(seed * 7.3 + i * 2.1) + Math.cos(seed * 3.7 + i * 1.4)) * 5.5);
-    pts.push(`L ${x} ${y + jag}`);
-  }
-  pts.push(`L ${width} ${y} L ${width} ${y + 28} L 0 ${y + 28} Z`);
-  return pts.join(" ");
-}
-
-// ── Paper texture lines ───────────────────────────────────────────────────────
-function PaperLines({ width, height }: { width: number; height: number }) {
-  const lines = [];
-  for (let y = 32; y < height - 10; y += 22) {
-    lines.push(
-      <line key={y} x1={20} y1={y} x2={width - 20} y2={y}
-        stroke="#E8E0D4" strokeWidth="0.8" strokeDasharray="none" />
-    );
-  }
-  return <>{lines}</>;
-}
-
-// ── Single strip component ────────────────────────────────────────────────────
-function TearStrip({
-  text, width, y, seed, state, delay,
-}: {
-  text: string; width: number; y: number; seed: number;
-  state: "attached" | "tearing" | "torn"; delay: number;
-}) {
-  const [visible, setVisible] = useState(true);
-  const [animating, setAnimating] = useState(false);
-  const [translateY, setTranslateY] = useState(0);
-  const [rotate, setRotate] = useState(0);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (state === "tearing" && !animating) {
-      setAnimating(true);
-      const t = setTimeout(() => {
-        // Animate strip falling off
-        setTranslateY(120);
-        setRotate((seed % 3 - 1) * 15);
-        setOpacity(0);
-        setTimeout(() => setVisible(false), 600);
-      }, delay);
-      return () => clearTimeout(t);
+  if (!flip) {
+    pts.push(`M 0 ${h}`);
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * width;
+      const jag = (Math.sin(seed * 5.1 + i * 2.7) * 4 + Math.cos(seed * 3.3 + i * 1.9) * 3);
+      pts.push(`L ${x} ${h + jag}`);
     }
-    if (state === "attached") {
-      setVisible(true);
-      setAnimating(false);
-      setTranslateY(0);
-      setRotate(0);
-      setOpacity(1);
+    pts.push(`L ${width} 0 L 0 0 Z`);
+  } else {
+    pts.push(`M 0 0`);
+    for (let i = 0; i <= steps; i++) {
+      const x = (i / steps) * width;
+      const jag = (Math.sin(seed * 5.1 + i * 2.7) * 4 + Math.cos(seed * 3.3 + i * 1.9) * 3);
+      pts.push(`L ${x} ${jag}`);
     }
-  }, [state, delay, seed, animating]);
-
-  if (!visible) return null;
-
-  const tearTop = makeTearPath(width, 0, seed);
-  const stripH = 28;
-
+    pts.push(`L ${width} ${h} L 0 ${h} Z`);
+  }
   return (
-    <g
-      transform={`translate(0, ${y}) translate(0, ${translateY}) rotate(${rotate}, ${width / 2}, ${stripH / 2})`}
-      style={{ transition: "transform 0.55s cubic-bezier(0.4,0,1,1), opacity 0.55s", opacity }}
+    <svg
+      width={width} height={h + 8}
+      viewBox={`0 0 ${width} ${h + 8}`}
+      style={{ display: "block", marginBottom: -1 }}
     >
-      {/* Strip background */}
-      <rect x={0} y={0} width={width} height={stripH} fill="#FAF6F0" />
-      {/* Tear edge at top */}
-      <path d={tearTop} fill="#F0E8DC" />
-      {/* Subtle shadow line */}
-      <line x1={0} y1={1} x2={width} y2={1} stroke="#D4C4B0" strokeWidth="0.6" />
-      {/* Text */}
-      <text
-        x={width / 2} y={stripH * 0.68}
-        textAnchor="middle"
-        fontSize="9.5"
-        fontFamily="'JetBrains Mono', monospace"
-        letterSpacing="0.08em"
-        fill="#8C7B6B"
-        opacity="0.85"
-      >
-        {text}
-      </text>
-    </g>
+      <path d={pts.join(" ")} fill="#F0E8DC" />
+    </svg>
   );
 }
 
-// ── Main PaperTearTimer ───────────────────────────────────────────────────────
+// ── Single strip ──────────────────────────────────────────────────────────────
+function TearStrip({
+  text, seed, state, isNext,
+}: {
+  text: string; seed: number;
+  state: "attached" | "tearing" | "torn";
+  isNext: boolean;
+}) {
+  const [cls, setCls] = useState("");
+  const [hidden, setHidden] = useState(false);
+  const prevState = useRef(state);
+
+  useEffect(() => {
+    if (state === "tearing" && prevState.current !== "tearing") {
+      // Brief shake first, then tear
+      setCls("strip-shake");
+      const t1 = setTimeout(() => {
+        setCls(seed % 2 === 0 ? "strip-tearing-left" : "strip-tearing-right");
+        setTimeout(() => setHidden(true), 680);
+      }, 320);
+      prevState.current = "tearing";
+      return () => clearTimeout(t1);
+    }
+    if (state === "attached") {
+      setCls("");
+      setHidden(false);
+      prevState.current = "attached";
+    }
+  }, [state, seed]);
+
+  if (hidden || state === "torn") return null;
+
+  return (
+    <div className={cls} style={{ position: "relative", transformOrigin: "center top" }}>
+      {/* Jagged top edge — only shown when it's the next strip to be torn */}
+      {isNext && (
+        <div style={{ position: "relative", zIndex: 1 }}>
+          <JaggedEdge width={260} seed={seed} />
+        </div>
+      )}
+      {/* Strip body */}
+      <div style={{
+        height: 40,
+        background: isNext
+          ? "linear-gradient(90deg, #F5EDE0 0%, #EDE0D0 50%, #F5EDE0 100%)"
+          : "#FAF6F0",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        position: "relative",
+        borderBottom: "1px solid #E8DDD0",
+        transition: "background 0.3s",
+      }}>
+        {/* Ruled line texture */}
+        <div style={{
+          position: "absolute", left: 0, right: 0, top: "50%",
+          height: 1, background: "#EDE0D4", opacity: 0.6,
+        }} />
+        {/* "Next to tear" indicator */}
+        {isNext && (
+          <div style={{
+            position: "absolute", left: 8, top: "50%", transform: "translateY(-50%)",
+            width: 6, height: 6, borderRadius: "50%",
+            background: "#C8603A", opacity: 0.7,
+            boxShadow: "0 0 6px #C8603A88",
+          }} />
+        )}
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 10,
+          letterSpacing: "0.09em",
+          color: isNext ? "#5A3A2A" : "#9C8B7A",
+          fontWeight: isNext ? 600 : 400,
+          transition: "color 0.3s",
+        }}>
+          {text}
+        </span>
+        {/* Perforated right edge hint */}
+        {isNext && (
+          <div style={{
+            position: "absolute", right: 0, top: 0, bottom: 0, width: 3,
+            background: "repeating-linear-gradient(to bottom, transparent 0px, transparent 4px, #C8603A44 4px, #C8603A44 6px)",
+          }} />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Main component ────────────────────────────────────────────────────────────
 interface PaperTearTimerProps {
   durationMinutes?: number;
 }
@@ -123,12 +191,13 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState<"idle" | "running" | "paused" | "complete" | "recovering">("idle");
-  const [tornCount, setTornCount] = useState(0); // how many strips have been torn
+  const [tornCount, setTornCount] = useState(0);
   const [stripStates, setStripStates] = useState<Array<"attached" | "tearing" | "torn">>(
     STRIPS.map(() => "attached")
   );
-  const [finalTear, setFinalTear] = useState(false); // whole paper tears away
+  const [paperFlying, setPaperFlying] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const prevTornRef = useRef(0);
 
   const progress = (totalSec - remaining) / totalSec;
   const stripsToTear = Math.floor(progress * STRIPS.length);
@@ -136,23 +205,42 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
 
-  // Sync strip states with progress
+  // Sync strip states — trigger tearing one at a time
   useEffect(() => {
-    setStripStates(prev => prev.map((s, i) => {
-      if (i < stripsToTear) return "torn";
-      if (i === stripsToTear && running) return "tearing";
-      return "attached";
-    }));
-    setTornCount(stripsToTear);
+    if (stripsToTear > prevTornRef.current && running) {
+      const idx = prevTornRef.current;
+      prevTornRef.current = stripsToTear;
+      // Mark current strip as tearing
+      setStripStates(prev => prev.map((s, i) => {
+        if (i < idx) return "torn";
+        if (i === idx) return "tearing";
+        return "attached";
+      }));
+      // After animation, mark as torn
+      setTimeout(() => {
+        setStripStates(prev => prev.map((s, i) => i <= idx ? "torn" : s));
+        setTornCount(stripsToTear);
+      }, 1100);
+    }
   }, [stripsToTear, running]);
 
   const handleComplete = useCallback(() => {
     clearInterval(intervalRef.current!);
     setRunning(false);
     setPhase("complete");
-    // Tear all remaining strips in cascade
-    setStripStates(STRIPS.map(() => "tearing"));
-    setTimeout(() => setFinalTear(true), 1200);
+    // Cascade tear all remaining
+    let delay = 0;
+    for (let i = prevTornRef.current; i < STRIPS.length; i++) {
+      const idx = i;
+      setTimeout(() => {
+        setStripStates(prev => prev.map((s, j) => j === idx ? "tearing" : s));
+        setTimeout(() => {
+          setStripStates(prev => prev.map((s, j) => j <= idx ? "torn" : s));
+        }, 700);
+      }, delay);
+      delay += 150;
+    }
+    setTimeout(() => setPaperFlying(true), delay + 400);
   }, []);
 
   useEffect(() => {
@@ -180,44 +268,39 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   };
 
   const handleQuit = () => {
-    // Recover — strips fly back up
     clearInterval(intervalRef.current!);
     setRunning(false);
     setPhase("recovering");
-    setFinalTear(false);
-    // Animate recovery: reset all strips
+    setPaperFlying(false);
+    prevTornRef.current = 0;
     setTimeout(() => {
       setRemaining(totalSec);
       setStripStates(STRIPS.map(() => "attached"));
       setTornCount(0);
       setPhase("idle");
-    }, 800);
+    }, 500);
   };
 
   const handleNewSession = () => {
     setRemaining(totalSec);
     setStripStates(STRIPS.map(() => "attached"));
     setTornCount(0);
-    setFinalTear(false);
+    setPaperFlying(false);
+    prevTornRef.current = 0;
     setPhase("idle");
     setRunning(false);
   };
 
-  // Paper dimensions
-  const W = 260;
-  const paperTop = 20;
-  const headerH = 70; // area above strips
-  const stripH = 28;
-  const totalStripsH = STRIPS.length * stripH;
-  const paperH = headerH + totalStripsH + 16;
-
   const statusMsg = {
     idle: "Start focusing — tear away the noise.",
     running: "Tearing away the stress, one strip at a time…",
-    paused: "Paused — the paper waits. Keep going.",
+    paused: "Paused — the paper waits.",
     complete: "All torn away. You did it. ✨",
-    recovering: "Recovering the paper…",
+    recovering: "Recovering…",
   }[phase];
+
+  // Which strip is next to be torn
+  const nextStripIdx = stripStates.findIndex(s => s === "attached");
 
   return (
     <div style={{
@@ -231,73 +314,89 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       gap: 16,
       minHeight: 480,
       position: "relative",
-      overflow: "hidden",
     }}>
-      {/* Paper SVG */}
-      <div style={{
-        position: "relative",
-        transform: finalTear ? "translateY(-120%) rotate(-8deg)" : "none",
-        transition: finalTear ? "transform 0.9s cubic-bezier(0.4,0,0.2,1), opacity 0.9s" : "none",
-        opacity: finalTear ? 0 : 1,
-      }}>
-        <svg
-          width={W}
-          height={paperH + paperTop}
-          viewBox={`0 0 ${W} ${paperH + paperTop}`}
-          style={{ display: "block", filter: "drop-shadow(0 4px 18px rgba(92,61,46,0.13))" }}
-        >
-          {/* Paper background */}
-          <rect x={0} y={paperTop} width={W} height={paperH} rx={4} fill="#FDFAF6" />
-          {/* Ruled lines */}
-          <PaperLines width={W} height={paperH + paperTop} />
-          {/* Red margin line */}
-          <line x1={38} y1={paperTop + 8} x2={38} y2={paperTop + paperH - 8}
-            stroke="#F0A0A0" strokeWidth="1.2" opacity="0.5" />
-          {/* Header text */}
-          <text x={W / 2} y={paperTop + 22} textAnchor="middle"
-            fontFamily="'Playfair Display', serif" fontSize="13" fontStyle="italic"
-            fill="#3D2B1F" opacity="0.7">
-            things to let go of
-          </text>
-          <line x1={20} y1={paperTop + 30} x2={W - 20} y2={paperTop + 30}
-            stroke="#D4C4B0" strokeWidth="0.8" />
-          {/* Countdown in header */}
-          <text x={W / 2} y={paperTop + 56} textAnchor="middle"
-            fontFamily="'JetBrains Mono', monospace" fontSize="22" fontWeight="700"
-            fill={remaining <= 60 ? "#C0392B" : "#3D2B1F"}
-            style={{ transition: "fill 0.5s" }}>
-            {mm}:{ss}
-          </text>
 
-          {/* Tear strips */}
+      {/* Paper */}
+      <div
+        className={paperFlying ? "paper-fly-away" : ""}
+        style={{
+          width: 260,
+          background: "#FDFAF6",
+          borderRadius: 4,
+          boxShadow: "0 4px 24px rgba(92,61,46,0.14), 0 1px 4px rgba(92,61,46,0.08)",
+          overflow: "hidden",
+          position: "relative",
+        }}
+      >
+        {/* Margin line */}
+        <div style={{
+          position: "absolute", left: 38, top: 0, bottom: 0, width: 1,
+          background: "#F0A0A0", opacity: 0.4, zIndex: 0,
+        }} />
+
+        {/* Header */}
+        <div style={{
+          padding: "16px 20px 12px",
+          borderBottom: "1px solid #E8DDD0",
+          position: "relative",
+          zIndex: 1,
+          background: "#FDFAF6",
+        }}>
+          {/* Ruled lines in header */}
+          {[0, 1, 2].map(i => (
+            <div key={i} style={{
+              position: "absolute", left: 20, right: 20,
+              top: 28 + i * 14, height: 1, background: "#EDE0D4", opacity: 0.5,
+            }} />
+          ))}
+          <p style={{
+            margin: 0, textAlign: "center",
+            fontFamily: "'Playfair Display', serif",
+            fontSize: 13, fontStyle: "italic",
+            color: "#3D2B1F", opacity: 0.65,
+            position: "relative", zIndex: 1,
+          }}>
+            things to let go of
+          </p>
+          <p style={{
+            margin: "8px 0 0", textAlign: "center",
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 26, fontWeight: 700, letterSpacing: "0.04em",
+            color: remaining <= 60 ? "#C0392B" : "#2A1F14",
+            transition: "color 0.5s",
+            position: "relative", zIndex: 1,
+          }}>
+            {mm}:{ss}
+          </p>
+        </div>
+
+        {/* Strips */}
+        <div style={{ position: "relative", zIndex: 1 }}>
           {STRIPS.map((text, i) => (
             <TearStrip
               key={i}
               text={text}
-              width={W}
-              y={paperTop + headerH + i * stripH}
               seed={i + 1}
               state={stripStates[i]}
-              delay={i * 120}
+              isNext={i === nextStripIdx && running}
             />
           ))}
+        </div>
 
-          {/* Bottom edge of paper */}
-          <rect x={0} y={paperTop + paperH - 4} width={W} height={4} rx={2} fill="#E8DDD0" />
-        </svg>
+        {/* Bottom edge */}
+        <div style={{ height: 6, background: "#E8DDD0" }} />
       </div>
 
-      {/* Status message */}
+      {/* Status */}
       <p style={{
         fontSize: 12, color: "#8C7B6B", fontStyle: "italic",
-        textAlign: "center", margin: 0, letterSpacing: "0.02em",
-        minHeight: 18,
+        textAlign: "center", margin: 0, letterSpacing: "0.02em", minHeight: 18,
       }}>
         {statusMsg}
       </p>
 
       {/* Progress bar */}
-      <div style={{ width: W, height: 4, background: "#E8DDD0", borderRadius: 2, overflow: "hidden" }}>
+      <div style={{ width: 260, height: 4, background: "#E8DDD0", borderRadius: 2, overflow: "hidden" }}>
         <div style={{
           height: "100%", background: "#C8603A", borderRadius: 2,
           width: `${progress * 100}%`, transition: "width 1s linear",
@@ -306,7 +405,6 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
 
       {/* Controls */}
       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* Quit */}
         {(running || phase === "paused") && (
           <button onClick={handleQuit} style={{
             display: "flex", alignItems: "center", gap: 5,
@@ -320,7 +418,6 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
           </button>
         )}
 
-        {/* Start / Pause / Resume */}
         {phase !== "complete" && phase !== "recovering" && (
           <button
             onClick={running ? handlePause : handleStart}
@@ -340,7 +437,6 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
           </button>
         )}
 
-        {/* New session after complete */}
         {phase === "complete" && (
           <button onClick={handleNewSession} style={{
             padding: "9px 24px", borderRadius: 999,
@@ -355,7 +451,10 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       </div>
 
       {/* Strip count */}
-      <p style={{ fontSize: 10, color: "#B0A090", margin: 0, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace" }}>
+      <p style={{
+        fontSize: 10, color: "#B0A090", margin: 0,
+        letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace",
+      }}>
         {tornCount}/{STRIPS.length} STRIPS TORN
       </p>
     </div>
