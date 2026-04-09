@@ -8,9 +8,9 @@
    Typography: Playfair Display (display), DM Sans (body), JetBrains Mono (digits)
    ============================================================ */
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil } from "lucide-react";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-tear-keyframes";
@@ -63,30 +63,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   document.head.appendChild(s);
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
-type TimerMode = "focus" | "short" | "long";
-type TimerPhase = "idle" | "running" | "paused" | "complete" | "quit" | "recovering";
-
-const DEFAULT_DURATIONS: Record<TimerMode, number> = { focus: 25, short: 5, long: 15 };
-const PRESETS: Record<TimerMode, number[]> = {
-  focus: [15, 25, 45, 60],
-  short: [3, 5, 10],
-  long: [10, 15, 20, 30],
-};
-const MODE_LABELS: Record<TimerMode, string> = { focus: "Focus", short: "Short Break", long: "Long Break" };
-const MODE_COLORS: Record<TimerMode, string> = { focus: "#C8603A", short: "#7A8C6E", long: "#7A8C9E" };
-
-// ── Default strip content (used when user hasn't customised) ─────────────────
-const DEFAULT_STRIPS = [
-  "overthinking",
-  "email backlog",
-  "that awkward thing",
-  "yesterday's worries",
-  "the meeting dread",
-  "unread messages",
-  "tomorrow's anxiety",
-  "the mental noise",
-];
+// ── Types re-exported from context (kept for local use) ──────────────────────
 
 // ── Strip editor (shown in idle state) ───────────────────────────────────────
 function StripEditor({ strips, onChange }: {
@@ -265,8 +242,8 @@ function JaggedEdge({ seed }: { seed: number }) {
   );
 }
 
-// ── Single strip ──────────────────────────────────────────────────────────────
-type StripState = "attached" | "tearing" | "torn";
+// ── Single strip ──────────────────────────────────────────────────────────────────────────────
+type StripState = "attached" | "tearing" | "torn"; // local alias
 
 function TearStrip({ text, seed, state, isNext }: {
   text: string; seed: number;
@@ -593,194 +570,48 @@ interface FocusTimerProps {
 }
 
 export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
-  const [durations, setDurations] = useState<Record<TimerMode, number>>({ ...DEFAULT_DURATIONS });
-  const [mode, setMode] = useState<TimerMode>("focus");
-  const [remaining, setRemaining] = useState(DEFAULT_DURATIONS.focus * 60);
-  const [running, setRunning] = useState(false);
-  const [phase, setPhase] = useState<TimerPhase>("idle");
-  const [sessions, setSessions] = useState(0);
-  const [quitCount, setQuitCount] = useState(0);
+  // All timer logic lives in the global context — this component is purely a view
+  const {
+    mode, phase, running, remaining, sessions, quitCount,
+    durations, strips, stripStates, paperFlying,
+    progress, tornCount, stripsLeft, nextStripIdx, accentColor,
+    handleStartPause, handleQuit, handleNewSession,
+    switchMode, applyDuration, setCustomStrips,
+    setOnSessionComplete, setOnQuit,
+  } = useTimer();
+
+  // Register callbacks so the context can fire them
+  useEffect(() => {
+    setOnSessionComplete(onSessionComplete ?? null);
+    return () => setOnSessionComplete(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onSessionComplete]);
+
+  useEffect(() => {
+    setOnQuit(onQuit ?? null);
+    return () => setOnQuit(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onQuit]);
+
+  // Local UI-only state (settings panel, inline edit)
   const [showSettings, setShowSettings] = useState(false);
   const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
   const [editVal, setEditVal] = useState("");
-  const [customStrips, setCustomStrips] = useLocalStorage<string[]>("adhd-focus-strips", DEFAULT_STRIPS);
-  const strips = customStrips.length > 0 ? customStrips : DEFAULT_STRIPS;
-  const [stripStates, setStripStates] = useState<StripState[]>(() => strips.map(() => "attached" as StripState));
-  const [paperFlying, setPaperFlying] = useState(false);
-
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const completedRef = useRef(false);
   const editRef = useRef<HTMLInputElement>(null);
-  // Timestamp when the current running session started (or resumed)
-  const startedAtRef = useRef<number | null>(null);
-  // Remaining seconds at the moment the timer was last started/resumed
-  const remainingAtStartRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
-
-  const totalSec = durations[mode] * 60;
-  const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  const stripsToTear = Math.floor(progress * strips.length);
-  const tornCount = stripStates.filter(s => s === "torn" || s === "tearing").length;
-  const stripsLeft = strips.length - tornCount;
-  const nextStripIdx = stripStates.findIndex(s => s === "attached");
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
-  const accentColor = MODE_COLORS[mode];
   const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
 
-  // Focus editingMode input
   useEffect(() => {
     if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
   }, [editingMode]);
-
-  // Tear strips as progress advances
-  useEffect(() => {
-    if (phase !== "running") return;
-    const currentTorn = stripStates.filter(s => s === "torn").length;
-    if (stripsToTear > currentTorn) {
-      const nextIdx = stripStates.findIndex(s => s === "attached");
-      if (nextIdx !== -1) {
-        setStripStates(prev => {
-          const next = [...prev];
-          next[nextIdx] = "tearing";
-          return next;
-        });
-        setTimeout(() => {
-          setStripStates(prev => {
-            const next = [...prev];
-            if (next[nextIdx] === "tearing") next[nextIdx] = "torn";
-            return next;
-          });
-        }, 1020);
-      }
-    }
-  }, [stripsToTear, phase, stripStates]);
-
-  const handleComplete = useCallback((natural = true) => {
-    setRunning(false);
-    if (mode === "focus") {
-      setSessions(s => s + 1);
-      if (natural && !completedRef.current) {
-        completedRef.current = true;
-        // Cascade tear remaining strips
-        const remaining_strips = strips.map((_: string, i: number) => i).filter((i: number) => stripStates[i] === "attached");
-        remaining_strips.forEach((idx: number, j: number) => {
-          setTimeout(() => {
-            setStripStates(prev => {
-              const next = [...prev];
-              next[idx] = "tearing";
-              return next;
-            });
-            setTimeout(() => {
-              setStripStates(prev => {
-                const next = [...prev];
-                if (next[idx] === "tearing") next[idx] = "torn";
-                return next;
-              });
-            }, 700);
-          }, j * 200);
-        });
-        // Fly away after cascade
-        setTimeout(() => {
-          setPaperFlying(true);
-          setTimeout(() => {
-            setPhase("complete");
-            onSessionComplete?.();
-          }, 900);
-        }, remaining_strips.length * 200 + 400);
-      } else {
-        setPhase("complete");
-      }
-    } else {
-      setPhase("complete");
-    }
-  }, [mode, onSessionComplete, stripStates]);
-
-  // Timestamp-based countdown — survives tab switches / browser throttling
-  useEffect(() => {
-    if (!running) {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-      return;
-    }
-    // Record the wall-clock start time and remaining seconds at that moment
-    startedAtRef.current = Date.now();
-    remainingAtStartRef.current = remaining;
-
-    intervalRef.current = setInterval(() => {
-      if (startedAtRef.current === null) return;
-      const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
-      const newRemaining = Math.max(0, remainingAtStartRef.current - elapsed);
-      setRemaining(newRemaining);
-      if (newRemaining <= 0) {
-        clearInterval(intervalRef.current!);
-        handleComplete(true);
-      }
-    }, 500); // poll every 500ms for responsiveness
-
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [running]); // only restart when running changes — elapsed calc uses refs
-
-  const resetStrips = () => setStripStates(strips.map(() => "attached" as StripState));
-
-  const switchMode = (m: TimerMode) => {
-    if (running) return;
-    setMode(m);
-    setRemaining(durations[m] * 60);
-    setPhase("idle");
-    resetStrips();
-    setPaperFlying(false);
-    completedRef.current = false;
-  };
-
-  const applyDuration = (m: TimerMode, mins: number) => {
-    const v = Math.max(1, Math.min(180, mins));
-    setDurations(d => ({ ...d, [m]: v }));
-    if (m === mode) { setRunning(false); setRemaining(v * 60); setPhase("idle"); resetStrips(); }
-  };
 
   const commitEdit = () => {
     if (!editingMode) return;
     const parsed = parseInt(editVal, 10);
     if (!isNaN(parsed)) applyDuration(editingMode, parsed);
     setEditingMode(null);
-  };
-
-  const handleStartPause = () => {
-    if (phase === "complete" || phase === "quit" || phase === "recovering") return;
-    const next = !running;
-    if (!next) {
-      // Pausing: capture remaining time from timestamp before stopping
-      if (startedAtRef.current !== null) {
-        const elapsed = Math.floor((Date.now() - startedAtRef.current) / 1000);
-        const snapped = Math.max(0, remainingAtStartRef.current - elapsed);
-        setRemaining(snapped);
-        remainingAtStartRef.current = snapped;
-      }
-    }
-    setRunning(next);
-    setPhase(next ? "running" : "paused");
-  };
-
-  const handleQuit = () => {
-    clearInterval(intervalRef.current!);
-    setRunning(false);
-    setQuitCount(q => q + 1);
-    onQuit?.();
-    // Sad drop animation — strips fall down
-    setPaperFlying(false);
-    setPhase("recovering");
-    setTimeout(() => {
-      setPhase("quit");
-    }, 400);
-  };
-
-  const handleNewSession = () => {
-    setRemaining(durations[mode] * 60);
-    setPhase("idle");
-    resetStrips();
-    setPaperFlying(false);
-    completedRef.current = false;
   };
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -928,7 +759,6 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
               strips={strips}
               onChange={(next) => {
                 setCustomStrips(next);
-                setStripStates(next.map(() => "attached" as StripState));
               }}
             />
           )}

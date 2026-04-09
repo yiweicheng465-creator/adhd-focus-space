@@ -5,6 +5,7 @@ import { Route, Switch } from "wouter";
 import AuraBackground from "./components/AuraBackground";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { TimerProvider } from "./contexts/TimerContext";
 import Home from "./pages/Home";
 import TimerPrototypes from "./pages/TimerPrototypes";
 import Monthly from "@/pages/Monthly";
@@ -27,6 +28,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
+        <TimerProvider>
         <TooltipProvider>
           {/* Global aura gradient background — behind everything */}
           <AuraBackground />
@@ -37,6 +39,7 @@ function App() {
             <Router />
           </div>
         </TooltipProvider>
+        </TimerProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
