@@ -110,11 +110,10 @@ function BalloonScene({
   mode: TimerMode;
   isRunning: boolean;
 }) {
-  const s = Math.max(0.20, balloonScale);
-  // As balloon inflates, it stays centered — grows outward toward the needle
+  const s = Math.max(0.18, balloonScale);
+  // Balloon deflates — stays centered, shrinks symmetrically
   const cx = 110;
-  // Keep cy fixed so balloon grows symmetrically (doesn't drift up)
-  const cy = 110;
+  const cy = 105;
   const rx = 72 * s, ry = 84 * s;
   const knotY = cy + ry;
   const knotSize = 9 * s;
@@ -122,7 +121,6 @@ function BalloonScene({
   const stringY2 = 255;
 
   const FILL = BALLOON_FILLS[mode];
-  // Warm crayon brown stroke — not pure black
   const STROKE = "#3A2A1A";
   const STRING_C = STRING_COLORS[mode];
   const sw = 2.4;
@@ -134,14 +132,19 @@ function BalloonScene({
   const eyeOffX = rx * 0.28;
   const smileR = rx * 0.30;
 
-  // Needle is FIXED in space — balloon grows toward it
-  // At s=0.35 (start): rx=25.2, balloonRightEdge=135.2, needle at ~220 → big gap
-  // At s=1.0 (end):   rx=72,   balloonRightEdge=182, needle at ~188 → almost touching
-  const NEEDLE_TIP_FIXED = 188; // fixed x position of needle tip
+  // Needle FOLLOWS the balloon as it shrinks — always 20px gap at start, closes to 4px at end
+  // balloonRightEdge shrinks from ~182 (s=1) to ~83 (s=0.18)
+  // needle maintains a gap that closes proportionally: gap = 4 + (1-progress)*16
   const balloonRightEdge = cx + rx;
-  const needleTipX = touching ? balloonRightEdge + 2 : NEEDLE_TIP_FIXED;
+  // progress derived from scale: s goes 1.0→0.18 over 10 stages
+  const progressFromScale = Math.max(0, Math.min(1, (1.0 - s) / 0.82));
+  const needleGap = touching ? -4 : Math.max(4, 20 - progressFromScale * 16);
+  const needleTipX = balloonRightEdge + needleGap;
   const needleEyeX = needleTipX + 110;
   const needleY = cy;
+
+  // Timer font scales with balloon: big at start, small at end
+  const timerFontSize = Math.round(Math.max(9, Math.min(26, rx * 0.32)));
 
   const svgW = 310;
   const svgH = 270;
@@ -162,42 +165,42 @@ function BalloonScene({
       {/* Balloon outline — warm brown crayon stroke */}
       <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" opacity="0.78" />
 
-      {/* When running: show MM:SS countdown inside balloon; otherwise show face */}
-      {s > 0.45 && (
-        isRunning ? (
-          /* Countdown text centered in balloon — font scales with balloon, capped small */
-          <text
-            x={cx}
-            y={cy}
-            textAnchor="middle"
-            dominantBaseline="middle"
-            fontFamily="'JetBrains Mono', monospace"
-            fontWeight="700"
-            fontSize={Math.min(26, Math.max(10, Math.round(rx * 0.30)))}
-            fill={STROKE}
-            opacity="0.82"
-          >
-            {timeLabel}
-          </text>
-        ) : (
-          <g opacity={Math.min(1, (s - 0.45) * 5)}>
-            {/* Left eye — cute downward arc ᵕ (like picture 2) */}
+      {/* When running: show MM:SS countdown inside balloon (always, scaling with size); otherwise show face */}
+      {isRunning ? (
+        /* Countdown text — always visible, font scales with balloon */
+        <text
+          x={cx}
+          y={cy + 2}
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontFamily="'JetBrains Mono', monospace"
+          fontWeight="700"
+          fontSize={timerFontSize}
+          fill={STROKE}
+          opacity="0.85"
+        >
+          {timeLabel}
+        </text>
+      ) : (
+        s > 0.40 ? (
+          <g opacity={Math.min(1, (s - 0.40) * 6)}>
+            {/* Left eye */}
             <path
               d={`M ${cx - eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx - eyeOffX} ${eyeY + ry * 0.10} ${cx - eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
               fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
             />
-            {/* Right eye — cute downward arc ᵕ */}
+            {/* Right eye */}
             <path
               d={`M ${cx + eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx + eyeOffX} ${eyeY + ry * 0.10} ${cx + eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
               fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
             />
-            {/* Gentle smile — soft and content */}
+            {/* Gentle smile */}
             <path
               d={`M ${cx - smileR * 0.7} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.42} ${cx + smileR * 0.7} ${cy + ry * 0.28}`}
               fill="none" stroke={STROKE} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.80"
             />
           </g>
-        )
+        ) : null
       )}
 
       {/* Knot — organic teardrop shape */}
@@ -278,9 +281,10 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  // Balloon INFLATES from 0.35 → 1.0 as focus progresses — starts small, grows fat
-  // Needle stays fixed; balloon expands toward it so it gets closer and closer
-  const balloonScale = balloonState === "popped" ? 0 : 0.35 + progress * 0.65;
+  // Balloon DEFLATES in 10 discrete stages: 1.0 → 0.18
+  // Each stage = 10% of session time. Visible step-change makes progress tangible.
+  const stage = Math.min(10, Math.floor(progress * 10)); // 0..10
+  const balloonScale = balloonState === "popped" ? 0 : Math.max(0.18, 1.0 - stage * 0.082);
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
