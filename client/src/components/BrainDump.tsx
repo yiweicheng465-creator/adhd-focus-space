@@ -44,14 +44,16 @@ const M = {
 
 /** Extract all #tags from a string, return lowercase without the # */
 function extractTags(text: string): string[] {
-  const matches = text.match(/#([a-zA-Z0-9\u4e00-\u9fa5_-]+)/g);
+  // Only match #tag when preceded by whitespace or start of string (not inside URLs)
+  const matches = text.match(/(?:^|\s)(#[a-zA-Z0-9\u4e00-\u9fa5_-]+)/g);
   if (!matches) return [];
-  return Array.from(new Set(matches.map((t) => t.slice(1).toLowerCase())));
+  return Array.from(new Set(matches.map((t) => t.trim().slice(1).toLowerCase())));
 }
 
 /** Render text with #tags highlighted as inline coral chips */
 function HighlightedText({ text, activeTag }: { text: string; activeTag: string | null }) {
-  const parts = text.split(/(#[a-zA-Z0-9\u4e00-\u9fa5_-]+)/g);
+  // Split on #tags only when preceded by whitespace or start of string
+  const parts = text.split(/((?:^|(?<=\s))#[a-zA-Z0-9\u4e00-\u9fa5_-]+)/g);
   return (
     <span>
       {parts.map((part, i) => {
