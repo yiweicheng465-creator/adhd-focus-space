@@ -324,24 +324,17 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-4 shrink-0">
-            {/* Mini stats */}
-            <div className="hidden sm:flex items-center gap-3 text-xs" style={{ color: "oklch(0.55 0.015 70)" }}>
-              <span>{tasks.filter((t) => !t.done).length} tasks</span>
-              <span style={{ color: "oklch(0.82 0.012 75)" }}>·</span>
-              <span>{wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length} wins</span>
-              {runningAgents > 0 && (
-                <>
-                  <span style={{ color: "oklch(0.82 0.012 75)" }}>·</span>
-                  <button
-                    onClick={() => setActiveSection("agents")}
-                    className="flex items-center gap-1 hover:text-foreground transition-colors"
-                  >
-                    <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.52 0.14 35)" }} />
-                    {runningAgents} agent{runningAgents > 1 ? "s" : ""}
-                  </button>
-                </>
-              )}
-            </div>
+            {/* Running agents indicator — only show when agents are active */}
+            {runningAgents > 0 && (
+              <button
+                onClick={() => setActiveSection("agents")}
+                className="hidden sm:flex items-center gap-1.5 text-xs hover:text-foreground transition-colors"
+                style={{ color: "oklch(0.52 0.14 35)" }}
+              >
+                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "oklch(0.52 0.14 35)" }} />
+                {runningAgents} agent{runningAgents > 1 ? "s" : ""} live
+              </button>
+            )}
 
             {/* Mood pill */}
             <MoodPill mood={mood} onMoodChange={setMood} />

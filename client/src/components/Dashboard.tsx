@@ -199,7 +199,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
       </div>
 
       {/* ── Stats row ── */}
-      <div className="grid grid-cols-4" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
+      <div className="grid grid-cols-4" style={{ border: `1px solid ${BORDER}`, background: CREAM, position: "relative", zIndex: 1 }}>
           {[
             { icon: <Flame className="w-3.5 h-3.5" />, label: "Urgent",  value: urgentTasks.length,  section: "tasks",  accent: "oklch(0.58 0.18 20)" },
             { icon: <CheckCircle2 className="w-3.5 h-3.5" />, label: "Active", value: activeTasks.length, section: "tasks", accent: TC },
@@ -209,7 +209,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
             <button
               key={label}
               onClick={() => onNavigate(section)}
-              className="flex flex-col gap-1.5 px-5 py-4 text-left transition-all hover:opacity-80 relative group"
+              className="flex flex-col gap-1.5 px-5 py-4 text-left transition-all hover:opacity-80 relative group cursor-pointer"
               style={{ borderRight: i < arr.length - 1 ? `1px solid ${BORDER}` : "none" }}
             >
               <div className="flex items-center gap-1.5" style={{ color: accent }}>
