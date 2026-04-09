@@ -310,10 +310,10 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  // Balloon DEFLATES in 10 discrete stages: 1.0 → 0.18
-  // Each stage = 10% of session time. Visible step-change makes progress tangible.
+  // Balloon DEFLATES in 10 discrete stages: 1.0 → 0.25
+  // Each stage = 10% of session time. Step is 0.075 → very visible jump each stage.
   const stage = Math.min(10, Math.floor(progress * 10)); // 0..10
-  const balloonScale = balloonState === "popped" ? 0 : Math.max(0.18, 1.0 - stage * 0.082);
+  const balloonScale = balloonState === "popped" ? 0 : Math.max(0.25, 1.0 - stage * 0.075);
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
@@ -638,7 +638,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
           {Array.from({ length: 4 }).map((_, i) => (
             <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
           ))}
-
+          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
         </div>
       </div>
 

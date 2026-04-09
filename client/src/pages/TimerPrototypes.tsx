@@ -1560,6 +1560,111 @@ export default function TimerPrototypes() {
           </p>
         </div>
 
+      {/* ─── Balloon Stage Preview ─────────────────────────────────────────── */}
+      <div style={{ maxWidth: 960, margin: "48px auto 0" }}>
+        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, color: "#3D2B1F", margin: "0 0 4px", fontStyle: "italic" }}>
+          Live Timer — Balloon Stages
+        </h2>
+        <p style={{ color: "#8B9E7A", fontSize: 13, margin: "0 0 24px" }}>
+          The active timer shrinks the balloon across 10 stages as your session progresses. Stage 1 is the start (big), Stage 10 is the end (tiny). Stages 8–10 pulse red.
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 12 }}>
+          {Array.from({ length: 10 }, (_, i) => {
+            const stageNum = i + 1;
+            const scale = Math.max(0.25, 1.0 - stageNum * 0.075);
+            const s = Math.max(0.18, scale);
+            const rx = 72 * s, ry = 84 * s;
+            const cx = 80, cy = 90;
+            const knotY = cy + ry;
+            const knotSize = 8 * s;
+            const stringY1 = knotY + knotSize;
+            const stringY2 = 185;
+            const hlRx = 13 * s, hlRy = 20 * s;
+            const hlCx = cx - rx * 0.32, hlCy = cy - ry * 0.28;
+            const isUrgent = stageNum >= 8;
+            const fillColor = isUrgent
+              ? (stageNum === 10 ? "oklch(0.48 0.18 25)" : stageNum === 9 ? "oklch(0.52 0.16 28)" : "oklch(0.56 0.14 32)")
+              : "oklch(0.65 0.13 35)";
+            const timerFontSize = Math.max(7, Math.round(rx * 0.32));
+            // Needle tip tracks balloon right edge
+            const balloonRight = cx + rx;
+            const progress = stageNum / 10;
+            const gap = Math.max(4, 20 - progress * 16);
+            const needleTipX = balloonRight + gap;
+            const needleEyeX = needleTipX + 60;
+            const needleY = cy;
+            return (
+              <div key={stageNum} style={{
+                background: isUrgent ? "oklch(0.97 0.012 25)" : "oklch(0.985 0.008 80)",
+                border: `1px solid ${isUrgent ? "oklch(0.88 0.04 25)" : "oklch(0.87 0.014 75)"}`,
+                borderRadius: 12,
+                padding: "12px 8px 8px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: 4,
+              }}>
+                <span style={{
+                  fontSize: 10,
+                  fontWeight: 700,
+                  letterSpacing: 1,
+                  color: isUrgent ? "oklch(0.52 0.14 25)" : "oklch(0.55 0.010 70)",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>STAGE {stageNum}</span>
+                <svg width="160" height="200" viewBox="0 0 160 200" style={{ overflow: "visible" }}>
+                  {/* Balloon body */}
+                  <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillColor} stroke="oklch(0.35 0.06 35)" strokeWidth="1.8" />
+                  {/* Highlight */}
+                  {s > 0.3 && (
+                    <ellipse cx={hlCx} cy={hlCy} rx={hlRx} ry={hlRy}
+                      fill="rgba(255,255,255,0.22)" transform={`rotate(-20 ${hlCx} ${hlCy})`} />
+                  )}
+                  {/* Knot */}
+                  {s > 0.22 && (
+                    <path
+                      d={`M${cx - knotSize}${knotY} Q${cx}${knotY + knotSize * 1.4}${cx + knotSize}${knotY} Q${cx}${knotY + knotSize * 0.6}${cx - knotSize}${knotY}Z`}
+                      fill={fillColor} stroke="oklch(0.35 0.06 35)" strokeWidth="0.8"
+                    />
+                  )}
+                  {/* String */}
+                  {s > 0.22 && (
+                    <path
+                      d={`M${cx}${stringY1} C${cx - 10}${(stringY1 + stringY2) * 0.5}${cx + 6}${(stringY1 + stringY2) * 0.75}${cx}${stringY2}`}
+                      fill="none" stroke="oklch(0.45 0.04 50)" strokeWidth="1.2" strokeLinecap="round"
+                    />
+                  )}
+                  {/* Timer text inside balloon */}
+                  <text x={cx} y={cy + timerFontSize * 0.38}
+                    textAnchor="middle"
+                    fill="oklch(0.25 0.04 35)"
+                    fontSize={timerFontSize}
+                    fontWeight="700"
+                    fontFamily="'JetBrains Mono', monospace"
+                    letterSpacing="1"
+                  >
+                    {String(Math.floor((25 - stageNum * 2.5))).padStart(2, "0")}:00
+                  </text>
+                  {/* Needle — tip tracks balloon right edge */}
+                  <line
+                    x1={needleTipX} y1={needleY}
+                    x2={needleEyeX} y2={needleY}
+                    stroke="oklch(0.25 0.02 50)" strokeWidth="1.2" strokeLinecap="round"
+                  />
+                  <ellipse cx={needleEyeX} cy={needleY} rx="3.5" ry="2"
+                    fill="none" stroke="oklch(0.25 0.02 50)" strokeWidth="1.2"
+                  />
+                </svg>
+                <span style={{
+                  fontSize: 9,
+                  color: isUrgent ? "oklch(0.52 0.14 25)" : "oklch(0.62 0.010 70)",
+                  fontFamily: "'DM Sans', sans-serif",
+                }}>{Math.round(scale * 100)}% size{isUrgent ? " 🔴" : ""}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Footer CTA */}
       <div style={{ maxWidth: 960, margin: "48px auto 0", padding: "24px", background: "#fff", borderRadius: 16, textAlign: "center", boxShadow: "0 2px 12px rgba(92,61,46,0.06)" }}>
         <p style={{ color: "#5C3D2E", fontSize: 15, margin: "0 0 4px", fontWeight: 600 }}>Which design do you prefer?</p>
