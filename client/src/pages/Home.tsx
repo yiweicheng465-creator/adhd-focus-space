@@ -192,6 +192,7 @@ export default function Home() {
 
   // ── Transient state ──
   const [focusSessions, setFocusSessions] = useState(0);
+  const [timerQuitCount, setTimerQuitCount] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
   const [pendingDump, setPendingDump] = useState<string | null>(null);
@@ -493,7 +494,7 @@ export default function Home() {
                         Deep Work
                       </h2>
                     </div>
-                    <FocusTimer onSessionComplete={handleSessionComplete} />
+                    <FocusTimer onSessionComplete={handleSessionComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                   </div>
                 </div>
 
@@ -594,6 +595,7 @@ export default function Home() {
           tasks={tasks}
           wins={wins}
           agents={agents}
+          quitCount={timerQuitCount}
           onClose={() => {
             const todayWins = wins.filter(w => new Date(w.createdAt).toDateString() === new Date().toDateString());
             const todayDone = tasks.filter(t => t.done && new Date(t.createdAt).toDateString() === new Date().toDateString());

@@ -1,48 +1,69 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Focus Timer (Balloon Deflate)
-   Design: Hand-painted sketch balloon that deflates as you focus.
-   Needle creeps toward the balloon as time runs out.
-   Reset mid-session → needle pops the balloon.
-   Complete → balloon fully deflated, stress fully released.
+   ADHD FOCUS SPACE — Focus Timer (Paper Tear Edition)
+   Design: A notebook page. As you focus, bottom strips tear off
+   one by one. Quit = sad wrap-up with score penalty + quit count.
+   Complete = celebration wrap-up with confetti.
 
-   Palette: warm cream bg, golden balloon, dark ink stroke
+   Palette: warm cream bg, ink strokes, terracotta accent
    Typography: Playfair Display (display), DM Sans (body), JetBrains Mono (digits)
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { RotateCcw, Play, Pause, Settings, Check, X } from "lucide-react";
 
-// Inject urgency pulse keyframe once
-const URGENCY_STYLE_ID = "balloon-urgency-pulse";
-if (typeof document !== "undefined" && !document.getElementById(URGENCY_STYLE_ID)) {
+// ── Inject keyframes once ─────────────────────────────────────────────────────
+const STYLE_ID = "focus-timer-tear-keyframes";
+if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
-  s.id = URGENCY_STYLE_ID;
+  s.id = STYLE_ID;
   s.textContent = `
-    @keyframes balloonUrgencyPulse {
-      0%,100% { filter: drop-shadow(0 0 0px #C8603A); }
-      50% { filter: drop-shadow(0 0 14px #E8603A) drop-shadow(0 0 6px #FF8C5A); }
+    @keyframes ft-tearLeft {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
+      25%  { transform: translateY(6px) rotate(-1.5deg); opacity: 0.95; }
+      100% { transform: translateY(110px) rotate(-16deg) translateX(-50px); opacity: 0; max-height: 0; }
     }
-    .balloon-urgency { animation: balloonUrgencyPulse 0.9s ease-in-out infinite; }
-    @keyframes balloonBreathe {
-      0%,100% { transform: scale(1); }
-      40%      { transform: scale(1.045); }
-      70%      { transform: scale(0.975); }
+    @keyframes ft-tearRight {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
+      25%  { transform: translateY(6px) rotate(2deg); opacity: 0.95; }
+      100% { transform: translateY(120px) rotate(20deg) translateX(55px); opacity: 0; max-height: 0; }
     }
-    .balloon-breathe { animation: balloonBreathe 3.6s ease-in-out infinite; transform-origin: center bottom; }
-    @keyframes balloonSqueeze {
-      0%   { transform: scale(1, 1); }
-      20%  { transform: scale(1.18, 0.82); }
-      45%  { transform: scale(0.88, 1.12); }
-      70%  { transform: scale(1.06, 0.96); }
-      100% { transform: scale(1, 1); }
+    @keyframes ft-shake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-3px) rotate(-1deg); }
+      40%     { transform: translateX(4px) rotate(1.5deg); }
+      60%     { transform: translateX(-2px) rotate(-0.5deg); }
+      80%     { transform: translateX(2px); }
     }
-    .balloon-squeeze { animation: balloonSqueeze 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards; transform-origin: center bottom; }
+    @keyframes ft-flyAway {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-160%) rotate(-10deg); opacity: 0; }
+    }
+    @keyframes ft-sadDrop {
+      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(80px) rotate(5deg); opacity: 0; }
+    }
+    @keyframes ft-fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes ft-scoreCount {
+      from { opacity: 0; transform: scale(0.7); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    .ft-tear-left  { animation: ft-tearLeft  0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
+    .ft-tear-right { animation: ft-tearRight 0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
+    .ft-shake      { animation: ft-shake 0.3s ease-in-out; }
+    .ft-fly-away   { animation: ft-flyAway 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .ft-sad-drop   { animation: ft-sadDrop 0.7s cubic-bezier(0.4,0,0.2,1) forwards; }
+    .ft-fade-in    { animation: ft-fadeIn 0.5s ease forwards; }
+    .ft-score-pop  { animation: ft-scoreCount 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
   `;
   document.head.appendChild(s);
 }
 
+// ── Types ─────────────────────────────────────────────────────────────────────
 type TimerMode = "focus" | "short" | "long";
-type BalloonState = "idle" | "running" | "paused" | "popping" | "popped" | "complete";
+type TimerPhase = "idle" | "running" | "paused" | "complete" | "quit" | "recovering";
 
 const DEFAULT_DURATIONS: Record<TimerMode, number> = { focus: 25, short: 5, long: 15 };
 const PRESETS: Record<TimerMode, number[]> = {
@@ -50,333 +71,474 @@ const PRESETS: Record<TimerMode, number[]> = {
   short: [3, 5, 10],
   long: [10, 15, 20, 30],
 };
-const MODE_LABELS: Record<TimerMode, string> = {
-  focus: "Focus",
-  short: "Short Break",
-  long: "Long Break",
-};
-const MODE_COLORS: Record<TimerMode, string> = {
-  focus: "#C8603A",
-  short: "#7A8C6E",
-  long: "#7A8C9E",
-};
-const BALLOON_FILLS: Record<TimerMode, string> = {
-  focus: "#F07B5A",   // coral salmon — matches reference
-  short: "#A8C4A0",   // sage green for short break
-  long: "#A0B8C8",    // dusty blue for long break
-};
-// String colors — warm crayon tones instead of pure black
-const STRING_COLORS: Record<TimerMode, string> = {
-  focus: "#6B4F3A",
-  short: "#4A6B4A",
-  long: "#3A4F6B",
-};
+const MODE_LABELS: Record<TimerMode, string> = { focus: "Focus", short: "Short Break", long: "Long Break" };
+const MODE_COLORS: Record<TimerMode, string> = { focus: "#C8603A", short: "#7A8C6E", long: "#7A8C9E" };
 
-// ── Balloon path helper — crayon wobbly organic shape ────────────────────────
-function makeBalloonPath(cx: number, cy: number, rx: number, ry: number) {
-  // Organic wobbly balloon — slightly asymmetric like a hand-drawn crayon sketch
-  return `
-    M ${cx} ${cy - ry}
-    C ${cx + rx * 0.55} ${cy - ry * 1.12},
-      ${cx + rx * 1.28} ${cy - ry * 0.68},
-      ${cx + rx * 1.18} ${cy + ry * 0.08}
-    C ${cx + rx * 1.10} ${cy + ry * 0.70},
-      ${cx + rx * 0.52} ${cy + ry * 1.05},
-      ${cx + rx * 0.08} ${cy + ry * 0.96}
-    C ${cx - rx * 0.05} ${cy + ry * 1.04},
-      ${cx - rx * 0.18} ${cy + ry * 1.02},
-      ${cx - rx * 0.30} ${cy + ry * 0.90}
-    C ${cx - rx * 1.15} ${cy + ry * 0.58},
-      ${cx - rx * 1.22} ${cy - ry * 0.55},
-      ${cx - rx * 0.62} ${cy - ry * 0.98}
-    C ${cx - rx * 0.32} ${cy - ry * 1.10},
-      ${cx - rx * 0.05} ${cy - ry * 1.08},
-      ${cx} ${cy - ry}
-    Z
-  `;
-}
-
-// ── Pop burst ─────────────────────────────────────────────────────────────────
-function PopBurst() {
-  const rays = [
-    [0, 18, 52], [28, 16, 44], [55, 20, 58], [82, 15, 48],
-    [110, 22, 60], [138, 17, 50], [165, 21, 55], [195, 14, 46],
-    [222, 19, 54], [250, 16, 42], [278, 23, 58], [308, 18, 50],
-    [335, 20, 52],
-  ];
-  return (
-    <svg width="200" height="200" viewBox="0 0 180 180" style={{ display: "block" }}>
-      {rays.map(([angle, r1, r2], i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x1 = 90 + r1 * Math.cos(rad), y1 = 90 + r1 * Math.sin(rad);
-        const x2 = 90 + r2 * Math.cos(rad), y2 = 90 + r2 * Math.sin(rad);
-        return (
-          <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
-            stroke={i % 3 === 0 ? "#C8603A" : i % 3 === 1 ? "#E8C06A" : "#2a1f14"}
-            strokeWidth={1.8 + (i % 3) * 0.6} strokeLinecap="round" opacity="0.85" />
-        );
-      })}
-      {[30, 90, 150, 210, 270, 330].map((a, i) => {
-        const r = 38 + (i % 2) * 10;
-        const rad = (a * Math.PI) / 180;
-        return <circle key={i} cx={90 + r * Math.cos(rad)} cy={90 + r * Math.sin(rad)} r={3.5}
-          fill={i % 2 === 0 ? "#C8603A" : "#E8C06A"} opacity="0.9" />;
-      })}
-      <text x="90" y="97" textAnchor="middle" fill="#C8603A" fontSize="20" fontWeight="900"
-        fontFamily="'Playfair Display', Georgia, serif" fontStyle="italic">POP!</text>
-    </svg>
-  );
-}
-
-// ── BalloonScene: unified SVG with balloon + needle ───────────────────────────
-function BalloonScene({
-  balloonScale, timeLabel, showNeedle, touching, mode, isRunning, stage, squeezing,
-}: {
-  balloonScale: number;
-  timeLabel: string;
-  showNeedle: boolean;
-  touching: boolean;
-  mode: TimerMode;
-  isRunning: boolean;
-  stage: number;
-  squeezing: boolean;
-}) {
-  const s = Math.max(0.18, balloonScale);
-  // Balloon deflates — stays centered, shrinks symmetrically
-  const cx = 110;
-  const cy = 105;
-  const rx = 72 * s, ry = 84 * s;
-  const knotY = cy + ry;
-  const knotSize = 9 * s;
-  const stringY1 = knotY + knotSize * 1.2;
-  const stringY2 = 255;
-
-  const FILL = BALLOON_FILLS[mode];
-  const STROKE = "#3A2A1A";
-  const STRING_C = STRING_COLORS[mode];
-  const sw = 2.4;
-
-  const bPath = makeBalloonPath(cx, cy, rx, ry);
-
-  // Smiley face positions — scale with balloon
-  const eyeY = cy - ry * 0.08;
-  const eyeOffX = rx * 0.28;
-  const smileR = rx * 0.30;
-
-  // Needle FOLLOWS the balloon as it shrinks — always 20px gap at start, closes to 4px at end
-  // balloonRightEdge shrinks from ~182 (s=1) to ~83 (s=0.18)
-  // needle maintains a gap that closes proportionally: gap = 4 + (1-progress)*16
-  const balloonRightEdge = cx + rx;
-  // progress derived from scale: s goes 1.0→0.18 over 10 stages
-  const progressFromScale = Math.max(0, Math.min(1, (1.0 - s) / 0.82));
-  const needleGap = touching ? -4 : Math.max(4, 20 - progressFromScale * 16);
-  const needleTipX = balloonRightEdge + needleGap;
-  const needleEyeX = needleTipX + 110;
-  const needleY = cy;
-
-  // Timer font scales with balloon: big at start, small at end
-  const timerFontSize = Math.round(Math.max(9, Math.min(26, rx * 0.32)));
-
-  const svgW = 310;
-  const svgH = 270;
-  const isUrgent = stage >= 8 && isRunning;
-  // Urgency: balloon fill shifts toward red/orange at stages 8-10
-  const urgentFill = stage >= 10 ? "#E83A1A" : stage >= 9 ? "#E85A2A" : "#E87040";
-  const activeFill = isUrgent ? urgentFill : FILL;
-
-  const isIdle = !isRunning && stage === 0;
-
-  return (
-    <svg
-      width={svgW}
-      height={svgH}
-      viewBox={`0 0 ${svgW} ${svgH}`}
-      className={squeezing ? "balloon-squeeze" : isUrgent ? "balloon-urgency" : isIdle ? "balloon-breathe" : ""}
-      style={{ display: "block", overflow: "visible", maxWidth: "100%", transition: "filter 0.5s" }}
-    >
-      {/* Balloon fill — urgency shifts to red/orange at stages 8-10 */}
-      <path d={bPath} fill={activeFill} opacity="0.90" style={{ transition: "fill 0.6s" }} />
-      {/* Inner crayon texture — soft inner glow */}
-      {s > 0.5 && (
-        <path d={bPath} fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth={sw * 3} strokeLinejoin="round" strokeLinecap="round" />
-      )}
-      {/* Balloon outline — warm brown crayon stroke */}
-      <path d={bPath} fill="none" stroke={STROKE} strokeWidth={sw} strokeLinejoin="round" strokeLinecap="round" opacity="0.78" />
-
-      {/* When running: show MM:SS countdown inside balloon (always, scaling with size); otherwise show face */}
-      {isRunning ? (
-        /* Countdown text — always visible, font scales with balloon */
-        <text
-          x={cx}
-          y={cy + 2}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fontFamily="'JetBrains Mono', monospace"
-          fontWeight="700"
-          fontSize={timerFontSize}
-          fill={STROKE}
-          opacity="0.85"
-        >
-          {timeLabel}
-        </text>
-      ) : (
-        s > 0.40 ? (
-          <g opacity={Math.min(1, (s - 0.40) * 6)}>
-            {/* Left eye */}
-            <path
-              d={`M ${cx - eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx - eyeOffX} ${eyeY + ry * 0.10} ${cx - eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
-              fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
-            />
-            {/* Right eye */}
-            <path
-              d={`M ${cx + eyeOffX - rx * 0.13} ${eyeY - ry * 0.04} Q ${cx + eyeOffX} ${eyeY + ry * 0.10} ${cx + eyeOffX + rx * 0.13} ${eyeY - ry * 0.04}`}
-              fill="none" stroke={STROKE} strokeWidth={sw * 1.0} strokeLinecap="round" opacity="0.85"
-            />
-            {/* Gentle smile */}
-            <path
-              d={`M ${cx - smileR * 0.7} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.42} ${cx + smileR * 0.7} ${cy + ry * 0.28}`}
-              fill="none" stroke={STROKE} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.80"
-            />
-          </g>
-        ) : null
-      )}
-
-      {/* Knot — organic teardrop shape */}
-      {s > 0.22 && (
-        <path
-          d={`M${cx - knotSize * 0.6} ${knotY} Q${cx} ${knotY + knotSize * 1.6} ${cx + knotSize * 0.6} ${knotY} Q${cx} ${knotY - knotSize * 0.3} ${cx - knotSize * 0.6} ${knotY}Z`}
-          fill={FILL} stroke={STROKE} strokeWidth={sw * 0.75} strokeLinejoin="round" opacity="0.85"
-        />
-      )}
-      {/* String — warm colored crayon line, slightly wavy */}
-      {s > 0.22 && (
-        <path
-          d={`M${cx} ${stringY1} C${cx - 14} ${stringY1 + (stringY2 - stringY1) * 0.35} ${cx + 8} ${stringY1 + (stringY2 - stringY1) * 0.65} ${cx - 4} ${stringY2}`}
-          fill="none" stroke={STRING_C} strokeWidth={sw * 0.85} strokeLinecap="round" opacity="0.72"
-        />
-      )}
-
-      {/* Needle — tip always at balloon right edge + gap */}
-      {showNeedle && (
-        <g style={{ transition: touching ? "transform 0.5s cubic-bezier(0.25,0,0.5,1)" : "transform 0.4s ease-out" }}>
-          <path
-            d={`M ${needleTipX} ${needleY - 2} C ${needleTipX + 30} ${needleY - 4}, ${needleTipX + 70} ${needleY - 5}, ${needleEyeX - 12} ${needleY}`}
-            fill="none" stroke="#3A2A1A" strokeWidth="1.8" strokeLinecap="round"
-          />
-          <path
-            d={`M ${needleTipX} ${needleY + 2} C ${needleTipX + 30} ${needleY + 4}, ${needleTipX + 70} ${needleY + 5}, ${needleEyeX - 12} ${needleY}`}
-            fill="none" stroke="#3A2A1A" strokeWidth="1.8" strokeLinecap="round"
-          />
-          <ellipse cx={needleEyeX - 6} cy={needleY} rx="5" ry="3" fill="none" stroke="#3A2A1A" strokeWidth="1.6" />
-          <ellipse cx={needleEyeX - 6} cy={needleY} rx="2" ry="1.2" fill="none" stroke="#3A2A1A" strokeWidth="1" />
-        </g>
-      )}
-    </svg>
-  );
-}
-
-// ── Status messages ───────────────────────────────────────────────────────────
-const IDLE_MSGS: Record<TimerMode, string> = {
-  focus: "Start the timer — breathe out your stress, one second at a time.",
-  short: "Take a breath. Let the tension float away.",
-  long: "A longer rest. Let the air — and the pressure — out slowly.",
-};
-const RUNNING_MSGS = [
-  "Stay focused — the needle is watching...",
-  "Every second of focus deflates the stress.",
-  "Keep going. The balloon is getting lighter.",
-  "You're doing great. Don't let the needle win.",
+// ── Strip content ─────────────────────────────────────────────────────────────
+const STRIPS = [
+  "overthinking",
+  "email backlog",
+  "that awkward thing",
+  "yesterday's worries",
+  "the meeting dread",
+  "unread messages",
+  "tomorrow's anxiety",
+  "the mental noise",
 ];
-const PAUSED_MSG = "Paused — the needle is waiting. Don't let it win.";
-const POPPED_MSG = "Your focus balloon popped. Shake it off and try again!";
-const COMPLETE_MSGS: Record<TimerMode, string> = {
-  focus: "All the stress is out. Session complete! 🎉",
-  short: "Break over — you're refreshed and ready.",
-  long: "Long break complete. You've earned it.",
-};
+
+// ── Jagged tear SVG edge ──────────────────────────────────────────────────────
+function JaggedEdge({ seed }: { seed: number }) {
+  const w = 320;
+  const h = 10;
+  const steps = 28;
+  const pts: string[] = [`M 0 ${h}`];
+  for (let i = 0; i <= steps; i++) {
+    const x = (i / steps) * w;
+    const jag = Math.sin(seed * 5.1 + i * 2.7) * 4 + Math.cos(seed * 3.3 + i * 1.9) * 3;
+    pts.push(`L ${x} ${h + jag}`);
+  }
+  pts.push(`L ${w} 0 L 0 0 Z`);
+  return (
+    <svg width="100%" height={h + 8} viewBox={`0 0 ${w} ${h + 8}`} preserveAspectRatio="none"
+      style={{ display: "block", marginBottom: -1, pointerEvents: "none" }}>
+      <path d={pts.join(" ")} fill="#F0E8DC" />
+    </svg>
+  );
+}
+
+// ── Single strip ──────────────────────────────────────────────────────────────
+type StripState = "attached" | "tearing" | "torn";
+
+function TearStrip({ text, seed, state, isNext }: {
+  text: string; seed: number;
+  state: StripState; isNext: boolean;
+}) {
+  const [cls, setCls] = useState("");
+  const [hidden, setHidden] = useState(false);
+  const prevState = useRef<StripState>(state);
+
+  useEffect(() => {
+    if (state === "tearing" && prevState.current !== "tearing") {
+      setCls("ft-shake");
+      const t1 = setTimeout(() => {
+        setCls(seed % 2 === 0 ? "ft-tear-left" : "ft-tear-right");
+        setTimeout(() => setHidden(true), 680);
+      }, 320);
+      prevState.current = "tearing";
+      return () => clearTimeout(t1);
+    }
+    if (state === "attached") {
+      setCls(""); setHidden(false); prevState.current = "attached";
+    }
+    if (state === "torn") {
+      setHidden(true); prevState.current = "torn";
+    }
+  }, [state, seed]);
+
+  if (hidden) return null;
+
+  return (
+    <div className={cls} style={{ overflow: "hidden" }}>
+      {isNext && <JaggedEdge seed={seed + 0.5} />}
+      <div style={{
+        padding: "10px 16px",
+        background: isNext
+          ? "linear-gradient(90deg, #F5EDE0 0%, #EDE0CF 100%)"
+          : "#FAF6F1",
+        borderTop: isNext ? "none" : "1px solid #EDE0CF",
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        position: "relative",
+      }}>
+        {isNext && (
+          <div style={{
+            width: 6, height: 6, borderRadius: "50%",
+            background: "#C8603A",
+            boxShadow: "0 0 6px #C8603A",
+            flexShrink: 0,
+          }} />
+        )}
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: isNext ? 11 : 10,
+          color: isNext ? "#3D2E1E" : "#8C7B6B",
+          letterSpacing: "0.06em",
+          fontWeight: isNext ? 600 : 400,
+        }}>{text}</span>
+        {/* Perforated right edge on next strip */}
+        {isNext && (
+          <div style={{
+            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+            display: "flex", flexDirection: "column", gap: 3,
+          }}>
+            {[0,1,2,3].map(i => (
+              <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: "#D4C4B0" }} />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Complete wrap-up ──────────────────────────────────────────────────────────
+function CompleteWrapUp({ sessions, mode, onNewSession }: {
+  sessions: number; mode: TimerMode; onNewSession: () => void;
+}) {
+  const accentColor = MODE_COLORS[mode];
+  const messages = [
+    "You stayed. That's everything.",
+    "The noise didn't win today.",
+    "One full session. Real progress.",
+    "You showed up. That matters.",
+  ];
+  const msg = messages[sessions % messages.length];
+
+  return (
+    <div className="ft-fade-in" style={{
+      background: "#FDFAF5",
+      border: "1px solid #E8DDD0",
+      padding: "28px 20px 24px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 16,
+      textAlign: "center",
+      minHeight: 260,
+    }}>
+      {/* Big celebration icon */}
+      <div style={{ fontSize: 48, lineHeight: 1 }}>✨</div>
+
+      <div>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 22,
+          fontWeight: 700,
+          color: "#3D2E1E",
+          margin: 0,
+          lineHeight: 1.2,
+        }}>Session complete</p>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 13,
+          fontStyle: "italic",
+          color: "#8C7B6B",
+          margin: "6px 0 0",
+        }}>{msg}</p>
+      </div>
+
+      {/* Score ring */}
+      <div className="ft-score-pop" style={{
+        width: 80, height: 80,
+        borderRadius: "50%",
+        border: `3px solid ${accentColor}`,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: `${accentColor}12`,
+      }}>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 22,
+          fontWeight: 700,
+          color: accentColor,
+          lineHeight: 1,
+        }}>{sessions}</span>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 8,
+          color: "#8C7B6B",
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          marginTop: 2,
+        }}>SESSION{sessions !== 1 ? "S" : ""}</span>
+      </div>
+
+      <div style={{
+        background: "#F5EDE0",
+        border: "1px solid #E8DDD0",
+        borderRadius: 4,
+        padding: "10px 18px",
+        fontSize: 11,
+        fontFamily: "'JetBrains Mono', monospace",
+        color: "#6A5A4A",
+        letterSpacing: "0.08em",
+      }}>
+        8 strips torn · all stress released
+      </div>
+
+      <button onClick={onNewSession} style={{
+        background: "#2a1f14",
+        border: "none",
+        color: "#FAF6F1",
+        borderRadius: 999,
+        padding: "10px 28px",
+        fontSize: 10,
+        cursor: "pointer",
+        fontFamily: "'JetBrains Mono', monospace",
+        letterSpacing: "0.14em",
+        boxShadow: "0 3px 0 #1a1208",
+      }}>
+        ✦ NEW SESSION
+      </button>
+    </div>
+  );
+}
+
+// ── Quit (sad) wrap-up ────────────────────────────────────────────────────────
+function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
+  quitCount: number; stripsLeft: number; onNewSession: () => void;
+}) {
+  const sadMessages = [
+    "It's okay. Tomorrow is a new page.",
+    "The strips are waiting for you.",
+    "Rest, then try again.",
+    "Even stopping takes courage.",
+  ];
+  const msg = sadMessages[(quitCount - 1) % sadMessages.length];
+  const penalty = Math.min(stripsLeft * 5, 40);
+
+  return (
+    <div className="ft-fade-in" style={{
+      background: "#FDFAF5",
+      border: "1px solid #E8DDD0",
+      padding: "28px 20px 24px",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      gap: 14,
+      textAlign: "center",
+      minHeight: 260,
+    }}>
+      {/* Sad icon */}
+      <div style={{ fontSize: 44, lineHeight: 1, filter: "grayscale(0.3)" }}>🌧</div>
+
+      <div>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 20,
+          fontWeight: 700,
+          color: "#5A4A3A",
+          margin: 0,
+          lineHeight: 1.2,
+        }}>Session ended early</p>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 13,
+          fontStyle: "italic",
+          color: "#8C7B6B",
+          margin: "6px 0 0",
+        }}>{msg}</p>
+      </div>
+
+      {/* Stats */}
+      <div style={{
+        display: "flex",
+        gap: 12,
+        width: "100%",
+      }}>
+        <div style={{
+          flex: 1,
+          background: "#F5EDE0",
+          border: "1px solid #E8DDD0",
+          padding: "12px 8px",
+          textAlign: "center",
+        }}>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 22,
+            fontWeight: 700,
+            color: "#8C7B6B",
+            margin: 0,
+          }}>{quitCount}</p>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 8,
+            color: "#A09080",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            margin: "4px 0 0",
+          }}>QUIT{quitCount !== 1 ? "S" : ""} TODAY</p>
+        </div>
+        <div style={{
+          flex: 1,
+          background: "#FFF0EC",
+          border: "1px solid #F0D0C4",
+          padding: "12px 8px",
+          textAlign: "center",
+        }}>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 22,
+            fontWeight: 700,
+            color: "#C8603A",
+            margin: 0,
+          }}>−{penalty}</p>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 8,
+            color: "#C8603A",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            margin: "4px 0 0",
+          }}>SCORE PENALTY</p>
+        </div>
+        <div style={{
+          flex: 1,
+          background: "#F5EDE0",
+          border: "1px solid #E8DDD0",
+          padding: "12px 8px",
+          textAlign: "center",
+        }}>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 22,
+            fontWeight: 700,
+            color: "#8C7B6B",
+            margin: 0,
+          }}>{stripsLeft}</p>
+          <p style={{
+            fontFamily: "'JetBrains Mono', monospace",
+            fontSize: 8,
+            color: "#A09080",
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            margin: "4px 0 0",
+          }}>STRIPS LEFT</p>
+        </div>
+      </div>
+
+      <button onClick={onNewSession} style={{
+        background: "transparent",
+        border: "1px solid #8C7B6B",
+        color: "#6A5A4A",
+        borderRadius: 999,
+        padding: "9px 24px",
+        fontSize: 10,
+        cursor: "pointer",
+        fontFamily: "'JetBrains Mono', monospace",
+        letterSpacing: "0.12em",
+      }}>
+        TRY AGAIN
+      </button>
+    </div>
+  );
+}
 
 // ── Main component ────────────────────────────────────────────────────────────
 interface FocusTimerProps {
   onSessionComplete?: () => void;
+  onQuit?: () => void;
 }
 
-export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
+export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
   const [durations, setDurations] = useState<Record<TimerMode, number>>({ ...DEFAULT_DURATIONS });
   const [mode, setMode] = useState<TimerMode>("focus");
   const [remaining, setRemaining] = useState(DEFAULT_DURATIONS.focus * 60);
   const [running, setRunning] = useState(false);
-  const [balloonState, setBalloonState] = useState<BalloonState>("idle");
-  const [touching, setTouching] = useState(false);
-  const [msgIdx, setMsgIdx] = useState(0);
+  const [phase, setPhase] = useState<TimerPhase>("idle");
   const [sessions, setSessions] = useState(0);
+  const [quitCount, setQuitCount] = useState(0);
   const [showSettings, setShowSettings] = useState(false);
   const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
   const [editVal, setEditVal] = useState("");
+  const [stripStates, setStripStates] = useState<StripState[]>(STRIPS.map(() => "attached"));
+  const [paperFlying, setPaperFlying] = useState(false);
+
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const msgRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedRef = useRef(false);
   const editRef = useRef<HTMLInputElement>(null);
-  const prevStageRef = useRef(0);
-  const [squeezing, setSqueezing] = useState(false);
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  // Balloon DEFLATES in 10 discrete stages: 1.0 → 0.25
-  // Each stage = 10% of session time. Step is 0.075 → very visible jump each stage.
-  const stage = Math.min(10, Math.floor(progress * 10)); // 0..10
-  const balloonScale = balloonState === "popped" ? 0 : Math.max(0.25, 1.0 - stage * 0.075);
+  const stripsToTear = Math.floor(progress * STRIPS.length);
+  const tornCount = stripStates.filter(s => s === "torn" || s === "tearing").length;
+  const stripsLeft = STRIPS.length - tornCount;
+  const nextStripIdx = stripStates.findIndex(s => s === "attached");
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
-
-  // Detect stage change → trigger squeeze animation
-  useEffect(() => {
-    if (running && stage > 0 && stage !== prevStageRef.current) {
-      prevStageRef.current = stage;
-      setSqueezing(true);
-      const t = setTimeout(() => setSqueezing(false), 600);
-      return () => clearTimeout(t);
-    }
-    if (!running) prevStageRef.current = stage;
-  }, [stage, running]);
-
-  // Rotate running messages
-  useEffect(() => {
-    if (running) {
-      msgRef.current = setInterval(() => setMsgIdx((i) => (i + 1) % RUNNING_MSGS.length), 8000);
-    } else {
-      if (msgRef.current) clearInterval(msgRef.current);
-    }
-    return () => { if (msgRef.current) clearInterval(msgRef.current); };
-  }, [running]);
+  const accentColor = MODE_COLORS[mode];
+  const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
 
   // Focus editingMode input
   useEffect(() => {
     if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
   }, [editingMode]);
 
-  // natural=true  → timer hit zero → counts as a win
-  // natural=false → user skipped/quit early → no win
-  const handleComplete = useCallback((natural = true) => {
-    setRunning(false);
-    setBalloonState("complete");
-    if (mode === "focus") {
-      setSessions((s) => s + 1);
-      if (natural && !completedRef.current) {
-        completedRef.current = true;
-        onSessionComplete?.();
+  // Tear strips as progress advances
+  useEffect(() => {
+    if (phase !== "running") return;
+    const currentTorn = stripStates.filter(s => s === "torn").length;
+    if (stripsToTear > currentTorn) {
+      const nextIdx = stripStates.findIndex(s => s === "attached");
+      if (nextIdx !== -1) {
+        setStripStates(prev => {
+          const next = [...prev];
+          next[nextIdx] = "tearing";
+          return next;
+        });
+        setTimeout(() => {
+          setStripStates(prev => {
+            const next = [...prev];
+            if (next[nextIdx] === "tearing") next[nextIdx] = "torn";
+            return next;
+          });
+        }, 1020);
       }
     }
-  }, [mode, onSessionComplete]);
+  }, [stripsToTear, phase, stripStates]);
+
+  const handleComplete = useCallback((natural = true) => {
+    setRunning(false);
+    if (mode === "focus") {
+      setSessions(s => s + 1);
+      if (natural && !completedRef.current) {
+        completedRef.current = true;
+        // Cascade tear remaining strips
+        const remaining_strips = STRIPS.map((_, i) => i).filter(i => stripStates[i] === "attached");
+        remaining_strips.forEach((idx, j) => {
+          setTimeout(() => {
+            setStripStates(prev => {
+              const next = [...prev];
+              next[idx] = "tearing";
+              return next;
+            });
+            setTimeout(() => {
+              setStripStates(prev => {
+                const next = [...prev];
+                if (next[idx] === "tearing") next[idx] = "torn";
+                return next;
+              });
+            }, 700);
+          }, j * 200);
+        });
+        // Fly away after cascade
+        setTimeout(() => {
+          setPaperFlying(true);
+          setTimeout(() => {
+            setPhase("complete");
+            onSessionComplete?.();
+          }, 900);
+        }, remaining_strips.length * 200 + 400);
+      } else {
+        setPhase("complete");
+      }
+    } else {
+      setPhase("complete");
+    }
+  }, [mode, onSessionComplete, stripStates]);
 
   // Countdown
   useEffect(() => {
     if (running && remaining > 0) {
       intervalRef.current = setInterval(() => {
-        setRemaining((r) => {
+        setRemaining(r => {
           if (r <= 1) {
             clearInterval(intervalRef.current!);
-            handleComplete();
+            handleComplete(true);
             return 0;
           }
           return r - 1;
@@ -386,19 +548,22 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
     return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
   }, [running, remaining, handleComplete]);
 
+  const resetStrips = () => setStripStates(STRIPS.map(() => "attached"));
+
   const switchMode = (m: TimerMode) => {
     if (running) return;
     setMode(m);
     setRemaining(durations[m] * 60);
-    setBalloonState("idle");
-    setTouching(false);
+    setPhase("idle");
+    resetStrips();
+    setPaperFlying(false);
     completedRef.current = false;
   };
 
   const applyDuration = (m: TimerMode, mins: number) => {
     const v = Math.max(1, Math.min(180, mins));
-    setDurations((d) => ({ ...d, [m]: v }));
-    if (m === mode) { setRunning(false); setRemaining(v * 60); setBalloonState("idle"); }
+    setDurations(d => ({ ...d, [m]: v }));
+    if (m === mode) { setRunning(false); setRemaining(v * 60); setPhase("idle"); resetStrips(); }
   };
 
   const commitEdit = () => {
@@ -409,54 +574,34 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   };
 
   const handleStartPause = () => {
-    if (balloonState === "complete" || balloonState === "popped" || balloonState === "popping") return;
+    if (phase === "complete" || phase === "quit" || phase === "recovering") return;
     const next = !running;
     setRunning(next);
-    setBalloonState(next ? "running" : "paused");
+    setPhase(next ? "running" : "paused");
   };
 
-  // Skip = user-initiated early end → NOT a win
-  const handleSkip = () => {
-    clearInterval(intervalRef.current!);
-    handleComplete(false);
-    setRemaining(0);
-  };
-
-  const handleReset = () => {
-    // Always pop if the timer was running (even in first 1-2 min)
-    const wasRunning = running || balloonState === "paused";
+  const handleQuit = () => {
     clearInterval(intervalRef.current!);
     setRunning(false);
-    completedRef.current = false;
-    if (wasRunning) {
-      setBalloonState("popping");
-      setTouching(true);
-      setTimeout(() => {
-        setBalloonState("popped");
-        setTouching(false);
-        setTimeout(() => {
-          setRemaining(durations[mode] * 60);
-          setBalloonState("idle");
-        }, 2200);
-      }, 700);
-    } else {
-      setRemaining(durations[mode] * 60);
-      setBalloonState("idle");
-    }
+    setQuitCount(q => q + 1);
+    onQuit?.();
+    // Sad drop animation — strips fall down
+    setPaperFlying(false);
+    setPhase("recovering");
+    setTimeout(() => {
+      setPhase("quit");
+    }, 400);
   };
 
-  const showNeedle = balloonState === "running" || balloonState === "popping" || balloonState === "paused";
-  const accentColor = MODE_COLORS[mode];
-  const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
+  const handleNewSession = () => {
+    setRemaining(durations[mode] * 60);
+    setPhase("idle");
+    resetStrips();
+    setPaperFlying(false);
+    completedRef.current = false;
+  };
 
-  const statusMsg = (() => {
-    if (balloonState === "complete") return COMPLETE_MSGS[mode];
-    if (balloonState === "popped" || balloonState === "popping") return POPPED_MSG;
-    if (balloonState === "running") return RUNNING_MSGS[msgIdx];
-    if (balloonState === "paused") return PAUSED_MSG;
-    return IDLE_MSGS[mode];
-  })();
-
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="flex flex-col gap-3" style={{ fontFamily: "'DM Sans', system-ui" }}>
       {/* Header */}
@@ -467,9 +612,12 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         </div>
         <div className="flex items-center gap-2">
           {sessions > 0 && (
-            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{sessions} SESSION{sessions > 1 ? "S" : ""}</span>
+            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{sessions} SESSION{sessions !== 1 ? "S" : ""}</span>
           )}
-          <button onClick={() => setShowSettings((s) => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
+          {quitCount > 0 && (
+            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#C8603A", fontFamily: "'JetBrains Mono', monospace" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""}</span>
+          )}
+          <button onClick={() => setShowSettings(s => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
             <Settings size={11} color={showSettings ? accentColor : "#8C7B6B"} />
           </button>
         </div>
@@ -477,7 +625,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
       {/* Mode tabs */}
       <div style={{ display: "flex", gap: 6 }}>
-        {(["focus", "short", "long"] as TimerMode[]).map((m) => (
+        {(["focus", "short", "long"] as TimerMode[]).map(m => (
           <button key={m} onClick={() => switchMode(m)} style={{
             flex: 1, padding: "6px 0", fontSize: 9, letterSpacing: "0.18em",
             textTransform: "uppercase", border: `1px solid ${mode === m ? MODE_COLORS[m] : "#D4C4B0"}`,
@@ -495,13 +643,13 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
           <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
           <div style={{ display: "flex", gap: 16 }}>
-            {(["focus", "short", "long"] as TimerMode[]).map((m) => (
+            {(["focus", "short", "long"] as TimerMode[]).map(m => (
               <div key={m} style={{ flex: 1 }}>
                 <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" }}>{m}</p>
                 {editingMode === m ? (
                   <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <input ref={editRef} value={editVal} onChange={(e) => setEditVal(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
+                    <input ref={editRef} value={editVal} onChange={e => setEditVal(e.target.value)}
+                      onKeyDown={e => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
                       type="number" min={1} max={180}
                       style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_COLORS[m]}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }} />
                     <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_COLORS[m]} /></button>
@@ -514,7 +662,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
                   </button>
                 )}
                 <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
-                  {PRESETS[m].map((p) => (
+                  {PRESETS[m].map(p => (
                     <button key={p} onClick={() => applyDuration(m, p)} style={{
                       fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                       border: `1px solid ${durations[m] === p ? MODE_COLORS[m] : "#D4C4B0"}`,
@@ -529,159 +677,158 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
         </div>
       )}
 
-      {/* Balloon scene */}
-      <div style={{
-        background: "#FDFAF5",
-        border: "1px solid #E8DDD0",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: "20px 16px 16px",
-        minHeight: 260,
-        overflow: "visible",
-        position: "relative",
-      }}>
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          width: "100%",
-          minHeight: 220,
-          overflow: "visible",
-        }}>
-          {balloonState === "popped" ? (
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 200 }}>
-              <PopBurst />
-            </div>
-          ) : (
-            <BalloonScene
-              balloonScale={balloonScale}
-              timeLabel={mm + ":" + ss}
-              showNeedle={showNeedle}
-              touching={touching}
-              mode={mode}
-              isRunning={running}
-              stage={stage}
-              squeezing={squeezing}
-            />
-          )}
-        </div>
+      {/* Complete wrap-up */}
+      {phase === "complete" && (
+        <CompleteWrapUp sessions={sessions} mode={mode} onNewSession={handleNewSession} />
+      )}
 
-        {/* Status message */}
-        <p style={{
-          fontSize: 11, color: balloonState === "popped" || balloonState === "popping" ? "#C8603A" : "#6A5A4A",
-          margin: "8px 0 0", fontStyle: "italic",
-          fontFamily: "'Playfair Display', serif",
-          maxWidth: 260, textAlign: "center", lineHeight: 1.55, minHeight: 34,
-          transition: "color 0.3s",
-        }}>
-          {statusMsg}
-        </p>
-      </div>
+      {/* Quit wrap-up */}
+      {phase === "quit" && (
+        <QuitWrapUp quitCount={quitCount} stripsLeft={stripsLeft} onNewSession={handleNewSession} />
+      )}
 
-      {/* Stage indicator — 10 dots showing which deflation stage we're on */}
-      {(balloonState === "running" || balloonState === "paused") && (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 5, margin: "2px 0" }}>
-          {Array.from({ length: 10 }).map((_, i) => {
-            const passed = i < stage;
-            const isUrgentDot = i >= 7;
-            return (
+      {/* Paper scene — hidden during complete/quit */}
+      {phase !== "complete" && phase !== "quit" && (
+        <div
+          className={paperFlying ? "ft-fly-away" : ""}
+          style={{
+            background: "#FDFAF5",
+            border: "1px solid #E8DDD0",
+            minHeight: 260,
+            overflow: "hidden",
+            position: "relative",
+          }}
+        >
+          {/* Notebook header — time display */}
+          <div style={{
+            padding: "14px 16px 10px",
+            borderBottom: "1px solid #E8DDD0",
+            background: "#FAF6F1",
+            position: "relative",
+          }}>
+            {/* Red margin line */}
+            <div style={{
+              position: "absolute", left: 36, top: 0, bottom: 0,
+              width: 1, background: "#E8A090", opacity: 0.5,
+            }} />
+            {/* Ruled lines */}
+            {[0,1,2].map(i => (
               <div key={i} style={{
-                width: passed ? 8 : 6,
-                height: passed ? 8 : 6,
-                borderRadius: "50%",
-                background: passed
-                  ? (isUrgentDot ? (i >= 9 ? "#E83A1A" : i >= 8 ? "#E85A2A" : "#E87040") : accentColor)
-                  : "#E8DDD0",
-                transition: "all 0.4s cubic-bezier(0.34,1.56,0.64,1)",
-                boxShadow: passed && isUrgentDot ? `0 0 5px ${i >= 9 ? "#E83A1A" : "#E87040"}` : "none",
+                position: "absolute", left: 0, right: 0,
+                top: 14 + i * 10,
+                height: 1, background: "#E8DDD0", opacity: 0.6,
               }} />
-            );
-          })}
+            ))}
+            <p style={{
+              fontFamily: "'Playfair Display', serif",
+              fontSize: 11,
+              fontStyle: "italic",
+              color: "#8C7B6B",
+              margin: "0 0 4px 44px",
+              position: "relative",
+            }}>things to let go of</p>
+            <p style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 32,
+              fontWeight: 700,
+              color: phase === "running" ? accentColor : "#3D2E1E",
+              margin: "0 0 0 44px",
+              letterSpacing: "0.04em",
+              lineHeight: 1,
+              position: "relative",
+              transition: "color 0.5s",
+            }}>{mm}:{ss}</p>
+          </div>
 
+          {/* Strips */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            {STRIPS.map((text, i) => (
+              <TearStrip
+                key={i}
+                text={text}
+                seed={i + 1}
+                state={stripStates[i]}
+                isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
+              />
+            ))}
+          </div>
+
+          {/* Empty state when all torn */}
+          {tornCount === STRIPS.length && phase === "running" && (
+            <div style={{
+              padding: "20px",
+              textAlign: "center",
+              fontFamily: "'Playfair Display', serif",
+              fontStyle: "italic",
+              color: "#8C7B6B",
+              fontSize: 13,
+            }}>
+              All torn away…
+            </div>
+          )}
         </div>
       )}
 
       {/* Progress segments */}
-      <div style={{ display: "flex", gap: 3 }}>
-        {segments.map((filled, i) => (
-          <div key={i} style={{ flex: 1, height: 5, background: filled ? accentColor : "#E8DDD0", transition: "background 0.5s" }} />
-        ))}
-      </div>
-
-      {/* MM:SS Countdown — shown below when paused, hidden when running (shown in balloon) */}
-      {balloonState === "paused" && (
-        <div style={{ textAlign: "center", margin: "2px 0" }}>
-          <span style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 28,
-            fontWeight: 700,
-            letterSpacing: "0.06em",
-            color: remaining <= 60 ? "#C0392B" : "#2a1f14",
-            transition: "color 0.5s",
-          }}>{mm}:{ss}</span>
+      {phase !== "complete" && phase !== "quit" && (
+        <div style={{ display: "flex", gap: 3 }}>
+          {segments.map((filled, i) => (
+            <div key={i} style={{ flex: 1, height: 5, background: filled ? accentColor : "#E8DDD0", transition: "background 0.5s" }} />
+          ))}
         </div>
       )}
 
       {/* Controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-        {/* Quit — pops the balloon */}
-        {(running || balloonState === "paused") && (
-          <button onClick={handleReset} title="Quit session" style={{
-            display: "flex", alignItems: "center", gap: 5,
-            padding: "7px 14px", borderRadius: 999,
-            background: "transparent", border: "1px solid #D4C4B0",
-            color: "#8C7B6B", cursor: "pointer",
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
-            letterSpacing: "0.12em",
-          }}>
-            <RotateCcw size={11} /> QUIT
-          </button>
-        )}
+      {phase !== "complete" && phase !== "quit" && (
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {/* Quit */}
+          {(running || phase === "paused") && (
+            <button onClick={handleQuit} title="Quit session" style={{
+              display: "flex", alignItems: "center", gap: 5,
+              padding: "7px 14px", borderRadius: 999,
+              background: "transparent", border: "1px solid #D4C4B0",
+              color: "#8C7B6B", cursor: "pointer",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+              letterSpacing: "0.12em",
+            }}>
+              <RotateCcw size={11} /> QUIT
+            </button>
+          )}
 
-        {/* Play / Pause */}
-        {balloonState !== "complete" && balloonState !== "popped" && balloonState !== "popping" && (
-          <button onClick={handleStartPause} style={{
-            display: "flex", alignItems: "center", gap: 7,
-            padding: "9px 24px", borderRadius: 999,
-            background: running ? "transparent" : "#2a1f14",
-            border: "1px solid #2a1f14",
-            color: running ? "#2a1f14" : "#FAF6F1",
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
-            letterSpacing: "0.14em", cursor: "pointer",
-            boxShadow: running ? "none" : "0 3px 0 #1a1208",
-            transition: "all 0.1s",
-          }}>
-            {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {balloonState === "paused" ? "RESUME" : "START"}</>}
-          </button>
-        )}
+          {/* Play / Pause */}
+          {phase !== "recovering" && (
+            <button onClick={handleStartPause} style={{
+              display: "flex", alignItems: "center", gap: 7,
+              padding: "9px 24px", borderRadius: 999,
+              background: running ? "transparent" : "#2a1f14",
+              border: "1px solid #2a1f14",
+              color: running ? "#2a1f14" : "#FAF6F1",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+              letterSpacing: "0.14em", cursor: "pointer",
+              boxShadow: running ? "none" : "0 3px 0 #1a1208",
+              transition: "all 0.1s",
+            }}>
+              {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {phase === "paused" ? "RESUME" : "START"}</>}
+            </button>
+          )}
 
-        {/* Session dots */}
-        <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>
-          {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
-          ))}
-          <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+          {/* Session dots */}
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
+            ))}
+            <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+          </div>
         </div>
-      </div>
-
-      {/* New session button after complete/popped */}
-      {(balloonState === "complete" || balloonState === "popped") && (
-        <button onClick={() => { setRemaining(durations[mode] * 60); setBalloonState("idle"); completedRef.current = false; }} style={{
-          background: "transparent", border: "1px solid #2a1f14", color: "#2a1f14",
-          borderRadius: 999, padding: "7px 22px", fontSize: 10, cursor: "pointer",
-          fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em",
-          alignSelf: "center",
-        }}>
-          NEW SESSION
-        </button>
       )}
 
       {/* Footer */}
-      <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
-        <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
-        <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{Math.round(progress * 100)}% ELAPSED</span>
-      </div>
+      {phase !== "complete" && phase !== "quit" && (
+        <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
+          <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
+          <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{STRIPS.length} STRIPS TORN</span>
+        </div>
+      )}
     </div>
   );
 }

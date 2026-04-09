@@ -297,10 +297,11 @@ interface DailyWrapUpProps {
   tasks: Task[];
   wins: Win[];
   agents: Agent[];
+  quitCount?: number;
   onClose: () => void;
 }
 
-export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) {
+export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: DailyWrapUpProps) {
   const [copied, setCopied] = useState(false);
 
   const today    = new Date().toDateString();
@@ -315,8 +316,10 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
   const workDone      = doneTasks.filter((t) => t.context === "work");
   const personalDone  = doneTasks.filter((t) => t.context === "personal");
 
-  const score      = Math.min(100, doneTasks.length * 15 + todayWins.length * 10 + doneAgents.length * 10);
-  const scoreLabel = score >= 80 ? "Supercharged day! 🚀" : score >= 50 ? "Solid work today 💪" : score >= 20 ? "Progress made — keep going 🌱" : "Rest is productive too ☕";
+  const rawScore   = Math.min(100, doneTasks.length * 15 + todayWins.length * 10 + doneAgents.length * 10);
+  const quitPenalty = Math.min(quitCount * 10, 40);
+  const score      = Math.max(0, rawScore - quitPenalty);
+  const scoreLabel = score >= 80 ? "Supercharged day! 🚀" : score >= 50 ? "Solid work today 💪" : score >= 20 ? "Progress made — keep going 🌱" : quitCount > 0 ? `${quitCount} quit${quitCount !== 1 ? 's' : ''} today — tomorrow is a new page ☁️` : "Rest is productive too ☕";
 
   const generateDigest = () => {
     const lines = [
@@ -387,6 +390,11 @@ export function DailyWrapUp({ tasks, wins, agents, onClose }: DailyWrapUpProps) 
             <div className="h-1.5 w-full" style={{ background: M.border }}>
               <div className="h-full transition-all duration-700" style={{ width: `${score}%`, background: M.coral }} />
             </div>
+            {quitCount > 0 && (
+              <p className="text-xs mt-1" style={{ color: "#C8603A", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em" }}>
+                −{quitPenalty} penalty · {quitCount} session{quitCount !== 1 ? 's' : ''} quit today
+              </p>
+            )}
           </div>
         </div>
 
