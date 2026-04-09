@@ -6,7 +6,7 @@
    - Less text, more geometric shapes
    ============================================================ */
 
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { Dashboard } from "@/components/Dashboard";
 import { FocusTimer } from "@/components/FocusTimer";
@@ -223,10 +223,15 @@ export default function Home() {
       };
       setWins((prev) => [win, ...prev]);
 
-      // Auto-nudge linked goals: +10% progress per completed linked task
+      // Auto-nudge linked goals: progress = 100 / total linked tasks per completed task
       const goalNudges: Record<string, number> = {};
       newlyDone.forEach((t) => {
-        if (t.goalId) goalNudges[t.goalId] = (goalNudges[t.goalId] ?? 0) + 10;
+        if (t.goalId) {
+          // Count total tasks linked to this goal (including the one just completed)
+          const totalLinked = newTasks.filter((task) => task.goalId === t.goalId).length;
+          const increment = totalLinked > 0 ? Math.round(100 / totalLinked) : 10;
+          goalNudges[t.goalId] = (goalNudges[t.goalId] ?? 0) + increment;
+        }
       });
       if (Object.keys(goalNudges).length > 0) {
         setGoals((prev) =>
@@ -238,8 +243,10 @@ export default function Home() {
         );
         const nudgedGoal = goals.find((g) => goalNudges[g.id]);
         if (nudgedGoal) {
+          const totalLinked = newTasks.filter((t) => t.goalId === nudgedGoal.id).length;
+          const pct = totalLinked > 0 ? Math.round(100 / totalLinked) : 10;
           toast.success(
-            `→ Goal nudged: “${nudgedGoal.text.length > 35 ? nudgedGoal.text.slice(0, 35) + "…" : nudgedGoal.text}” +10%`,
+            `→ Goal: "${nudgedGoal.text.length > 35 ? nudgedGoal.text.slice(0, 35) + "…" : nudgedGoal.text}" +${pct}%`,
             { duration: 3500 }
           );
         }
@@ -348,24 +355,25 @@ export default function Home() {
           <div className="flex items-center gap-4 shrink-0">
             {/* Dashboard quick-stats in header — clickable, only shown on dashboard */}
             {activeSection === "dashboard" && (
-              <div className="hidden sm:flex items-center" style={{ border: "1px solid oklch(0.88 0.012 75)", borderRadius: 0 }}>
+              <div className="hidden sm:flex items-center gap-3">
                 {[
-                  { label: "Tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section, color: "oklch(0.58 0.18 20)" },
-                  { label: "Wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section, color: "oklch(0.50 0.12 75)" },
-                  { label: "Agents", value: agents.filter((a) => a.status === "running").length, section: "agents" as Section, color: "oklch(0.52 0.14 35)" },
-                ].map(({ label, value, section, color }, i, arr) => (
-                  <button
-                    key={label}
-                    onClick={() => setActiveSection(section)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 transition-all hover:opacity-70 cursor-pointer"
-                    style={{
-                      borderRight: i < arr.length - 1 ? "1px solid oklch(0.88 0.012 75)" : "none",
-                      background: "transparent",
-                    }}
-                  >
-                    <span style={{ fontSize: "0.68rem", fontWeight: 700, fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)", fontStyle: "italic" }}>{value}</span>
-                    <span style={{ fontSize: "0.58rem", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase", color, fontWeight: 600 }}>{label}</span>
-                  </button>
+                  { label: "tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section },
+                  { label: "wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section },
+                  { label: "agents live", value: agents.filter((a) => a.status === "running").length, section: "agents" as Section },
+                ].map(({ label, value, section }, i, arr) => (
+                  <React.Fragment key={label}>
+                    <button
+                      onClick={() => setActiveSection(section)}
+                      className="flex items-baseline gap-1.5 transition-all hover:opacity-60 cursor-pointer"
+                      style={{ background: "transparent", border: "none", padding: 0 }}
+                    >
+                      <span style={{ fontSize: "0.95rem", fontWeight: 400, fontFamily: "'DM Sans', sans-serif", color: "oklch(0.45 0.010 70)", letterSpacing: "-0.01em" }}>{value}</span>
+                      <span style={{ fontSize: "0.78rem", fontWeight: 400, fontFamily: "'DM Sans', sans-serif", color: "oklch(0.55 0.010 70)" }}>{label}</span>
+                    </button>
+                    {i < arr.length - 1 && (
+                      <span style={{ color: "oklch(0.70 0.008 70)", fontSize: "0.5rem", lineHeight: 1 }}>·</span>
+                    )}
+                  </React.Fragment>
                 ))}
               </div>
             )}

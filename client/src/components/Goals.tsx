@@ -313,9 +313,11 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                           >
                             {t.text}
                           </span>
-                          {t.done && (
-                            <span style={{ fontSize: "0.58rem", color: M.sage, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em" }}>+10%</span>
-                          )}
+                          {t.done && (() => {
+                            const totalLinked = tasks.filter((task) => task.goalId === goal.id).length;
+                            const pct = totalLinked > 0 ? Math.round(100 / totalLinked) : 10;
+                            return <span style={{ fontSize: "0.58rem", color: M.sage, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em" }}>+{pct}%</span>;
+                          })()}
                         </div>
                       ))}
                     </div>
