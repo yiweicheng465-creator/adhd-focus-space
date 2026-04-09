@@ -196,7 +196,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
           return (
             <div
               key={goal.id}
-              className="group p-4 transition-all"
+              className="group p-4 transition-all relative overflow-hidden"
               style={{
                 background: done ? M.sageBg : M.card,
                 border:     `1px solid ${done ? M.sageBdr : M.border}`,
@@ -208,6 +208,24 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                 (e.currentTarget as HTMLDivElement).style.borderColor = done ? M.sageBdr : M.border;
               }}
             >
+              {/* ✓ Achieved stamp — shown when goal hits 100% */}
+              {done && (
+                <div
+                  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-0.5"
+                  style={{
+                    background: M.sageBg,
+                    border: `1px solid ${M.sageBdr}`,
+                    borderRadius: 0,
+                    transform: "rotate(2deg)",
+                  }}
+                >
+                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                    <path d="M2 6l3 3 5-5" stroke={M.sage} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: M.sage, fontFamily: "'DM Sans', sans-serif" }}>Achieved</span>
+                </div>
+              )}
+
               <div className="flex items-start justify-between gap-2 mb-3">
                 <div className="flex items-start gap-2 flex-1 min-w-0">
                   {/* Simple flag icon */}

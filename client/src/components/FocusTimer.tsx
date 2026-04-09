@@ -29,6 +29,14 @@ if (typeof document !== "undefined" && !document.getElementById(URGENCY_STYLE_ID
       70%      { transform: scale(0.975); }
     }
     .balloon-breathe { animation: balloonBreathe 3.6s ease-in-out infinite; transform-origin: center bottom; }
+    @keyframes balloonSqueeze {
+      0%   { transform: scale(1, 1); }
+      20%  { transform: scale(1.18, 0.82); }
+      45%  { transform: scale(0.88, 1.12); }
+      70%  { transform: scale(1.06, 0.96); }
+      100% { transform: scale(1, 1); }
+    }
+    .balloon-squeeze { animation: balloonSqueeze 0.55s cubic-bezier(0.36,0.07,0.19,0.97) forwards; transform-origin: center bottom; }
   `;
   document.head.appendChild(s);
 }
@@ -122,7 +130,7 @@ function PopBurst() {
 
 // ── BalloonScene: unified SVG with balloon + needle ───────────────────────────
 function BalloonScene({
-  balloonScale, timeLabel, showNeedle, touching, mode, isRunning, stage,
+  balloonScale, timeLabel, showNeedle, touching, mode, isRunning, stage, squeezing,
 }: {
   balloonScale: number;
   timeLabel: string;
@@ -131,6 +139,7 @@ function BalloonScene({
   mode: TimerMode;
   isRunning: boolean;
   stage: number;
+  squeezing: boolean;
 }) {
   const s = Math.max(0.18, balloonScale);
   // Balloon deflates — stays centered, shrinks symmetrically
@@ -182,7 +191,7 @@ function BalloonScene({
       width={svgW}
       height={svgH}
       viewBox={`0 0 ${svgW} ${svgH}`}
-      className={isUrgent ? "balloon-urgency" : isIdle ? "balloon-breathe" : ""}
+      className={squeezing ? "balloon-squeeze" : isUrgent ? "balloon-urgency" : isIdle ? "balloon-breathe" : ""}
       style={{ display: "block", overflow: "visible", maxWidth: "100%", transition: "filter 0.5s" }}
     >
       {/* Balloon fill — urgency shifts to red/orange at stages 8-10 */}
@@ -307,6 +316,8 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
   const msgRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedRef = useRef(false);
   const editRef = useRef<HTMLInputElement>(null);
+  const prevStageRef = useRef(0);
+  const [squeezing, setSqueezing] = useState(false);
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
@@ -317,6 +328,17 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
+
+  // Detect stage change → trigger squeeze animation
+  useEffect(() => {
+    if (running && stage > 0 && stage !== prevStageRef.current) {
+      prevStageRef.current = stage;
+      setSqueezing(true);
+      const t = setTimeout(() => setSqueezing(false), 600);
+      return () => clearTimeout(t);
+    }
+    if (!running) prevStageRef.current = stage;
+  }, [stage, running]);
 
   // Rotate running messages
   useEffect(() => {
@@ -540,6 +562,7 @@ export function FocusTimer({ onSessionComplete }: FocusTimerProps) {
               mode={mode}
               isRunning={running}
               stage={stage}
+              squeezing={squeezing}
             />
           )}
         </div>
