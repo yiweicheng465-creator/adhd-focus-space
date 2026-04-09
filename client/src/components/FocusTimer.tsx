@@ -9,7 +9,8 @@
    ============================================================ */
 
 import { useEffect, useRef, useState, useCallback } from "react";
-import { RotateCcw, Play, Pause, Settings, Check, X } from "lucide-react";
+import { RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil } from "lucide-react";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-tear-keyframes";
@@ -57,6 +58,7 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
     .ft-sad-drop   { animation: ft-sadDrop 0.7s cubic-bezier(0.4,0,0.2,1) forwards; }
     .ft-fade-in    { animation: ft-fadeIn 0.5s ease forwards; }
     .ft-score-pop  { animation: ft-scoreCount 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .strip-row:hover .strip-actions { opacity: 1 !important; }
   `;
   document.head.appendChild(s);
 }
@@ -74,8 +76,8 @@ const PRESETS: Record<TimerMode, number[]> = {
 const MODE_LABELS: Record<TimerMode, string> = { focus: "Focus", short: "Short Break", long: "Long Break" };
 const MODE_COLORS: Record<TimerMode, string> = { focus: "#C8603A", short: "#7A8C6E", long: "#7A8C9E" };
 
-// ── Strip content ─────────────────────────────────────────────────────────────
-const STRIPS = [
+// ── Default strip content (used when user hasn't customised) ─────────────────
+const DEFAULT_STRIPS = [
   "overthinking",
   "email backlog",
   "that awkward thing",
@@ -85,6 +87,163 @@ const STRIPS = [
   "tomorrow's anxiety",
   "the mental noise",
 ];
+
+// ── Strip editor (shown in idle state) ───────────────────────────────────────
+function StripEditor({ strips, onChange }: {
+  strips: string[];
+  onChange: (strips: string[]) => void;
+}) {
+  const [newText, setNewText] = useState("");
+  const [editingIdx, setEditingIdx] = useState<number | null>(null);
+  const [editVal, setEditVal] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const editRef = useRef<HTMLInputElement>(null);
+
+  const addStrip = () => {
+    const trimmed = newText.trim();
+    if (!trimmed || strips.length >= 12) return;
+    onChange([...strips, trimmed]);
+    setNewText("");
+    setTimeout(() => inputRef.current?.focus(), 40);
+  };
+
+  const removeStrip = (i: number) => onChange(strips.filter((_, idx) => idx !== i));
+
+  const startEdit = (i: number) => {
+    setEditingIdx(i);
+    setEditVal(strips[i]);
+    setTimeout(() => editRef.current?.focus(), 40);
+  };
+
+  const commitEdit = () => {
+    if (editingIdx === null) return;
+    const trimmed = editVal.trim();
+    if (trimmed) {
+      const next = [...strips];
+      next[editingIdx] = trimmed;
+      onChange(next);
+    }
+    setEditingIdx(null);
+  };
+
+  const resetToDefaults = () => onChange([...DEFAULT_STRIPS]);
+
+  return (
+    <div style={{ padding: "12px 16px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <p style={{
+          fontFamily: "'Playfair Display', serif",
+          fontSize: 11, fontStyle: "italic",
+          color: "#8C7B6B", margin: 0,
+        }}>things to let go of</p>
+        <button
+          onClick={resetToDefaults}
+          title="Reset to defaults"
+          style={{
+            fontSize: 8, letterSpacing: "0.12em",
+            color: "#B0A090", background: "none", border: "none",
+            cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+            textDecoration: "underline", padding: 0,
+          }}
+        >reset</button>
+      </div>
+
+      {/* Strip list */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+        {strips.map((text, i) => (
+          <div key={i} className="strip-row" style={{
+            display: "flex", alignItems: "center", gap: 6,
+            padding: "6px 10px",
+            background: i === 0 ? "linear-gradient(90deg,#F5EDE0,#EDE0CF)" : "#FAF6F1",
+            borderTop: i === 0 ? "none" : "1px solid #EDE0CF",
+            position: "relative",
+          }}>
+            {/* Tear-order number */}
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 8, color: "#C8C0B0",
+              width: 14, flexShrink: 0, textAlign: "right",
+            }}>{i + 1}</span>
+
+            {editingIdx === i ? (
+              <input
+                ref={editRef}
+                value={editVal}
+                onChange={e => setEditVal(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter") commitEdit();
+                  if (e.key === "Escape") setEditingIdx(null);
+                }}
+                onBlur={commitEdit}
+                style={{
+                  flex: 1, fontSize: 10, border: "none",
+                  borderBottom: "1px solid #C8603A",
+                  background: "transparent", outline: "none",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  color: "#3D2E1E", padding: "1px 0",
+                }}
+              />
+            ) : (
+              <span style={{
+                flex: 1, fontSize: 10,
+                fontFamily: "'JetBrains Mono', monospace",
+                color: "#3D2E1E", letterSpacing: "0.04em",
+              }}>{text}</span>
+            )}
+
+            <div style={{ display: "flex", gap: 4, opacity: 0, transition: "opacity 0.15s" }}
+              className="strip-actions">
+              <button onClick={() => startEdit(i)} style={{
+                background: "none", border: "none", cursor: "pointer", padding: 2,
+              }}><Pencil size={10} color="#B0A090" /></button>
+              <button onClick={() => removeStrip(i)} style={{
+                background: "none", border: "none", cursor: "pointer", padding: 2,
+              }}><Trash2 size={10} color="#C8603A" /></button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Add new strip */}
+      {strips.length < 12 && (
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <input
+            ref={inputRef}
+            value={newText}
+            onChange={e => setNewText(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter") addStrip(); }}
+            placeholder="add something to let go of…"
+            style={{
+              flex: 1, fontSize: 10,
+              border: "none", borderBottom: "1px solid #D4C4B0",
+              background: "transparent", outline: "none",
+              fontFamily: "'JetBrains Mono', monospace",
+              color: "#3D2E1E", padding: "4px 0",
+              letterSpacing: "0.04em",
+            }}
+          />
+          <button
+            onClick={addStrip}
+            disabled={!newText.trim()}
+            style={{
+              width: 22, height: 22,
+              border: `1px solid ${newText.trim() ? "#C8603A" : "#D4C4B0"}`,
+              background: newText.trim() ? "#C8603A" : "transparent",
+              color: newText.trim() ? "#FAF6F1" : "#B0A090",
+              cursor: newText.trim() ? "pointer" : "default",
+              display: "flex", alignItems: "center", justifyContent: "center",
+              borderRadius: 0, flexShrink: 0,
+            }}
+          ><Plus size={11} /></button>
+        </div>
+      )}
+
+      {strips.length >= 12 && (
+        <p style={{ fontSize: 8, color: "#B0A090", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em", margin: 0 }}>max 12 strips</p>
+      )}
+    </div>
+  );
+}
 
 // ── Jagged tear SVG edge ──────────────────────────────────────────────────────
 function JaggedEdge({ seed }: { seed: number }) {
@@ -444,7 +603,9 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
   const [showSettings, setShowSettings] = useState(false);
   const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
   const [editVal, setEditVal] = useState("");
-  const [stripStates, setStripStates] = useState<StripState[]>(STRIPS.map(() => "attached"));
+  const [customStrips, setCustomStrips] = useLocalStorage<string[]>("adhd-focus-strips", DEFAULT_STRIPS);
+  const strips = customStrips.length > 0 ? customStrips : DEFAULT_STRIPS;
+  const [stripStates, setStripStates] = useState<StripState[]>(() => strips.map(() => "attached" as StripState));
   const [paperFlying, setPaperFlying] = useState(false);
 
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -457,9 +618,9 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
 
   const totalSec = durations[mode] * 60;
   const progress = totalSec > 0 ? (totalSec - remaining) / totalSec : 0;
-  const stripsToTear = Math.floor(progress * STRIPS.length);
+  const stripsToTear = Math.floor(progress * strips.length);
   const tornCount = stripStates.filter(s => s === "torn" || s === "tearing").length;
-  const stripsLeft = STRIPS.length - tornCount;
+  const stripsLeft = strips.length - tornCount;
   const nextStripIdx = stripStates.findIndex(s => s === "attached");
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
@@ -502,8 +663,8 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
       if (natural && !completedRef.current) {
         completedRef.current = true;
         // Cascade tear remaining strips
-        const remaining_strips = STRIPS.map((_, i) => i).filter(i => stripStates[i] === "attached");
-        remaining_strips.forEach((idx, j) => {
+        const remaining_strips = strips.map((_: string, i: number) => i).filter((i: number) => stripStates[i] === "attached");
+        remaining_strips.forEach((idx: number, j: number) => {
           setTimeout(() => {
             setStripStates(prev => {
               const next = [...prev];
@@ -560,7 +721,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running]); // only restart when running changes — elapsed calc uses refs
 
-  const resetStrips = () => setStripStates(STRIPS.map(() => "attached"));
+  const resetStrips = () => setStripStates(strips.map(() => "attached" as StripState));
 
   const switchMode = (m: TimerMode) => {
     if (running) return;
@@ -761,21 +922,34 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
             }}>{mm}:{ss}</p>
           </div>
 
-          {/* Strips */}
-          <div style={{ display: "flex", flexDirection: "column" }}>
-            {STRIPS.map((text, i) => (
-              <TearStrip
-                key={i}
-                text={text}
-                seed={i + 1}
-                state={stripStates[i]}
-                isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
-              />
-            ))}
-          </div>
+          {/* Idle: show editable strip list */}
+          {phase === "idle" && (
+            <StripEditor
+              strips={strips}
+              onChange={(next) => {
+                setCustomStrips(next);
+                setStripStates(next.map(() => "attached" as StripState));
+              }}
+            />
+          )}
+
+          {/* Running / paused: show tear strips */}
+          {phase !== "idle" && (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              {strips.map((text: string, i: number) => (
+                <TearStrip
+                  key={i}
+                  text={text}
+                  seed={i + 1}
+                  state={stripStates[i] ?? "attached"}
+                  isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
+                />
+              ))}
+            </div>
+          )}
 
           {/* Empty state when all torn */}
-          {tornCount === STRIPS.length && phase === "running" && (
+          {tornCount === strips.length && phase === "running" && (
             <div style={{
               padding: "20px",
               textAlign: "center",
@@ -847,7 +1021,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
       {phase !== "complete" && phase !== "quit" && (
         <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
-          <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{STRIPS.length} STRIPS TORN</span>
+          <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} STRIPS TORN</span>
         </div>
       )}
     </div>
