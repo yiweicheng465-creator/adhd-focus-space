@@ -211,6 +211,20 @@ export default function Home() {
   const [pendingDump, setPendingDump] = useState<string | null>(null);
   const [pendingAgentTask, setPendingAgentTask] = useState<string | null>(null);
 
+  // One-time migration: remove old session- wins that were added before the pill badge change
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("adhd-wins");
+      if (!raw) return;
+      const all = JSON.parse(raw) as Array<{ id: string }>;
+      const cleaned = all.filter((w) => !w.id.startsWith("session-"));
+      if (cleaned.length !== all.length) {
+        setWins(cleaned as Win[]);
+      }
+    } catch { /* ignore */ }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // Daily check-in
   const { show: showCheckIn, dismiss: dismissCheckIn } = useDailyCheckIn();
 

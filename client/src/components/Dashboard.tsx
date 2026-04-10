@@ -455,10 +455,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
                   letterSpacing: "0.04em",
                 }}
               >
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="9" stroke="oklch(0.42 0.14 35)" strokeWidth="2" />
-                  <polyline points="12,7 12,12 15,15" stroke="oklch(0.42 0.14 35)" strokeWidth="2" strokeLinecap="round" />
-                </svg>
                 ⏱ {focusSessions} FOCUS SESSION{focusSessions > 1 ? "S" : ""}
               </div>
             )}
