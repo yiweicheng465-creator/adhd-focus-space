@@ -9,7 +9,7 @@
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX, Music } from "lucide-react";
+import { RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
 import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
 import { useTimerSound } from "@/hooks/useTimerSound";
 
@@ -597,6 +597,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
 
   // Local UI-only state (settings panel, inline edit)
   const [showSettings, setShowSettings] = useState(false);
+  const [showSound, setShowSound] = useState(false);
   const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
   const [editVal, setEditVal] = useState("");
   const editRef = useRef<HTMLInputElement>(null);
@@ -658,15 +659,15 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
           {quitCount > 0 && (
             <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#C8603A", fontFamily: "'JetBrains Mono', monospace" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""}</span>
           )}
-          {/* SFX toggle */}
-          <button onClick={sound.toggleSfx} title={sound.sfxEnabled ? "Mute sound effects" : "Enable sound effects"} style={{ width: 26, height: 26, border: `1px solid ${sound.sfxEnabled ? "#C8603A" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
-            {sound.sfxEnabled ? <Volume2 size={11} color="#C8603A" /> : <VolumeX size={11} color="#8C7B6B" />}
+          {/* Single sound button */}
+          <button
+            onClick={() => { setShowSound(s => !s); setShowSettings(false); }}
+            title="Sound & music"
+            style={{ width: 26, height: 26, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", borderRadius: 0, position: "relative" }}
+          >
+            {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={11} color="#7A8C6E" /> : (sound.sfxEnabled ? <Volume2 size={11} color="#8C7B6B" /> : <VolumeX size={11} color="#8C7B6B" />)}
           </button>
-          {/* Coffee shop music toggle */}
-          <button onClick={sound.toggleMusic} title={sound.musicEnabled ? "Stop coffee shop music" : "Play coffee shop music"} style={{ width: 26, height: 26, border: `1px solid ${sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", borderRadius: 0 }}>
-            {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : <Coffee size={11} color={sound.musicEnabled ? "#7A8C6E" : "#8C7B6B"} />}
-          </button>
-          <button onClick={() => setShowSettings(s => !s)} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
+          <button onClick={() => { setShowSettings(s => !s); setShowSound(false); }} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
             <Settings size={11} color={showSettings ? accentColor : "#8C7B6B"} />
           </button>
         </div>
@@ -724,28 +725,38 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
             ))}
           </div>
 
-          {/* Sound controls */}
-          <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid #E8DDD0" }}>
-            <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              {/* SFX volume */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Volume2 size={10} color="#C8603A" />
-                <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 32 }}>SFX</span>
-                <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}
-                  onChange={e => sound.setSfxVolume(parseFloat(e.target.value))}
-                  style={{ flex: 1, accentColor: "#C8603A", cursor: "pointer" }} />
-                <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
-              </div>
-              {/* Music volume */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <Coffee size={10} color="#7A8C6E" />
-                <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 32 }}>CAFE</span>
-                <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
-                  onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
-                  style={{ flex: 1, accentColor: "#7A8C6E", cursor: "pointer" }} />
-                <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
-              </div>
+
+        </div>
+      )}
+
+      {/* Sound panel */}
+      {showSound && (
+        <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
+          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 12, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {/* Sound effects toggle + volume */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button onClick={sound.toggleSfx} style={{ width: 22, height: 22, border: `1px solid ${sound.sfxEnabled ? "#C8603A" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0, flexShrink: 0 }}>
+                {sound.sfxEnabled ? <Volume2 size={10} color="#C8603A" /> : <VolumeX size={10} color="#8C7B6B" />}
+              </button>
+              <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 80 }}>Sound Effects</span>
+              <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}
+                onChange={e => sound.setSfxVolume(parseFloat(e.target.value))}
+                disabled={!sound.sfxEnabled}
+                style={{ flex: 1, accentColor: "#C8603A", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
+              <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
+            </div>
+            {/* Coffee shop music toggle + volume */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <button onClick={sound.toggleMusic} style={{ width: 22, height: 22, border: `1px solid ${sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", borderRadius: 0, flexShrink: 0 }}>
+                {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : <Coffee size={10} color={sound.musicEnabled ? "#7A8C6E" : "#8C7B6B"} />}
+              </button>
+              <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 80 }}>Cafe Music</span>
+              <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
+                onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
+                disabled={!sound.musicEnabled}
+                style={{ flex: 1, accentColor: "#7A8C6E", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
+              <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
             </div>
           </div>
         </div>
