@@ -7,6 +7,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame } from "lucide-react";
+import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import type { Win } from "./DailyWins";
 import type { Task } from "./TaskManager";
 /* ── Types ── */
@@ -74,6 +75,83 @@ function calcStreak(logs: Record<string, DailyLog>): number {
   return streak;
 }
 
+/* ── Day hover card content ── */
+function DayCellHoverContent({ log, day, month, year }: { log?: DailyLog; day: number; month: number; year: number }) {
+  const dateStr = new Date(year, month, day).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const hasAny = log && (log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0 || log.tasksCompleted > 0 || (log.focusSessions ?? 0) > 0);
+  return (
+    <div style={{ fontFamily: "'DM Sans', sans-serif", minWidth: 180 }}>
+      <div style={{ fontSize: 12, fontWeight: 600, color: M.ink, marginBottom: 10, paddingBottom: 8, borderBottom: `1px solid ${M.border}` }}>
+        {dateStr}
+      </div>
+      {!hasAny ? (
+        <p style={{ fontSize: 11, color: M.muted, fontStyle: "italic", margin: 0 }}>No activity recorded.</p>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 7 }}>
+          {log?.wrapUpDone && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <CheckCircle2 size={13} style={{ color: M.sage, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: M.ink }}>Daily wrap-up completed</span>
+            </div>
+          )}
+          {(log?.dumpCount ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <Brain size={13} style={{ color: M.coral, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: M.ink }}>{log!.dumpCount} brain dump {log!.dumpCount === 1 ? "entry" : "entries"}</span>
+            </div>
+          )}
+          {(log?.winsCount ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <Sparkles size={13} style={{ color: M.gold, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: M.ink }}>{log!.winsCount} {log!.winsCount === 1 ? "win" : "wins"} logged</span>
+            </div>
+          )}
+          {(log?.tasksCompleted ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <CheckCircle2 size={13} style={{ color: M.pink, flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: M.ink }}>{log!.tasksCompleted} {log!.tasksCompleted === 1 ? "task" : "tasks"} completed</span>
+            </div>
+          )}
+          {(log?.focusSessions ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" />
+                <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <span style={{ fontSize: 11, color: M.ink }}>{log!.focusSessions} focus {log!.focusSessions === 1 ? "session" : "sessions"}</span>
+            </div>
+          )}
+          {(log?.blocksCompleted ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
+              </svg>
+              <span style={{ fontSize: 11, color: M.ink }}>{log!.blocksCompleted} deep focus {log!.blocksCompleted === 1 ? "block" : "blocks"} 🔥</span>
+            </div>
+          )}
+          {log?.mood && (
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <div style={{ width: 13, height: 13, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
+              <span style={{ fontSize: 11, color: M.ink }}>Mood: {MOOD_LABELS[log.mood - 1]}</span>
+            </div>
+          )}
+          {log?.score !== undefined && log.score > 0 && (
+            <div style={{ marginTop: 2, paddingTop: 7, borderTop: `1px solid ${M.border}` }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                <span style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: 1 }}>Day score</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: M.ink }}>{log.score}/100</span>
+              </div>
+              <div style={{ height: 3, borderRadius: 2, background: M.border, overflow: "hidden" }}>
+                <div style={{ height: "100%", width: `${log.score}%`, background: M.coral, borderRadius: 2 }} />
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Day cell ── */
 function DayCell({
   day, year, month, log, isToday, isSelected, onClick,
@@ -89,7 +167,7 @@ function DayCell({
   const hasActivity = log && (log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0);
   const moodColor = log?.mood ? MOOD_COLORS[log.mood - 1] : null;
 
-  return (
+  const cellButton = (
     <button
       onClick={onClick}
       style={{
@@ -119,9 +197,7 @@ function DayCell({
         transition: "all 0.15s",
         overflow: "hidden",
       }}
-      title={hasActivity ? `${log?.winsCount ?? 0} wins · ${log?.dumpCount ?? 0} dumps · ${log?.tasksCompleted ?? 0} tasks` : "No activity"}
     >
-      {/* Day number */}
       <span style={{
         fontSize: 11,
         fontWeight: isToday ? 700 : 400,
@@ -131,23 +207,13 @@ function DayCell({
       }}>
         {day}
       </span>
-
-      {/* Activity dots */}
       {hasActivity && (
         <div style={{ display: "flex", gap: 2, flexWrap: "wrap", justifyContent: "center" }}>
-          {log?.wrapUpDone && (
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.sage }} title="Wrap-up done" />
-          )}
-          {(log?.dumpCount ?? 0) > 0 && (
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.coral }} title="Brain dump" />
-          )}
-          {(log?.winsCount ?? 0) > 0 && (
-            <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.gold }} title="Wins" />
-          )}
+          {log?.wrapUpDone && <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.sage }} />}
+          {(log?.dumpCount ?? 0) > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.coral }} />}
+          {(log?.winsCount ?? 0) > 0 && <div style={{ width: 5, height: 5, borderRadius: "50%", background: M.gold }} />}
         </div>
       )}
-
-      {/* Mood colour strip at bottom */}
       {moodColor && (
         <div style={{
           position: "absolute",
@@ -159,6 +225,36 @@ function DayCell({
         }} />
       )}
     </button>
+  );
+
+  // Only show hover card for days with activity
+  if (!log || !(log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0 || log.tasksCompleted > 0 || (log.focusSessions ?? 0) > 0)) {
+    return cellButton;
+  }
+
+  return (
+    <HoverCard openDelay={300} closeDelay={100}>
+      <HoverCardTrigger asChild>
+        {cellButton}
+      </HoverCardTrigger>
+      <HoverCardContent
+        side="top"
+        align="center"
+        sideOffset={6}
+        style={{
+          background: M.card,
+          border: `1px solid ${M.border}`,
+          borderRadius: 12,
+          padding: "12px 14px",
+          boxShadow: "0 4px 20px oklch(0.28 0.018 65 / 0.10)",
+          width: "auto",
+          minWidth: 180,
+        }}
+        className=""
+      >
+        <DayCellHoverContent log={log} day={day} month={month} year={year} />
+      </HoverCardContent>
+    </HoverCard>
   );
 }
 
