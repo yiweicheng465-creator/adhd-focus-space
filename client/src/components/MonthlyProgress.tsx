@@ -359,26 +359,7 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
               </div>
             )}
 
-            {/* Focus sessions + blocks */}
-            {((log?.focusSessions ?? 0) > 0 || (log?.blocksCompleted ?? 0) > 0) && (
-              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-                {(log?.focusSessions ?? 0) > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "oklch(0.52 0.14 35 / 0.08)", border: "1px solid oklch(0.52 0.14 35 / 0.2)", borderRadius: 20 }}>
-                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="2" />
-                      <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="2" strokeLinecap="round" />
-                    </svg>
-                    <span style={{ fontSize: 11, color: "oklch(0.52 0.14 35)", fontWeight: 600 }}>{log!.focusSessions} session{log!.focusSessions !== 1 ? "s" : ""}</span>
-                  </div>
-                )}
-                {(log?.blocksCompleted ?? 0) > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "oklch(0.52 0.14 35 / 0.08)", border: "1px solid oklch(0.52 0.14 35 / 0.2)", borderRadius: 20 }}>
-                    <Flame size={11} style={{ color: "oklch(0.52 0.14 35)" }} />
-                    <span style={{ fontSize: 11, color: "oklch(0.52 0.14 35)", fontWeight: 600 }}>{log!.blocksCompleted} block{log!.blocksCompleted !== 1 ? "s" : ""} 🔥</span>
-                  </div>
-                )}
-              </div>
-            )}
+
 
             {/* Wins list */}
             {dayWins.length > 0 && (

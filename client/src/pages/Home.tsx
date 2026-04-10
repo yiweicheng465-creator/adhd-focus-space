@@ -194,7 +194,16 @@ export default function Home() {
   const [deletedCategories, setDeletedCategories] = useLocalStorage<string[]>("adhd-deleted-categories", []);
 
   // ── Transient state ──
-  const [focusSessions, setFocusSessions] = useState(0);
+  // Initialise from today's session wins so the counter survives page reloads
+  const [focusSessions, setFocusSessions] = useState(() => {
+    try {
+      const raw = localStorage.getItem("adhd-wins");
+      if (!raw) return 0;
+      const all = JSON.parse(raw) as Array<{ id: string; createdAt: string }>;
+      const today = new Date().toDateString();
+      return all.filter(w => w.id.startsWith("session-") && new Date(w.createdAt).toDateString() === today).length;
+    } catch { return 0; }
+  });
   const { streak: blockStreak, history: blockHistory, recordBlock } = useBlockStreak();
   const [timerQuitCount, setTimerQuitCount] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
