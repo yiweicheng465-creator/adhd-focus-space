@@ -260,89 +260,182 @@ function DayCell({
   );
 }
 
+/* ── Win category colours/labels (must match DailyWins WIN_ICONS order) ── */
+const WIN_CAT_COLORS = [
+  "oklch(0.60 0.10 15)",  // health
+  "oklch(0.52 0.08 230)", // study
+  "oklch(0.50 0.07 145)", // work
+  "oklch(0.58 0.09 55)",  // social
+  "oklch(0.55 0.10 300)", // creative
+  "oklch(0.55 0.07 185)", // mindful
+  "oklch(0.53 0.09 35)",  // fitness
+  "oklch(0.52 0.10 130)", // nutrition
+];
+const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
+
 /* ── Day detail panel ── */
-function DayDetail({ log, dateStr, onClose }: { log?: DailyLog; dateStr: string; onClose: () => void }) {
-  const hasAny = log && (log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0 || log.tasksCompleted > 0);
+function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dateStr: string; dateKey: string; onClose: () => void }) {
+  const hasAny = log && (log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0 || log.tasksCompleted > 0 || (log.focusSessions ?? 0) > 0);
+
+  // Read detailed wins for this day from localStorage
+  const dayWins = (() => {
+    try {
+      const raw = localStorage.getItem("adhd-wins");
+      if (!raw) return [];
+      const all = JSON.parse(raw) as Array<{ id: string; text: string; iconIdx: number; createdAt: string }>;
+      return all.filter(w => new Date(w.createdAt).toDateString() === dk);
+    } catch { return []; }
+  })();
+
+  // Read brain dump entries for this day from localStorage
+  const dayDumps = (() => {
+    try {
+      const raw = localStorage.getItem("adhd_braindump_entries");
+      if (!raw) return [];
+      const all = JSON.parse(raw) as Array<{ id: string; text: string; createdAt: string }>;
+      return all.filter(e => new Date(e.createdAt).toDateString() === dk);
+    } catch { return []; }
+  })();
+
+  // Group wins by category
+  const winsByCategory = dayWins.reduce<Record<number, typeof dayWins>>((acc, w) => {
+    const idx = w.iconIdx ?? 4;
+    if (!acc[idx]) acc[idx] = [];
+    acc[idx].push(w);
+    return acc;
+  }, {});
+
   return (
     <div style={{
       background: M.card,
       border: `1px solid ${M.border}`,
       borderRadius: 14,
-      padding: "18px 20px",
       fontFamily: "'DM Sans', sans-serif",
+      overflow: "hidden",
     }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-        <span style={{ fontSize: 13, fontWeight: 600, color: M.ink }}>{dateStr}</span>
-        <button onClick={onClose} style={{ fontSize: 16, color: M.muted, background: "none", border: "none", cursor: "pointer", lineHeight: 1 }}>×</button>
+      {/* Header */}
+      <div style={{ padding: "14px 18px", borderBottom: `1px solid ${M.border}`, background: M.coralBg, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <span style={{ fontSize: 11, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>Day Summary</span>
+          <p style={{ fontSize: 14, fontWeight: 700, color: M.ink, margin: 0, fontFamily: "'Playfair Display', serif", fontStyle: "italic" }}>{dateStr}</p>
+        </div>
+        <button onClick={onClose} style={{ fontSize: 18, color: M.muted, background: "none", border: "none", cursor: "pointer", lineHeight: 1, padding: "0 2px" }}>×</button>
       </div>
 
-      {!hasAny ? (
-        <div style={{ textAlign: "center", padding: "16px 0" }}>
-          <p style={{ fontSize: 13, color: M.muted, fontStyle: "italic" }}>No activity recorded for this day.</p>
-          <p style={{ fontSize: 11, color: M.muted, marginTop: 6 }}>Even a quick brain dump counts!</p>
-        </div>
-      ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-          {log?.wrapUpDone && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <CheckCircle2 size={14} style={{ color: M.sage, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: M.ink }}>Daily wrap-up completed</span>
-            </div>
-          )}
-          {(log?.dumpCount ?? 0) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Brain size={14} style={{ color: M.coral, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: M.ink }}>{log!.dumpCount} brain dump {log!.dumpCount === 1 ? "entry" : "entries"}</span>
-            </div>
-          )}
-          {(log?.winsCount ?? 0) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <Sparkles size={14} style={{ color: M.gold, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: M.ink }}>{log!.winsCount} {log!.winsCount === 1 ? "win" : "wins"} logged</span>
-            </div>
-          )}
-          {(log?.tasksCompleted ?? 0) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <CheckCircle2 size={14} style={{ color: M.pink, flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: M.ink }}>{log!.tasksCompleted} {log!.tasksCompleted === 1 ? "task" : "tasks"} completed</span>
-            </div>
-          )}
-          {(log?.focusSessions ?? 0) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" />
-                <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-              <span style={{ fontSize: 12, color: M.ink }}>{log!.focusSessions} focus {log!.focusSessions === 1 ? "session" : "sessions"} completed</span>
-            </div>
-          )}
-          {(log?.blocksCompleted ?? 0) > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
-              </svg>
-              <span style={{ fontSize: 12, color: M.ink }}>{log!.blocksCompleted} deep focus {log!.blocksCompleted === 1 ? "block" : "blocks"} complete 🔥</span>
-            </div>
-          )}
-          {log?.mood && (
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <div style={{ width: 14, height: 14, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
-              <span style={{ fontSize: 12, color: M.ink }}>Mood: {MOOD_LABELS[log.mood - 1]}</span>
-            </div>
-          )}
-          {log?.score !== undefined && log.score > 0 && (
-            <div style={{ marginTop: 4, paddingTop: 8, borderTop: `1px solid ${M.border}` }}>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                <span style={{ fontSize: 11, color: M.muted, textTransform: "uppercase", letterSpacing: 1 }}>Day score</span>
-                <span style={{ fontSize: 11, fontWeight: 600, color: M.ink }}>{log.score}/100</span>
-              </div>
-              <div style={{ height: 4, borderRadius: 2, background: M.border, overflow: "hidden" }}>
-                <div style={{ height: "100%", width: `${log.score}%`, background: M.coral, borderRadius: 2, transition: "width 0.4s" }} />
-              </div>
-            </div>
-          )}
+      {/* Score bar */}
+      {log?.score !== undefined && log.score > 0 && (
+        <div style={{ padding: "10px 18px", borderBottom: `1px solid ${M.border}` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 5 }}>
+            <span style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: 1 }}>Day Score</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: M.ink }}>{log.score}/100</span>
+          </div>
+          <div style={{ height: 5, borderRadius: 3, background: M.border, overflow: "hidden" }}>
+            <div style={{ height: "100%", width: `${log.score}%`, background: M.coral, borderRadius: 3, transition: "width 0.5s" }} />
+          </div>
         </div>
       )}
+
+      <div style={{ padding: "14px 18px", display: "flex", flexDirection: "column", gap: 14 }}>
+        {!hasAny ? (
+          <div style={{ textAlign: "center", padding: "12px 0" }}>
+            <p style={{ fontSize: 13, color: M.muted, fontStyle: "italic" }}>No activity recorded for this day.</p>
+            <p style={{ fontSize: 11, color: M.muted, marginTop: 4 }}>Even a quick brain dump counts!</p>
+          </div>
+        ) : (
+          <>
+            {/* Mood */}
+            {log?.mood && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 12, height: 12, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: M.ink }}>Mood: <strong>{MOOD_LABELS[log.mood - 1]}</strong></span>
+              </div>
+            )}
+
+            {/* Wrap-up */}
+            {log?.wrapUpDone && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <CheckCircle2 size={13} style={{ color: M.sage, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: M.sage, fontWeight: 600 }}>Daily wrap-up completed</span>
+              </div>
+            )}
+
+            {/* Focus sessions + blocks */}
+            {((log?.focusSessions ?? 0) > 0 || (log?.blocksCompleted ?? 0) > 0) && (
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+                {(log?.focusSessions ?? 0) > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "oklch(0.52 0.14 35 / 0.08)", border: "1px solid oklch(0.52 0.14 35 / 0.2)", borderRadius: 20 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="2" />
+                      <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="2" strokeLinecap="round" />
+                    </svg>
+                    <span style={{ fontSize: 11, color: "oklch(0.52 0.14 35)", fontWeight: 600 }}>{log!.focusSessions} session{log!.focusSessions !== 1 ? "s" : ""}</span>
+                  </div>
+                )}
+                {(log?.blocksCompleted ?? 0) > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: "oklch(0.52 0.14 35 / 0.08)", border: "1px solid oklch(0.52 0.14 35 / 0.2)", borderRadius: 20 }}>
+                    <Flame size={11} style={{ color: "oklch(0.52 0.14 35)" }} />
+                    <span style={{ fontSize: 11, color: "oklch(0.52 0.14 35)", fontWeight: 600 }}>{log!.blocksCompleted} block{log!.blocksCompleted !== 1 ? "s" : ""} 🔥</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Wins list */}
+            {dayWins.length > 0 && (
+              <div>
+                <p style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 600 }}>
+                  <Sparkles size={10} style={{ display: "inline", marginRight: 4, color: M.gold }} />
+                  Wins ({dayWins.length})
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                  {Object.entries(winsByCategory).map(([idxStr, catWins]) => {
+                    const idx = Number(idxStr);
+                    const color = WIN_CAT_COLORS[idx % WIN_CAT_COLORS.length];
+                    const label = WIN_CAT_LABELS[idx % WIN_CAT_LABELS.length];
+                    return (
+                      <div key={idx}>
+                        <p style={{ fontSize: 10, color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 3 }}>{label}</p>
+                        {catWins.map(w => (
+                          <div key={w.id} style={{ display: "flex", alignItems: "flex-start", gap: 7, padding: "4px 0", borderBottom: `1px solid ${M.border}` }}>
+                            <div style={{ width: 3, height: 3, borderRadius: "50%", background: color, marginTop: 6, flexShrink: 0 }} />
+                            <span style={{ fontSize: 12, color: M.ink, lineHeight: 1.4 }}>{w.text}</span>
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Brain dump entries */}
+            {dayDumps.length > 0 && (
+              <div>
+                <p style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 600 }}>
+                  <Brain size={10} style={{ display: "inline", marginRight: 4, color: M.coral }} />
+                  Brain Dump ({dayDumps.length})
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                  {dayDumps.map(e => (
+                    <div key={e.id} style={{ display: "flex", alignItems: "flex-start", gap: 7, padding: "4px 0", borderBottom: `1px solid ${M.border}` }}>
+                      <div style={{ width: 3, height: 3, borderRadius: "50%", background: M.coral, marginTop: 6, flexShrink: 0 }} />
+                      <span style={{ fontSize: 12, color: M.ink, lineHeight: 1.4 }}>{e.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Tasks completed (count only — no completedAt timestamp available) */}
+            {(log?.tasksCompleted ?? 0) > 0 && dayWins.length === 0 && dayDumps.length === 0 && (
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <CheckCircle2 size={13} style={{ color: M.pink, flexShrink: 0 }} />
+                <span style={{ fontSize: 12, color: M.ink }}>{log!.tasksCompleted} {log!.tasksCompleted === 1 ? "task" : "tasks"} completed</span>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -568,6 +661,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         <DayDetail
           log={selectedLog}
           dateStr={selectedDateStr}
+          dateKey={new Date(viewYear, viewMonth, selectedDay).toDateString()}
           onClose={() => setSelectedDay(null)}
         />
       )}
