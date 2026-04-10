@@ -18,7 +18,7 @@ import { AgentTracker, type Agent } from "@/components/AgentTracker";
 import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
-import { recordWrapUp, recordDumpEntry } from "@/components/MonthlyProgress";
+import { recordWrapUp, recordDumpEntry, recordFocusSession, recordBlockComplete } from "@/components/MonthlyProgress";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
@@ -274,6 +274,7 @@ export default function Home() {
   };
 
   const handleSessionComplete = () => {
+    recordFocusSession();
     setFocusSessions((s) => {
       const next = s + 1;
       setConfettiTrigger(true);
@@ -289,6 +290,7 @@ export default function Home() {
   };
 
   const handleBlockComplete = () => {
+    recordBlockComplete();
     const blockWin: Win = {
       id: `block-${Date.now()}`,
       text: "2-hour deep focus block complete",

@@ -9,69 +9,6 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame } from "lucide-react";
 import type { Win } from "./DailyWins";
 import type { Task } from "./TaskManager";
-import { getLastNDays } from "@/hooks/useBlockStreak";
-
-/* ── Block heatmap ── */
-function BlockHeatmap({ history, streak }: { history: Record<string, number>; streak: number }) {
-  const days = getLastNDays(7);
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const maxCount = Math.max(1, ...days.map((d) => history[d] ?? 0));
-  const dayLabels = days.map((d) => {
-    const dow = new Date(d + "T12:00:00").getDay();
-    return ["S","M","T","W","T","F","S"][dow];
-  });
-  return (
-    <div style={{ marginTop: 24, padding: "16px", border: `1px solid oklch(0.52 0.14 35 / 0.18)`, background: "oklch(0.52 0.14 35 / 0.03)", borderRadius: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
-          </svg>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: M.muted, fontFamily: "'JetBrains Mono', monospace" }}>Deep focus blocks · this week</span>
-        </div>
-        {streak > 0 && (
-          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace" }}>
-            {streak} day streak
-          </span>
-        )}
-      </div>
-      <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
-        {days.map((date, i) => {
-          const count = history[date] ?? 0;
-          const isToday = date === todayStr;
-          const intensity = count === 0 ? 0 : Math.max(0.15, count / maxCount);
-          const bg = count === 0 ? "oklch(0.88 0.014 75)" : `oklch(0.52 0.14 35 / ${0.15 + intensity * 0.75})`;
-          const cellH = count === 0 ? 28 : Math.round(28 + intensity * 28);
-          return (
-            <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-              {count > 0 && (
-                <span style={{ fontSize: 9, fontWeight: 700, color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{count}</span>
-              )}
-              <div
-                title={`${date}: ${count} block${count !== 1 ? "s" : ""}`}
-                style={{ width: "100%", height: cellH, background: bg, border: isToday ? "1.5px solid oklch(0.52 0.14 35 / 0.6)" : "1px solid oklch(0.87 0.014 75)", borderRadius: 3, transition: "height 0.3s ease" }}
-              />
-              <span style={{ fontSize: 9, fontWeight: isToday ? 700 : 400, color: isToday ? "oklch(0.45 0.10 35)" : M.muted, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{dayLabels[i]}</span>
-            </div>
-          );
-        })}
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
-        {[
-          { bg: "oklch(0.88 0.014 75)", label: "no block" },
-          { bg: "oklch(0.52 0.14 35 / 0.35)", label: "1 block" },
-          { bg: "oklch(0.52 0.14 35 / 0.90)", label: "2+ blocks" },
-        ].map(({ bg, label }) => (
-          <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <div style={{ width: 10, height: 10, background: bg, border: "1px solid oklch(0.87 0.014 75)", borderRadius: 2 }} />
-            <span style={{ fontSize: 10, color: M.muted, fontFamily: "'JetBrains Mono', monospace" }}>{label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 /* ── Types ── */
 export interface DailyLog {
   dateKey: string;       // "Mon Apr 07 2026"
@@ -81,6 +18,8 @@ export interface DailyLog {
   tasksCompleted: number;
   mood: number | null;   // 1-5
   score: number;         // 0-100
+  focusSessions?: number; // individual 25-min sessions completed
+  blocksCompleted?: number; // full 4-session blocks completed
 }
 
 const MOOD_COLORS = ["#C0BCCC","#C8C0D8","#B09878","#90C8A8","#F0A878"];
@@ -270,6 +209,23 @@ function DayDetail({ log, dateStr, onClose }: { log?: DailyLog; dateStr: string;
               <span style={{ fontSize: 12, color: M.ink }}>{log!.tasksCompleted} {log!.tasksCompleted === 1 ? "task" : "tasks"} completed</span>
             </div>
           )}
+          {(log?.focusSessions ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" />
+                <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+              <span style={{ fontSize: 12, color: M.ink }}>{log!.focusSessions} focus {log!.focusSessions === 1 ? "session" : "sessions"} completed</span>
+            </div>
+          )}
+          {(log?.blocksCompleted ?? 0) > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
+                <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
+              </svg>
+              <span style={{ fontSize: 12, color: M.ink }}>{log!.blocksCompleted} deep focus {log!.blocksCompleted === 1 ? "block" : "blocks"} complete 🔥</span>
+            </div>
+          )}
           {log?.mood && (
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <div style={{ width: 14, height: 14, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
@@ -328,7 +284,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         ...existing,
         winsCount: todayWins.length,
         tasksCompleted: todayDone.length,
-        score: Math.min(100, todayWins.length * 10 + todayDone.length * 15 + (existing.wrapUpDone ? 20 : 0) + existing.dumpCount * 5),
+        score: Math.min(100, todayWins.length * 10 + todayDone.length * 15 + (existing.wrapUpDone ? 20 : 0) + existing.dumpCount * 5 + (existing.focusSessions ?? 0) * 5 + (existing.blocksCompleted ?? 0) * 10),
       };
       if (JSON.stringify(existing) === JSON.stringify(updated)) return prev;
       const next = { ...prev, [todayKey]: updated };
@@ -504,9 +460,6 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         />
       )}
 
-      {/* Block heatmap achievement */}
-      <BlockHeatmap history={blockHistory} streak={blockStreak} />
-
       {/* Motivational note */}
       <div style={{ marginTop: 20, padding: "14px 16px", background: M.coralBg, borderRadius: 10, border: `1px solid oklch(0.55 0.09 35 / 0.15)` }}>
         <p style={{ fontSize: 12, color: M.ink, margin: 0, lineHeight: 1.6 }}>
@@ -537,6 +490,34 @@ export function recordDumpEntry() {
     const logs: Record<string, DailyLog> = raw ? JSON.parse(raw) : {};
     const existing = logs[today] ?? { dateKey: today, wrapUpDone: false, dumpCount: 0, winsCount: 0, tasksCompleted: 0, mood: null, score: 0 };
     logs[today] = { ...existing, dumpCount: existing.dumpCount + 1 };
+    localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
+  } catch {}
+}
+
+/* ── Exported helper to record a focus session completion ── */
+export function recordFocusSession() {
+  const today = new Date().toDateString();
+  try {
+    const raw = localStorage.getItem("adhd-daily-logs");
+    const logs: Record<string, DailyLog> = raw ? JSON.parse(raw) : {};
+    const existing = logs[today] ?? { dateKey: today, wrapUpDone: false, dumpCount: 0, winsCount: 0, tasksCompleted: 0, mood: null, score: 0 };
+    const sessions = (existing.focusSessions ?? 0) + 1;
+    const score = Math.min(100, existing.score + 5);
+    logs[today] = { ...existing, focusSessions: sessions, score };
+    localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
+  } catch {}
+}
+
+/* ── Exported helper to record a full 4-session block completion ── */
+export function recordBlockComplete() {
+  const today = new Date().toDateString();
+  try {
+    const raw = localStorage.getItem("adhd-daily-logs");
+    const logs: Record<string, DailyLog> = raw ? JSON.parse(raw) : {};
+    const existing = logs[today] ?? { dateKey: today, wrapUpDone: false, dumpCount: 0, winsCount: 0, tasksCompleted: 0, mood: null, score: 0 };
+    const blocks = (existing.blocksCompleted ?? 0) + 1;
+    const score = Math.min(100, existing.score + 10);
+    logs[today] = { ...existing, blocksCompleted: blocks, score };
     localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
   } catch {}
 }
