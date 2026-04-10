@@ -24,6 +24,7 @@ import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useBlockStreak } from "@/hooks/useBlockStreak";
+import { useTimer } from "@/contexts/TimerContext";
 import {
   DashboardDecor,
   FocusDecor,
@@ -183,6 +184,7 @@ const SUNSET_WIDE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WN
 
 export default function Home() {
   const [activeSection, setActiveSection] = useState<Section>("dashboard");
+  const { durations } = useTimer();
 
   // ── Persisted state ──
   const [tasks,  setTasks]  = useLocalStorage<Task[]>("adhd-tasks",  INITIAL_TASKS);
@@ -194,14 +196,24 @@ export default function Home() {
   const [deletedCategories, setDeletedCategories] = useLocalStorage<string[]>("adhd-deleted-categories", []);
 
   // ── Transient state ──
-  // Initialise from today's session wins so the counter survives page reloads
+  // Initialise from today's session list so the counter survives page reloads
   const [focusSessions, setFocusSessions] = useState(() => {
     try {
-      const raw = localStorage.getItem("adhd-wins");
-      if (!raw) return 0;
-      const all = JSON.parse(raw) as Array<{ id: string; createdAt: string }>;
-      const today = new Date().toDateString();
-      return all.filter(w => w.id.startsWith("session-") && new Date(w.createdAt).toDateString() === today).length;
+      // First try the new detailed session list
+      const listRaw = localStorage.getItem("adhd-focus-session-list");
+      if (listRaw) {
+        const list = JSON.parse(listRaw) as Record<string, Array<{ sessionNumber: number }>>;
+        const today = new Date().toDateString();
+        return (list[today] ?? []).length;
+      }
+      // Fallback: read from daily log count
+      const logRaw = localStorage.getItem("adhd-daily-logs");
+      if (logRaw) {
+        const logs = JSON.parse(logRaw) as Record<string, { focusSessions?: number }>;
+        const today = new Date().toDateString();
+        return logs[today]?.focusSessions ?? 0;
+      }
+      return 0;
     } catch { return 0; }
   });
   const { streak: blockStreak, history: blockHistory, recordBlock } = useBlockStreak();
@@ -300,7 +312,7 @@ export default function Home() {
   };
 
   const handleSessionComplete = () => {
-    recordFocusSession();
+    recordFocusSession(durations.focus);
     setFocusSessions((s) => {
       setConfettiTrigger(true);
       return s + 1;

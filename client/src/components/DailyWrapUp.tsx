@@ -513,6 +513,9 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
             <WinsRing wins={todayWins} />
           </Section>
 
+          {/* Focus Tracker */}
+          <FocusTrackerSection />
+
           {/* Pending */}
           {activeTasks.length > 0 && (
             <Section icon={<span className="text-base">⏳</span>} title={`Still pending (${activeTasks.length})`} color={M.slumber}>
@@ -603,5 +606,119 @@ function TaskRow({ text, color }: { text: string; color: string }) {
       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color }} />
       <span className="text-sm" style={{ color: "oklch(0.28 0.018 65)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
     </div>
+  );
+}
+
+/* ── Focus Tracker Section ── */
+interface FocusSessionEntry {
+  sessionNumber: number;
+  duration: number;
+  timestamp: number;
+  dateKey: string;
+}
+
+function FocusTrackerSection() {
+  const today = new Date().toDateString();
+
+  // Read today's focus sessions from the detailed session list
+  const sessions: FocusSessionEntry[] = (() => {
+    try {
+      const raw = localStorage.getItem("adhd-focus-session-list");
+      if (!raw) return [];
+      const list = JSON.parse(raw) as Record<string, FocusSessionEntry[]>;
+      return list[today] ?? [];
+    } catch { return []; }
+  })();
+
+  // Also check daily log for count (in case sessions were done before the new key was added)
+  const logCount: number = (() => {
+    try {
+      const raw = localStorage.getItem("adhd-daily-logs");
+      if (!raw) return 0;
+      const logs = JSON.parse(raw) as Record<string, { focusSessions?: number }>;
+      return logs[today]?.focusSessions ?? 0;
+    } catch { return 0; }
+  })();
+
+  const count = Math.max(sessions.length, logCount);
+  const timerColor = "oklch(0.55 0.09 35)"; // coral / timer color
+
+  return (
+    <Section
+      icon={<span style={{ fontSize: 14 }}>⏱</span>}
+      title={`Focus Sessions (${count})`}
+      color={timerColor}
+    >
+      {count === 0 ? (
+        <p className="text-sm italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+          No focus sessions completed today.
+        </p>
+      ) : sessions.length > 0 ? (
+        <div className="space-y-1.5">
+          {sessions.map((s) => {
+            const time = new Date(s.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+            return (
+              <div
+                key={s.sessionNumber}
+                className="flex items-center gap-3 py-1.5 px-2.5"
+                style={{
+                  background: "oklch(0.55 0.09 35 / 0.06)",
+                  border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                  borderRadius: 6,
+                }}
+              >
+                <span
+                  className="text-xs font-bold"
+                  style={{
+                    color: timerColor,
+                    fontFamily: "'JetBrains Mono', monospace",
+                    letterSpacing: "0.08em",
+                    minWidth: 20,
+                  }}
+                >
+                  #{s.sessionNumber}
+                </span>
+                <span className="text-sm flex-1" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+                  {s.duration} min focus session
+                </span>
+                <span className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                  {time}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        // Old data: only count is available, no detailed entries
+        <div className="space-y-1.5">
+          {Array.from({ length: count }, (_, i) => (
+            <div
+              key={i}
+              className="flex items-center gap-3 py-1.5 px-2.5"
+              style={{
+                background: "oklch(0.55 0.09 35 / 0.06)",
+                border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                borderRadius: 6,
+              }}
+            >
+              <span
+                className="text-xs font-bold"
+                style={{
+                  color: timerColor,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  letterSpacing: "0.08em",
+                  minWidth: 20,
+                }}
+              >
+                #{i + 1}
+              </span>
+              <span className="text-sm flex-1" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+                Focus session complete
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </Section>
   );
 }

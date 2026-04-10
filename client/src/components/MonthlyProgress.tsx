@@ -297,6 +297,19 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
     } catch { return []; }
   })();
 
+  // Read focus session details for this day
+  interface FocusSessionEntry { sessionNumber: number; duration: number; timestamp: number; dateKey: string; }
+  const dayFocusSessions = (() => {
+    try {
+      const raw = localStorage.getItem("adhd-focus-session-list");
+      if (!raw) return [] as FocusSessionEntry[];
+      const list = JSON.parse(raw) as Record<string, FocusSessionEntry[]>;
+      return list[dk] ?? [] as FocusSessionEntry[];
+    } catch { return [] as FocusSessionEntry[]; }
+  })();
+  // Fallback: use count from log if no detailed entries
+  const focusCount = dayFocusSessions.length > 0 ? dayFocusSessions.length : (log?.focusSessions ?? 0);
+
   // Group wins by category
   const winsByCategory = dayWins.reduce<Record<number, typeof dayWins>>((acc, w) => {
     const idx = w.iconIdx ?? 4;
@@ -403,6 +416,50 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
                       <span style={{ fontSize: 12, color: M.ink, lineHeight: 1.4 }}>{e.text}</span>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+
+            {/* Focus Tracker */}
+            {focusCount > 0 && (
+              <div>
+                <p style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 600 }}>
+                  <span style={{ marginRight: 4 }}>⏱</span>
+                  Focus Sessions ({focusCount})
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                  {dayFocusSessions.length > 0 ? (
+                    dayFocusSessions.map((s) => {
+                      const time = new Date(s.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+                      return (
+                        <div key={s.sessionNumber} style={{
+                          display: "flex", alignItems: "center", gap: 10,
+                          padding: "5px 10px",
+                          background: "oklch(0.55 0.09 35 / 0.06)",
+                          border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                          borderRadius: 6,
+                        }}>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: M.coral, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", minWidth: 20 }}>#{s.sessionNumber}</span>
+                          <span style={{ fontSize: 12, color: M.ink, flex: 1 }}>{s.duration} min focus</span>
+                          <span style={{ fontSize: 11, color: M.muted }}>{time}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    // Old data: only count available
+                    Array.from({ length: focusCount }, (_, i) => (
+                      <div key={i} style={{
+                        display: "flex", alignItems: "center", gap: 10,
+                        padding: "5px 10px",
+                        background: "oklch(0.55 0.09 35 / 0.06)",
+                        border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                        borderRadius: 6,
+                      }}>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: M.coral, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", minWidth: 20 }}>#{i + 1}</span>
+                        <span style={{ fontSize: 12, color: M.ink }}>Focus session complete</span>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             )}
@@ -807,10 +864,19 @@ export function recordDumpEntry() {
   } catch {}
 }
 
+/* ── Focus session detail entry type ── */
+export interface FocusSessionEntry {
+  sessionNumber: number;  // 1-based
+  duration: number;       // minutes
+  timestamp: number;      // ms since epoch
+  dateKey: string;        // "Mon Apr 07 2026"
+}
+
 /* ── Exported helper to record a focus session completion ── */
-export function recordFocusSession() {
+export function recordFocusSession(durationMinutes = 25) {
   const today = new Date().toDateString();
   try {
+    // Update daily log count
     const raw = localStorage.getItem("adhd-daily-logs");
     const logs: Record<string, DailyLog> = raw ? JSON.parse(raw) : {};
     const existing = logs[today] ?? { dateKey: today, wrapUpDone: false, dumpCount: 0, winsCount: 0, tasksCompleted: 0, mood: null, score: 0 };
@@ -818,6 +884,20 @@ export function recordFocusSession() {
     const score = Math.min(100, existing.score + 5);
     logs[today] = { ...existing, focusSessions: sessions, score };
     localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
+
+    // Save detailed session entry
+    const listRaw = localStorage.getItem("adhd-focus-session-list");
+    const list: Record<string, FocusSessionEntry[]> = listRaw ? JSON.parse(listRaw) : {};
+    if (!list[today]) list[today] = [];
+    const entry: FocusSessionEntry = {
+      sessionNumber: sessions,
+      duration: durationMinutes,
+      timestamp: Date.now(),
+      dateKey: today,
+    };
+    list[today] = [...list[today], entry];
+    localStorage.setItem("adhd-focus-session-list", JSON.stringify(list));
+
     window.dispatchEvent(new CustomEvent("adhd-storage-update", { detail: "adhd-daily-logs" }));
   } catch {}
 }
