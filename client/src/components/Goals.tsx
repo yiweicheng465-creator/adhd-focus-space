@@ -150,9 +150,20 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
             value={newGoal}
             onChange={(e) => setNewGoal(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addGoal()}
-            placeholder="Goal... or add #health #learning to categorize"
+            placeholder="goal... #health #learning"
             className="flex-1"
-            style={{ background: M.card, border: `1px solid ${liveTag ? M.coral : M.border}`, fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+            style={{
+              background: M.card,
+              border: `1px solid ${liveTag ? M.coral : M.border}`,
+              fontFamily: "'DM Sans', sans-serif",
+              transition: "border-color 0.2s",
+              fontSize: "0.8rem",
+              fontWeight: 300,
+              letterSpacing: "0.01em",
+              paddingTop: "0.55rem",
+              paddingBottom: "0.55rem",
+              color: "oklch(0.35 0.02 70)",
+            }}
           />
           <button
             onClick={addGoal}

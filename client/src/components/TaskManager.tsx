@@ -193,9 +193,20 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
             value={newTaskText}
             onChange={(e) => setNewTaskText(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addTask()}
-            placeholder="Task name... or add #yoga #reading to categorize"
+            placeholder="task name... #yoga #reading"
             className="flex-1"
-            style={{ background: M.card, border: `1px solid ${liveTag ? M.coral : M.border}`, fontFamily: "'DM Sans', sans-serif", transition: "border-color 0.2s" }}
+            style={{
+              background: M.card,
+              border: `1px solid ${liveTag ? M.coral : M.border}`,
+              fontFamily: "'DM Sans', sans-serif",
+              transition: "border-color 0.2s",
+              fontSize: "0.8rem",
+              fontWeight: 300,
+              letterSpacing: "0.01em",
+              paddingTop: "0.55rem",
+              paddingBottom: "0.55rem",
+              color: "oklch(0.35 0.02 70)",
+            }}
           />
           <button
             onClick={addTask}
