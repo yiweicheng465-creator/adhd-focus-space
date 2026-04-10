@@ -353,6 +353,30 @@ function WinCard({
           <span style={{ color: isArchiveView ? M.archiveClr : (isBlockWin ? blockColor : iconDef.color), opacity: 0.8 }}>
             {isBlockWin ? "Block" : iconDef.label}
           </span>
+          {(isBlockWin || win.id.startsWith("session-")) && !isArchiveView && (
+            <span
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 3,
+                marginLeft: 6,
+                padding: "1px 6px",
+                borderRadius: 4,
+                background: "oklch(0.93 0.03 35)",
+                color: "oklch(0.45 0.12 35)",
+                fontSize: 10,
+                fontFamily: "'DM Mono', monospace",
+                letterSpacing: "0.04em",
+                verticalAlign: "middle",
+              }}
+            >
+              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="9" />
+                <polyline points="12,7 12,12 15,15" />
+              </svg>
+              FOCUS TIMER
+            </span>
+          )}
           {isArchiveView && (
             <span style={{ color: M.archiveClr, opacity: 0.7 }}> · archived</span>
           )}

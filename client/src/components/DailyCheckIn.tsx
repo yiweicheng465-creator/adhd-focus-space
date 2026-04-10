@@ -124,8 +124,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
 
   // Goals
   const [goalInput, setGoalInput] = useState("");
-  const [goalContext, setGoalContext] = useState<"work" | "personal">("work");
-  const [newGoals, setNewGoals] = useState<{ text: string; context: "work" | "personal" }[]>([]);
+  const [goalContext, setGoalContext] = useState<string>("work");
+  const [newGoals, setNewGoals] = useState<{ text: string; context: string }[]>([]);
 
   // Tasks
   const [taskInput, setTaskInput] = useState("");
@@ -164,7 +164,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   const addGoal = () => {
     if (!goalInput.trim()) return;
     const { cleanText, tag } = parseHashtag(goalInput);
-    const context = (tag ?? goalContext) as "work" | "personal";
+    // Allow any custom hashtag as context (not just work/personal)
+    const context = (tag ?? goalContext ?? "personal") as string;
     setNewGoals((p) => [...p, { text: cleanText || goalInput.trim(), context }]);
     setGoalInput("");
   };
@@ -401,7 +402,12 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                 <ul className="space-y-1.5 mt-3">
                   {newGoals.map((g, i) => (
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      🎯 {g.text}
+                      🎯 <span>{g.text}</span>
+                      {g.context && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.92 0.02 75)", color: "oklch(0.45 0.08 35)" }}>
+                          #{g.context}
+                        </span>
+                      )}
                       <button onClick={() => setNewGoals((p) => p.filter((_, j) => j !== i))} className="ml-auto text-xs text-muted-foreground hover:text-destructive">✕</button>
                     </li>
                   ))}

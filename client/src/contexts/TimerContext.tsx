@@ -144,6 +144,10 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     DEFAULT_STRIPS
   );
   const strips = customStrips.length > 0 ? customStrips : DEFAULT_STRIPS;
+  // Use a ref so startPhaseWithDurations always reads the latest strips
+  // without causing stripStates to reinitialize on every customStrips change
+  const stripsRef = useRef(strips);
+  useEffect(() => { stripsRef.current = strips; }, [strips]);
   const [stripStates, setStripStates] = useState<StripState[]>(() =>
     strips.map(() => "attached" as StripState)
   );
@@ -233,10 +237,10 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     setPaperFlying(false);
     completedRef.current = false;
     if (m === "focus") {
-      setStripStates(strips.map(() => "attached" as StripState));
+      setStripStates(stripsRef.current.map(() => "attached" as StripState));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [strips]);
+  }, []);  // stripsRef is a ref — stable reference, no dependency needed
 
   // ── Transition countdown ───────────────────────────────────────────────────
   const startTransition = useCallback((toMode: TimerMode, toStep: number) => {
@@ -274,7 +278,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         if (natural && !completedRef.current) {
           completedRef.current = true;
           // Cascade tear remaining strips
-          const remaining_strips = strips
+          const remaining_strips = stripsRef.current
             .map((_: string, i: number) => i)
             .filter((i: number) => stripStates[i] === "attached");
           remaining_strips.forEach((idx: number, j: number) => {
@@ -363,7 +367,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
   // ── Actions ────────────────────────────────────────────────────────────────
   const resetStrips = () =>
-    setStripStates(strips.map(() => "attached" as StripState));
+    setStripStates(stripsRef.current.map(() => "attached" as StripState));
 
   const switchMode = (m: TimerMode) => {
     if (running || phase === "transition") return;
