@@ -485,6 +485,14 @@ export default function Home() {
                 focusSessions={focusSessions}
                 allCategories={allCategories}
                 onQuickDump={(text) => setPendingDump(text)}
+                onTaskToggle={(id) => {
+                  const updated = tasks.map((t) => t.id === id ? { ...t, done: !t.done } : t);
+                  handleTasksChange(updated);
+                }}
+                onTaskCreate={(task) => setTasks((prev) => [task, ...prev])}
+                onGoalCreate={(goal) => setGoals((prev) => [goal, ...prev])}
+                onAgentCreate={(agent) => setAgents((prev) => [agent, ...prev])}
+                onWinCreate={(win) => setWins((prev) => [win, ...prev])}
               />
               </div>
             )}

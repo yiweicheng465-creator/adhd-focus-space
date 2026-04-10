@@ -33,3 +33,7 @@
 - [x] Simplify Focus Sessions in Monthly day detail to inline "Focus Time: N sessions" next to Mood
 - [x] Redesign Dashboard to compact grid layout that fits laptop screen without scrolling
 - [x] Add Talk with AI panel directly on the Dashboard page
+- [x] Restore illustrated hero header in Dashboard (illustration left + greeting/quick-capture right)
+- [x] Redesign dashboard task list cards to look cuter and more polished
+- [x] Add quick-complete checkboxes on dashboard Next Up task rows
+- [x] Upgrade dashboard AI chat to full command center (create tasks, agents, goals, wins via natural language)

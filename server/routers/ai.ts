@@ -393,4 +393,96 @@ Pick the single most important task they should focus on today. Consider urgency
         encouragement: string;
       };
     }),
+
+  /* ── 7. AI Command Center ── */
+  command: publicProcedure
+    .input(z.object({
+      messages: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string(),
+      })).min(1).max(40),
+      tasks: z.array(z.object({
+        id: z.string(),
+        text: z.string(),
+        priority: z.enum(["focus", "urgent", "normal"]),
+        context: z.string(),
+        done: z.boolean(),
+      })).optional(),
+      goals: z.array(z.object({
+        id: z.string(),
+        text: z.string(),
+        progress: z.number(),
+        context: z.string(),
+      })).optional(),
+      agents: z.array(z.object({
+        id: z.string(),
+        name: z.string(),
+        task: z.string(),
+        status: z.string(),
+        context: z.string(),
+      })).optional(),
+      focusSessions: z.number().optional(),
+      mood: z.number().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
+      const taskSummary = (input.tasks ?? []).filter(t => !t.done).slice(0, 10)
+        .map(t => `- [${t.priority}] ${t.text} (${t.context})`).join("\n");
+      const goalSummary = (input.goals ?? []).slice(0, 5)
+        .map(g => `- ${g.text} (${g.progress}% done, ${g.context})`).join("\n");
+      const agentSummary = (input.agents ?? []).filter(a => a.status !== "done").slice(0, 5)
+        .map(a => `- ${a.name}: ${a.task} [${a.status}]`).join("\n");
+
+      const systemPrompt = `${ADHD_SYSTEM}
+
+You are also an AI command assistant. The user can ask you to:
+- Create tasks (e.g. "add task review PR urgent work")
+- Complete/delete tasks (e.g. "mark review PR as done", "delete that task")
+- Create goals (e.g. "set a goal to ship the feature by Friday")
+- Create AI agents (e.g. "create an agent to research competitors")
+- Log wins (e.g. "log a win: finished the design")
+- Answer questions, give advice, prioritise, or coach them
+
+Current app state:
+Active tasks:
+${taskSummary || "No active tasks"}
+Goals:
+${goalSummary || "No goals set"}
+Agents:
+${agentSummary || "No active agents"}
+Focus sessions today: ${input.focusSessions ?? 0}
+Mood: ${input.mood ? moodLabels[input.mood - 1] : "Not set"}
+
+When the user wants to perform an action, respond with a friendly confirmation message AND include a JSON action block at the very end of your response in this exact format (raw JSON, no code fences):
+ACTION:{"type":"...","payload":{...}}
+
+Supported action types and payloads:
+- create_task: {"text":"...","priority":"focus|urgent|normal","context":"work|personal|..."}
+- complete_task: {"id":"...","text":"..."}
+- delete_task: {"id":"...","text":"..."}
+- create_goal: {"text":"...","context":"work|personal|..."}
+- create_agent: {"name":"...","task":"...","context":"work|personal|..."}
+- log_win: {"text":"..."}
+- none: {}
+
+Only include the ACTION line when performing an action. For pure conversation, omit it entirely.`;
+
+      const result = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...input.messages,
+        ],
+      });
+      const raw = result.choices[0]?.message?.content;
+      if (!raw || typeof raw !== "string") throw new Error("No response from AI");
+
+      // Parse out the ACTION line if present
+      const actionMatch = raw.match(/^ACTION:(\{.*\})$/m);
+      const reply = raw.replace(/^ACTION:\{.*\}$/m, "").trim();
+      let action: { type: string; payload: Record<string, unknown> } | null = null;
+      if (actionMatch) {
+        try { action = JSON.parse(actionMatch[1]); } catch { action = null; }
+      }
+      return { reply, action };
+    }),
 });
