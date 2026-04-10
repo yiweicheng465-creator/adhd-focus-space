@@ -25,6 +25,31 @@ import {
 } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
 
+/* ── URL-aware task text renderer ── */
+const URL_RE = /(https?:\/\/[^\s]+)/g;
+function renderTaskText(text: string) {
+  const parts = text.split(URL_RE);
+  return parts.map((part, i) => {
+    if (URL_RE.test(part)) {
+      URL_RE.lastIndex = 0; // reset after test
+      return (
+        <a
+          key={i}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={(e) => e.stopPropagation()}
+          className="underline hover:opacity-70"
+          style={{ color: "oklch(0.52 0.14 35)", wordBreak: "break-all" }}
+        >
+          {part.length > 40 ? part.slice(0, 40) + "…" : part}
+        </a>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+}
+
 /* ── Morandi tokens ── */
 const M = {
   coral:    "oklch(0.55 0.09 35)",
@@ -302,7 +327,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                   maxWidth: 220,
                 }}
               >
-                <span className="truncate" style={{ maxWidth: 160 }}>{t.text}</span>
+                <span className="flex flex-wrap items-center gap-0.5" style={{ maxWidth: 180 }}>{renderTaskText(t.text)}</span>
                 <Plus className="w-3 h-3 shrink-0" style={{ color: M.coral }} />
               </button>
             ))}
