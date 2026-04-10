@@ -7,10 +7,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { PixelBrain } from "@/components/PixelIcons";
 import { cn } from "@/lib/utils";
-import { ArrowRight, Hash, Tag, Trash2, X } from "lucide-react";
+import { ArrowRight, Hash, Sparkles, Tag, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
+import { trpc } from "@/lib/trpc";
 
 interface BrainDumpEntry {
   id: string;
@@ -155,6 +156,56 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
     toast.info("Brain dump cleared.", { duration: 2000 });
   };
 
+  // ── AI Categorise ──
+  const [aiResults, setAiResults] = useState<Array<{
+    original: string;
+    category: "task" | "worry" | "idea" | "reminder" | "other";
+    action: "add_to_tasks" | "archive" | "keep";
+    rewritten: string;
+    emoji: string;
+  }> | null>(null);
+  const [aiDismissed, setAiDismissed] = useState(false);
+
+  const categorizeMutation = trpc.ai.categorizeDump.useMutation({
+    onSuccess: (data) => {
+      setAiResults(data.items);
+      setAiDismissed(false);
+      toast.success("AI sorted your thoughts!", { duration: 2500 });
+    },
+    onError: () => {
+      toast.error("AI couldn't categorise right now. Try again.", { duration: 3000 });
+    },
+  });
+
+  const handleAiCategorise = () => {
+    const unconverted = entries.filter((e) => !e.converted);
+    if (unconverted.length === 0) {
+      toast.info("No entries to categorise yet.", { duration: 2000 });
+      return;
+    }
+    categorizeMutation.mutate({ entries: unconverted.map((e) => e.text) });
+  };
+
+  const applyAiAction = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
+    if (!item) return;
+    if (item.action === "add_to_tasks") {
+      onConvertToTask({
+        id: nanoid(), text: item.rewritten, priority: "focus",
+        context: "work", done: false, createdAt: new Date(),
+      });
+      // Mark original entry as converted
+      setEntries((prev) => prev.map((e) =>
+        e.text === item.original ? { ...e, converted: true } : e
+      ));
+      toast.success("Added to tasks.", { duration: 2000 });
+    } else if (item.action === "archive") {
+      setEntries((prev) => prev.filter((e) => e.text !== item.original));
+      toast.info("Archived.", { duration: 1500 });
+    }
+    // Remove from AI results
+    setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
+  };
+
   // Auto-dump initialText (from quick-capture bar) once on mount
   useEffect(() => {
     if (initialText && initialText.trim()) {
@@ -218,11 +269,97 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
 
         <div className="flex items-center justify-between">
           <span className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>⌘ + Enter to capture</span>
-          <button onClick={dump} className="m-btn-primary">
-            Dump It
-          </button>
+          <div className="flex items-center gap-2">
+            {entries.filter((e) => !e.converted).length > 0 && (
+              <button
+                onClick={handleAiCategorise}
+                disabled={categorizeMutation.isPending}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all"
+                style={{
+                  background: categorizeMutation.isPending ? "oklch(0.88 0.014 75)" : "oklch(0.55 0.09 35 / 0.10)",
+                  border: `1px solid oklch(0.55 0.09 35 / 0.28)`,
+                  color: M.coral,
+                  fontFamily: "'DM Sans', sans-serif",
+                  borderRadius: 6,
+                  cursor: categorizeMutation.isPending ? "not-allowed" : "pointer",
+                }}
+              >
+                <Sparkles className="w-3 h-3" />
+                {categorizeMutation.isPending ? "Sorting…" : "AI Sort"}
+              </button>
+            )}
+            <button onClick={dump} className="m-btn-primary">
+              Dump It
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* AI Results Panel */}
+      {aiResults && !aiDismissed && aiResults.length > 0 && (
+        <div
+          className="flex flex-col gap-2 p-3"
+          style={{ background: "oklch(0.55 0.09 35 / 0.05)", border: `1px solid oklch(0.55 0.09 35 / 0.20)`, borderRadius: 8 }}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5" style={{ color: M.coral }} />
+              <span className="text-xs font-semibold" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>AI sorted your thoughts</span>
+            </div>
+            <button onClick={() => setAiDismissed(true)} style={{ color: M.muted }}><X className="w-3.5 h-3.5" /></button>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            {aiResults.map((item, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-2 p-2"
+                style={{ background: M.card, border: `1px solid ${M.border}`, borderRadius: 6 }}
+              >
+                <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+                    {item.action === "add_to_tasks" ? item.rewritten : item.original}
+                  </p>
+                  <span
+                    className="inline-block mt-0.5 px-1.5 py-0.5 text-xs"
+                    style={{
+                      background: item.category === "task" ? "oklch(0.52 0.07 145 / 0.12)" : item.category === "worry" ? "oklch(0.55 0.09 35 / 0.10)" : "oklch(0.58 0.09 55 / 0.12)",
+                      color: item.category === "task" ? M.sage : item.category === "worry" ? M.coral : "oklch(0.58 0.09 55)",
+                      fontFamily: "'DM Sans', sans-serif",
+                      borderRadius: 4,
+                    }}
+                  >
+                    {item.category}
+                  </span>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  {item.action === "add_to_tasks" && (
+                    <button
+                      onClick={() => applyAiAction(item)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs"
+                      style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                    >
+                      <ArrowRight className="w-3 h-3" /> Task
+                    </button>
+                  )}
+                  {item.action === "archive" && (
+                    <button
+                      onClick={() => applyAiAction(item)}
+                      className="flex items-center gap-1 px-2 py-1 text-xs"
+                      style={{ background: "oklch(0.88 0.014 75)", color: M.muted, borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                    >
+                      Archive
+                    </button>
+                  )}
+                  <button onClick={() => setAiResults((prev) => prev ? prev.filter((_, j) => j !== i) : null)} style={{ color: M.muted, background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Tag filter bar */}
       {allTags.length > 0 && (

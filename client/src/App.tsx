@@ -10,8 +10,8 @@ import Home from "./pages/Home";
 import TimerPrototypes from "./pages/TimerPrototypes";
 import Monthly from "@/pages/Monthly";
 import Insight from "@/pages/Insight";
-
 function Router() {
+  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />

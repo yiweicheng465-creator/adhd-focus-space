@@ -33,7 +33,10 @@ export default function NotFound() {
             It may have been moved or deleted.
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <div
+            id="not-found-button-group"
+            className="flex flex-col sm:flex-row gap-3 justify-center"
+          >
             <Button
               onClick={handleGoHome}
               className="m-btn-primary"

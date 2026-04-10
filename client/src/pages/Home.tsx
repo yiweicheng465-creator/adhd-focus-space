@@ -15,6 +15,7 @@ import { DailyWins, type Win } from "@/components/DailyWins";
 import { BrainDump } from "@/components/BrainDump";
 import { Goals, type Goal } from "@/components/Goals";
 import { AgentTracker, type Agent } from "@/components/AgentTracker";
+import { AIHub } from "@/components/AIHub";
 import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
@@ -154,7 +155,7 @@ function GoalFlagIcon({ className, style }: { className?: string; style?: React.
   );
 }
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents" | "ai";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
@@ -164,6 +165,7 @@ const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> 
   braindump:  { title: "Brain Dump",   icon: Brain           },
   goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
+  ai:         { title: "AI Features",  icon: Sparkles        },
 };
 
 const INITIAL_TASKS: Task[] = [
@@ -602,6 +604,15 @@ export default function Home() {
               <div className="relative">
                 <AgentsDecor />
                 <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} allCategories={allCategories} />
+              </div>
+            )}
+
+            {activeSection === "ai" && (
+              <div
+                className="p-8 min-h-[600px] flex flex-col"
+                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
+              >
+                <AIHub />
               </div>
             )}
           </div>

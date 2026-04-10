@@ -6,7 +6,9 @@
    ============================================================ */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame } from "lucide-react";
+import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame, Loader2 } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { Streamdown } from "streamdown";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import type { Win } from "./DailyWins";
 import type { Task } from "./TaskManager";
@@ -576,6 +578,139 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
           <strong>Tip:</strong> Brain dumps count just as much as wrap-ups. Even on days with no plan, dumping your thoughts fills the calendar and keeps your streak alive.
         </p>
       </div>
+
+      {/* AI Monthly Review */}
+      <MonthlyAIReview
+        viewYear={viewYear}
+        viewMonth={viewMonth}
+        logs={logs}
+        daysInMonth={daysInMonth}
+        streak={streak}
+        monthStats={monthStats}
+      />
+    </div>
+  );
+}
+
+/* ── AI Monthly Review Component ── */
+function MonthlyAIReview({
+  viewYear, viewMonth, logs, daysInMonth, streak, monthStats
+}: {
+  viewYear: number;
+  viewMonth: number;
+  logs: Record<string, DailyLog>;
+  daysInMonth: number;
+  streak: number;
+  monthStats: { activeDays: number; wrapDays: number; dumpDays: number; totalWins: number; totalTasks: number };
+}) {
+  const [review, setReview] = useState<string | null>(null);
+
+  const reviewMutation = trpc.ai.monthlyReview.useMutation({
+    onSuccess: (data) => setReview(typeof data.review === "string" ? data.review : ""),
+    onError: () => {},
+  });
+
+  const handleGenerate = () => {
+    // Compute extra stats
+    let totalFocusSessions = 0, totalBlocks = 0;
+    let moodSum = 0, moodCount = 0;
+    const topWins: string[] = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      const k = new Date(viewYear, viewMonth, d).toDateString();
+      const log = logs[k];
+      if (!log) continue;
+      totalFocusSessions += log.focusSessions ?? 0;
+      totalBlocks += log.blocksCompleted ?? 0;
+      if (log.mood) { moodSum += log.mood; moodCount++; }
+    }
+    // Get top wins from localStorage
+    try {
+      const raw = localStorage.getItem("adhd-wins");
+      if (raw) {
+        const wins = JSON.parse(raw) as Array<{ text: string; createdAt: string }>;
+        const monthWins = wins.filter((w) => {
+          const d = new Date(w.createdAt);
+          return d.getFullYear() === viewYear && d.getMonth() === viewMonth;
+        });
+        topWins.push(...monthWins.slice(0, 5).map((w) => w.text));
+      }
+    } catch { /* ignore */ }
+
+    reviewMutation.mutate({
+      month: `${["January","February","March","April","May","June","July","August","September","October","November","December"][viewMonth]} ${viewYear}`,
+      totalDays: daysInMonth,
+      activeDays: monthStats.activeDays,
+      wrapUpDays: monthStats.wrapDays,
+      totalWins: monthStats.totalWins,
+      totalFocusSessions,
+      totalBlocks,
+      totalTasks: monthStats.totalTasks,
+      avgMood: moodCount > 0 ? moodSum / moodCount : null,
+      streakMax: streak,
+      topWins,
+    });
+  };
+
+  const M2 = {
+    coral:   "oklch(0.55 0.09 35)",
+    coralBg: "oklch(0.55 0.09 35 / 0.08)",
+    coralBdr:"oklch(0.55 0.09 35 / 0.25)",
+    ink:     "oklch(0.28 0.018 65)",
+    muted:   "oklch(0.55 0.018 70)",
+    border:  "oklch(0.88 0.014 75)",
+    card:    "oklch(0.985 0.007 80)",
+  };
+
+  return (
+    <div style={{ marginTop: 16, padding: "16px", background: M2.card, border: `1px solid ${M2.border}`, borderRadius: 12 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+        <Sparkles size={15} style={{ color: M2.coral }} />
+        <span style={{ fontSize: 13, fontWeight: 600, color: M2.ink, fontFamily: "'DM Sans', sans-serif" }}>AI Monthly Review</span>
+      </div>
+
+      {!review ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          <p style={{ fontSize: 12, color: M2.muted, margin: 0, fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+            Get a personalised narrative review of your month — patterns, insights, and one thing to try next month.
+          </p>
+          <button
+            onClick={handleGenerate}
+            disabled={reviewMutation.isPending}
+            style={{
+              display: "inline-flex", alignItems: "center", gap: 6,
+              background: reviewMutation.isPending ? M2.border : M2.coralBg,
+              border: `1px solid ${M2.coralBdr}`,
+              color: M2.coral, borderRadius: 6, padding: "8px 14px",
+              fontSize: 11, cursor: reviewMutation.isPending ? "not-allowed" : "pointer",
+              fontFamily: "'DM Sans', sans-serif", fontWeight: 500,
+              alignSelf: "flex-start",
+            }}
+          >
+            {reviewMutation.isPending ? (
+              <><Loader2 size={12} style={{ animation: "spin 1s linear infinite" }} /> Generating…</>
+            ) : (
+              <><Sparkles size={12} /> Generate review</>
+            )}
+          </button>
+        </div>
+      ) : (
+        <div>
+          <div style={{
+            padding: "12px 14px", background: M2.coralBg,
+            border: `1px solid ${M2.coralBdr}`, borderRadius: 8,
+            fontSize: 13, color: M2.ink, lineHeight: 1.7,
+            fontFamily: "'DM Sans', sans-serif",
+          }}>
+            <Streamdown>{review}</Streamdown>
+          </div>
+          <button
+            onClick={() => setReview(null)}
+            style={{ marginTop: 8, fontSize: 11, color: M2.muted, background: "none", border: "none", cursor: "pointer", fontFamily: "'DM Sans', sans-serif" }}
+          >
+            Regenerate
+          </button>
+        </div>
+      )}
     </div>
   );
 }

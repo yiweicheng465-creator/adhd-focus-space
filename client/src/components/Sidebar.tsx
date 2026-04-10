@@ -15,6 +15,7 @@ import {
   PixelDump,
   PixelGoals,
   PixelAgents,
+  PixelBrain,
 } from "@/components/PixelIcons";
 import { useTimer } from "@/contexts/TimerContext";
 
@@ -32,6 +33,7 @@ const NAV = [
   { id: "braindump", short: "DUMP",   PixelIcon: PixelDump,   title: "Brain Dump"   },
   { id: "goals",     short: "GOALS",  PixelIcon: PixelGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", PixelIcon: PixelAgents, title: "AI Agents"    },
+  { id: "ai",        short: "AI",     PixelIcon: PixelBrain,  title: "AI Features"  },
 ];
 
 /* ── Floating timer pill — shows live countdown in sidebar when running/paused ── */

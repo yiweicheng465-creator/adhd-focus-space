@@ -9,9 +9,10 @@
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
+import { Loader2, RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
 import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
 import { useTimerSound } from "@/hooks/useTimerSound";
+import { trpc } from "@/lib/trpc";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-tear-keyframes";
@@ -332,6 +333,28 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
   ];
   const msg = messages[sessions % messages.length];
 
+  // AI micro-reflection
+  const [intention, setIntention] = useState("");
+  const [outcome, setOutcome] = useState("");
+  const [reflection, setReflection] = useState<string | null>(null);
+  const [showReflect, setShowReflect] = useState(false);
+
+  const reflectMutation = trpc.ai.focusReflection.useMutation({
+    onSuccess: (data) => {
+      const msg = data.message;
+      setReflection(typeof msg === "string" ? msg : "");
+    },
+  });
+
+  const handleReflect = () => {
+    reflectMutation.mutate({
+      phase: "after",
+      sessionNumber: sessions,
+      intention: intention || undefined,
+      outcome: outcome || undefined,
+    });
+  };
+
   return (
     <div className="ft-fade-in" style={{
       background: "#FDFAF5",
@@ -406,6 +429,79 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
         8 strips torn · all stress released
       </div>
 
+      {/* AI Micro-Reflection */}
+      {!showReflect && !reflection && (
+        <button
+          onClick={() => setShowReflect(true)}
+          style={{
+            background: "oklch(0.55 0.09 35 / 0.10)",
+            border: "1px solid oklch(0.55 0.09 35 / 0.28)",
+            color: "oklch(0.52 0.14 35)",
+            borderRadius: 6,
+            padding: "7px 14px",
+            fontSize: 10,
+            cursor: "pointer",
+            fontFamily: "'JetBrains Mono', monospace",
+            letterSpacing: "0.08em",
+          }}
+        >
+          ✦ REFLECT WITH AI
+        </button>
+      )}
+
+      {showReflect && !reflection && (
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#6A5A4A", margin: 0 }}>What did you intend to do?</p>
+          <input
+            value={intention}
+            onChange={(e) => setIntention(e.target.value)}
+            placeholder="e.g. finish the report intro"
+            style={{
+              border: "1px solid #E8DDD0", borderRadius: 4, padding: "6px 10px",
+              fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
+              background: "#FDFAF5", outline: "none", width: "100%",
+            }}
+          />
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#6A5A4A", margin: 0 }}>What actually happened?</p>
+          <input
+            value={outcome}
+            onChange={(e) => setOutcome(e.target.value)}
+            placeholder="e.g. got distracted but wrote 2 paragraphs"
+            style={{
+              border: "1px solid #E8DDD0", borderRadius: 4, padding: "6px 10px",
+              fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
+              background: "#FDFAF5", outline: "none", width: "100%",
+            }}
+          />
+          <button
+            onClick={handleReflect}
+            disabled={reflectMutation.isPending}
+            style={{
+              background: reflectMutation.isPending ? "#E8DDD0" : "#2a1f14",
+              border: "none", color: "#FAF6F1", borderRadius: 4,
+              padding: "8px 16px", fontSize: 10, cursor: reflectMutation.isPending ? "not-allowed" : "pointer",
+              fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.10em",
+              display: "flex", alignItems: "center", gap: 6, alignSelf: "flex-end",
+            }}
+          >
+            {reflectMutation.isPending ? <><Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> THINKING…</> : "✦ GET REFLECTION"}
+          </button>
+        </div>
+      )}
+
+      {reflection && (
+        <div style={{
+          background: "oklch(0.55 0.09 35 / 0.06)",
+          border: "1px solid oklch(0.55 0.09 35 / 0.20)",
+          borderRadius: 6, padding: "10px 14px",
+          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
+          color: "#3D2E1E", lineHeight: 1.6, textAlign: "left",
+          width: "100%",
+        }}>
+          {reflection}
+        </div>
+      )}
+
       <button onClick={onNewSession} style={{
         background: "#2a1f14",
         border: "none",
@@ -418,7 +514,7 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
         letterSpacing: "0.14em",
         boxShadow: "0 3px 0 #1a1208",
       }}>
-        ✦ NEW SESSION
+        ✶ NEW SESSION
       </button>
     </div>
   );

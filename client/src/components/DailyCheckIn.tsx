@@ -11,12 +11,13 @@
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, SkipForward, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, SkipForward, Sparkles, X } from "lucide-react";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
 import type { Goal } from "./Goals";
+import { trpc } from "@/lib/trpc";
 
 /* ── localStorage keys ── */
 function getTodayKey() {
@@ -120,6 +121,7 @@ const FACE_COMPONENTS = [FaceDrained, FaceLow, FaceOkay, FaceGood, FaceGlowing];
 /* ── Main component ── */
 export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps) {
   const [step, setStep] = useState<Step>("greeting");
+  const [mitSuggestion, setMitSuggestion] = useState<string | null>(null);
   const [mood, setMood] = useState<number | null>(null);
 
   // Goals
@@ -196,9 +198,32 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
     }
   };
 
+  const mitMutation = trpc.ai.mitSuggestion.useMutation({
+    onSuccess: (data) => {
+      setMitSuggestion(data.mit ?? "");
+    },
+  });
+
   const goNext = () => {
     const idx = STEP_ORDER.indexOf(step);
-    if (idx < STEP_ORDER.length - 1) setStep(STEP_ORDER[idx + 1]);
+    if (idx < STEP_ORDER.length - 1) {
+      const nextStep = STEP_ORDER[idx + 1];
+      setStep(nextStep);
+      // When entering done step, auto-generate MIT suggestion
+      if (nextStep === "done" && tasks.length > 0) {
+        mitMutation.mutate({
+          pendingTasks: tasks.map((t) => ({
+            text: t.text,
+            priority: "focus",
+            context: t.context,
+            createdAt: new Date().toISOString(),
+          })),
+          goals: newGoals.map((g) => ({ text: g.text, progress: 0, context: g.context })),
+          mood: mood,
+          focusSessionsToday: 0,
+        });
+      }
+    }
   };
 
   const goBack = () => {
@@ -585,23 +610,50 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
 
           {/* DONE */}
           {step === "done" && (
-            <div className="flex gap-6 items-start">
-              <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-brain-AsWVT7JWa9jdswJaKeJWzj.webp"
-                alt="illustration"
-                className="w-20 opacity-80 shrink-0"
-              />
-              <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
-                {newGoals.length > 0 && <p>{newGoals.length} goal{newGoals.length > 1 ? "s" : ""} added</p>}
-                {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
-                {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
-                {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} from yesterday recorded</p>}
-                {!mood && !newGoals.length && !tasks.length && !agents.length && !wins.length && (
-                  <p className="italic text-muted-foreground">Nothing added — that's okay. Your space is ready.</p>
-                )}
+            <>
+              <div className="flex gap-6 items-start">
+                <img
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-brain-AsWVT7JWa9jdswJaKeJWzj.webp"
+                  alt="illustration"
+                  className="w-20 opacity-80 shrink-0"
+                />
+                <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                  {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
+                  {newGoals.length > 0 && <p>{newGoals.length} goal{newGoals.length > 1 ? "s" : ""} added</p>}
+                  {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
+                  {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
+                  {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} from yesterday recorded</p>}
+                  {!mood && !newGoals.length && !tasks.length && !agents.length && !wins.length && (
+                    <p className="italic text-muted-foreground">Nothing added — that's okay. Your space is ready.</p>
+                  )}
+                </div>
               </div>
-            </div>
+
+              {/* MIT Suggestion */}
+              {(tasks.length > 0 || newGoals.length > 0) && (
+                <div
+                  className="mt-4 p-3 rounded-lg"
+                  style={{ background: "oklch(0.52 0.14 35 / 0.07)", border: "1px solid oklch(0.52 0.14 35 / 0.22)" }}
+                >
+                  <div className="flex items-center gap-1.5 mb-1.5">
+                    <Sparkles className="w-3.5 h-3.5" style={{ color: M.accent }} />
+                    <span className="text-xs font-semibold" style={{ color: M.accent, fontFamily: "'DM Sans', sans-serif" }}>Most Important Thing today</span>
+                  </div>
+                  {mitMutation.isPending ? (
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" style={{ color: M.muted }} />
+                      <span className="text-xs italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>AI is thinking…</span>
+                    </div>
+                  ) : mitSuggestion ? (
+                    <p className="text-sm leading-relaxed" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+                      {mitSuggestion}
+                    </p>
+                  ) : (
+                    <p className="text-xs italic" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>Add tasks to get your MIT suggestion.</p>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
 
