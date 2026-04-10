@@ -18,6 +18,7 @@ import type { Agent } from "./AgentTracker";
 import { CheckCircle2, Clock, Flame, Sparkles, Zap } from "lucide-react";
 import { PixelAgents } from "@/components/PixelIcons";
 import { PixelTrophy } from "@/components/PixelIcons";
+import { getLastNDays } from "@/hooks/useBlockStreak";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 
@@ -32,6 +33,7 @@ interface DashboardProps {
   onSessionComplete: () => void;
   onBlockComplete?: () => void;
   blockStreak?: number;
+  blockHistory?: Record<string, number>;
   /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
 }
@@ -67,6 +69,131 @@ function GeoDivider({ color = BORDER }: { color?: string }) {
   );
 }
 
+/* 7-day block heatmap */
+const SHORT_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
+
+function BlockHeatmap({ history, streak }: { history: Record<string, number>; streak: number }) {
+  const days = getLastNDays(7); // ["2026-04-04", ..., "2026-04-10"]
+  const today = new Date().toISOString().slice(0, 10);
+  const maxCount = Math.max(1, ...days.map((d) => history[d] ?? 0));
+
+  // Day-of-week labels aligned to the 7 days
+  const dayLabels = days.map((d) => {
+    const dow = new Date(d + "T12:00:00").getDay(); // 0=Sun
+    const labels = ["S", "M", "T", "W", "T", "F", "S"];
+    return labels[dow];
+  });
+
+  return (
+    <div
+      className="p-5"
+      style={{
+        border: `1px solid oklch(0.52 0.14 35 / 0.18)`,
+        background: "oklch(0.52 0.14 35 / 0.03)",
+      }}
+    >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path
+              d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z"
+              fill="oklch(0.52 0.14 35)"
+              opacity="0.85"
+            />
+          </svg>
+          <p className="editorial-label">This week</p>
+        </div>
+        {streak > 0 && (
+          <span
+            style={{
+              fontSize: "0.65rem",
+              fontWeight: 600,
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              color: "oklch(0.45 0.10 35)",
+              fontFamily: "'JetBrains Mono', monospace",
+            }}
+          >
+            {streak} day streak
+          </span>
+        )}
+      </div>
+
+      <div className="flex items-end gap-2">
+        {days.map((date, i) => {
+          const count = history[date] ?? 0;
+          const isToday = date === today;
+          const intensity = count === 0 ? 0 : Math.max(0.15, count / maxCount);
+          const bg = count === 0
+            ? `oklch(0.88 0.014 75)`
+            : `oklch(0.52 0.14 35 / ${0.15 + intensity * 0.75})`;
+          const cellH = count === 0 ? 28 : Math.round(28 + intensity * 28);
+
+          return (
+            <div key={date} className="flex flex-col items-center gap-1.5" style={{ flex: 1 }}>
+              {/* Block count label */}
+              {count > 0 && (
+                <span
+                  style={{
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                    color: "oklch(0.45 0.10 35)",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    lineHeight: 1,
+                  }}
+                >
+                  {count}
+                </span>
+              )}
+              {/* Bar cell */}
+              <div
+                title={`${date}: ${count} block${count !== 1 ? "s" : ""}`}
+                style={{
+                  width: "100%",
+                  height: cellH,
+                  background: bg,
+                  border: isToday
+                    ? `1.5px solid oklch(0.52 0.14 35 / 0.6)`
+                    : `1px solid oklch(0.87 0.014 75)`,
+                  transition: "height 0.3s ease",
+                }}
+              />
+              {/* Day label */}
+              <span
+                style={{
+                  fontSize: "0.6rem",
+                  fontWeight: isToday ? 700 : 400,
+                  color: isToday ? "oklch(0.45 0.10 35)" : MUTED,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  lineHeight: 1,
+                }}
+              >
+                {dayLabels[i]}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-3 mt-3">
+        <div className="flex items-center gap-1.5">
+          <div style={{ width: 10, height: 10, background: "oklch(0.88 0.014 75)", border: "1px solid oklch(0.87 0.014 75)" }} />
+          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>no block</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div style={{ width: 10, height: 10, background: "oklch(0.52 0.14 35 / 0.35)", border: "1px solid oklch(0.87 0.014 75)" }} />
+          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>1 block</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div style={{ width: 10, height: 10, background: "oklch(0.52 0.14 35 / 0.90)", border: "1px solid oklch(0.87 0.014 75)" }} />
+          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>2+ blocks</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* Corner cross-hair decoration */
 function CornerMark({ color = BORDER }: { color?: string }) {
   return (
@@ -77,7 +204,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, blockHistory = {}, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -300,6 +427,9 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, o
           )}
         </div>
       </div>
+
+      {/* ── 7-day block heatmap ── */}
+      <BlockHeatmap history={blockHistory} streak={blockStreak} />
 
       {/* ── Today's wins ── */}
       {todayWins.length > 0 && (

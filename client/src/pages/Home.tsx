@@ -193,7 +193,7 @@ export default function Home() {
 
   // ── Transient state ──
   const [focusSessions, setFocusSessions] = useState(0);
-  const { streak: blockStreak, recordBlock } = useBlockStreak();
+  const { streak: blockStreak, history: blockHistory, recordBlock } = useBlockStreak();
   const [timerQuitCount, setTimerQuitCount] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
@@ -446,6 +446,7 @@ export default function Home() {
                 agents={agents}
                 mood={mood}
                 blockStreak={blockStreak}
+                blockHistory={blockHistory}
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
                 onBlockComplete={handleBlockComplete}
