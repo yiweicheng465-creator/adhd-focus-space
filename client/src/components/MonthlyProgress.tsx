@@ -666,13 +666,6 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         />
       )}
 
-      {/* Motivational note */}
-      <div style={{ marginTop: 20, padding: "14px 16px", background: M.coralBg, borderRadius: 10, border: `1px solid oklch(0.55 0.09 35 / 0.15)` }}>
-        <p style={{ fontSize: 12, color: M.ink, margin: 0, lineHeight: 1.6 }}>
-          <strong>Tip:</strong> Brain dumps count just as much as wrap-ups. Even on days with no plan, dumping your thoughts fills the calendar and keeps your streak alive.
-        </p>
-      </div>
-
       {/* AI Monthly Review */}
       <MonthlyAIReview
         viewYear={viewYear}
