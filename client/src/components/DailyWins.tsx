@@ -341,24 +341,24 @@ function WinCard({
             style={{
               display: "inline-flex",
               alignItems: "center",
-              gap: 4,
-              marginBottom: 4,
-              padding: "3px 8px",
-              borderRadius: 5,
+              gap: 3,
+              marginBottom: 3,
+              padding: "2px 6px",
+              borderRadius: 4,
               background: "oklch(0.88 0.06 35)",
-              border: "1px solid oklch(0.75 0.10 35 / 0.5)",
-              color: "oklch(0.38 0.14 35)",
-              fontSize: 11,
+              border: "1px solid oklch(0.75 0.10 35 / 0.4)",
+              color: "oklch(0.40 0.13 35)",
+              fontSize: 10,
               fontFamily: "'DM Mono', monospace",
               fontWeight: 600,
-              letterSpacing: "0.06em",
+              letterSpacing: "0.05em",
             }}
           >
-            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" style={{ flexShrink: 0 }}>
               <circle cx="12" cy="12" r="9" />
               <polyline points="12,7 12,12 15,15" />
             </svg>
-            ⏱ FOCUS TIMER
+            FOCUS TIMER
           </div>
         )}
         <p

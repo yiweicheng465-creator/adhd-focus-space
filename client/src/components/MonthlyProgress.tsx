@@ -5,7 +5,7 @@
    Each day shows: wrap-up done, brain dump entries, wins count, mood
    ============================================================ */
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame } from "lucide-react";
 import type { Win } from "./DailyWins";
 import type { Task } from "./TaskManager";
@@ -264,13 +264,27 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
   const [selectedDay, setSelectedDay] = useState<number | null>(today.getDate());
   const [logs, setLogs] = useState<Record<string, DailyLog>>({});
 
-  /* Load persisted logs */
-  useEffect(() => {
+  /* Load persisted logs + re-read on storage changes (e.g. focus session recorded) */
+  const loadLogs = useCallback(() => {
     try {
       const raw = localStorage.getItem("adhd-daily-logs");
-      if (raw) setLogs(JSON.parse(raw));
+      if (raw) setLogs(prev => {
+        const next = JSON.parse(raw) as Record<string, DailyLog>;
+        // Merge: keep any in-memory wins/tasks counts that are more up-to-date
+        return next;
+      });
     } catch {}
   }, []);
+
+  useEffect(() => {
+    loadLogs();
+    // Listen for changes from other parts of the app (same tab via custom event)
+    const handler = (e: Event) => {
+      if ((e as CustomEvent).detail === "adhd-daily-logs") loadLogs();
+    };
+    window.addEventListener("adhd-storage-update", handler);
+    return () => window.removeEventListener("adhd-storage-update", handler);
+  }, [loadLogs]);
 
   /* Derive today's log from live data and merge */
   useEffect(() => {
@@ -505,6 +519,7 @@ export function recordFocusSession() {
     const score = Math.min(100, existing.score + 5);
     logs[today] = { ...existing, focusSessions: sessions, score };
     localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
+    window.dispatchEvent(new CustomEvent("adhd-storage-update", { detail: "adhd-daily-logs" }));
   } catch {}
 }
 
@@ -519,5 +534,6 @@ export function recordBlockComplete() {
     const score = Math.min(100, existing.score + 10);
     logs[today] = { ...existing, blocksCompleted: blocks, score };
     localStorage.setItem("adhd-daily-logs", JSON.stringify(logs));
+    window.dispatchEvent(new CustomEvent("adhd-storage-update", { detail: "adhd-daily-logs" }));
   } catch {}
 }
