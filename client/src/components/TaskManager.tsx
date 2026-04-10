@@ -380,7 +380,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                     lineHeight: 1.4,
                   }}
                 >
-                  {task.text}
+                  {task.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || task.text}
                 </p>
                 {task.goalId && (() => {
                   const linkedGoal = goals.find((g) => g.id === task.goalId);

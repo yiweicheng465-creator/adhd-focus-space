@@ -27,3 +27,9 @@
 - [ ] Agent → Win auto-log when Agent marked as Done
 - [ ] AI reflection button inside day detail card for past days
 - [ ] Session win category picker (Work, Study, etc.) for focus session wins
+
+## Bugs
+- [x] Strip hashtags from display text in Brain Dump entries and Task cards (tags already shown as badges below)
+- [x] Simplify Focus Sessions in Monthly day detail to inline "Focus Time: N sessions" next to Mood
+- [x] Redesign Dashboard to compact grid layout that fits laptop screen without scrolling
+- [x] Add Talk with AI panel directly on the Dashboard page

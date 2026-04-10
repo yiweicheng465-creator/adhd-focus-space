@@ -315,6 +315,39 @@ Return JSON with:
       return JSON.parse(content) as { name: string; brief: string; firstStep: string };
     }),
 
+  /* ── 6. Dashboard Chat ── */
+  chat: publicProcedure
+    .input(z.object({
+      messages: z.array(z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string(),
+      })).min(1).max(40),
+      // Optional context so the AI can give personalised replies
+      taskCount: z.number().optional(),
+      focusSessions: z.number().optional(),
+      mood: z.number().nullable().optional(),
+    }))
+    .mutation(async ({ input }) => {
+      const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
+      const contextNote = [
+        input.taskCount != null ? `Active tasks: ${input.taskCount}` : "",
+        input.focusSessions ? `Focus sessions today: ${input.focusSessions}` : "",
+        input.mood ? `Current mood: ${moodLabels[input.mood - 1]}` : "",
+      ].filter(Boolean).join(" | ");
+
+      const systemPrompt = `${ADHD_SYSTEM}${contextNote ? `\n\nUser context: ${contextNote}` : ""}`;
+
+      const result = await invokeLLM({
+        messages: [
+          { role: "system", content: systemPrompt },
+          ...input.messages,
+        ],
+      });
+      const reply = result.choices[0]?.message?.content;
+      if (!reply || typeof reply !== "string") throw new Error("No response from AI");
+      return { reply };
+    }),
+
   /* ── 5. MIT Morning Suggestion ── */
   mitSuggestion: publicProcedure
     .input(mitSuggestionInput)

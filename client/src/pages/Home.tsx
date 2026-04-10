@@ -461,7 +461,7 @@ export default function Home() {
 
         {/* Page content */}
         <div className="flex-1 px-8 py-8 overflow-y-auto">
-          <div className={cn("mx-auto", activeSection === "dashboard" ? "max-w-5xl" : "max-w-3xl")}>
+          <div className={cn("mx-auto", activeSection === "dashboard" ? "max-w-7xl" : "max-w-3xl")}>
 
             {/* Weekly reset nudge */}
             <div className="mb-6">

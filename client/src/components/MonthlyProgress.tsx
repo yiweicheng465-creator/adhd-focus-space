@@ -356,11 +356,21 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
           </div>
         ) : (
           <>
-            {/* Mood */}
-            {log?.mood && (
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 12, height: 12, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
-                <span style={{ fontSize: 12, color: M.ink }}>Mood: <strong>{MOOD_LABELS[log.mood - 1]}</strong></span>
+            {/* Mood + Focus Time inline row */}
+            {(log?.mood || focusCount > 0) && (
+              <div style={{ display: "flex", alignItems: "center", gap: 16, flexWrap: "wrap" }}>
+                {log?.mood && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <div style={{ width: 10, height: 10, borderRadius: "50%", background: MOOD_COLORS[log.mood - 1], flexShrink: 0 }} />
+                    <span style={{ fontSize: 12, color: M.ink }}>Mood: <strong>{MOOD_LABELS[log.mood - 1]}</strong></span>
+                  </div>
+                )}
+                {focusCount > 0 && (
+                  <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                    <span style={{ fontSize: 11, color: M.coral }}>⏱</span>
+                    <span style={{ fontSize: 12, color: M.ink }}>Focus: <strong style={{ color: M.coral }}>{focusCount} {focusCount === 1 ? "session" : "sessions"}</strong></span>
+                  </div>
+                )}
               </div>
             )}
 
@@ -416,50 +426,6 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
                       <span style={{ fontSize: 12, color: M.ink, lineHeight: 1.4 }}>{e.text}</span>
                     </div>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Focus Tracker */}
-            {focusCount > 0 && (
-              <div>
-                <p style={{ fontSize: 10, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, fontWeight: 600 }}>
-                  <span style={{ marginRight: 4 }}>⏱</span>
-                  Focus Sessions ({focusCount})
-                </p>
-                <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-                  {dayFocusSessions.length > 0 ? (
-                    dayFocusSessions.map((s) => {
-                      const time = new Date(s.timestamp).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-                      return (
-                        <div key={s.sessionNumber} style={{
-                          display: "flex", alignItems: "center", gap: 10,
-                          padding: "5px 10px",
-                          background: "oklch(0.55 0.09 35 / 0.06)",
-                          border: "1px solid oklch(0.55 0.09 35 / 0.18)",
-                          borderRadius: 6,
-                        }}>
-                          <span style={{ fontSize: 10, fontWeight: 700, color: M.coral, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", minWidth: 20 }}>#{s.sessionNumber}</span>
-                          <span style={{ fontSize: 12, color: M.ink, flex: 1 }}>{s.duration} min focus</span>
-                          <span style={{ fontSize: 11, color: M.muted }}>{time}</span>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    // Old data: only count available
-                    Array.from({ length: focusCount }, (_, i) => (
-                      <div key={i} style={{
-                        display: "flex", alignItems: "center", gap: 10,
-                        padding: "5px 10px",
-                        background: "oklch(0.55 0.09 35 / 0.06)",
-                        border: "1px solid oklch(0.55 0.09 35 / 0.18)",
-                        borderRadius: 6,
-                      }}>
-                        <span style={{ fontSize: 10, fontWeight: 700, color: M.coral, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em", minWidth: 20 }}>#{i + 1}</span>
-                        <span style={{ fontSize: 12, color: M.ink }}>Focus session complete</span>
-                      </div>
-                    ))
-                  )}
                 </div>
               </div>
             )}

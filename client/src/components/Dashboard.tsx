@@ -1,24 +1,23 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Editorial Dashboard v3.0
-   Design: Warm Editorial Minimalism + Atmospheric Sunset
-   - Sunset hero image as atmospheric background panel
-   - Geometric SVG decorations replace verbose text blocks
-   - Playfair Display serif headings, DM Sans body
-   - Thin 1px borders, cream backgrounds, terracotta accents
+   ADHD FOCUS SPACE — Editorial Dashboard v4.0
+   Design: Compact laptop-first grid — fits one screen
+   Layout:
+     [TOP]    greeting bar + quick capture + context filter
+     [MIDDLE] 3-col grid: Focus Timer | Next Up | Talk with AI
+     [BOTTOM] Today's wins/focus strip (only when data exists)
    ============================================================ */
 
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { trpc } from "@/lib/trpc";
 import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { CheckCircle2, Clock, Flame, Sparkles, Zap } from "lucide-react";
-import { PixelAgents } from "@/components/PixelIcons";
+import { Clock, Sparkles, Zap, Send, Bot, Loader2 } from "lucide-react";
 import { PixelTrophy } from "@/components/PixelIcons";
-import { getLastNDays } from "@/hooks/useBlockStreak";
+import { Streamdown } from "streamdown";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 
@@ -35,7 +34,6 @@ interface DashboardProps {
   blockStreak?: number;
   blockHistory?: Record<string, number>;
   focusSessions?: number;
-  /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
 }
 
@@ -49,159 +47,191 @@ function getGreeting() {
   return "Good evening";
 }
 
-const TC       = "oklch(0.52 0.14 35)";
-const TC_LIGHT = "oklch(0.52 0.14 35 / 0.08)";
+const TC        = "oklch(0.52 0.14 35)";
 const TC_BORDER = "oklch(0.52 0.14 35 / 0.25)";
-const CREAM    = "oklch(0.985 0.008 80)";
-const BORDER   = "oklch(0.87 0.014 75)";
-const INK      = "oklch(0.18 0.01 60)";
-const MUTED    = "oklch(0.52 0.015 70)";
-
-/* Tiny geometric SVG decoration — horizontal rule with diamond */
-function GeoDivider({ color = BORDER }: { color?: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8, opacity: 0.6 }}>
-      <div style={{ flex: 1, height: 1, background: color }} />
-      <svg width="8" height="8" viewBox="0 0 8 8">
-        <rect x="1" y="1" width="6" height="6" transform="rotate(45 4 4)" fill="none" stroke={color} strokeWidth="1" />
-      </svg>
-      <div style={{ flex: 1, height: 1, background: color }} />
-    </div>
-  );
-}
-
-/* 7-day block heatmap */
-const SHORT_DAYS = ["M", "T", "W", "T", "F", "S", "S"];
-
-function BlockHeatmap({ history, streak }: { history: Record<string, number>; streak: number }) {
-  const days = getLastNDays(7); // ["2026-04-04", ..., "2026-04-10"]
-  const today = new Date().toISOString().slice(0, 10);
-  const maxCount = Math.max(1, ...days.map((d) => history[d] ?? 0));
-
-  // Day-of-week labels aligned to the 7 days
-  const dayLabels = days.map((d) => {
-    const dow = new Date(d + "T12:00:00").getDay(); // 0=Sun
-    const labels = ["S", "M", "T", "W", "T", "F", "S"];
-    return labels[dow];
-  });
-
-  return (
-    <div
-      className="p-5"
-      style={{
-        border: `1px solid oklch(0.52 0.14 35 / 0.18)`,
-        background: "oklch(0.52 0.14 35 / 0.03)",
-      }}
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
-            <path
-              d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z"
-              fill="oklch(0.52 0.14 35)"
-              opacity="0.85"
-            />
-          </svg>
-          <p className="editorial-label">This week</p>
-        </div>
-        {streak > 0 && (
-          <span
-            style={{
-              fontSize: "0.65rem",
-              fontWeight: 600,
-              letterSpacing: "0.10em",
-              textTransform: "uppercase",
-              color: "oklch(0.45 0.10 35)",
-              fontFamily: "'JetBrains Mono', monospace",
-            }}
-          >
-            {streak} day streak
-          </span>
-        )}
-      </div>
-
-      <div className="flex items-end gap-2">
-        {days.map((date, i) => {
-          const count = history[date] ?? 0;
-          const isToday = date === today;
-          const intensity = count === 0 ? 0 : Math.max(0.15, count / maxCount);
-          const bg = count === 0
-            ? `oklch(0.88 0.014 75)`
-            : `oklch(0.52 0.14 35 / ${0.15 + intensity * 0.75})`;
-          const cellH = count === 0 ? 28 : Math.round(28 + intensity * 28);
-
-          return (
-            <div key={date} className="flex flex-col items-center gap-1.5" style={{ flex: 1 }}>
-              {/* Block count label */}
-              {count > 0 && (
-                <span
-                  style={{
-                    fontSize: "0.6rem",
-                    fontWeight: 700,
-                    color: "oklch(0.45 0.10 35)",
-                    fontFamily: "'JetBrains Mono', monospace",
-                    lineHeight: 1,
-                  }}
-                >
-                  {count}
-                </span>
-              )}
-              {/* Bar cell */}
-              <div
-                title={`${date}: ${count} block${count !== 1 ? "s" : ""}`}
-                style={{
-                  width: "100%",
-                  height: cellH,
-                  background: bg,
-                  border: isToday
-                    ? `1.5px solid oklch(0.52 0.14 35 / 0.6)`
-                    : `1px solid oklch(0.87 0.014 75)`,
-                  transition: "height 0.3s ease",
-                }}
-              />
-              {/* Day label */}
-              <span
-                style={{
-                  fontSize: "0.6rem",
-                  fontWeight: isToday ? 700 : 400,
-                  color: isToday ? "oklch(0.45 0.10 35)" : MUTED,
-                  fontFamily: "'JetBrains Mono', monospace",
-                  lineHeight: 1,
-                }}
-              >
-                {dayLabels[i]}
-              </span>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Legend */}
-      <div className="flex items-center gap-3 mt-3">
-        <div className="flex items-center gap-1.5">
-          <div style={{ width: 10, height: 10, background: "oklch(0.88 0.014 75)", border: "1px solid oklch(0.87 0.014 75)" }} />
-          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>no block</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div style={{ width: 10, height: 10, background: "oklch(0.52 0.14 35 / 0.35)", border: "1px solid oklch(0.87 0.014 75)" }} />
-          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>1 block</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <div style={{ width: 10, height: 10, background: "oklch(0.52 0.14 35 / 0.90)", border: "1px solid oklch(0.87 0.014 75)" }} />
-          <span style={{ fontSize: "0.6rem", color: MUTED, fontFamily: "'JetBrains Mono', monospace" }}>2+ blocks</span>
-        </div>
-      </div>
-    </div>
-  );
-}
+const CREAM     = "oklch(0.985 0.008 80)";
+const BORDER    = "oklch(0.87 0.014 75)";
+const INK       = "oklch(0.18 0.01 60)";
+const MUTED     = "oklch(0.52 0.015 70)";
+const AI_BG     = "oklch(0.975 0.010 260 / 0.5)";
+const AI_BORDER = "oklch(0.75 0.05 260 / 0.35)";
 
 /* Corner cross-hair decoration */
 function CornerMark({ color = BORDER }: { color?: string }) {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" style={{ opacity: 0.5 }}>
+    <svg width="10" height="10" viewBox="0 0 12 12" style={{ opacity: 0.45 }}>
       <line x1="6" y1="0" x2="6" y2="5" stroke={color} strokeWidth="1" />
       <line x1="7" y1="6" x2="12" y2="6" stroke={color} strokeWidth="1" />
     </svg>
+  );
+}
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+/* ── Inline AI Chat Panel ── */
+function AIChatPanel({ taskCount, focusSessions, mood }: { taskCount: number; focusSessions: number; mood: number | null }) {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const endRef = useState<HTMLDivElement | null>(null);
+  const chatMutation = trpc.ai.chat.useMutation({
+    onSuccess: (data) => {
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+    },
+  });
+
+  const send = () => {
+    const text = input.trim();
+    if (!text || chatMutation.isPending) return;
+    const newMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
+    setMessages(newMessages);
+    setInput("");
+    chatMutation.mutate({ messages: newMessages, taskCount, focusSessions, mood });
+  };
+
+  const SUGGESTED = [
+    "Help me prioritise my tasks",
+    "I'm feeling overwhelmed",
+    "What should I focus on?",
+  ];
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
+      {/* Header */}
+      <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexShrink: 0 }}>
+        <Bot size={13} style={{ color: "oklch(0.50 0.12 260)" }} />
+        <p className="editorial-label" style={{ color: "oklch(0.38 0.08 260)" }}>Talk with AI</p>
+      </div>
+
+      {/* Messages area */}
+      <div
+        style={{
+          flex: 1,
+          overflowY: "auto",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+          paddingRight: 2,
+          minHeight: 0,
+        }}
+      >
+        {messages.length === 0 ? (
+          <div style={{ display: "flex", flexDirection: "column", gap: 6, paddingTop: 4 }}>
+            <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.5 }}>
+              Your ADHD coach is here. Ask anything.
+            </p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 5, marginTop: 4 }}>
+              {SUGGESTED.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => {
+                    setInput(s);
+                    setTimeout(() => {
+                      const newMessages: ChatMessage[] = [{ role: "user", content: s }];
+                      setMessages(newMessages);
+                      setInput("");
+                      chatMutation.mutate({ messages: newMessages, taskCount, focusSessions, mood });
+                    }, 0);
+                  }}
+                  style={{
+                    textAlign: "left",
+                    fontSize: 11,
+                    color: "oklch(0.42 0.08 260)",
+                    background: "oklch(0.975 0.010 260 / 0.4)",
+                    border: `1px solid ${AI_BORDER}`,
+                    padding: "5px 9px",
+                    cursor: "pointer",
+                    lineHeight: 1.4,
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : (
+          messages.map((m, i) => (
+            <div
+              key={i}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: m.role === "user" ? "flex-end" : "flex-start",
+              }}
+            >
+              <div
+                style={{
+                  maxWidth: "90%",
+                  padding: "6px 10px",
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                  color: m.role === "user" ? CREAM : INK,
+                  background: m.role === "user"
+                    ? TC
+                    : "oklch(0.975 0.010 260 / 0.55)",
+                  border: m.role === "user" ? "none" : `1px solid ${AI_BORDER}`,
+                }}
+              >
+                {m.role === "assistant" ? (
+                  <Streamdown>{m.content}</Streamdown>
+                ) : (
+                  m.content
+                )}
+              </div>
+            </div>
+          ))
+        )}
+        {chatMutation.isPending && (
+          <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 0" }}>
+            <Loader2 size={12} style={{ color: "oklch(0.50 0.12 260)", animation: "spin 1s linear infinite" }} />
+            <span style={{ fontSize: 11, color: MUTED }}>Thinking…</span>
+          </div>
+        )}
+      </div>
+
+      {/* Input */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          marginTop: 8,
+          border: `1px solid ${AI_BORDER}`,
+          background: AI_BG,
+          padding: "5px 8px",
+          flexShrink: 0,
+        }}
+      >
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder="Ask your coach…"
+          style={{
+            flex: 1,
+            fontSize: 12,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            color: INK,
+          }}
+        />
+        <button
+          onClick={send}
+          disabled={!input.trim() || chatMutation.isPending}
+          style={{
+            background: input.trim() ? "oklch(0.50 0.12 260)" : "transparent",
+            border: `1px solid ${input.trim() ? "transparent" : AI_BORDER}`,
+            color: input.trim() ? CREAM : MUTED,
+            padding: "4px 7px",
+            cursor: input.trim() ? "pointer" : "default",
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Send size={11} />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -210,25 +240,10 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
 
-  const contextTasks  = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
-  const contextGoals  = goals.filter((g) => activeContext === "all" ? true : g.context === activeContext);
-  const contextAgents = agents.filter((a) => activeContext === "all" ? true : a.context === activeContext);
-
+  const contextTasks = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
   const activeTasks  = contextTasks.filter((t) => !t.done);
-  const urgentTasks  = activeTasks.filter((t) => t.priority === "urgent");
   const todayWins    = wins.filter((w) => new Date(w.createdAt).toDateString() === now.toDateString());
-  const avgGoalProg  = contextGoals.length > 0
-    ? Math.round(contextGoals.reduce((s, g) => s + g.progress, 0) / contextGoals.length)
-    : 0;
 
-  const today         = now.toDateString();
-  const todayAgents   = contextAgents.filter((a) => new Date(a.startedAt).toDateString() === today);
-  const runningAgents = contextAgents.filter((a) => a.status === "running");
-  const uncovered     = activeTasks.filter(
-    (t) => !agents.some((a) => a.linkedTaskId === t.id && (a.status === "running" || a.status === "paused"))
-  );
-
-  // Build counts for all known contexts (dynamic)
   const allContexts = Array.from(new Set(["work", "personal", ...tasks.map((t) => t.context)]));
   const ctxCounts: Record<string, number> = { all: tasks.filter((t) => !t.done).length };
   allContexts.forEach((ctx) => {
@@ -236,112 +251,82 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
-      {/* ── Hero: sunset atmospheric panel ── */}
+      {/* ── TOP BAR: greeting + quick capture + context ── */}
       <div
         className="relative overflow-hidden"
-        style={{ border: `1px solid ${BORDER}`, minHeight: 200 }}
+        style={{ border: `1px solid ${BORDER}` }}
       >
-        {/* Sunset image background */}
+        {/* Subtle sunset background */}
         <div
           className="absolute inset-0"
           style={{
             backgroundImage: `url(${SUNSET_BLOB})`,
             backgroundSize: "cover",
             backgroundPosition: "center 40%",
-            opacity: 0.22,
+            opacity: 0.12,
           }}
         />
-        {/* Gradient overlay for text legibility */}
         <div
           className="absolute inset-0"
-          style={{
-            background: `linear-gradient(to right, oklch(0.985 0.008 80 / 0.92) 40%, oklch(0.985 0.008 80 / 0.60) 100%)`,
-          }}
+          style={{ background: `linear-gradient(to right, oklch(0.985 0.008 80 / 0.95) 50%, oklch(0.985 0.008 80 / 0.75) 100%)` }}
         />
-
         {/* Corner marks */}
-        <div className="absolute top-3 left-3"><CornerMark /></div>
-        <div className="absolute top-3 right-3" style={{ transform: "rotate(90deg)" }}><CornerMark /></div>
-        <div className="absolute bottom-3 left-3" style={{ transform: "rotate(-90deg)" }}><CornerMark /></div>
-        <div className="absolute bottom-3 right-3" style={{ transform: "rotate(180deg)" }}><CornerMark /></div>
+        <div className="absolute top-2 left-2"><CornerMark /></div>
+        <div className="absolute top-2 right-2" style={{ transform: "rotate(90deg)" }}><CornerMark /></div>
+        <div className="absolute bottom-2 left-2" style={{ transform: "rotate(-90deg)" }}><CornerMark /></div>
+        <div className="absolute bottom-2 right-2" style={{ transform: "rotate(180deg)" }}><CornerMark /></div>
 
-        {/* Content — illustration left, text right */}
-        <div className="relative flex items-stretch">
-          {/* Left: illustration panel */}
-          <div
-            className="hidden md:flex w-44 shrink-0 items-end justify-center pb-0 pt-4"
-            style={{ borderRight: `1px solid ${BORDER}` }}
-          >
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp"
-              alt="thinking person illustration"
-              className="object-contain w-full"
-              style={{ maxHeight: 190, opacity: 0.72 }}
-            />
-          </div>
-          {/* Right: greeting + controls */}
-          <div className="flex-1 p-7 flex flex-col gap-4">
+        <div className="relative" style={{ padding: "14px 20px", display: "flex", alignItems: "center", gap: 20, flexWrap: "wrap" }}>
           {/* Date + greeting */}
-          <div>
-            <p className="editorial-label mb-1">
+          <div style={{ flexShrink: 0 }}>
+            <p className="editorial-label" style={{ marginBottom: 1, fontSize: 9 }}>
               {DAYS[now.getDay()]} · {MONTHS[now.getMonth()]} {now.getDate()}
             </p>
-            <div className="flex items-center gap-3 flex-wrap">
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
               <h1
-                className="text-3xl font-bold italic leading-tight"
+                className="text-xl font-bold italic leading-tight"
                 style={{ fontFamily: "'Playfair Display', serif", color: INK }}
               >
                 {getGreeting()}
               </h1>
               {blockStreak > 0 && (
                 <div
-                  className="flex items-center gap-1.5 px-2.5 py-1"
-                  title={`${blockStreak}-day deep focus streak`}
                   style={{
+                    display: "flex", alignItems: "center", gap: 5,
                     background: "oklch(0.55 0.13 35 / 0.10)",
                     border: "1px solid oklch(0.55 0.13 35 / 0.30)",
-                    borderRadius: 0,
+                    padding: "2px 8px",
                   }}
                 >
-                  {/* Flame SVG */}
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
-                    <path
-                      d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z"
-                      fill="oklch(0.55 0.13 35)"
-                      opacity="0.9"
-                    />
-                    <path
-                      d="M12 14c0 0-1.5 1-1.5 2.5a1.5 1.5 0 0 0 3 0C13.5 15 12 14 12 14z"
-                      fill="oklch(0.92 0.06 70)"
-                    />
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.55 0.13 35)" opacity="0.9" />
                   </svg>
-                  <span
-                    style={{
-                      fontSize: "0.65rem",
-                      fontWeight: 600,
-                      letterSpacing: "0.10em",
-                      textTransform: "uppercase",
-                      color: "oklch(0.45 0.10 35)",
-                      fontFamily: "'JetBrains Mono', monospace",
-                    }}
-                  >
-                    {blockStreak} day{blockStreak !== 1 ? "s" : ""}
+                  <span style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace" }}>
+                    {blockStreak}d streak
                   </span>
                 </div>
               )}
             </div>
-          </div>{/* end date+greeting */}
+          </div>
 
-          <GeoDivider />
+          {/* Divider */}
+          <div style={{ width: 1, height: 32, background: BORDER, flexShrink: 0 }} />
 
           {/* Quick capture */}
           <div
-            className="flex items-center gap-3 px-4 py-3 max-w-lg"
-            style={{ border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80 / 0.85)", backdropFilter: "blur(4px)" }}
+            style={{
+              display: "flex", alignItems: "center", gap: 8,
+              border: `1px solid ${BORDER}`,
+              background: "oklch(0.975 0.012 80 / 0.85)",
+              backdropFilter: "blur(4px)",
+              padding: "6px 12px",
+              flex: "1 1 200px",
+              maxWidth: 340,
+            }}
           >
-            <Zap className="w-3.5 h-3.5 shrink-0" style={{ color: TC }} />
+            <Zap size={12} style={{ color: TC, flexShrink: 0 }} />
             <input
               value={quickCapture}
               onChange={(e) => setQuickCapture(e.target.value)}
@@ -354,121 +339,192 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
                 }
               }}
               placeholder="What's on your mind?"
-              className="flex-1 text-sm bg-transparent focus:outline-none placeholder:text-muted-foreground/60"
-              style={{ color: INK }}
+              style={{ flex: 1, fontSize: 12, background: "transparent", border: "none", outline: "none", color: INK }}
             />
-            <kbd className="hidden sm:inline text-[10px] border px-1.5 py-0.5" style={{ color: MUTED, borderColor: BORDER }}>↵</kbd>
+            <kbd style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED }}>↵</kbd>
           </div>
 
-          {/* Context switcher — dynamic categories */}
-          <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
-          </div>{/* end right column */}
-        </div>{/* end illustration+content row */}
+          {/* Context switcher */}
+          <div style={{ flex: "1 1 auto" }}>
+            <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
+          </div>
+        </div>
       </div>
 
-
-      {/* ── Bottom: Focus timer + Next up ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Focus timer */}
-        <div className="p-7" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
-          <div className="flex items-center gap-2 mb-5">
-            <Clock className="w-3.5 h-3.5" style={{ color: TC }} />
+      {/* ── MIDDLE: 3-column grid ── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr 1fr",
+          gap: 10,
+          minHeight: 0,
+        }}
+      >
+        {/* Col 1: Focus Timer */}
+        <div
+          style={{
+            border: `1px solid ${BORDER}`,
+            background: CREAM,
+            padding: "14px 16px",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10, flexShrink: 0 }}>
+            <Clock size={12} style={{ color: TC }} />
             <p className="editorial-label">Focus Timer</p>
           </div>
-          <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
+          <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+            <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
+          </div>
         </div>
 
-        {/* Next up */}
-        <div className="p-7 flex flex-col" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5" style={{ color: TC }} />
+        {/* Col 2: Next Up */}
+        <div
+          style={{
+            border: `1px solid ${BORDER}`,
+            background: CREAM,
+            padding: "14px 16px",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexShrink: 0 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <Zap size={12} style={{ color: TC }} />
               <p className="editorial-label">Next Up</p>
             </div>
             <button className="m-btn-link" onClick={() => onNavigate("tasks")}>All tasks</button>
           </div>
 
-          {activeTasks.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center py-8 text-center gap-4">
-              {/* Geometric empty state */}
-              <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
-                <circle cx="20" cy="20" r="18" fill="none" stroke={INK} strokeWidth="1" />
-                <line x1="20" y1="8" x2="20" y2="32" stroke={INK} strokeWidth="0.8" />
-                <line x1="8" y1="20" x2="32" y2="20" stroke={INK} strokeWidth="0.8" />
-                <circle cx="20" cy="20" r="3" fill={INK} />
-              </svg>
-              <button className="m-btn-primary" onClick={() => onNavigate("tasks")}>Add a task</button>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {activeTasks.slice(0, 5).map((t) => {
-                const pc: Record<string, string> = { urgent: "oklch(0.6 0.2 15)", focus: TC, normal: "oklch(0.62 0.1 75)" };
-                const ctxColor = getContextConfig(t.context).color;
-                return (
-                  <div
-                    key={t.id}
-                    className="flex items-center gap-3 p-3 transition-all"
-                    style={{ border: `1px solid ${BORDER}` }}
-                  >
-                    <div className="w-1.5 h-1.5 shrink-0" style={{ background: pc[t.priority] ?? TC }} />
-                    <p className="text-sm flex-1 truncate" style={{ color: INK }}>{t.text}</p>
-                    <span
-                      className="text-[10px] px-1.5 py-0.5 shrink-0"
-                      style={{ color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em" }}
+          <div style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
+            {activeTasks.length === 0 ? (
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 10, textAlign: "center" }}>
+                <svg width="32" height="32" viewBox="0 0 40 40" style={{ opacity: 0.15 }}>
+                  <circle cx="20" cy="20" r="18" fill="none" stroke={INK} strokeWidth="1" />
+                  <line x1="20" y1="8" x2="20" y2="32" stroke={INK} strokeWidth="0.8" />
+                  <line x1="8" y1="20" x2="32" y2="20" stroke={INK} strokeWidth="0.8" />
+                  <circle cx="20" cy="20" r="3" fill={INK} />
+                </svg>
+                <button className="m-btn-primary" onClick={() => onNavigate("tasks")}>Add a task</button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
+                {activeTasks.slice(0, 7).map((t) => {
+                  const pc: Record<string, string> = { urgent: "oklch(0.6 0.2 15)", focus: TC, normal: "oklch(0.62 0.1 75)" };
+                  const ctxColor = getContextConfig(t.context).color;
+                  return (
+                    <div
+                      key={t.id}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "6px 8px",
+                        border: `1px solid ${BORDER}`,
+                      }}
                     >
-                      {t.context}
-                    </span>
-                  </div>
-                );
-              })}
-              {activeTasks.length > 5 && (
-                <p className="text-xs text-center pt-1" style={{ color: MUTED }}>+{activeTasks.length - 5} more</p>
-              )}
-            </div>
-          )}
+                      <div style={{ width: 5, height: 5, flexShrink: 0, background: pc[t.priority] ?? TC }} />
+                      <p style={{ fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: INK }}>
+                        {t.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || t.text}
+                      </p>
+                      <span
+                        style={{
+                          fontSize: 9, padding: "1px 5px", flexShrink: 0,
+                          color: ctxColor, background: ctxColor + "18",
+                          border: `1px solid ${ctxColor}30`,
+                          fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em",
+                        }}
+                      >
+                        {t.context}
+                      </span>
+                    </div>
+                  );
+                })}
+                {activeTasks.length > 7 && (
+                  <p style={{ fontSize: 10, textAlign: "center", paddingTop: 2, color: MUTED }}>+{activeTasks.length - 7} more</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Col 3: Talk with AI */}
+        <div
+          style={{
+            border: `1px solid ${AI_BORDER}`,
+            background: AI_BG,
+            padding: "14px 16px",
+            display: "flex",
+            flexDirection: "column",
+            minHeight: 0,
+            overflow: "hidden",
+          }}
+        >
+          <AIChatPanel
+            taskCount={activeTasks.length}
+            focusSessions={focusSessions}
+            mood={mood}
+          />
         </div>
       </div>
 
-      {/* ── Today's activity ── */}
+      {/* ── BOTTOM: Today's wins + focus strip ── */}
       {(todayWins.length > 0 || focusSessions > 0) && (
-        <div className="p-5" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.12 75)" }} />
-              <p className="editorial-label">Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}</p>
+        <div
+          style={{
+            border: `1px solid oklch(0.65 0.12 75 / 0.3)`,
+            background: "oklch(0.65 0.12 75 / 0.04)",
+            padding: "8px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
+            <Sparkles size={11} style={{ color: "oklch(0.55 0.12 75)" }} />
+            <p className="editorial-label" style={{ fontSize: 9 }}>
+              Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}
+            </p>
+          </div>
+          {focusSessions > 0 && (
+            <div
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                background: "oklch(0.52 0.14 35 / 0.08)",
+                border: "1px solid oklch(0.52 0.14 35 / 0.25)",
+                borderRadius: 20,
+                color: "oklch(0.42 0.14 35)",
+                fontSize: 10,
+                fontWeight: 600,
+                fontFamily: "'DM Mono', monospace",
+                letterSpacing: "0.04em",
+                padding: "2px 9px",
+              }}
+            >
+              ⏱ {focusSessions} session{focusSessions > 1 ? "s" : ""}
             </div>
-            <button className="m-btn-link" onClick={() => onNavigate("wins")}>Log more</button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {/* Focus session pill */}
-            {focusSessions > 0 && (
-              <div
-                className="flex items-center gap-1.5 px-2.5 py-1"
-                style={{
-                  background: "oklch(0.52 0.14 35 / 0.08)",
-                  border: "1px solid oklch(0.52 0.14 35 / 0.25)",
-                  borderRadius: 20,
-                  color: "oklch(0.42 0.14 35)",
-                  fontSize: 11,
-                  fontWeight: 600,
-                  fontFamily: "'DM Mono', monospace",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                ⏱ {focusSessions} FOCUS SESSION{focusSessions > 1 ? "S" : ""}
-              </div>
-            )}
-            {todayWins.map((w) => (
-              <div
-                key={w.id}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm"
-                style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.985 0.008 80)", color: INK }}
-              >
-                <PixelTrophy size={12} color="oklch(0.55 0.12 75)" />
-                <span>{w.text}</span>
-              </div>
-            ))}
-          </div>
+          )}
+          {todayWins.map((w) => (
+            <div
+              key={w.id}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "3px 9px",
+                border: `1px solid oklch(0.65 0.12 75 / 0.3)`,
+                background: CREAM,
+                color: INK,
+                fontSize: 11,
+              }}
+            >
+              <PixelTrophy size={10} color="oklch(0.55 0.12 75)" />
+              <span>{w.text}</span>
+            </div>
+          ))}
+          <button className="m-btn-link" style={{ marginLeft: "auto", fontSize: 10 }} onClick={() => onNavigate("wins")}>Log more</button>
         </div>
       )}
     </div>

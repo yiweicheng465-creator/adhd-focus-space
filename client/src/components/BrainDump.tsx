@@ -139,8 +139,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
   };
 
   const convertToTask = (entry: BrainDumpEntry) => {
+    const cleanText = entry.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim();
     onConvertToTask({
-      id: nanoid(), text: entry.text, priority: "focus",
+      id: nanoid(), text: cleanText || entry.text.trim(), priority: "focus",
       context: "work", done: false, createdAt: new Date(),
     });
     setEntries(entries.map((e) => e.id === entry.id ? { ...e, converted: true } : e));
@@ -209,7 +210,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
 
   const pushItemToTask = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
     if (!item) return;
-    const text = item.rewritten || item.original;
+    const rawText = item.rewritten || item.original;
+    const text = rawText.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || rawText.trim();
     onConvertToTask({
       id: nanoid(), text, priority: "focus",
       context: "work", done: false, createdAt: new Date(),
@@ -225,7 +227,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
     if (!aiResults) return;
     const taskItems = aiResults.filter((r) => r.action === "add_to_tasks" || r.category === "task");
     taskItems.forEach((item) => {
-      const text = item.rewritten || item.original;
+      const rawText = item.rewritten || item.original;
+      const text = rawText.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || rawText.trim();
       onConvertToTask({
         id: nanoid(), text, priority: "focus",
         context: "work", done: false, createdAt: new Date(),
@@ -520,14 +523,14 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
               (e.currentTarget as HTMLDivElement).style.borderColor = M.border;
             }}
           >
-            {/* Text with highlighted tags */}
+            {/* Text with tags stripped (tags shown as chips below) */}
             <div className="flex items-start gap-3">
               <div className="flex-1 min-w-0">
                 <p
                   className={cn("text-sm leading-relaxed", entry.converted && "line-through")}
                   style={{ color: entry.converted ? M.muted : M.ink, fontFamily: "'DM Sans', sans-serif" }}
                 >
-                  {entry.text}
+                  {entry.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, "").trim()}
                 </p>
                 <p className="text-xs mt-1" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
                   {new Date(entry.createdAt).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}
