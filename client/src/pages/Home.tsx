@@ -200,6 +200,7 @@ export default function Home() {
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
   const [pendingDump, setPendingDump] = useState<string | null>(null);
+  const [pendingAgentTask, setPendingAgentTask] = useState<string | null>(null);
 
   // Daily check-in
   const { show: showCheckIn, dismiss: dismissCheckIn } = useDailyCheckIn();
@@ -583,6 +584,10 @@ export default function Home() {
                     onDump={recordDumpEntry}
                     initialText={pendingDump ?? undefined}
                     onInitialTextConsumed={() => setPendingDump(null)}
+                    onCreateAgent={(text) => {
+                      setPendingAgentTask(text);
+                      setActiveSection("agents");
+                    }}
                   />
                 </div>
               </div>
@@ -603,7 +608,14 @@ export default function Home() {
             {activeSection === "agents" && (
               <div className="relative">
                 <AgentsDecor />
-                <AgentTracker agents={agents} onAgentsChange={setAgents} tasks={tasks} allCategories={allCategories} />
+                <AgentTracker
+                  agents={agents}
+                  onAgentsChange={setAgents}
+                  tasks={tasks}
+                  allCategories={allCategories}
+                  pendingTaskText={pendingAgentTask ?? undefined}
+                  onPendingTaskConsumed={() => setPendingAgentTask(null)}
+                />
               </div>
             )}
 

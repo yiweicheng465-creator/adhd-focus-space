@@ -4,7 +4,7 @@
    No teal, no bright green, no vivid red
    ============================================================ */
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import {
@@ -82,9 +82,12 @@ interface AgentTrackerProps {
   defaultContext?: ActiveContext;
   /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
+  /** Pre-fill task text from Brain Dump or external source */
+  pendingTaskText?: string;
+  onPendingTaskConsumed?: () => void;
 }
 
-export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "all", allCategories }: AgentTrackerProps) {
+export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "all", allCategories, pendingTaskText, onPendingTaskConsumed }: AgentTrackerProps) {
   const [name,           setName]           = useState("");
   const [taskDesc,       setTaskDesc]       = useState("");
   const [linkedTaskId,   setLinkedTaskId]   = useState<string>("");
@@ -112,19 +115,43 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   const counts: Record<string, number> = { all: agents.length };
   knownCategories.forEach((ctx) => { counts[ctx] = agents.filter((a) => a.context === ctx).length; });
 
+  // Consume pendingTaskText from Brain Dump
+  useEffect(() => {
+    if (pendingTaskText && pendingTaskText.trim()) {
+      setName(pendingTaskText.trim().slice(0, 40));
+      setTaskDesc(pendingTaskText.trim());
+      onPendingTaskConsumed?.();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pendingTaskText]);
+
   const addAgent = () => {
     if (!name.trim()) {
       toast.error("Give the agent a name.");
       return;
     }
     const agent: Agent = {
-      id: nanoid(), name: name.trim(), task: "",
+      id: nanoid(), name: name.trim(), task: taskDesc.trim() || name.trim(),
       status: "running", context: newCtx,
       linkedTaskId: linkedTaskId || undefined, startedAt: new Date(),
     };
     onAgentsChange([agent, ...agents]);
     setName(""); setTaskDesc(""); setLinkedTaskId("");
     toast.success(`Agent "${agent.name}" is now running.`, { duration: 2500 });
+  };
+
+  const createAgentFromTask = (task: Task) => {
+    const agent: Agent = {
+      id: nanoid(),
+      name: task.text.slice(0, 40),
+      task: task.text,
+      status: "running",
+      context: (task.context as ItemContext) ?? "work",
+      linkedTaskId: task.id,
+      startedAt: new Date(),
+    };
+    onAgentsChange([agent, ...agents]);
+    toast.success(`Agent created for "${task.text.slice(0, 30)}…"`, { duration: 2500 });
   };
 
   const cycleStatus = (id: string) => {
@@ -214,11 +241,18 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
               {uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated to an agent
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-col gap-1.5 mt-1">
             {uncoveredTasks.map((t) => (
-              <span key={t.id} className="text-xs px-2.5 py-1" style={{ background: M.card, border: `1px solid ${M.roseBdr}`, color: M.rose, fontFamily: "'DM Sans', sans-serif" }}>
-                {t.text}
-              </span>
+              <div key={t.id} className="flex items-center justify-between gap-2 px-2.5 py-1.5" style={{ background: M.card, border: `1px solid ${M.roseBdr}` }}>
+                <span className="text-xs flex-1 min-w-0 truncate" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{t.text}</span>
+                <button
+                  onClick={() => createAgentFromTask(t)}
+                  className="flex items-center gap-1 px-2 py-1 text-xs shrink-0 font-medium"
+                  style={{ background: M.coral, color: "white", fontFamily: "'DM Sans', sans-serif", border: "none", cursor: "pointer" }}
+                >
+                  <Plus className="w-3 h-3" /> Create Agent
+                </button>
+              </div>
             ))}
           </div>
         </div>

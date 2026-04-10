@@ -23,6 +23,7 @@ interface BrainDumpEntry {
 
 interface BrainDumpProps {
   onConvertToTask: (task: Task) => void;
+  onCreateAgent?: (taskText: string) => void;
   onDump?: () => void;
   initialText?: string;
   onInitialTextConsumed?: () => void;
@@ -97,7 +98,7 @@ function loadEntries(): BrainDumpEntry[] {
   }
 }
 
-export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
+export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
   const [currentThought, setCurrentThought] = useState("");
   const [entries,        setEntries]        = useState<BrainDumpEntry[]>(() => loadEntries());
   const [activeTag,      setActiveTag]      = useState<string | null>(null);
@@ -206,6 +207,45 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
     setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
   };
 
+  const pushItemToTask = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
+    if (!item) return;
+    const text = item.rewritten || item.original;
+    onConvertToTask({
+      id: nanoid(), text, priority: "focus",
+      context: "work", done: false, createdAt: new Date(),
+    });
+    setEntries((prev) => prev.map((e) =>
+      e.text === item.original ? { ...e, converted: true } : e
+    ));
+    setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
+    toast.success("Added to tasks.", { duration: 2000 });
+  };
+
+  const pushAllToTasks = () => {
+    if (!aiResults) return;
+    const taskItems = aiResults.filter((r) => r.action === "add_to_tasks" || r.category === "task");
+    taskItems.forEach((item) => {
+      const text = item.rewritten || item.original;
+      onConvertToTask({
+        id: nanoid(), text, priority: "focus",
+        context: "work", done: false, createdAt: new Date(),
+      });
+      setEntries((prev) => prev.map((e) =>
+        e.text === item.original ? { ...e, converted: true } : e
+      ));
+    });
+    setAiResults((prev) => prev ? prev.filter((r) => r.action !== "add_to_tasks" && r.category !== "task") : null);
+    toast.success(`${taskItems.length} item${taskItems.length !== 1 ? "s" : ""} added to tasks.`, { duration: 2500 });
+  };
+
+  const sendToAgent = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
+    if (!item) return;
+    const text = item.rewritten || item.original;
+    onCreateAgent?.(text);
+    setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
+    toast.success("Sent to AI Agents.", { duration: 2000 });
+  };
+
   // Auto-dump initialText (from quick-capture bar) once on mount
   useEffect(() => {
     if (initialText && initialText.trim()) {
@@ -306,7 +346,18 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
               <Sparkles className="w-3.5 h-3.5" style={{ color: M.coral }} />
               <span className="text-xs font-semibold" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>AI sorted your thoughts</span>
             </div>
-            <button onClick={() => setAiDismissed(true)} style={{ color: M.muted }}><X className="w-3.5 h-3.5" /></button>
+            <div className="flex items-center gap-2">
+              {aiResults && aiResults.filter((r) => r.action === "add_to_tasks" || r.category === "task").length > 1 && (
+                <button
+                  onClick={pushAllToTasks}
+                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium"
+                  style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                >
+                  <ArrowRight className="w-3 h-3" /> Push all tasks
+                </button>
+              )}
+              <button onClick={() => setAiDismissed(true)} style={{ color: M.muted, background: "none", border: "none", cursor: "pointer" }}><X className="w-3.5 h-3.5" /></button>
+            </div>
           </div>
           <div className="flex flex-col gap-1.5">
             {aiResults.map((item, i) => (
@@ -333,13 +384,24 @@ export function BrainDump({ onConvertToTask, onDump, initialText, onInitialTextC
                   </span>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  {item.action === "add_to_tasks" && (
+                  {/* Push to task — available for all items */}
+                  <button
+                    onClick={() => pushItemToTask(item)}
+                    title="Add to tasks"
+                    className="flex items-center gap-1 px-2 py-1 text-xs"
+                    style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                  >
+                    <ArrowRight className="w-3 h-3" /> Task
+                  </button>
+                  {/* Send to AI Agent */}
+                  {onCreateAgent && (
                     <button
-                      onClick={() => applyAiAction(item)}
+                      onClick={() => sendToAgent(item)}
+                      title="Create AI agent for this"
                       className="flex items-center gap-1 px-2 py-1 text-xs"
-                      style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                      style={{ background: "oklch(0.52 0.14 35 / 0.12)", color: M.coral, borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: `1px solid oklch(0.52 0.14 35 / 0.25)` }}
                     >
-                      <ArrowRight className="w-3 h-3" /> Task
+                      <Sparkles className="w-3 h-3" /> Agent
                     </button>
                   )}
                   {item.action === "archive" && (
