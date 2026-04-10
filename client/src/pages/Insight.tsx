@@ -1,6 +1,6 @@
 /* ============================================================
    ADHD FOCUS SPACE — Insight / About page
-   Explains the balloon metaphor and core app philosophy
+   Explains the tear-strip focus timer and core app philosophy
    ============================================================ */
 
 import { useLocation } from "wouter";
@@ -18,30 +18,57 @@ const M = {
   sageBg:  "oklch(0.52 0.07 145 / 0.08)",
 };
 
-function BalloonIllustration({ scale = 1 }: { scale?: number }) {
-  const s = scale;
-  const cx = 60, cy = 60;
-  const rx = 38 * s, ry = 44 * s;
-  const knotY = cy + ry;
+// ── Tear-strip illustration ───────────────────────────────────────────────────
+function StripIllustration() {
+  const strips = [
+    { label: "overthinking", torn: true },
+    { label: "email backlog", torn: true },
+    { label: "the meeting dread", torn: false },
+    { label: "tomorrow's anxiety", torn: false },
+  ];
   return (
-    <svg width="120" height="140" viewBox="0 0 120 140" fill="none">
-      {/* Balloon body */}
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="oklch(0.65 0.12 35)" opacity="0.85" />
-      <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill="none" stroke="#3A2A1A" strokeWidth="1.6" opacity="0.7" />
-      {/* Highlight */}
-      <ellipse cx={cx - rx * 0.28} cy={cy - ry * 0.28} rx={rx * 0.18} ry={ry * 0.14} fill="white" opacity="0.25" />
-      {/* Smiley */}
-      <path d={`M ${cx - rx * 0.28} ${cy - ry * 0.05} Q ${cx - rx * 0.18} ${cy + ry * 0.08} ${cx - rx * 0.08} ${cy - ry * 0.05}`}
-        fill="none" stroke="#3A2A1A" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
-      <path d={`M ${cx + rx * 0.08} ${cy - ry * 0.05} Q ${cx + rx * 0.18} ${cy + ry * 0.08} ${cx + rx * 0.28} ${cy - ry * 0.05}`}
-        fill="none" stroke="#3A2A1A" strokeWidth="1.2" strokeLinecap="round" opacity="0.7" />
-      <path d={`M ${cx - rx * 0.35} ${cy + ry * 0.28} Q ${cx} ${cy + ry * 0.44} ${cx + rx * 0.35} ${cy + ry * 0.28}`}
-        fill="none" stroke="#3A2A1A" strokeWidth="1.1" strokeLinecap="round" opacity="0.65" />
-      {/* Knot */}
-      <ellipse cx={cx} cy={knotY + 5 * s} rx={5 * s} ry={6 * s} fill="oklch(0.50 0.10 35)" opacity="0.8" />
-      {/* String */}
-      <path d={`M ${cx} ${knotY + 10 * s} Q ${cx + 8} ${knotY + 35} ${cx - 4} ${130}`}
-        fill="none" stroke="oklch(0.55 0.018 70)" strokeWidth="1" opacity="0.5" />
+    <svg width="110" height="148" viewBox="0 0 110 148" fill="none" style={{ flexShrink: 0 }}>
+      {/* Paper background */}
+      <rect x="4" y="4" width="102" height="140" rx="3" fill="oklch(0.99 0.005 80)" stroke="oklch(0.82 0.015 75)" strokeWidth="1.2" />
+      {/* Torn-edge top */}
+      <path d="M4 4 Q14 10 24 4 Q34 10 44 4 Q54 10 64 4 Q74 10 84 4 Q94 10 104 4 L106 4 L106 8 Q94 14 84 8 Q74 14 64 8 Q54 14 44 8 Q34 14 24 8 Q14 14 4 8 Z"
+        fill="oklch(0.93 0.012 75)" />
+      {/* Strips */}
+      {strips.map((s, i) => {
+        const y = 20 + i * 30;
+        const isTorn = s.torn;
+        return (
+          <g key={i}>
+            {/* Strip body */}
+            <rect x="10" y={y} width="90" height="22" rx="2"
+              fill={isTorn ? "oklch(0.92 0.01 75)" : "oklch(0.97 0.008 80)"}
+              stroke={isTorn ? "oklch(0.80 0.015 75)" : "oklch(0.55 0.09 35 / 0.4)"}
+              strokeWidth="0.9"
+              opacity={isTorn ? 0.5 : 1}
+            />
+            {/* Tear line on right side for torn strips */}
+            {isTorn && (
+              <path
+                d={`M 90 ${y + 2} Q 93 ${y + 7} 90 ${y + 11} Q 93 ${y + 15} 90 ${y + 20}`}
+                fill="none" stroke="oklch(0.70 0.015 75)" strokeWidth="0.8" strokeDasharray="2 2"
+              />
+            )}
+            {/* Label text */}
+            <text x="18" y={y + 14}
+              fontFamily="'DM Sans', sans-serif" fontSize="7.5"
+              fill={isTorn ? "oklch(0.65 0.015 70)" : "oklch(0.35 0.018 65)"}
+              opacity={isTorn ? 0.6 : 1}
+            >
+              {s.label}
+            </text>
+            {/* Strikethrough for torn */}
+            {isTorn && (
+              <line x1="18" y1={y + 11} x2={18 + s.label.length * 4.4} y2={y + 11}
+                stroke="oklch(0.55 0.09 35)" strokeWidth="0.9" opacity="0.5" />
+            )}
+          </g>
+        );
+      })}
     </svg>
   );
 }
@@ -50,12 +77,14 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <circle cx="14" cy="14" r="11" fill="oklch(0.55 0.09 35 / 0.15)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.4" />
-        <path d="M14 8 L14 14 L18 16" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" />
+        {/* Paper strip with tear */}
+        <rect x="3" y="8" width="22" height="12" rx="2" fill="oklch(0.55 0.09 35 / 0.12)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
+        <path d="M19 8 Q21 11 19 14 Q21 17 19 20" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.1" strokeDasharray="2 1.5" />
+        <line x1="7" y1="14" x2="16" y2="14" stroke="oklch(0.55 0.09 35)" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
       </svg>
     ),
-    title: "The Balloon = Your Focus Session",
-    body: "When you start the timer, the balloon is fully inflated — big, round, full of potential. As you stay focused, it slowly deflates. Completing a session means you've breathed out all that stored tension. The balloon is empty. You did it.",
+    title: "The Strips = Things to Let Go Of",
+    body: "Before each session you write down the mental clutter weighing on you — the email backlog, the awkward conversation, tomorrow's anxiety. As you focus, the strips tear away one by one. By the end, the page is clear. So is your head.",
   },
   {
     icon: (
@@ -64,19 +93,31 @@ const CONCEPTS = [
         <circle cx="24" cy="8" r="3" fill="oklch(0.52 0.07 145 / 0.3)" stroke="oklch(0.52 0.07 145)" strokeWidth="1.2" />
       </svg>
     ),
-    title: "Deflation = Progress",
-    body: "Every second the balloon gets smaller is a second of real focus. The shrinking is not a countdown to failure — it's a countdown to release. Stress leaves the balloon as you work. By the end, it's flat. So is the anxiety.",
+    title: "Tearing = Progress",
+    body: "Each strip that tears is a second of real focus made visible. The tearing is not a countdown to failure — it is a countdown to release. Distractions leave the page as you work. By the end, nothing is left. Neither is the anxiety.",
   },
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <path d="M6 22 L22 6" stroke="oklch(0.55 0.09 35)" strokeWidth="1.4" strokeLinecap="round" />
-        <circle cx="22" cy="6" r="4" fill="oklch(0.55 0.09 35 / 0.15)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" />
-        <path d="M14 14 L18 10" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" strokeLinecap="round" />
+        <circle cx="14" cy="14" r="9" fill="oklch(0.55 0.09 35 / 0.12)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
+        <path d="M14 9 L14 14 L18 16" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
-    title: "The Needle = Accountability",
-    body: "The needle hovering near the balloon is not a threat — it's a reminder that quitting early has a cost. If you abandon the session, the balloon pops. That's okay. But the goal is to let it deflate naturally, on your terms.",
+    title: "The Timer = One Thing at a Time",
+    body: "The timer runs across all pages — start it on the Dashboard, switch to Tasks, come back, and it is still counting. There is no reset when you navigate. The session belongs to you, not to a single tab. Focus travels with you.",
+  },
+  {
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        {/* Cycle arrows */}
+        <path d="M8 6 Q14 3 20 6 Q24 10 22 16" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M20 22 Q14 25 8 22 Q4 18 6 12" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.4" strokeLinecap="round" />
+        <polyline points="22,12 22,16 18,16" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="6,18 6,12 10,12" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+    title: "Cycles = Rhythm, Not Grind",
+    body: "Focus → Short Break → Focus → Short Break → Focus → Long Break. Four rounds, then rest. The cycle is automatic — you do not have to decide what comes next. ADHD brains thrive on predictable rhythm. The app holds the structure so you can hold the attention.",
   },
   {
     icon: (
@@ -97,7 +138,7 @@ const CONCEPTS = [
       </svg>
     ),
     title: "Goals = Direction, Not Pressure",
-    body: "Goals here are not deadlines. They are compass headings. Progress is measured in small nudges (+10%, +25%) because ADHD brains work in bursts. A goal at 40% is not failing — it's 40% further than before.",
+    body: "Goals here are not deadlines. They are compass headings. Progress is measured in small nudges (+10%, +25%) because ADHD brains work in bursts. A goal at 40% is not failing — it is 40% further than before.",
   },
   {
     icon: (
@@ -110,7 +151,7 @@ const CONCEPTS = [
       </svg>
     ),
     title: "AI Agents = Extended Cognition",
-    body: "Your brain has limited working memory. AI agents are not shortcuts — they are cognitive extensions. Logging what each agent is doing externalizes the mental load of tracking parallel work, freeing your focus for what only you can do.",
+    body: "Your brain has limited working memory. AI agents are not shortcuts — they are cognitive extensions. Logging what each agent is doing externalises the mental load of tracking parallel work, freeing your focus for what only you can do.",
   },
 ];
 
@@ -149,17 +190,17 @@ export default function Insight() {
             style={{ background: M.coralBg, border: `1px solid oklch(0.55 0.09 35 / 0.18)` }}
           >
             <div className="shrink-0">
-              <BalloonIllustration scale={1} />
+              <StripIllustration />
             </div>
             <div>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.22em", textTransform: "uppercase", color: M.coral, marginBottom: 8 }}>
                 THE PHILOSOPHY
               </p>
               <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: "1.45rem", fontWeight: 700, color: M.ink, lineHeight: 1.3, marginBottom: 10 }}>
-                Your focus is a balloon.<br />Stress is the air inside.
+                Your focus is a page.<br />Distractions are the strips.
               </h1>
               <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.muted, lineHeight: 1.65 }}>
-                This workspace is built around one idea: ADHD brains are not broken. They are high-pressure systems that need the right release valves. Every feature here is a valve.
+                This workspace is built around one idea: ADHD brains are not broken. They are high-pressure systems that need the right release valves. Every feature here is a valve — and the tear-strip timer is the main one.
               </p>
             </div>
           </div>
