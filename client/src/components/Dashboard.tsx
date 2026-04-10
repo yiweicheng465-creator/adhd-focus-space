@@ -428,9 +428,6 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
         </div>
       </div>
 
-      {/* ── 7-day block heatmap ── */}
-      <BlockHeatmap history={blockHistory} streak={blockStreak} />
-
       {/* ── Today's wins ── */}
       {todayWins.length > 0 && (
         <div className="p-5" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>

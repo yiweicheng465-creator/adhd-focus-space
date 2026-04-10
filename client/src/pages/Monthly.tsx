@@ -6,6 +6,7 @@
 import { Sidebar } from "@/components/Sidebar";
 import { MonthlyProgress } from "@/components/MonthlyProgress";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useBlockStreak } from "@/hooks/useBlockStreak";
 import type { Win } from "@/components/DailyWins";
 import type { Task } from "@/components/TaskManager";
 import { useLocation } from "wouter";
@@ -14,6 +15,7 @@ export default function Monthly() {
   const [, navigate] = useLocation();
   const [wins]  = useLocalStorage<Win[]>("adhd-wins",  []);
   const [tasks] = useLocalStorage<Task[]>("adhd-tasks", []);
+  const { streak: blockStreak, history: blockHistory } = useBlockStreak();
 
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
@@ -54,7 +56,7 @@ export default function Monthly() {
         </header>
 
         <div className="flex-1 overflow-y-auto">
-          <MonthlyProgress wins={wins} tasks={tasks} />
+          <MonthlyProgress wins={wins} tasks={tasks} blockHistory={blockHistory} blockStreak={blockStreak} />
         </div>
       </main>
     </div>

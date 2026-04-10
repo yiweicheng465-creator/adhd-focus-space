@@ -9,6 +9,68 @@ import { useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame } from "lucide-react";
 import type { Win } from "./DailyWins";
 import type { Task } from "./TaskManager";
+import { getLastNDays } from "@/hooks/useBlockStreak";
+
+/* ── Block heatmap ── */
+function BlockHeatmap({ history, streak }: { history: Record<string, number>; streak: number }) {
+  const days = getLastNDays(7);
+  const todayStr = new Date().toISOString().slice(0, 10);
+  const maxCount = Math.max(1, ...days.map((d) => history[d] ?? 0));
+  const dayLabels = days.map((d) => {
+    const dow = new Date(d + "T12:00:00").getDay();
+    return ["S","M","T","W","T","F","S"][dow];
+  });
+  return (
+    <div style={{ marginTop: 24, padding: "16px", border: `1px solid oklch(0.52 0.14 35 / 0.18)`, background: "oklch(0.52 0.14 35 / 0.03)", borderRadius: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+            <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
+          </svg>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase", color: M.muted, fontFamily: "'JetBrains Mono', monospace" }}>Deep focus blocks · this week</span>
+        </div>
+        {streak > 0 && (
+          <span style={{ fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace" }}>
+            {streak} day streak
+          </span>
+        )}
+      </div>
+      <div style={{ display: "flex", alignItems: "flex-end", gap: 8 }}>
+        {days.map((date, i) => {
+          const count = history[date] ?? 0;
+          const isToday = date === todayStr;
+          const intensity = count === 0 ? 0 : Math.max(0.15, count / maxCount);
+          const bg = count === 0 ? "oklch(0.88 0.014 75)" : `oklch(0.52 0.14 35 / ${0.15 + intensity * 0.75})`;
+          const cellH = count === 0 ? 28 : Math.round(28 + intensity * 28);
+          return (
+            <div key={date} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              {count > 0 && (
+                <span style={{ fontSize: 9, fontWeight: 700, color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{count}</span>
+              )}
+              <div
+                title={`${date}: ${count} block${count !== 1 ? "s" : ""}`}
+                style={{ width: "100%", height: cellH, background: bg, border: isToday ? "1.5px solid oklch(0.52 0.14 35 / 0.6)" : "1px solid oklch(0.87 0.014 75)", borderRadius: 3, transition: "height 0.3s ease" }}
+              />
+              <span style={{ fontSize: 9, fontWeight: isToday ? 700 : 400, color: isToday ? "oklch(0.45 0.10 35)" : M.muted, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}>{dayLabels[i]}</span>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 12 }}>
+        {[
+          { bg: "oklch(0.88 0.014 75)", label: "no block" },
+          { bg: "oklch(0.52 0.14 35 / 0.35)", label: "1 block" },
+          { bg: "oklch(0.52 0.14 35 / 0.90)", label: "2+ blocks" },
+        ].map(({ bg, label }) => (
+          <div key={label} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+            <div style={{ width: 10, height: 10, background: bg, border: "1px solid oklch(0.87 0.014 75)", borderRadius: 2 }} />
+            <span style={{ fontSize: 10, color: M.muted, fontFamily: "'JetBrains Mono', monospace" }}>{label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 /* ── Types ── */
 export interface DailyLog {
@@ -235,9 +297,11 @@ function DayDetail({ log, dateStr, onClose }: { log?: DailyLog; dateStr: string;
 interface MonthlyProgressProps {
   wins: Win[];
   tasks: Task[];
+  blockHistory?: Record<string, number>;
+  blockStreak?: number;
 }
 
-export function MonthlyProgress({ wins, tasks }: MonthlyProgressProps) {
+export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 0 }: MonthlyProgressProps) {
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -439,6 +503,9 @@ export function MonthlyProgress({ wins, tasks }: MonthlyProgressProps) {
           onClose={() => setSelectedDay(null)}
         />
       )}
+
+      {/* Block heatmap achievement */}
+      <BlockHeatmap history={blockHistory} streak={blockStreak} />
 
       {/* Motivational note */}
       <div style={{ marginTop: 20, padding: "14px 16px", background: M.coralBg, borderRadius: 10, border: `1px solid oklch(0.55 0.09 35 / 0.15)` }}>
