@@ -3,6 +3,13 @@
   Owns all timer state so the countdown persists across page navigation.
   Both the Dashboard mini-timer and the full Focus page read from this
   single source of truth.
+
+  Pomodoro cycle:
+    Focus → Short Break → Focus → Short Break →
+    Focus → Short Break → Focus → Long Break → [STOP — full block done]
+  
+  Between phases: a 5-second "transition" countdown screen.
+  After the 4th focus + long break: "block_complete" phase — timer stops.
 */
 
 import {
@@ -22,6 +29,8 @@ export type TimerPhase =
   | "running"
   | "paused"
   | "complete"
+  | "transition"   // 5-second auto-start countdown between phases
+  | "block_complete" // all 4 focus rounds + long break done
   | "quit"
   | "recovering";
 export type StripState = "attached" | "tearing" | "torn";
@@ -58,6 +67,15 @@ export const DEFAULT_STRIPS = [
   "the mental noise",
 ];
 
+// ── Pomodoro sequence ─────────────────────────────────────────────────────────
+// 8 steps: focus, short, focus, short, focus, short, focus, long
+export const POMODORO_SEQUENCE: TimerMode[] = [
+  "focus", "short",
+  "focus", "short",
+  "focus", "short",
+  "focus", "long",
+];
+
 // ── Context shape ─────────────────────────────────────────────────────────────
 export interface TimerContextValue {
   // State
@@ -65,12 +83,15 @@ export interface TimerContextValue {
   phase: TimerPhase;
   running: boolean;
   remaining: number;
-  sessions: number;
+  sessions: number;         // focus sessions completed this block
   quitCount: number;
   durations: Record<TimerMode, number>;
   strips: string[];
   stripStates: StripState[];
   paperFlying: boolean;
+  pomodoroStep: number;     // 0–7 index into POMODORO_SEQUENCE
+  transitionCountdown: number; // 5→0 seconds before next phase auto-starts
+  nextMode: TimerMode | null;  // what comes after the transition
 
   // Derived
   progress: number;
@@ -83,7 +104,8 @@ export interface TimerContextValue {
   // Actions
   handleStartPause: () => void;
   handleQuit: () => void;
-  handleNewSession: () => void;
+  handleNewSession: () => void;   // start a fresh block from idle
+  handleSkipTransition: () => void; // skip the 5-second countdown
   switchMode: (m: TimerMode) => void;
   applyDuration: (m: TimerMode, mins: number) => void;
   setCustomStrips: (s: string[] | ((prev: string[]) => string[])) => void;
@@ -112,6 +134,10 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const [phase, setPhase] = useState<TimerPhase>("idle");
   const [sessions, setSessions] = useState(0);
   const [quitCount, setQuitCount] = useState(0);
+  const [pomodoroStep, setPomodoroStep] = useState(0); // 0–7
+  const [transitionCountdown, setTransitionCountdown] = useState(5);
+  const [nextMode, setNextMode] = useState<TimerMode | null>(null);
+
   const [customStrips, setCustomStrips] = useLocalStorage<string[]>(
     "adhd-focus-strips",
     DEFAULT_STRIPS
@@ -124,6 +150,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
   // Refs
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const transitionRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const completedRef = useRef(false);
   const startedAtRef = useRef<number | null>(null);
   const remainingAtStartRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
@@ -164,14 +191,68 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     }
   }, [stripsToTear, phase, stripStates]);
 
+  // ── Start next phase after transition ─────────────────────────────────────
+  // startPhase is superseded by startPhaseWithDurations below — kept as no-op
+  const startPhase = useCallback((_m: TimerMode, _step: number) => {
+    // intentionally empty — use startPhaseWithDurations
+  }, []);
+
+  // We need durations in startPhase — use a ref to avoid stale closure
+  const durationsRef = useRef(durations);
+  useEffect(() => { durationsRef.current = durations; }, [durations]);
+
+  const startPhaseWithDurations = useCallback((m: TimerMode, step: number) => {
+    const secs = durationsRef.current[m] * 60;
+    setMode(m);
+    setRemaining(secs);
+    remainingAtStartRef.current = secs;
+    setPhase("running");
+    setRunning(true);
+    setPomodoroStep(step);
+    setPaperFlying(false);
+    completedRef.current = false;
+    if (m === "focus") {
+      setStripStates(strips.map(() => "attached" as StripState));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [strips]);
+
+  // ── Transition countdown ───────────────────────────────────────────────────
+  const startTransition = useCallback((toMode: TimerMode, toStep: number) => {
+    if (transitionRef.current) clearInterval(transitionRef.current);
+    setNextMode(toMode);
+    setTransitionCountdown(5);
+    setPhase("transition");
+    let count = 5;
+    transitionRef.current = setInterval(() => {
+      count -= 1;
+      setTransitionCountdown(count);
+      if (count <= 0) {
+        clearInterval(transitionRef.current!);
+        startPhaseWithDurations(toMode, toStep);
+      }
+    }, 1000);
+  }, [startPhaseWithDurations]);
+
+  const handleSkipTransition = useCallback(() => {
+    if (transitionRef.current) clearInterval(transitionRef.current);
+    if (nextMode !== null) {
+      const step = POMODORO_SEQUENCE.indexOf(nextMode, pomodoroStep);
+      startPhaseWithDurations(nextMode, step >= 0 ? step : pomodoroStep);
+    }
+  }, [nextMode, pomodoroStep, startPhaseWithDurations]);
+
   // ── Complete handler ───────────────────────────────────────────────────────
   const handleComplete = useCallback(
     (natural = true) => {
       setRunning(false);
+      if (intervalRef.current) clearInterval(intervalRef.current);
+
       if (mode === "focus") {
         setSessions((s) => s + 1);
         if (natural && !completedRef.current) {
           completedRef.current = true;
+          // Cascade tear remaining strips
           const remaining_strips = strips
             .map((_: string, i: number) => i)
             .filter((i: number) => stripStates[i] === "attached");
@@ -194,19 +275,40 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
           setTimeout(() => {
             setPaperFlying(true);
             setTimeout(() => {
-              setPhase("complete");
               onSessionCompleteRef.current?.();
+              // Determine next step in Pomodoro sequence
+              const nextStep = pomodoroStep + 1;
+              if (nextStep < POMODORO_SEQUENCE.length) {
+                const nextM = POMODORO_SEQUENCE[nextStep];
+                startTransition(nextM, nextStep);
+              } else {
+                // All 8 steps done — full block complete
+                setPhase("block_complete");
+              }
             }, 900);
           }, remaining_strips.length * 200 + 400);
         } else {
-          setPhase("complete");
+          // Non-natural complete (e.g. forced)
+          onSessionCompleteRef.current?.();
+          const nextStep = pomodoroStep + 1;
+          if (nextStep < POMODORO_SEQUENCE.length) {
+            startTransition(POMODORO_SEQUENCE[nextStep], nextStep);
+          } else {
+            setPhase("block_complete");
+          }
         }
       } else {
-        // Break complete — just go to complete state
-        setPhase("complete");
+        // Break complete — move to next step
+        const nextStep = pomodoroStep + 1;
+        if (nextStep < POMODORO_SEQUENCE.length) {
+          startTransition(POMODORO_SEQUENCE[nextStep], nextStep);
+        } else {
+          // After the long break at step 7 — block complete
+          setPhase("block_complete");
+        }
       }
     },
-    [mode, strips, stripStates]
+    [mode, strips, stripStates, pomodoroStep, startTransition]
   );
 
   // ── Timestamp-based countdown ──────────────────────────────────────────────
@@ -240,13 +342,16 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     setStripStates(strips.map(() => "attached" as StripState));
 
   const switchMode = (m: TimerMode) => {
-    if (running) return;
+    if (running || phase === "transition") return;
     setMode(m);
     setRemaining(durations[m] * 60);
     setPhase("idle");
     resetStrips();
     setPaperFlying(false);
     completedRef.current = false;
+    // Reset Pomodoro to start of that mode
+    const idx = POMODORO_SEQUENCE.indexOf(m);
+    setPomodoroStep(idx >= 0 ? idx : 0);
   };
 
   const applyDuration = (m: TimerMode, mins: number) => {
@@ -264,7 +369,9 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     if (
       phase === "complete" ||
       phase === "quit" ||
-      phase === "recovering"
+      phase === "recovering" ||
+      phase === "transition" ||
+      phase === "block_complete"
     )
       return;
     const next = !running;
@@ -280,6 +387,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
 
   const handleQuit = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
+    if (transitionRef.current) clearInterval(transitionRef.current);
     setRunning(false);
     setQuitCount((q) => q + 1);
     onQuitRef.current?.();
@@ -289,11 +397,17 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleNewSession = () => {
-    setRemaining(durations[mode] * 60);
+    if (transitionRef.current) clearInterval(transitionRef.current);
+    setRemaining(durations["focus"] * 60);
+    setMode("focus");
     setPhase("idle");
     resetStrips();
     setPaperFlying(false);
     completedRef.current = false;
+    setPomodoroStep(0);
+    setSessions(0);
+    setNextMode(null);
+    setTransitionCountdown(5);
   };
 
   const setOnSessionComplete = (fn: (() => void) | null) => {
@@ -314,6 +428,9 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     strips,
     stripStates,
     paperFlying,
+    pomodoroStep,
+    transitionCountdown,
+    nextMode,
     progress,
     totalSec,
     tornCount,
@@ -323,6 +440,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     handleStartPause,
     handleQuit,
     handleNewSession,
+    handleSkipTransition,
     switchMode,
     applyDuration,
     setCustomStrips,

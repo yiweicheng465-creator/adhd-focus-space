@@ -575,7 +575,8 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
     mode, phase, running, remaining, sessions, quitCount,
     durations, strips, stripStates, paperFlying,
     progress, tornCount, stripsLeft, nextStripIdx, accentColor,
-    handleStartPause, handleQuit, handleNewSession,
+    pomodoroStep, transitionCountdown, nextMode,
+    handleStartPause, handleQuit, handleNewSession, handleSkipTransition,
     switchMode, applyDuration, setCustomStrips,
     setOnSessionComplete, setOnQuit,
   } = useTimer();
@@ -690,7 +691,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
         </div>
       )}
 
-      {/* Complete wrap-up */}
+      {/* Complete wrap-up (manual complete, not auto-cycle) */}
       {phase === "complete" && (
         <CompleteWrapUp sessions={sessions} mode={mode} onNewSession={handleNewSession} />
       )}
@@ -700,8 +701,72 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
         <QuitWrapUp quitCount={quitCount} stripsLeft={stripsLeft} onNewSession={handleNewSession} />
       )}
 
-      {/* Paper scene — hidden during complete/quit */}
-      {phase !== "complete" && phase !== "quit" && (
+      {/* Transition countdown — auto-start next phase */}
+      {phase === "transition" && nextMode && (
+        <div style={{
+          border: "1px solid #E8DDD0", background: "#FDFAF5",
+          padding: "28px 20px", textAlign: "center",
+        }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>
+            NEXT UP
+          </p>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, fontStyle: "italic", color: MODE_COLORS[nextMode], marginBottom: 6 }}>
+            {MODE_LABELS[nextMode]}
+          </p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 32, fontWeight: 700, color: "#3D2E1E", marginBottom: 16 }}>
+            {transitionCountdown}
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#8C7B6B", marginBottom: 16 }}>
+            Starting automatically…
+          </p>
+          <button onClick={handleSkipTransition} style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+            letterSpacing: "0.14em", textTransform: "uppercase",
+            background: MODE_COLORS[nextMode], color: "#FAF6F1",
+            border: "none", padding: "8px 20px", cursor: "pointer",
+          }}>
+            Start now →
+          </button>
+        </div>
+      )}
+
+      {/* Block complete — all 4 focus rounds done */}
+      {phase === "block_complete" && (
+        <div style={{
+          border: "1px solid #E8DDD0", background: "#FDFAF5",
+          padding: "28px 20px", textAlign: "center",
+        }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#7A8C6E", textTransform: "uppercase", marginBottom: 10 }}>
+            BLOCK COMPLETE
+          </p>
+          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "#3D2E1E", marginBottom: 8 }}>
+            4 sessions done.
+          </p>
+          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#8C7B6B", lineHeight: 1.6, marginBottom: 20 }}>
+            You completed a full Pomodoro block.<br />
+            Take a real break — you earned it.
+          </p>
+          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} style={{ width: 10, height: 10, background: "#7A8C6E", borderRadius: 0 }} />
+            ))}
+          </div>
+          <div style={{ marginTop: 20 }}>
+            <button onClick={handleNewSession} style={{
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+              letterSpacing: "0.14em", textTransform: "uppercase",
+              background: "#2a1f14", color: "#FAF6F1",
+              border: "none", padding: "9px 24px", cursor: "pointer",
+              boxShadow: "0 3px 0 #1a1208",
+            }}>
+              Start new block
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Paper scene — hidden during complete/quit/transition/block_complete */}
+      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
         <div
           className={paperFlying ? "ft-fly-away" : ""}
           style={{
@@ -795,7 +860,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
       )}
 
       {/* Progress segments */}
-      {phase !== "complete" && phase !== "quit" && (
+      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
         <div style={{ display: "flex", gap: 3 }}>
           {segments.map((filled, i) => (
             <div key={i} style={{ flex: 1, height: 5, background: filled ? accentColor : "#E8DDD0", transition: "background 0.5s" }} />
@@ -804,7 +869,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
       )}
 
       {/* Controls */}
-      {phase !== "complete" && phase !== "quit" && (
+      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {/* Quit */}
           {(running || phase === "paused") && (
@@ -848,7 +913,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
       )}
 
       {/* Footer */}
-      {phase !== "complete" && phase !== "quit" && (
+      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
         <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
           <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
           <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} STRIPS TORN</span>
