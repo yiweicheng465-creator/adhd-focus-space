@@ -271,6 +271,50 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
       return { review };
     }),
 
+  /* ── 6. Create Agent Brief ── */
+  createAgentBrief: publicProcedure
+    .input(z.object({
+      taskText: z.string(),
+      context: z.string(),
+    }))
+    .mutation(async ({ input }) => {
+      const result = await invokeLLM({
+        messages: [
+          { role: "system", content: ADHD_SYSTEM },
+          {
+            role: "user",
+            content: `Generate a concise AI agent name and brief for this task: "${input.taskText}" (context: ${input.context}).
+
+Return JSON with:
+- name: short agent name (3-5 words, action-oriented, e.g. "API Review Checker")
+- brief: 1-2 sentence description of what the agent should do
+- firstStep: the very first concrete action the agent should take`,
+          },
+        ],
+        response_format: {
+          type: "json_schema" as const,
+          json_schema: {
+            name: "agent_brief",
+            strict: true,
+            schema: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                brief: { type: "string" },
+                firstStep: { type: "string" },
+              },
+              required: ["name", "brief", "firstStep"],
+              additionalProperties: false,
+            },
+          },
+        },
+      });
+      const rawContent = result.choices[0]?.message?.content;
+      const content = typeof rawContent === "string" ? rawContent : null;
+      if (!content) throw new Error("No response from AI");
+      return JSON.parse(content) as { name: string; brief: string; firstStep: string };
+    }),
+
   /* ── 5. MIT Morning Suggestion ── */
   mitSuggestion: publicProcedure
     .input(mitSuggestionInput)

@@ -34,6 +34,7 @@ interface DashboardProps {
   onBlockComplete?: () => void;
   blockStreak?: number;
   blockHistory?: Record<string, number>;
+  focusSessions?: number;
   /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
 }
@@ -204,7 +205,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, blockHistory = {}, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, blockHistory = {}, focusSessions = 0, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -428,17 +429,39 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
         </div>
       </div>
 
-      {/* ── Today's wins ── */}
-      {todayWins.length > 0 && (
+      {/* ── Today's activity ── */}
+      {(todayWins.length > 0 || focusSessions > 0) && (
         <div className="p-5" style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)" }}>
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-3.5 h-3.5" style={{ color: "oklch(0.55 0.12 75)" }} />
-              <p className="editorial-label">Today · {todayWins.length} win{todayWins.length > 1 ? "s" : ""}</p>
+              <p className="editorial-label">Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}</p>
             </div>
             <button className="m-btn-link" onClick={() => onNavigate("wins")}>Log more</button>
           </div>
           <div className="flex flex-wrap gap-2">
+            {/* Focus session pill */}
+            {focusSessions > 0 && (
+              <div
+                className="flex items-center gap-1.5 px-2.5 py-1"
+                style={{
+                  background: "oklch(0.52 0.14 35 / 0.08)",
+                  border: "1px solid oklch(0.52 0.14 35 / 0.25)",
+                  borderRadius: 20,
+                  color: "oklch(0.42 0.14 35)",
+                  fontSize: 11,
+                  fontWeight: 600,
+                  fontFamily: "'DM Mono', monospace",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                  <circle cx="12" cy="12" r="9" stroke="oklch(0.42 0.14 35)" strokeWidth="2" />
+                  <polyline points="12,7 12,12 15,15" stroke="oklch(0.42 0.14 35)" strokeWidth="2" strokeLinecap="round" />
+                </svg>
+                ⏱ {focusSessions} FOCUS SESSION{focusSessions > 1 ? "S" : ""}
+              </div>
+            )}
             {todayWins.map((w) => (
               <div
                 key={w.id}

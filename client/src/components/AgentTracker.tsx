@@ -6,10 +6,11 @@
 
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import {
-  CheckCircle2, Clock, Flame,
-  Link2, Pause, Play, Plus, RefreshCw, Trash2, X, XCircle,
+  CheckCircle2, Clock, Flame, Loader2,
+  Link2, Pause, Play, Plus, RefreshCw, Sparkles, Trash2, X, XCircle,
 } from "lucide-react";
 import { PixelAgents } from "@/components/PixelIcons";
 import { toast } from "sonner";
@@ -19,6 +20,10 @@ import {
   ContextSwitcher, ContextBadge, getContextConfig,
   type ItemContext, type ActiveContext,
 } from "./ContextSwitcher";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from "@/components/ui/dialog";
+import { trpc } from "@/lib/trpc";
 
 /* ── Morandi tokens ── */
 const M = {
@@ -97,6 +102,46 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
   const [expandedId,     setExpandedId]    = useState<string | null>(null);
   const [noteEditing,    setNoteEditing]   = useState<{ id: string; value: string } | null>(null);
   const [taskEditing,    setTaskEditing]   = useState<string | null>(null); // agent id being task-edited
+
+  // AI Create Agent popup
+  const [popupTask,      setPopupTask]     = useState<Task | null>(null);
+  const [popupName,      setPopupName]     = useState("");
+  const [popupBrief,     setPopupBrief]    = useState("");
+  const [popupFirstStep, setPopupFirstStep] = useState("");
+
+  const createBriefMutation = trpc.ai.createAgentBrief.useMutation({
+    onSuccess: (data) => {
+      setPopupName(data.name);
+      setPopupBrief(data.brief);
+      setPopupFirstStep(data.firstStep);
+    },
+    onError: () => toast.error("AI couldn't generate a brief. You can fill it in manually."),
+  });
+
+  const openCreatePopup = (task: Task) => {
+    setPopupTask(task);
+    setPopupName(task.text.slice(0, 40));
+    setPopupBrief("");
+    setPopupFirstStep("");
+    createBriefMutation.mutate({ taskText: task.text, context: (task.context as string) ?? "work" });
+  };
+
+  const confirmCreateAgent = () => {
+    if (!popupTask) return;
+    const agent: Agent = {
+      id: nanoid(),
+      name: popupName || popupTask.text.slice(0, 40),
+      task: popupBrief || popupTask.text,
+      status: "running",
+      context: (popupTask.context as ItemContext) ?? "work",
+      linkedTaskId: popupTask.id,
+      startedAt: new Date(),
+      notes: popupFirstStep ? `First step: ${popupFirstStep}` : undefined,
+    };
+    onAgentsChange([agent, ...agents]);
+    toast.success(`Agent "${agent.name}" created!`, { duration: 2500 });
+    setPopupTask(null);
+  };
 
   const today        = new Date().toDateString();
   const todayAgents  = agents.filter((a) => new Date(a.startedAt).toDateString() === today);
@@ -235,24 +280,31 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       {/* Coverage alert */}
       {uncoveredTasks.length > 0 && (
         <div style={{ padding: "14px 18px", borderRadius: 10, border: `1px solid ${M.roseBdr}`, background: M.roseBg }}>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-3">
             <Flame className="w-4 h-4" style={{ color: M.rose }} />
             <p className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-              {uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated to an agent
+              {uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated
             </p>
           </div>
-          <div className="flex flex-col gap-1.5 mt-1">
+          <div className="flex flex-wrap gap-2">
             {uncoveredTasks.map((t) => (
-              <div key={t.id} className="flex items-center justify-between gap-2 px-2.5 py-1.5" style={{ background: M.card, border: `1px solid ${M.roseBdr}` }}>
-                <span className="text-xs flex-1 min-w-0 truncate" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{t.text}</span>
-                <button
-                  onClick={() => createAgentFromTask(t)}
-                  className="flex items-center gap-1 px-2 py-1 text-xs shrink-0 font-medium"
-                  style={{ background: M.coral, color: "white", fontFamily: "'DM Sans', sans-serif", border: "none", cursor: "pointer" }}
-                >
-                  <Plus className="w-3 h-3" /> Create Agent
-                </button>
-              </div>
+              <button
+                key={t.id}
+                onClick={() => openCreatePopup(t)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
+                style={{
+                  background: M.card,
+                  border: `1px solid ${M.roseBdr}`,
+                  borderRadius: 20,
+                  color: M.ink,
+                  fontFamily: "'DM Sans', sans-serif",
+                  cursor: "pointer",
+                  maxWidth: 220,
+                }}
+              >
+                <span className="truncate" style={{ maxWidth: 160 }}>{t.text}</span>
+                <Plus className="w-3 h-3 shrink-0" style={{ color: M.coral }} />
+              </button>
             ))}
           </div>
         </div>
@@ -499,6 +551,83 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
           );
         })}
       </div>
+
+      {/* ── AI Create Agent Popup ── */}
+      <Dialog open={!!popupTask} onOpenChange={(open) => { if (!open) setPopupTask(null); }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", color: "oklch(0.28 0.018 65)" }}>
+              Create Agent
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Task source */}
+          <div className="text-xs px-3 py-2 rounded-lg" style={{ background: "oklch(0.52 0.14 35 / 0.07)", border: "1px solid oklch(0.52 0.14 35 / 0.2)", color: "oklch(0.42 0.14 35)", fontFamily: "'DM Sans', sans-serif" }}>
+            <span className="font-semibold">Task: </span>{popupTask?.text}
+          </div>
+
+          {createBriefMutation.isPending ? (
+            <div className="flex items-center gap-2 py-4 justify-center" style={{ color: "oklch(0.55 0.018 70)" }}>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span className="text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>AI is drafting your agent brief…</span>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-3">
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Agent Name</label>
+                <Input
+                  value={popupName}
+                  onChange={(e) => setPopupName(e.target.value)}
+                  placeholder="e.g. API Review Checker"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Brief</label>
+                <Textarea
+                  value={popupBrief}
+                  onChange={(e) => setPopupBrief(e.target.value)}
+                  placeholder="What should this agent do?"
+                  rows={3}
+                  style={{ fontFamily: "'DM Sans', sans-serif", resize: "none" }}
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>First Step</label>
+                <Input
+                  value={popupFirstStep}
+                  onChange={(e) => setPopupFirstStep(e.target.value)}
+                  placeholder="First concrete action…"
+                  style={{ fontFamily: "'DM Sans', sans-serif" }}
+                />
+              </div>
+              {createBriefMutation.isSuccess && (
+                <div className="flex items-center gap-1.5 text-xs" style={{ color: "oklch(0.52 0.07 145)", fontFamily: "'DM Sans', sans-serif" }}>
+                  <Sparkles className="w-3 h-3" />
+                  AI-generated — edit freely before creating
+                </div>
+              )}
+            </div>
+          )}
+
+          <DialogFooter>
+            <button
+              onClick={() => setPopupTask(null)}
+              className="m-btn-ghost"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmCreateAgent}
+              disabled={createBriefMutation.isPending}
+              className="m-btn-primary"
+              style={{ opacity: createBriefMutation.isPending ? 0.5 : 1 }}
+            >
+              <Plus className="w-3.5 h-3.5" /> Create Agent
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

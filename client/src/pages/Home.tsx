@@ -288,16 +288,8 @@ export default function Home() {
   const handleSessionComplete = () => {
     recordFocusSession();
     setFocusSessions((s) => {
-      const next = s + 1;
       setConfettiTrigger(true);
-      const win: Win = {
-        id: `session-${Date.now()}`,
-        text: `Focus session #${next} complete`,
-        iconIdx: 4, // lightning icon
-        createdAt: new Date(),
-      };
-      setWins((prev) => [win, ...prev]);
-      return next;
+      return s + 1;
     });
   };
 
@@ -464,6 +456,7 @@ export default function Home() {
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
                 onBlockComplete={handleBlockComplete}
+                focusSessions={focusSessions}
                 allCategories={allCategories}
                 onQuickDump={(text) => setPendingDump(text)}
               />
