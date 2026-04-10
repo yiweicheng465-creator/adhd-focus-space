@@ -196,7 +196,8 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   // ── Strip tear progression ─────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "running") return;
-    const currentTorn = stripStates.filter((s) => s === "torn").length;
+    // Count both "torn" and "tearing" so we don't cascade-tear while animation is in flight
+    const currentTorn = stripStates.filter((s) => s === "torn" || s === "tearing").length;
     if (stripsToTear > currentTorn) {
       const nextIdx = stripStates.findIndex((s) => s === "attached");
       if (nextIdx !== -1) {
