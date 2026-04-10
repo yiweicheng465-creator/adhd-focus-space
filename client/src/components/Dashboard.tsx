@@ -9,7 +9,6 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
@@ -366,15 +365,27 @@ export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, b
       </div>
 
 
-      {/* ── Bottom: Focus timer + Next up ── */}
+      {/* ── Bottom: Focus timer shortcut + Next up ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Focus timer */}
-        <div className="p-7" style={{ border: `1px solid ${BORDER}`, background: CREAM }}>
-          <div className="flex items-center gap-2 mb-5">
+        {/* Focus timer shortcut card */}
+        <div className="p-7 flex flex-col justify-between" style={{ border: `1px solid ${BORDER}`, background: CREAM, minHeight: 180 }}>
+          <div className="flex items-center gap-2 mb-4">
             <Clock className="w-3.5 h-3.5" style={{ color: TC }} />
             <p className="editorial-label">Focus Timer</p>
           </div>
-          <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
+          <div className="flex flex-col gap-3">
+            <p className="text-sm" style={{ color: "oklch(0.45 0.01 60)", fontFamily: "'DM Sans', sans-serif", lineHeight: 1.5 }}>
+              Start a 25-minute deep work session. Phone away, tabs closed, one task at a time.
+            </p>
+            <div className="flex items-center gap-3 mt-1">
+              <button
+                className="m-btn-primary flex items-center gap-2"
+                onClick={() => onNavigate("focus")}
+              >
+                <Clock className="w-3.5 h-3.5" /> Start Focus Session
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Next up */}
