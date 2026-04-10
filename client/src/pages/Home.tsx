@@ -272,15 +272,29 @@ export default function Home() {
   };
 
   const handleSessionComplete = () => {
-    setFocusSessions((s) => s + 1);
-    setConfettiTrigger(true);
-    const win: Win = {
-      id: `session-${Date.now()}`,
-      text: `Focus session #${focusSessions + 1} complete`,
+    setFocusSessions((s) => {
+      const next = s + 1;
+      setConfettiTrigger(true);
+      const win: Win = {
+        id: `session-${Date.now()}`,
+        text: `Focus session #${next} complete`,
         iconIdx: 4, // lightning icon
+        createdAt: new Date(),
+      };
+      setWins((prev) => [win, ...prev]);
+      return next;
+    });
+  };
+
+  const handleBlockComplete = () => {
+    const blockWin: Win = {
+      id: `block-${Date.now()}`,
+      text: "2-hour deep focus block complete 🔥",
+      iconIdx: 4,
       createdAt: new Date(),
     };
-    setWins((prev) => [win, ...prev]);
+    setWins((prev) => [blockWin, ...prev]);
+    setFocusSessions(0); // reset for next block
   };
 
   const handleConvertToTask = (task: Task) => {
@@ -430,6 +444,7 @@ export default function Home() {
                 mood={mood}
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
+                onBlockComplete={handleBlockComplete}
                 allCategories={allCategories}
                 onQuickDump={(text) => setPendingDump(text)}
               />
@@ -494,7 +509,7 @@ export default function Home() {
                         Deep Work
                       </h2>
                     </div>
-                    <FocusTimer onSessionComplete={handleSessionComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
+                    <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                   </div>
                 </div>
 

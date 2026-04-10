@@ -112,6 +112,7 @@ export interface TimerContextValue {
 
   // Callbacks (set by consumers)
   setOnSessionComplete: (fn: (() => void) | null) => void;
+  setOnBlockComplete: (fn: (() => void) | null) => void;
   setOnQuit: (fn: (() => void) | null) => void;
 }
 
@@ -155,6 +156,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const startedAtRef = useRef<number | null>(null);
   const remainingAtStartRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
   const onSessionCompleteRef = useRef<(() => void) | null>(null);
+  const onBlockCompleteRef = useRef<(() => void) | null>(null);
   const onQuitRef = useRef<(() => void) | null>(null);
 
   // Derived
@@ -303,6 +305,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
               } else {
                 // All 8 steps done — full block complete
                 setPhase("block_complete");
+                onBlockCompleteRef.current?.();
               }
             }, 900);
           }, remaining_strips.length * 200 + 400);
@@ -314,6 +317,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
             startTransition(POMODORO_SEQUENCE[nextStep], nextStep);
           } else {
             setPhase("block_complete");
+            onBlockCompleteRef.current?.();
           }
         }
       } else {
@@ -324,6 +328,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
         } else {
           // After the long break at step 7 — block complete
           setPhase("block_complete");
+          onBlockCompleteRef.current?.();
         }
       }
     },
@@ -432,6 +437,9 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const setOnSessionComplete = (fn: (() => void) | null) => {
     onSessionCompleteRef.current = fn;
   };
+  const setOnBlockComplete = (fn: (() => void) | null) => {
+    onBlockCompleteRef.current = fn;
+  };
   const setOnQuit = (fn: (() => void) | null) => {
     onQuitRef.current = fn;
   };
@@ -464,6 +472,7 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
     applyDuration,
     setCustomStrips,
     setOnSessionComplete,
+    setOnBlockComplete,
     setOnQuit,
   };
 

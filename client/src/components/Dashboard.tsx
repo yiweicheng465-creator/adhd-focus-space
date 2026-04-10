@@ -30,6 +30,7 @@ interface DashboardProps {
   onNavigate: (section: string) => void;
   onQuickDump?: (text: string) => void;
   onSessionComplete: () => void;
+  onBlockComplete?: () => void;
   /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
 }
@@ -75,7 +76,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSessionComplete, allCategories, onQuickDump }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -207,7 +208,7 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
             <Clock className="w-3.5 h-3.5" style={{ color: TC }} />
             <p className="editorial-label">Focus Timer</p>
           </div>
-          <FocusTimer onSessionComplete={onSessionComplete} />
+          <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
         </div>
 
         {/* Next up */}

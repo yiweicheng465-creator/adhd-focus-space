@@ -567,10 +567,11 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
 // ── Main component ────────────────────────────────────────────────────────────
 interface FocusTimerProps {
   onSessionComplete?: () => void;
+  onBlockComplete?: () => void;
   onQuit?: () => void;
 }
 
-export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
+export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: FocusTimerProps) {
   // All timer logic lives in the global context — this component is purely a view
   const {
     mode, phase, running, remaining, sessions, quitCount,
@@ -579,7 +580,7 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
     pomodoroStep, transitionCountdown, nextMode,
     handleStartPause, handleQuit, handleNewSession, handleSkipTransition,
     switchMode, applyDuration, setCustomStrips,
-    setOnSessionComplete, setOnQuit,
+    setOnSessionComplete, setOnBlockComplete, setOnQuit,
   } = useTimer();
 
   // Register callbacks so the context can fire them
@@ -588,6 +589,12 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
     return () => setOnSessionComplete(null);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onSessionComplete]);
+
+  useEffect(() => {
+    setOnBlockComplete(onBlockComplete ?? null);
+    return () => setOnBlockComplete(null);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onBlockComplete]);
 
   useEffect(() => {
     setOnQuit(onQuit ?? null);
@@ -966,8 +973,8 @@ export function FocusTimer({ onSessionComplete, onQuit }: FocusTimerProps) {
               color: running ? "#2a1f14" : "#FAF6F1",
               fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
               letterSpacing: "0.14em", cursor: "pointer",
-              boxShadow: running ? "none" : "0 3px 0 #1a1208",
-              transition: "all 0.1s",
+              boxShadow: "none",
+              transition: "all 0.15s",
             }}>
               {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {phase === "paused" ? "RESUME" : "START"}</>}
             </button>
