@@ -16,6 +16,7 @@ import {
   PixelGoals,
   PixelAgents,
 } from "@/components/PixelIcons";
+import { useTimer } from "@/contexts/TimerContext";
 
 interface SidebarProps {
   activeSection: string;
@@ -32,6 +33,45 @@ const NAV = [
   { id: "goals",     short: "GOALS",  PixelIcon: PixelGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", PixelIcon: PixelAgents, title: "AI Agents"    },
 ];
+
+/* ── Floating timer pill — shows live countdown in sidebar when running/paused ── */
+function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
+  const { phase, remaining, mode } = useTimer();
+  const active = phase === "running" || phase === "paused" || phase === "transition";
+  if (!active) return null;
+
+  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const ss = String(remaining % 60).padStart(2, "0");
+  const modeColor = mode === "focus" ? "oklch(0.55 0.12 35)" : mode === "short" ? "oklch(0.50 0.08 145)" : "oklch(0.50 0.07 240)";
+  const modeBg = mode === "focus" ? "oklch(0.55 0.12 35 / 0.12)" : mode === "short" ? "oklch(0.50 0.08 145 / 0.12)" : "oklch(0.50 0.07 240 / 0.12)";
+  const label = mode === "focus" ? "FOCUS" : mode === "short" ? "SHORT" : "LONG";
+
+  return (
+    <button
+      onClick={onGoToFocus}
+      title={`${mm}:${ss} · ${label} — click to go to timer`}
+      className="w-full flex flex-col items-center justify-center py-2 transition-all duration-200"
+      style={{ background: modeBg, borderTop: `1px solid ${modeColor}20`, borderBottom: `1px solid ${modeColor}20`, cursor: "pointer" }}
+    >
+      {/* Pulsing dot */}
+      <div style={{ position: "relative", width: 6, height: 6, marginBottom: 3 }}>
+        <div style={{ width: 6, height: 6, borderRadius: "50%", background: modeColor, animation: phase === "running" ? "timerPulse 2s ease-in-out infinite" : "none" }} />
+      </div>
+      <span
+        className="tabular-nums font-bold"
+        style={{ fontSize: 11, letterSpacing: "0.04em", color: modeColor, fontFamily: "'JetBrains Mono', monospace", lineHeight: 1 }}
+      >
+        {phase === "transition" ? "NEXT" : `${mm}:${ss}`}
+      </span>
+      <span
+        className="tracking-widest"
+        style={{ fontSize: 6, color: modeColor, fontFamily: "'JetBrains Mono', monospace", marginTop: 2, opacity: 0.75 }}
+      >
+        {phase === "paused" ? "PAUSED" : label}
+      </span>
+    </button>
+  );
+}
 
 /* ── Logo mark ── */
 function LogoMark() {
@@ -171,6 +211,14 @@ function PrototypesLink() {
   );
 }
 
+// Inject timerPulse keyframe once
+if (typeof document !== "undefined" && !document.getElementById("sidebar-timer-pulse")) {
+  const s = document.createElement("style");
+  s.id = "sidebar-timer-pulse";
+  s.textContent = `@keyframes timerPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.4; transform:scale(0.7); } }`;
+  document.head.appendChild(s);
+}
+
 export function Sidebar({ activeSection, onSectionChange, onClearData }: SidebarProps) {
   return (
     <aside
@@ -227,6 +275,9 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
           );
         })}
       </nav>
+
+      {/* Timer pill — appears when timer is running, click navigates to focus */}
+      <TimerPill onGoToFocus={() => onSectionChange("focus")} />
 
       {/* Monthly + Prototypes links — bottom of nav */}
       <div className="w-full px-2 mt-1">

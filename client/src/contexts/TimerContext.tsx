@@ -168,6 +168,25 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const nextStripIdx = stripStates.findIndex((s) => s === "attached");
   const accentColor = MODE_COLORS[mode];
 
+  // ── Browser tab title countdown ───────────────────────────────────────────
+  useEffect(() => {
+    const appTitle = "ADHD Focus Space";
+    if (phase === "running" || phase === "paused") {
+      const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+      const ss = String(remaining % 60).padStart(2, "0");
+      const label = mode === "focus" ? "Focus" : mode === "short" ? "Short Break" : "Long Break";
+      const pausedMark = phase === "paused" ? "⏸ " : "";
+      document.title = `${pausedMark}${mm}:${ss} · ${label}`;
+    } else if (phase === "transition") {
+      document.title = `⏭ Next up… · ${appTitle}`;
+    } else if (phase === "block_complete") {
+      document.title = `✅ Block Complete! · ${appTitle}`;
+    } else {
+      document.title = appTitle;
+    }
+    return () => { document.title = appTitle; };
+  }, [phase, remaining, mode]);
+
   // ── Strip tear progression ─────────────────────────────────────────────────
   useEffect(() => {
     if (phase !== "running") return;
