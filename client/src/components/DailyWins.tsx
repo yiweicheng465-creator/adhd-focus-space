@@ -110,6 +110,26 @@ function IconNutrition({ size = 20, color = "#888" }: IconProps) {
   );
 }
 
+// ── Special block-complete icon (iconIdx === 99) ─────────────────────────────
+function IconBlockComplete({ size = 20, color = "#C0622F" }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" strokeLinecap="round" strokeLinejoin="round">
+      {/* Flame */}
+      <path
+        d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z"
+        fill={color}
+        opacity="0.85"
+        stroke="none"
+      />
+      <path
+        d="M12 14c0 0-1.5 1-1.5 2.5a1.5 1.5 0 0 0 3 0C13.5 15 12 14 12 14z"
+        fill="oklch(0.95 0.04 60)"
+        stroke="none"
+      />
+    </svg>
+  );
+}
+
 // ── Icon registry ──────────────────────────────────────────────────────────────
 const WIN_ICONS = [
   { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.60 0.10 15)"  },
@@ -253,8 +273,11 @@ function WinCard({
   onUnarchive: (winId: string) => void;
   onDelete: (winId: string) => void;
 }) {
-  const iconIdx = typeof win.iconIdx === "number" ? win.iconIdx % WIN_ICONS.length : 0;
+  // iconIdx 99 = special block-complete flame icon
+  const isBlockWin = win.iconIdx === 99;
+  const iconIdx = isBlockWin ? 0 : (typeof win.iconIdx === "number" ? win.iconIdx % WIN_ICONS.length : 0);
   const iconDef = WIN_ICONS[iconIdx];
+  const blockColor = "oklch(0.55 0.13 35)"; // deep terracotta for block wins
   const isEditing = editingWinId === win.id;
 
   return (
@@ -296,7 +319,10 @@ function WinCard({
             if (!isEditing && !isArchiveView) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
           }}
         >
-          <iconDef.Component size={16} color={isArchiveView ? M.archiveClr : iconDef.color} />
+          {isBlockWin
+            ? <IconBlockComplete size={16} color={isArchiveView ? M.archiveClr : blockColor} />
+            : <iconDef.Component size={16} color={isArchiveView ? M.archiveClr : iconDef.color} />
+          }
         </button>
         {isEditing && !isArchiveView && (
           <IconPickerPopover
@@ -324,8 +350,8 @@ function WinCard({
             ? "Today"
             : new Date(win.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
           {" · "}
-          <span style={{ color: isArchiveView ? M.archiveClr : iconDef.color, opacity: 0.8 }}>
-            {iconDef.label}
+          <span style={{ color: isArchiveView ? M.archiveClr : (isBlockWin ? blockColor : iconDef.color), opacity: 0.8 }}>
+            {isBlockWin ? "Block" : iconDef.label}
           </span>
           {isArchiveView && (
             <span style={{ color: M.archiveClr, opacity: 0.7 }}> · archived</span>

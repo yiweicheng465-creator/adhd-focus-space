@@ -31,6 +31,7 @@ interface DashboardProps {
   onQuickDump?: (text: string) => void;
   onSessionComplete: () => void;
   onBlockComplete?: () => void;
+  blockStreak?: number;
   /** Shared category list from Home — all contexts across tasks/goals/agents */
   allCategories?: string[];
 }
@@ -76,7 +77,7 @@ function CornerMark({ color = BORDER }: { color?: string }) {
   );
 }
 
-export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
+export function Dashboard({ tasks, wins, goals, agents, mood, blockStreak = 0, onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const now = new Date();
@@ -159,13 +160,51 @@ export function Dashboard({ tasks, wins, goals, agents, mood, onNavigate, onSess
             <p className="editorial-label mb-1">
               {DAYS[now.getDay()]} · {MONTHS[now.getMonth()]} {now.getDate()}
             </p>
-            <h1
-              className="text-3xl font-bold italic leading-tight"
-              style={{ fontFamily: "'Playfair Display', serif", color: INK }}
-            >
-              {getGreeting()}
-            </h1>
-          </div>
+            <div className="flex items-center gap-3 flex-wrap">
+              <h1
+                className="text-3xl font-bold italic leading-tight"
+                style={{ fontFamily: "'Playfair Display', serif", color: INK }}
+              >
+                {getGreeting()}
+              </h1>
+              {blockStreak > 0 && (
+                <div
+                  className="flex items-center gap-1.5 px-2.5 py-1"
+                  title={`${blockStreak}-day deep focus streak`}
+                  style={{
+                    background: "oklch(0.55 0.13 35 / 0.10)",
+                    border: "1px solid oklch(0.55 0.13 35 / 0.30)",
+                    borderRadius: 0,
+                  }}
+                >
+                  {/* Flame SVG */}
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none">
+                    <path
+                      d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z"
+                      fill="oklch(0.55 0.13 35)"
+                      opacity="0.9"
+                    />
+                    <path
+                      d="M12 14c0 0-1.5 1-1.5 2.5a1.5 1.5 0 0 0 3 0C13.5 15 12 14 12 14z"
+                      fill="oklch(0.92 0.06 70)"
+                    />
+                  </svg>
+                  <span
+                    style={{
+                      fontSize: "0.65rem",
+                      fontWeight: 600,
+                      letterSpacing: "0.10em",
+                      textTransform: "uppercase",
+                      color: "oklch(0.45 0.10 35)",
+                      fontFamily: "'JetBrains Mono', monospace",
+                    }}
+                  >
+                    {blockStreak} day{blockStreak !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>{/* end date+greeting */}
 
           <GeoDivider />
 

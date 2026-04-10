@@ -22,6 +22,7 @@ import { recordWrapUp, recordDumpEntry } from "@/components/MonthlyProgress";
 import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { useBlockStreak } from "@/hooks/useBlockStreak";
 import {
   DashboardDecor,
   FocusDecor,
@@ -192,6 +193,7 @@ export default function Home() {
 
   // ── Transient state ──
   const [focusSessions, setFocusSessions] = useState(0);
+  const { streak: blockStreak, recordBlock } = useBlockStreak();
   const [timerQuitCount, setTimerQuitCount] = useState(0);
   const [confettiTrigger, setConfettiTrigger] = useState(false);
   const [wrapUpOpen, setWrapUpOpen] = useState(false);
@@ -289,12 +291,13 @@ export default function Home() {
   const handleBlockComplete = () => {
     const blockWin: Win = {
       id: `block-${Date.now()}`,
-      text: "2-hour deep focus block complete 🔥",
-      iconIdx: 4,
+      text: "2-hour deep focus block complete",
+      iconIdx: 99, // special flame icon
       createdAt: new Date(),
     };
     setWins((prev) => [blockWin, ...prev]);
     setFocusSessions(0); // reset for next block
+    recordBlock(); // increment streak
   };
 
   const handleConvertToTask = (task: Task) => {
@@ -442,6 +445,7 @@ export default function Home() {
                 goals={goals}
                 agents={agents}
                 mood={mood}
+                blockStreak={blockStreak}
                 onNavigate={(s) => setActiveSection(s as Section)}
                 onSessionComplete={handleSessionComplete}
                 onBlockComplete={handleBlockComplete}
