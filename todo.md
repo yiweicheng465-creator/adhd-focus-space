@@ -105,3 +105,7 @@
 - [x] Replace cursor with pixel-art hand pointer SVG via CSS cursor property
 - [x] Simplify sidebar icons to thin-line minimal geometric SVGs (clean outlines, no pixel art)
 - [x] Redesign task list to retro dashed-border card rows with icon boxes and dotted connectors
+
+## Active Bugs
+- [ ] Fix GAINS % in CYBER_PET.EXE focus timer — always shows 0% (bottom-right of focus area)
+- [x] Restyle category filter tabs (All/Work/Personal/Video) on main page with retro lo-fi button styling

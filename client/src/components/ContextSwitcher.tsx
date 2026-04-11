@@ -96,14 +96,20 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
 
   return (
     <div
-      className="flex flex-wrap items-center gap-1"
+      className="flex flex-wrap items-center gap-2"
       style={{ padding: "2px 0" }}
     >
       {options.map(({ id, label, icon: Icon }, idx) => {
         const isActive = active === id;
         const cfg      = id !== "all" ? getContextConfig(id) : null;
-
         const isCustom = id !== "all" && !builtins.includes(id) && !!onDeleteContext;
+
+        // Retro lo-fi 3D button colors
+        const activeBg     = cfg ? cfg.bg     : "oklch(0.92 0.030 355)";
+        const activeColor  = cfg ? cfg.color  : "oklch(0.38 0.060 330)";
+        const activeBorder = cfg ? cfg.border : "oklch(0.78 0.060 340)";
+        const DARK = "oklch(0.22 0.040 320)";
+
         return (
           <div
             key={id}
@@ -112,27 +118,52 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
           >
             <button
               onClick={() => onChange(id)}
-              className="flex items-center gap-1.5 text-xs font-medium transition-all justify-center shrink-0"
+              className="flex items-center gap-1.5 text-xs font-medium justify-center shrink-0"
               style={{
-                background:    isActive ? (cfg ? cfg.bg : "oklch(0.92 0.030 355)") : "transparent",
-                color:         isActive ? (cfg ? cfg.color : "oklch(0.38 0.060 330)") : "oklch(0.52 0.040 330)",
-                border:        `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.78 0.060 340)") : "oklch(0.84 0.040 340)"}`,
-                fontFamily:    "'DM Sans', sans-serif",
-                letterSpacing: "0.04em",
+                background:    isActive ? activeBg : "oklch(0.975 0.010 355)",
+                color:         isActive ? activeColor : "oklch(0.42 0.060 330)",
+                border:        `1.5px solid ${isActive ? activeBorder : "oklch(0.72 0.040 330)"}`,
+                outline:       `1.5px solid ${DARK}`,
+                outlineOffset: "0px",
+                boxShadow:     isActive
+                  ? `2px 2px 0 ${DARK}`
+                  : `3px 3px 0 ${DARK}`,
+                fontFamily:    "'Space Mono', monospace",
+                fontSize:      "0.65rem",
+                letterSpacing: "0.06em",
+                textTransform: "uppercase" as const,
                 cursor:        "pointer",
-                borderRadius:  0,
-                /* padding: leave room for × on the right when custom */
-                padding:       isCustom ? "8px 6px 8px 12px" : "8px 12px",
+                borderRadius:  2,
+                padding:       isCustom ? "6px 6px 6px 10px" : "6px 10px",
+                transform:     isActive ? "translate(1px, 1px)" : "translate(0, 0)",
+                transition:    "transform 0.08s, box-shadow 0.08s",
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLButtonElement).style.transform = "translate(1px, 1px)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = `2px 2px 0 ${DARK}`;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  (e.currentTarget as HTMLButtonElement).style.transform = "translate(0, 0)";
+                  (e.currentTarget as HTMLButtonElement).style.boxShadow = `3px 3px 0 ${DARK}`;
+                }
               }}
             >
               <Icon className="w-3 h-3" />
               {label}
               {counts?.[id] !== undefined && counts[id] > 0 && (
                 <span
-                  className="text-[10px] px-1.5 py-0.5 font-medium"
+                  className="text-[9px] px-1 py-0"
                   style={{
-                    background: "oklch(0.88 0.040 340 / 0.6)",
-                    color: "oklch(0.48 0.060 330)",
+                    background: isActive ? activeBorder : "oklch(0.88 0.040 340 / 0.5)",
+                    color: isActive ? activeColor : "oklch(0.48 0.060 330)",
+                    fontFamily: "'Space Mono', monospace",
+                    fontWeight: 700,
+                    border: `1px solid ${isActive ? activeBorder : "oklch(0.80 0.040 340)"}`,
+                    borderRadius: 1,
+                    lineHeight: "1.6",
                   }}
                 >
                   {counts[id]}
