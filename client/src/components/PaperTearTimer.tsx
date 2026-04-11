@@ -1,33 +1,45 @@
 /* ============================================================
-   ADHD FOCUS SPACE — PaperTearTimer v5.0
-   Effect: Jagged vertical tear on the RIGHT side of the active
-   strip. The tear progresses from BOTTOM to TOP as the timer
-   runs. When complete, the strip tears away right-to-left.
-   Matches the reference screenshot exactly.
+   ADHD FOCUS SPACE — PaperTearTimer v4.0 (Peeling Strip)
+   Design: The active strip looks like a physical paper strip
+   that's been partially peeled off the page — raised with a
+   drop shadow underneath, right corner curling up like a
+   sticky note peeling off. Strips below sit flat on the page.
+   Retro lo-fi: Space Mono, warm parchment, ruled lines.
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
-const STYLE_ID = "paper-tear-v5-keyframes";
+const STYLE_ID = "paper-peel-keyframes-v4";
 if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
-    @keyframes tearAway {
-      0%   { transform: translateX(0) rotate(0deg); opacity: 1; }
-      20%  { transform: translateX(-6px) rotate(-0.8deg); opacity: 1; }
-      100% { transform: translateX(-110%) rotate(-3deg); opacity: 0; }
+    @keyframes stripTearAway {
+      0%   { transform: translateX(0) rotate(0deg) scaleY(1); opacity: 1; }
+      15%  { transform: translateX(-8px) rotate(-1.5deg) scaleY(1.02); opacity: 1; }
+      100% { transform: translateX(140%) rotate(-6deg) scaleY(0.7); opacity: 0; }
     }
-    .strip-tear-away {
-      animation: tearAway 0.55s cubic-bezier(0.4,0,0.9,1) forwards;
+    @keyframes stripShake {
+      0%,100% { transform: translateX(0); }
+      20%     { transform: translateX(-3px); }
+      40%     { transform: translateX(4px); }
+      60%     { transform: translateX(-2px); }
+      80%     { transform: translateX(2px); }
     }
+    @keyframes curlPulse {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.18); }
+    }
+    .strip-tearing { animation: stripTearAway 0.65s cubic-bezier(0.4,0,1,1) forwards; }
+    .strip-shake   { animation: stripShake 0.25s ease-in-out; }
+    .curl-pulse    { animation: curlPulse 2.8s ease-in-out infinite; }
   `;
   document.head.appendChild(s);
 }
 
-// ── Strip data ────────────────────────────────────────────────────────────────
-const DEFAULT_STRIPS = [
+// ── Strip content ─────────────────────────────────────────────────────────────
+const STRIPS = [
   "overthinking",
   "email backlog",
   "that awkward thing",
@@ -38,256 +50,200 @@ const DEFAULT_STRIPS = [
   "the mental noise",
 ];
 
-// ── Jagged SVG tear path generator ───────────────────────────────────────────
-// Generates a jagged vertical path for the right edge of the strip.
-// The tear is revealed from bottom (y=height) to top (y=0) based on `revealFraction` (0..1).
-// revealFraction=0 → full paper (no tear visible), =1 → full tear visible
-function buildTearPath(
-  w: number,
-  h: number,
-  revealFraction: number,
-  seed: number
-): string {
-  // The tear edge is a fixed jagged path. We clip it from bottom to top.
-  // We generate a deterministic jagged path based on seed.
-  const tearX = w - 18; // where the tear starts (from right)
-  const steps = 14;
-  const stepH = h / steps;
+const STRIP_H = 40; // px height per strip
 
-  // Build jagged points along the tear edge
-  const pts: [number, number][] = [];
-  for (let i = 0; i <= steps; i++) {
-    const y = i * stepH;
-    // Pseudo-random offset based on seed + step
-    const rand = Math.sin(seed * 7.3 + i * 2.9) * 0.5 + 0.5;
-    const x = tearX + (rand * 14 - 4); // jag between -4 and +10 from tearX
-    pts.push([x, y]);
-  }
-
-  // The revealed portion: from y=h down to y = h*(1-revealFraction)
-  const revealTop = h * (1 - revealFraction);
-
-  // SVG polygon: right side of strip (torn away part) is hidden
-  // We draw the "remaining paper" as a clip path
-  // Shape: left edge top → tear edge (from top to revealTop) → straight right edge → bottom right → bottom left → back
-  // Actually we draw the OVERLAY that covers the right portion that hasn't been torn yet
-
-  // Overlay covers: from tearX to right, from top to bottom, EXCEPT the revealed tear area
-  // Revealed area = bottom portion (from revealTop to h)
-
-  // Overlay polygon:
-  // top-left of overlay (tearX, 0) → top-right (w, 0) → bottom-right (w, h) → bottom-left of overlay (tearX, h)
-  // But we cut out the jagged tear edge and the revealed bottom portion
-
-  // Build the overlay path:
-  // Start at (w, 0), go to (w, h), then along the jagged edge from bottom to revealTop,
-  // then straight across to (w, revealTop) ... actually let's think differently.
-
-  // The overlay (dark paper covering right portion) shape:
-  // - Covers the right side of the strip
-  // - Has a jagged LEFT edge (the tear)
-  // - The bottom `revealFraction` of the tear has been torn away (not covered)
-
-  // Path: start top-right → top of jagged edge → down jagged edge to revealTop → 
-  //        straight right to right edge at revealTop → down right edge to bottom → 
-  //        but bottom portion is revealed, so we stop at revealTop
-
-  if (revealFraction <= 0) {
-    // Full overlay: rectangle from tearX to w, full height
-    return `M ${tearX} 0 L ${w} 0 L ${w} ${h} L ${tearX} ${h} Z`;
-  }
-
-  if (revealFraction >= 1) {
-    // No overlay
-    return "";
-  }
-
-  // Partial: overlay from top to revealTop, with jagged left edge
-  // Top-right corner
-  let d = `M ${w} 0 `;
-  // Top of jagged edge (y=0)
-  d += `L ${pts[0][0]} ${pts[0][1]} `;
-  // Down the jagged edge to revealTop
-  for (let i = 1; i <= steps; i++) {
-    const [px, py] = pts[i];
-    if (py >= revealTop) {
-      // Interpolate to exact revealTop
-      const [px0, py0] = pts[i - 1];
-      const t = (revealTop - py0) / (py - py0);
-      const ix = px0 + t * (px - px0);
-      d += `L ${ix} ${revealTop} `;
-      break;
-    }
-    d += `L ${px} ${py} `;
-  }
-  // Right edge back up to top
-  d += `L ${w} ${revealTop} L ${w} 0 Z`;
-  return d;
-}
-
-// ── Single strip component ────────────────────────────────────────────────────
+// ── Single strip ──────────────────────────────────────────────────────────────
 function TearStrip({
   text,
   index,
+  state,
   isActive,
-  isTorn,
-  isTearing,
-  progress, // 0..1, how much of THIS strip's interval has elapsed
-  seed,
+  progress,
 }: {
   text: string;
   index: number;
+  state: "attached" | "tearing" | "torn";
   isActive: boolean;
-  isTorn: boolean;
-  isTearing: boolean;
-  progress: number;
-  seed: number;
+  progress: number; // 0..1 for active strip fill
 }) {
+  const [cls, setCls] = useState("");
   const [hidden, setHidden] = useState(false);
-  const [tearClass, setTearClass] = useState("");
-  const prevTearing = useRef(false);
+  const prevState = useRef(state);
 
   useEffect(() => {
-    if (isTearing && !prevTearing.current) {
-      prevTearing.current = true;
-      setTearClass("strip-tear-away");
-      setTimeout(() => setHidden(true), 600);
+    if (state === "tearing" && prevState.current !== "tearing") {
+      setCls("strip-shake");
+      const t1 = setTimeout(() => {
+        setCls("strip-tearing");
+        setTimeout(() => setHidden(true), 700);
+      }, 260);
+      prevState.current = "tearing";
+      return () => clearTimeout(t1);
     }
-    if (!isTearing && !isTorn) {
-      prevTearing.current = false;
-      setTearClass("");
+    if (state === "attached") {
+      setCls("");
       setHidden(false);
+      prevState.current = "attached";
     }
-  }, [isTearing, isTorn]);
+  }, [state]);
 
-  if (hidden || isTorn) return null;
-
-  const STRIP_H = 42;
-  const STRIP_W = 500; // large enough, SVG viewBox scales
+  if (hidden || state === "torn") return null;
 
   // Colors
-  const bgColor   = isActive ? "oklch(0.975 0.012 72)" : "oklch(0.982 0.008 74)";
+  const bgActive   = "oklch(0.972 0.014 70)";
+  const bgInactive = "oklch(0.982 0.008 74)";
   const inkActive  = "oklch(0.28 0.022 55)";
-  const inkMuted   = "oklch(0.62 0.012 68)";
-  const dotColor   = "oklch(0.48 0.12 30)";
-  const tearColor  = "oklch(0.88 0.018 68)"; // torn paper edge color
+  const inkInactive = "oklch(0.58 0.014 65)";
+  const dotColor   = "oklch(0.52 0.10 32)";
   const ruleColor  = "oklch(0.88 0.012 68)";
-  const marginColor = "oklch(0.62 0.12 15)";
-
-  const revealFraction = isActive ? progress : 0;
-  const tearPath = buildTearPath(STRIP_W, STRIP_H, revealFraction, seed);
+  const marginColor = "oklch(0.65 0.12 15)";
 
   return (
     <div
-      className={tearClass}
+      className={cls}
       style={{
         position: "relative",
         height: STRIP_H,
-        overflow: "hidden",
-        borderBottom: `1px solid ${ruleColor}`,
-        background: bgColor,
-        zIndex: isActive ? 3 : 1,
-        // Active strip: subtle lift
-        boxShadow: isActive
-          ? "0 2px 8px oklch(0.30 0.018 55 / 0.18)"
-          : "none",
-        transition: "box-shadow 0.3s",
-        transformOrigin: "right center",
+        transformOrigin: "left center",
+        // Active strip is raised above the page with shadow
+        zIndex: isActive ? 4 : 1,
+        marginBottom: isActive ? 0 : 0,
       }}
     >
-      {/* Red margin line */}
+      {/* ── Strip body ── */}
       <div style={{
-        position: "absolute", left: 32, top: 0, bottom: 0,
-        width: 1, background: marginColor, opacity: 0.18, zIndex: 1,
-      }} />
+        position: "absolute",
+        inset: 0,
+        background: isActive ? bgActive : bgInactive,
+        // Active strip: elevated with shadow to look peeled off page
+        boxShadow: isActive
+          ? "0 3px 12px oklch(0.30 0.018 55 / 0.22), 0 1px 3px oklch(0.30 0.018 55 / 0.12)"
+          : "none",
+        borderBottom: `1px solid oklch(0.88 0.012 68 / 0.6)`,
+        transition: "box-shadow 0.3s, background 0.3s",
+        overflow: "hidden",
+      }}>
+        {/* Red margin line */}
+        <div style={{
+          position: "absolute",
+          left: 34,
+          top: 0,
+          bottom: 0,
+          width: 1,
+          background: marginColor,
+          opacity: 0.22,
+        }} />
+        {/* Ruled line */}
+        <div style={{
+          position: "absolute",
+          left: 34,
+          right: 0,
+          top: "50%",
+          height: 1,
+          background: ruleColor,
+          opacity: 0.35,
+          transform: "translateY(-50%)",
+        }} />
 
-      {/* Content */}
+        {/* Progress fill for active strip */}
+        {isActive && progress > 0 && (
+          <div style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${progress * 100}%`,
+            background: "oklch(0.88 0.022 68 / 0.35)",
+            transition: "width 1s linear",
+            pointerEvents: "none",
+          }} />
+        )}
+      </div>
+
+      {/* ── Content ── */}
       <div style={{
-        position: "absolute", inset: 0,
-        display: "flex", alignItems: "center",
-        paddingLeft: 42, paddingRight: 24,
+        position: "absolute",
+        inset: 0,
+        display: "flex",
+        alignItems: "center",
+        paddingLeft: 44,
+        paddingRight: 28,
         zIndex: 2,
       }}>
-        {isActive ? (
+        {/* Active dot */}
+        {isActive && (
           <div style={{
-            position: "absolute", left: 12, top: "50%",
+            position: "absolute",
+            left: 13,
+            top: "50%",
             transform: "translateY(-50%)",
-            width: 8, height: 8, borderRadius: "50%",
+            width: 7,
+            height: 7,
+            borderRadius: "50%",
             background: dotColor,
-            boxShadow: `0 0 6px ${dotColor}88`,
+            boxShadow: `0 0 5px ${dotColor}80`,
           }} />
-        ) : (
+        )}
+        {/* Row number for inactive */}
+        {!isActive && (
           <span style={{
-            position: "absolute", left: 13, top: "50%",
+            position: "absolute",
+            left: 14,
+            top: "50%",
             transform: "translateY(-50%)",
             fontFamily: "'Space Mono', monospace",
-            fontSize: 8, color: inkMuted, opacity: 0.5,
-          }}>{index + 1}</span>
+            fontSize: 8,
+            color: inkInactive,
+            opacity: 0.5,
+          }}>
+            {index + 1}
+          </span>
         )}
         <span style={{
           fontFamily: "'Space Mono', monospace",
-          fontSize: isActive ? 10.5 : 9,
+          fontSize: isActive ? 10 : 9,
           letterSpacing: "0.07em",
-          color: isActive ? inkActive : inkMuted,
+          color: isActive ? inkActive : inkInactive,
           fontWeight: isActive ? 700 : 400,
+          transition: "color 0.3s, font-size 0.2s",
         }}>
           {text}
         </span>
       </div>
 
-      {/* SVG tear overlay — covers the right portion that hasn't been torn yet */}
-      {isActive && tearPath && (
-        <svg
+      {/* ── Corner peel on active strip ── */}
+      {isActive && (
+        <div
+          className="curl-pulse"
           style={{
-            position: "absolute", inset: 0,
-            width: "100%", height: "100%",
-            zIndex: 4, pointerEvents: "none",
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            zIndex: 10,
+            pointerEvents: "none",
+            transformOrigin: "bottom right",
           }}
-          viewBox={`0 0 ${STRIP_W} ${STRIP_H}`}
-          preserveAspectRatio="none"
         >
-          {/* Shadow under the tear edge */}
-          <path
-            d={tearPath}
-            fill="oklch(0.30 0.018 55 / 0.12)"
-            transform="translate(3, 0)"
-          />
-          {/* The paper overlay (right portion not yet torn) */}
-          <path
-            d={tearPath}
-            fill={bgColor}
-            stroke={tearColor}
-            strokeWidth="1.5"
-          />
-          {/* Highlight on the torn edge */}
-          {revealFraction > 0 && revealFraction < 1 && (() => {
-            // Draw just the jagged edge line at the tear boundary
-            const h = STRIP_H;
-            const steps = 14;
-            const stepH = h / steps;
-            const tearX = STRIP_W - 18;
-            const revealTop = h * (1 - revealFraction);
-            let linePath = "";
-            for (let i = 0; i <= steps; i++) {
-              const y = i * stepH;
-              const rand = Math.sin(seed * 7.3 + i * 2.9) * 0.5 + 0.5;
-              const x = tearX + (rand * 14 - 4);
-              if (y >= revealTop - 1) {
-                linePath += (linePath ? ` L ${x} ${y}` : `M ${x} ${y}`);
-              }
-              if (y > revealTop + stepH) break;
-            }
-            return (
-              <path
-                d={linePath}
-                fill="none"
-                stroke="oklch(0.92 0.012 68)"
-                strokeWidth="1"
-                opacity="0.6"
-              />
-            );
-          })()}
-        </svg>
+          {/* The peeled corner triangle */}
+          <svg width={28} height={28} viewBox="0 0 28 28" style={{ display: "block" }}>
+            <defs>
+              <linearGradient id="peelGrad" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="oklch(0.78 0.022 68)" stopOpacity="1" />
+                <stop offset="100%" stopColor="oklch(0.62 0.018 60)" stopOpacity="1" />
+              </linearGradient>
+              <linearGradient id="peelShadow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {/* Shadow cast by the peeled corner onto the page */}
+            <polygon points="4,28 28,4 28,28" fill="url(#peelShadow)" />
+            {/* The peeled corner itself (lighter, curled-up paper) */}
+            <polygon points="10,28 28,10 28,28" fill="url(#peelGrad)" />
+            {/* Subtle highlight on the fold edge */}
+            <line x1="10" y1="28" x2="28" y2="10" stroke="oklch(0.92 0.012 68)" strokeWidth="0.8" opacity="0.7" />
+          </svg>
+        </div>
       )}
     </div>
   );
@@ -296,48 +252,47 @@ function TearStrip({
 // ── Main component ────────────────────────────────────────────────────────────
 interface PaperTearTimerProps {
   durationMinutes?: number;
-  compact?: boolean; // for dashboard use
 }
 
-export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperTearTimerProps) {
+export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   const totalSec = durationMinutes * 60;
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
   const [phase, setPhase] = useState<"idle" | "running" | "paused" | "complete">("idle");
   const [tornCount, setTornCount] = useState(0);
-  const [tearing, setTearing] = useState<number | null>(null);
-  const [customItems, setCustomItems] = useState<string[]>([]);
-  const [newItem, setNewItem] = useState("");
+  const [stripStates, setStripStates] = useState<Array<"attached" | "tearing" | "torn">>(
+    STRIPS.map(() => "attached")
+  );
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevTornRef = useRef(0);
+  const [customItems, setCustomItems] = useState<string[]>([]);
+  const [newItem, setNewItem] = useState("");
 
-  const allStrips = [...DEFAULT_STRIPS, ...customItems];
-  const stripSeeds = useRef(allStrips.map((_, i) => i + 1.5));
+  const allStrips = [...STRIPS, ...customItems];
 
-  const elapsed = totalSec - remaining;
-  const progress = elapsed / totalSec; // 0..1 overall
-  const stripsPerSec = allStrips.length / totalSec;
-  const currentStripFloat = progress * allStrips.length;
-  const activeIdx = Math.min(Math.floor(currentStripFloat), allStrips.length - 1);
-  const stripProgress = currentStripFloat - Math.floor(currentStripFloat); // 0..1 within active strip
+  const progress = (totalSec - remaining) / totalSec;
+  const stripsToTear = Math.min(Math.floor(progress * allStrips.length), allStrips.length);
+  const stripProgress = (progress * allStrips.length) % 1;
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
 
-  // Detect strip transitions
+  // Sync strip states
   useEffect(() => {
-    if (!running) return;
-    const newTornCount = Math.floor(currentStripFloat);
-    if (newTornCount > prevTornRef.current) {
+    if (stripsToTear > prevTornRef.current && running) {
       const idx = prevTornRef.current;
-      prevTornRef.current = newTornCount;
-      setTearing(idx);
+      prevTornRef.current = stripsToTear;
+      setStripStates(prev => prev.map((s, i) => {
+        if (i < idx) return "torn";
+        if (i === idx) return "tearing";
+        return "attached";
+      }));
       setTimeout(() => {
-        setTearing(null);
-        setTornCount(newTornCount);
-      }, 600);
+        setStripStates(prev => prev.map((s, i) => i <= idx ? "torn" : s));
+        setTornCount(stripsToTear);
+      }, 1000);
     }
-  }, [currentStripFloat, running]);
+  }, [stripsToTear, running]);
 
   // Timer tick
   useEffect(() => {
@@ -363,8 +318,8 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
     if (phase === "complete") {
       setRemaining(totalSec);
       setTornCount(0);
-      setTearing(null);
       prevTornRef.current = 0;
+      setStripStates(allStrips.map(() => "attached"));
       setPhase("running");
       setRunning(true);
     } else {
@@ -377,8 +332,8 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
     setRunning(false);
     setRemaining(totalSec);
     setTornCount(0);
-    setTearing(null);
     prevTornRef.current = 0;
+    setStripStates(allStrips.map(() => "attached"));
     setPhase("idle");
   };
 
@@ -386,18 +341,21 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
     const t = newItem.trim();
     if (!t) return;
     setCustomItems(c => [...c, t]);
-    stripSeeds.current.push(stripSeeds.current.length + 1.5);
+    setStripStates(s => [...s, "attached"]);
     setNewItem("");
   };
 
-  // Colors
+  // Active strip index = first non-torn strip
+  const activeIdx = stripStates.findIndex(s => s !== "torn");
+
+  // Colors / tokens
   const C = {
-    bg:      "oklch(0.968 0.016 72)",
-    border:  "oklch(0.82 0.018 68)",
-    ink:     "oklch(0.28 0.022 55)",
-    muted:   "oklch(0.58 0.014 65)",
-    accent:  "oklch(0.48 0.12 30)",
-    rule:    "oklch(0.88 0.012 68)",
+    bg:       "oklch(0.968 0.016 72)",
+    border:   "oklch(0.82 0.018 68)",
+    ink:      "oklch(0.28 0.022 55)",
+    muted:    "oklch(0.58 0.014 65)",
+    accent:   "oklch(0.52 0.10 32)",
+    shadow:   "oklch(0.28 0.018 55 / 0.15)",
   };
 
   return (
@@ -405,81 +363,86 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
       fontFamily: "'Space Mono', monospace",
       background: C.bg,
       border: `2px solid ${C.border}`,
-      borderRadius: 3,
-      boxShadow: `3px 3px 0 oklch(0.30 0.018 55 / 0.12)`,
+      borderRadius: 4,
+      boxShadow: `4px 4px 0 ${C.shadow}`,
       overflow: "hidden",
+      userSelect: "none",
     }}>
       {/* ── Header ── */}
       <div style={{
-        padding: compact ? "8px 12px 6px" : "10px 14px 8px",
+        padding: "10px 14px 8px",
         borderBottom: `1px solid ${C.border}`,
         background: "oklch(0.960 0.018 70)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 7.5, letterSpacing: "0.12em", color: C.muted, textTransform: "uppercase" }}>
-            things to let go of
+          <span style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, textTransform: "uppercase" }}>
+            FOCUS TIMER
           </span>
-          <button onClick={handleReset} style={{
-            fontSize: 7.5, letterSpacing: "0.08em", color: C.muted,
-            background: "none", border: "none", cursor: "pointer",
-            fontFamily: "'Space Mono', monospace", textTransform: "uppercase", opacity: 0.7,
-          }}>reset</button>
+          <button
+            onClick={handleReset}
+            style={{
+              fontSize: 8, letterSpacing: "0.08em", color: C.muted,
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: "'Space Mono', monospace", textTransform: "uppercase",
+              opacity: 0.7,
+            }}
+          >
+            reset
+          </button>
         </div>
-        {/* Timer */}
-        <div style={{ textAlign: "center", padding: compact ? "4px 0 2px" : "6px 0 2px" }}>
+
+        {/* Timer display */}
+        <div style={{ textAlign: "center", padding: "6px 0 2px" }}>
+          <div style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, marginBottom: 2 }}>
+            things to let go of
+          </div>
           <div style={{
-            fontSize: compact ? 28 : 36,
+            fontSize: 36,
             fontWeight: 700,
             color: C.accent,
-            letterSpacing: "0.06em",
+            letterSpacing: "0.04em",
             lineHeight: 1,
-            fontFamily: "'Space Mono', monospace",
           }}>
             {mm}:{ss}
           </div>
         </div>
-        {/* Ruled lines decoration */}
-        {[0,1,2].map(i => (
-          <div key={i} style={{
-            height: 1, background: C.rule, opacity: 0.25,
-            marginTop: i === 0 ? 6 : 3,
-          }} />
-        ))}
       </div>
 
       {/* ── Strip list ── */}
       <div style={{
-        background: "oklch(0.978 0.010 74)",
         position: "relative",
-        // Notebook ruled lines behind strips
+        background: "oklch(0.978 0.010 74)",
+        // Ruled notebook lines behind the strips
         backgroundImage: `repeating-linear-gradient(
           to bottom,
-          transparent 0px,
-          transparent 41px,
-          oklch(0.88 0.012 68 / 0.25) 41px,
-          oklch(0.88 0.012 68 / 0.25) 42px
+          transparent,
+          transparent ${STRIP_H - 1}px,
+          oklch(0.88 0.012 68 / 0.3) ${STRIP_H - 1}px,
+          oklch(0.88 0.012 68 / 0.3) ${STRIP_H}px
         )`,
       }}>
-        {allStrips.map((text, i) => (
-          <TearStrip
-            key={i}
-            text={text}
-            index={i}
-            isActive={i === activeIdx && (running || phase === "paused")}
-            isTorn={i < tornCount}
-            isTearing={tearing === i}
-            progress={i === activeIdx && running ? stripProgress : (i === activeIdx && phase === "paused" ? stripProgress : 0)}
-            seed={stripSeeds.current[i] ?? i + 1.5}
-          />
-        ))}
-        {/* Idle state: show first strip as active with no progress */}
-        {phase === "idle" && allStrips.map((text, i) => i === 0 ? null : null)}
+        {allStrips.map((text, i) => {
+          const s = stripStates[i] ?? "attached";
+          const isActive = i === activeIdx;
+          return (
+            <TearStrip
+              key={i}
+              text={text}
+              index={i}
+              state={s}
+              isActive={isActive}
+              progress={isActive && running ? stripProgress : (isActive ? 0 : 0)}
+            />
+          );
+        })}
       </div>
 
       {/* ── Add item ── */}
       <div style={{
-        display: "flex", alignItems: "center", gap: 8,
-        padding: "7px 12px",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 12px",
         borderTop: `1px dashed ${C.border}`,
         background: "oklch(0.965 0.014 70)",
       }}>
@@ -489,48 +452,75 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
           onKeyDown={e => e.key === "Enter" && addItem()}
           placeholder="add something to let go of…"
           style={{
-            flex: 1, background: "none", border: "none", outline: "none",
-            fontFamily: "'Space Mono', monospace", fontSize: 9,
-            color: C.ink, letterSpacing: "0.06em",
+            flex: 1,
+            background: "none",
+            border: "none",
+            outline: "none",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            color: C.ink,
+            letterSpacing: "0.06em",
           }}
         />
-        <button onClick={addItem} style={{
-          width: 20, height: 20, background: C.accent, border: "none",
-          borderRadius: 2, color: "oklch(0.97 0.010 70)", fontSize: 14,
-          lineHeight: 1, cursor: "pointer",
-          display: "flex", alignItems: "center", justifyContent: "center",
-        }}>+</button>
+        <button
+          onClick={addItem}
+          style={{
+            width: 20, height: 20,
+            background: C.accent,
+            border: "none",
+            borderRadius: 2,
+            color: "oklch(0.97 0.010 70)",
+            fontSize: 14,
+            lineHeight: 1,
+            cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "sans-serif",
+          }}
+        >+</button>
       </div>
 
-      {/* ── Footer ── */}
+      {/* ── Footer / Start button ── */}
       <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
         padding: "8px 12px",
         borderTop: `1px solid ${C.border}`,
         background: "oklch(0.960 0.018 70)",
       }}>
-        <button onClick={handleStart} style={{
-          display: "flex", alignItems: "center", gap: 6,
-          padding: "6px 16px",
-          background: phase === "complete" ? "oklch(0.52 0.10 145)" : C.accent,
-          color: "oklch(0.97 0.010 70)",
-          border: "none", borderRadius: 3,
-          fontFamily: "'Space Mono', monospace",
-          fontSize: 9, letterSpacing: "0.1em", textTransform: "uppercase",
-          cursor: "pointer", fontWeight: 700,
-          boxShadow: "2px 2px 0 oklch(0.30 0.018 55 / 0.20)",
-        }}>
+        <button
+          onClick={handleStart}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 16px",
+            background: phase === "complete" ? "oklch(0.52 0.10 145)" : C.accent,
+            color: "oklch(0.97 0.010 70)",
+            border: "none",
+            borderRadius: 3,
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            fontWeight: 700,
+            boxShadow: "2px 2px 0 oklch(0.30 0.018 55 / 0.20)",
+          }}
+        >
           {phase === "complete" ? "▶ AGAIN" : running ? "⏸ PAUSE" : "▶ START"}
         </button>
 
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <div style={{ display: "flex", gap: 3 }}>
-            {allStrips.slice(0, 8).map((_, i) => (
+          {/* Progress dots */}
+          <div style={{ display: "flex", gap: 4 }}>
+            {allStrips.slice(0, Math.min(allStrips.length, 8)).map((_, i) => (
               <div key={i} style={{
-                width: 6, height: 6, borderRadius: "50%",
+                width: 6, height: 6,
+                borderRadius: "50%",
                 background: i < tornCount
                   ? C.accent
-                  : i === activeIdx && running
+                  : i === activeIdx
                     ? "oklch(0.72 0.040 68)"
                     : "oklch(0.84 0.014 68)",
                 transition: "background 0.3s",
@@ -545,9 +535,10 @@ export function PaperTearTimer({ durationMinutes = 25, compact = false }: PaperT
 
       {/* ── Status bar ── */}
       <div style={{
-        padding: "3px 12px",
+        padding: "4px 12px",
         borderTop: `1px solid ${C.border}`,
-        display: "flex", justifyContent: "space-between",
+        display: "flex",
+        justifyContent: "space-between",
         background: "oklch(0.955 0.016 70)",
       }}>
         <span style={{ fontSize: 7.5, color: C.muted, letterSpacing: "0.08em" }}>
