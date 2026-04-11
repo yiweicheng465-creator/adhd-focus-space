@@ -483,8 +483,8 @@ export function Dashboard({
             be kind to yourself ✦
           </div>
         </div>
-        {/* Leaf sprig — left edge */}
-        <div className="absolute" style={{ top: 38, left: 148, opacity: 0.35, transform: "rotate(-15deg)" }}>
+        {/* Leaf sprig — slightly right of left pane edge, peeking under greeting */}
+        <div className="absolute" style={{ top: 38, left: 172, opacity: 0.45, transform: "rotate(-15deg)", zIndex: 12 }}>
           <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
             <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.50 0.10 145)" strokeWidth="1.2" strokeLinecap="round" />
             <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.54 0.11 145)" />
@@ -503,9 +503,9 @@ export function Dashboard({
 
         {/* ── Content ── */}
         <div className="relative z-10 flex" style={{ height: 160 }}>
-          {/* Left: illustration — full image, no crop, pink bg fill */}
-          <div className="hidden md:block shrink-0" style={{ width: 160, height: "100%", borderRight: `1px solid ${BORDER}`, background: "#f5d5d0", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center center", display: "block" }} />
+          {/* Left: illustration — cropped to fill pane, no white bg exposed */}
+          <div className="hidden md:block shrink-0" style={{ width: 160, height: "100%", borderRight: `1px solid ${BORDER}`, background: "#f5d5d0", overflow: "hidden", position: "relative" }}>
+            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 55%", display: "block" }} />
           </div>
           {/* Center: greeting + controls */}
           <div className="flex-1 px-6 py-3 flex flex-col justify-between" style={{ minWidth: 0 }}>
