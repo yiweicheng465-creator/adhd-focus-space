@@ -513,63 +513,47 @@ input[type="radio"]:not(:disabled) {
 }
 
 /* ── Retro Task List ──
-   Dashed-border rows with icon box + dotted connectors (like shipping tracking) */
+   Clean rows with color-only priority indication (no dotted lines, no icon boxes) */
 .retro-task-list {
   display: flex;
   flex-direction: column;
-  position: relative;
-}
-.retro-task-list::before {
-  content: '';
-  position: absolute;
-  left: 19px;
-  top: 32px;
-  bottom: 32px;
-  width: 2px;
-  background: repeating-linear-gradient(
-    to bottom,
-    oklch(0.72 0.022 68) 0px,
-    oklch(0.72 0.022 68) 4px,
-    transparent 4px,
-    transparent 8px
-  );
-  pointer-events: none;
-  z-index: 0;
 }
 .retro-task-row {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: 10px;
-  padding: 8px 10px 8px 8px;
+  padding: 8px 10px 8px 10px;
   background: oklch(0.978 0.008 76);
-  border: 2px solid oklch(0.78 0.022 68);
+  border: 2px solid oklch(0.82 0.018 68);
   border-radius: 4px;
   position: relative;
-  z-index: 1;
   transition: box-shadow 0.08s, transform 0.08s;
-  margin-bottom: 6px;
+  margin-bottom: 5px;
 }
 .retro-task-row:hover {
   box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
   transform: translate(-1px, -1px);
 }
 .retro-task-row.done {
-  opacity: 0.55;
+  opacity: 0.50;
   background: oklch(0.970 0.006 76);
 }
-.retro-task-row.urgent { border-left: 4px solid oklch(0.52 0.10 32); }
-.retro-task-row.focus  { border-left: 4px solid oklch(0.52 0.09 145); }
-.retro-task-row.normal { border-left: 4px solid oklch(0.62 0.022 68); }
-.retro-task-row.someday { border-left: 4px solid oklch(0.60 0.06 220); }
-.retro-task-icon-box {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  border: 2px solid oklch(0.78 0.022 68);
-  border-radius: 3px;
-  background: oklch(0.965 0.012 74);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 1px 1px 0px oklch(0.72 0.022 68);
+/* Priority: color via left border + subtle bg tint — no text tag needed */
+.retro-task-row.urgent {
+  border-left: 4px solid oklch(0.52 0.10 32);
+  background: oklch(0.52 0.10 32 / 0.04);
 }
+.retro-task-row.focus {
+  border-left: 4px solid oklch(0.48 0.09 145);
+  background: oklch(0.48 0.09 145 / 0.04);
+}
+.retro-task-row.normal {
+  border-left: 4px solid oklch(0.68 0.022 68);
+  background: oklch(0.978 0.008 76);
+}
+.retro-task-row.someday {
+  border-left: 4px solid oklch(0.60 0.06 220);
+  background: oklch(0.60 0.06 220 / 0.04);
+}
+/* Hide icon box — no longer used */
+.retro-task-icon-box { display: none; }

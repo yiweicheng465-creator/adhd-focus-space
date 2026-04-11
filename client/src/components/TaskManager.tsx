@@ -354,14 +354,6 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 transition: "all 0.3s ease",
               }}
             >
-              {/* Icon box — priority icon in a small bordered square */}
-              <div className="retro-task-icon-box" style={{ borderColor: task.done ? M.border : pcfg.color + "60" }}>
-                <PIcon
-                  className="w-3 h-3"
-                  style={{ color: task.done ? M.muted : pcfg.color }}
-                />
-              </div>
-
               {/* Text + goal link */}
               <div className="flex-1 min-w-0">
                 <p
@@ -394,19 +386,6 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
 
               {/* Context badge */}
               <ContextBadge context={task.context} />
-
-              {/* Priority stamp */}
-              <span style={{
-                fontSize: 7, padding: "2px 5px", flexShrink: 0,
-                color: task.done ? M.muted : pcfg.color,
-                background: task.done ? "transparent" : pcfg.bg,
-                border: `1.5px solid ${task.done ? M.border : pcfg.color + "55"}`,
-                fontFamily: "'Space Mono', monospace",
-                letterSpacing: "0.08em", borderRadius: 2,
-                fontWeight: 700, textTransform: "uppercase" as const,
-              }}>
-                {pcfg.label.toLowerCase()}
-              </span>
 
               {/* Checkbox */}
               <button

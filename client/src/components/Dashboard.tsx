@@ -641,14 +641,6 @@ export function Dashboard({
                         padding: "6px 8px",
                       }}
                     >
-                      {/* Icon box */}
-                      <div className="retro-task-icon-box" style={{ width: 22, height: 22, borderColor: pd.color + "60" }}>
-                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                          <circle cx="6" cy="6" r="4" stroke={pd.color} strokeWidth="1.5"/>
-                          <circle cx="6" cy="6" r="1.5" fill={pd.color}/>
-                        </svg>
-                      </div>
-
                       {/* Task text */}
                       <p style={{
                         fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -659,18 +651,6 @@ export function Dashboard({
                       }}>
                         {cleanText}
                       </p>
-
-                      {/* Priority stamp */}
-                      <span style={{
-                        fontSize: 7, padding: "1px 4px", flexShrink: 0,
-                        color: pd.color, background: pd.labelBg,
-                        border: `1.5px solid ${pd.color}55`,
-                        fontFamily: "'Space Mono', monospace",
-                        letterSpacing: "0.06em", borderRadius: 2,
-                        fontWeight: 700,
-                      }}>
-                        {pd.label}
-                      </span>
 
                       {/* Checkbox */}
                       <button
