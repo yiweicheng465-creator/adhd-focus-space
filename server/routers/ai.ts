@@ -404,7 +404,7 @@ Pick the single most important task they should focus on today. Consider urgency
       tasks: z.array(z.object({
         id: z.string(),
         text: z.string(),
-        priority: z.enum(["focus", "urgent", "normal"]),
+        priority: z.enum(["focus", "urgent", "normal", "someday"]),
         context: z.string(),
         done: z.boolean(),
       })).optional(),
