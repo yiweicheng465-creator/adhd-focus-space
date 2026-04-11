@@ -67,3 +67,8 @@
 - [x] Restyle hero banner: grid paper bg, retro window chrome, warmer palette
 - [x] Add decorative SVG stickers to hero (plant, moon, star, leaf, cloud)
 - [x] Add subtle sticker accents to dashboard panels
+
+## Modal Retro Styling
+- [x] Restyle DailyCheckIn modal with retro window chrome (title bar, grid bg, pencil borders)
+- [x] Restyle DailyWrapUp modal with retro window chrome
+- [x] Restyle WeeklyResetNudge modal with retro window chrome

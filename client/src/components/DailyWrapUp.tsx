@@ -418,12 +418,48 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
       onClick={onClose}
     >
       <div
-        className="w-full max-w-lg overflow-hidden shadow-2xl max-h-[90vh] flex flex-col"
-        style={{ background: M.card, border: `1px solid ${M.border}` }}
+        className="w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col"
+        style={{
+          background: M.card,
+          border: `1.5px solid ${M.border}`,
+          boxShadow: "4px 6px 20px oklch(0.30 0.02 60 / 0.18), 0 0 0 1px oklch(0.90 0.018 72 / 0.60)",
+          position: "relative",
+        }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Grid paper background */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          backgroundImage: `linear-gradient(oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px), linear-gradient(90deg, oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px)`,
+          backgroundSize: "20px 20px",
+          zIndex: 0,
+        }} />
+
+        {/* Retro title bar */}
+        <div className="relative z-10" style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "5px 10px",
+          background: "oklch(0.940 0.020 70)",
+          borderBottom: `1.5px solid ${M.border}`,
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 10,
+          color: "oklch(0.45 0.020 62)",
+          flexShrink: 0,
+        }}>
+          <span>daily_wrapup.exe</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+            <button
+              onClick={onClose}
+              style={{ fontSize: 9, padding: "1px 5px", cursor: "pointer",
+                background: "oklch(0.88 0.022 68)", border: `1px solid ${M.border}`,
+                color: "oklch(0.45 0.020 62)", fontFamily: "'Space Mono', monospace",
+                lineHeight: 1.4,
+              }}
+            >✕</button>
+          </div>
+        </div>
+
         {/* Header */}
-        <div className="p-5" style={{ borderBottom: `1px solid ${M.border}`, background: M.coralBg }}>
+        <div className="relative z-10 p-5" style={{ borderBottom: `1px solid ${M.border}`, background: M.coralBg }}>
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.08em", textTransform: "uppercase" }}>{todayStr}</p>
@@ -432,9 +468,6 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
               </h2>
               <p className="text-sm mt-1" style={{ color: M.coral, fontFamily: "'DM Sans', sans-serif" }}>{scoreLabel}</p>
             </div>
-            <button onClick={onClose} className="p-1 transition-colors" style={{ color: M.muted }}>
-              <X className="w-5 h-5" />
-            </button>
           </div>
 
           {/* Score bar */}
@@ -455,7 +488,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
         </div>
 
         {/* Body */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-5">
+        <div className="relative z-10 flex-1 overflow-y-auto p-5 space-y-5">
           {/* Tasks */}
           <Section icon={<CheckCircle2 className="w-4 h-4" />} title={`Tasks completed (${doneTasks.length})`} color={M.sage}>
             {doneTasks.length === 0 ? (
@@ -574,7 +607,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
         </div>
 
         {/* Footer */}
-        <div className="p-4 flex gap-3" style={{ borderTop: `1px solid ${M.border}` }}>
+        <div className="relative z-10 p-4 flex gap-3" style={{ borderTop: `1px solid ${M.border}` }}>
           <button onClick={onClose} className="m-btn-ghost flex-1">
             Close
           </button>

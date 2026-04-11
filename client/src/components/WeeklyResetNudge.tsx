@@ -48,12 +48,42 @@ export function WeeklyResetNudge() {
 
   return (
     <div
-      className="p-4 transition-all"
+      className="transition-all overflow-hidden"
       style={{
         background: allDone ? M.sageBg : M.coralBg,
-        border:     `1px solid ${allDone ? M.sageBdr : M.coralBdr}`,
+        border: `1.5px solid ${allDone ? M.sageBdr : M.coralBdr}`,
+        position: "relative",
       }}
     >
+      {/* Grid paper background */}
+      <div className="absolute inset-0 pointer-events-none" style={{
+        backgroundImage: `linear-gradient(oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px), linear-gradient(90deg, oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px)`,
+        backgroundSize: "20px 20px",
+        zIndex: 0,
+      }} />
+
+      {/* Retro title bar */}
+      <div className="relative z-10" style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "4px 10px",
+        background: allDone ? M.sageBg : "oklch(0.940 0.020 70)",
+        borderBottom: `1px solid ${allDone ? M.sageBdr : M.coralBdr}`,
+        fontFamily: "'Space Mono', monospace",
+        fontSize: 9,
+        color: "oklch(0.45 0.020 62)",
+      }}>
+        <span>weekly_reset.exe</span>
+        <button
+          onClick={() => setDismissed(true)}
+          style={{ fontSize: 8, padding: "1px 5px", cursor: "pointer",
+            background: "oklch(0.88 0.022 68)", border: `1px solid ${M.border}`,
+            color: "oklch(0.45 0.020 62)", fontFamily: "'Space Mono', monospace",
+            lineHeight: 1.4,
+          }}
+        >✕</button>
+      </div>
+
+      <div className="relative z-10 p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-2">
           <RefreshCw className="w-4 h-4 shrink-0" style={{ color: allDone ? M.sage : M.coral }} />
@@ -66,9 +96,6 @@ export function WeeklyResetNudge() {
             </p>
           </div>
         </div>
-        <button onClick={() => setDismissed(true)} className="p-1 transition-colors shrink-0" style={{ color: M.muted }}>
-          <X className="w-4 h-4" />
-        </button>
       </div>
 
       <div className="mt-3 space-y-2">
@@ -111,6 +138,7 @@ export function WeeklyResetNudge() {
           Done — dismiss reminder
         </button>
       )}
+      </div>{/* /z-10 wrapper */}
     </div>
   );
 }
