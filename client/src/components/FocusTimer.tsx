@@ -19,14 +19,14 @@ import { useTimerSound } from "@/hooks/useTimerSound";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 
-// ── Palette ──────────────────────────────────────────────────────────────────
-const BG = "#E8DCFA";
-const PANEL = "#D0C0F0";
-const BORDER = "#7A6A9A";
-const DARK = "#3D2E5E";
-const ACCENT = "#9B7FD4";
-const BTN_BG = "#C8B4E8";
-const SCREEN_BG = "#B8A8D8";
+// ── Palette (pink/cream/dusty rose — from reference illustration) ────────────
+const BG = "#F5E6E8";       // soft blush pink background
+const PANEL = "#EDD5CC";    // warm cream/dusty rose panel
+const BORDER = "#B87870";   // dusty rose border
+const DARK = "#5C2E2A";     // deep rose/brown dark text
+const ACCENT = "#C4605A";   // coral/dusty red accent
+const BTN_BG = "#E8C4BC";   // light pink button bg
+const SCREEN_BG = "#DDB8B0"; // muted pink screen bg
 
 // ── Inject keyframes once ────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-cyber-keyframes";
@@ -757,26 +757,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       boxShadow: `4px 4px 0 ${DARK}`,
       overflow: "hidden",
     }}>
-      {/* ── Outer title bar: focus_timer.exe ── */}
-      <div style={{
-        background: PANEL,
-        borderBottom: `2px solid ${DARK}`,
-        padding: "0 10px",
-        height: 28,
-        display: "flex",
-        alignItems: "center",
-        userSelect: "none",
-      }}>
-        <span style={{ fontSize: 8, letterSpacing: "0.20em", textTransform: "uppercase", color: DARK, fontWeight: 700, flex: 1 }}>
-          focus_timer.exe
-        </span>
-        <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
-          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>★</span>
-          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>□</span>
-          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>□</span>
-          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>×</span>
-        </div>
-      </div>
+
       {/* ── Top bar: mode tabs + sound/settings + death counter ── */}
       <div style={{ display: "flex", alignItems: "stretch", borderBottom: `2px solid ${DARK}`, background: PANEL }}>
         {/* Mode tabs */}

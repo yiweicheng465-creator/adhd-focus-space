@@ -614,14 +614,15 @@ export default function Home() {
                   <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                 </div>
 
-                {/* ── session_tips.txt window — top-right corner, doesn't block timer ── */}
+                {/* ── session_tips.txt window — below timer, timer overlaps slightly on top ── */}
                 <div style={{
-                  position: "absolute",
-                  top: -12,
-                  right: -16,
-                  zIndex: 5,
+                  position: "relative",
+                  zIndex: 1,
                   width: 220,
-                  transform: "rotate(2deg)",
+                  marginTop: -16,
+                  marginLeft: "auto",
+                  marginRight: 24,
+                  transform: "rotate(1.5deg)",
                   transformOrigin: "top right",
                   boxShadow: "5px 5px 0 oklch(0.28 0.018 55 / 0.18)",
                 }}>
