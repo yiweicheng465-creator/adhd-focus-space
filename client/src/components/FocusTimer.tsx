@@ -224,98 +224,67 @@ function StripEditor({ strips, onChange }: {
   );
 }
 
-// ── Jagged tear SVG edge ──────────────────────────────────────────────────────
-function JaggedEdge({ seed }: { seed: number }) {
-  const w = 320;
-  const h = 10;
-  const steps = 28;
-  const pts: string[] = [`M 0 ${h}`];
-  for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * w;
-    const jag = Math.sin(seed * 5.1 + i * 2.7) * 4 + Math.cos(seed * 3.3 + i * 1.9) * 3;
-    pts.push(`L ${x} ${h + jag}`);
-  }
-  pts.push(`L ${w} 0 L 0 0 Z`);
-  return (
-    <svg width="100%" height={h + 8} viewBox={`0 0 ${w} ${h + 8}`} preserveAspectRatio="none"
-      style={{ display: "block", marginBottom: -1, pointerEvents: "none" }}>
-      <path d={pts.join(" ")} fill="#F0E8DC" />
-    </svg>
-  );
-}
-
-// ── Single strip ──────────────────────────────────────────────────────────────────────────────
+// ── Single strip (strikethrough style — no tear animations) ──────────────────
 type StripState = "attached" | "tearing" | "torn"; // local alias
 
-function TearStrip({ text, seed, state, isNext }: {
+function TearStrip({ text, state, isNext }: {
   text: string; seed: number;
   state: StripState; isNext: boolean;
 }) {
-  const [cls, setCls] = useState("");
-  const [hidden, setHidden] = useState(false);
-  const prevState = useRef<StripState>(state);
+  const isDone = state === "tearing" || state === "torn";
 
+  // Torn strips fade out smoothly then disappear
+  const [visible, setVisible] = useState(true);
+  const prevState = useRef<StripState>(state);
   useEffect(() => {
     if (state === "tearing" && prevState.current !== "tearing") {
-      setCls("ft-shake");
-      const t1 = setTimeout(() => {
-        setCls(seed % 2 === 0 ? "ft-tear-left" : "ft-tear-right");
-        setTimeout(() => setHidden(true), 680);
-      }, 320);
+      // Brief delay then hide
+      const t = setTimeout(() => setVisible(false), 400);
       prevState.current = "tearing";
-      return () => clearTimeout(t1);
+      return () => clearTimeout(t);
     }
     if (state === "attached") {
-      setCls(""); setHidden(false); prevState.current = "attached";
+      setVisible(true); prevState.current = "attached";
     }
     if (state === "torn") {
-      setHidden(true); prevState.current = "torn";
+      setVisible(false); prevState.current = "torn";
     }
-  }, [state, seed]);
+  }, [state]);
 
-  if (hidden) return null;
+  if (!visible) return null;
 
   return (
-    <div className={cls} style={{ overflow: "hidden" }}>
-      {isNext && <JaggedEdge seed={seed + 0.5} />}
-      <div style={{
-        padding: "10px 16px",
-        background: isNext
-          ? "linear-gradient(90deg, #F5EDE0 0%, #EDE0CF 100%)"
-          : "#FAF6F1",
-        borderTop: isNext ? "none" : "1px solid #EDE0CF",
-        display: "flex",
-        alignItems: "center",
-        gap: 10,
-        position: "relative",
-      }}>
-        {isNext && (
-          <div style={{
-            width: 6, height: 6, borderRadius: "50%",
-            background: "#C8603A",
-            boxShadow: "0 0 6px #C8603A",
-            flexShrink: 0,
-          }} />
-        )}
-        <span style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: isNext ? 11 : 10,
-          color: isNext ? "#3D2E1E" : "#8C7B6B",
-          letterSpacing: "0.06em",
-          fontWeight: isNext ? 600 : 400,
-        }}>{text}</span>
-        {/* Perforated right edge on next strip */}
-        {isNext && (
-          <div style={{
-            position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
-            display: "flex", flexDirection: "column", gap: 3,
-          }}>
-            {[0,1,2,3].map(i => (
-              <div key={i} style={{ width: 3, height: 3, borderRadius: "50%", background: "#D4C4B0" }} />
-            ))}
-          </div>
-        )}
-      </div>
+    <div style={{
+      padding: "9px 16px",
+      background: isNext
+        ? "linear-gradient(90deg, #F5EDE0 0%, #EDE0CF 100%)"
+        : isDone ? "#FAF6F1" : "#FAF6F1",
+      borderTop: "1px solid #EDE0CF",
+      display: "flex",
+      alignItems: "center",
+      gap: 10,
+      opacity: isDone ? 0.45 : 1,
+      transition: "opacity 0.35s",
+    }}>
+      {isNext && (
+        <div style={{
+          width: 6, height: 6, borderRadius: "50%",
+          background: "#C8603A",
+          boxShadow: "0 0 6px #C8603A",
+          flexShrink: 0,
+        }} />
+      )}
+      <span style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: isNext ? 11 : 10,
+        color: isDone ? "#B0A090" : isNext ? "#3D2E1E" : "#8C7B6B",
+        letterSpacing: "0.06em",
+        fontWeight: isNext ? 600 : 400,
+        textDecoration: isDone ? "line-through" : "none",
+        textDecorationColor: "#C8603A",
+        textDecorationThickness: "1.5px",
+        transition: "color 0.3s, text-decoration 0.3s",
+      }}>{text}</span>
     </div>
   );
 }
