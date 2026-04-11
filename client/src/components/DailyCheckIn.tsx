@@ -83,31 +83,31 @@ const WIN_CATS = [
 
 /* ── Geometric mood faces (matching MoodCheckIn) ── */
 const MOODS = [
-  { value: 1, label: "Drained", fill: "#B8B4C8", stroke: "#5A5570", shadow: "rgba(180,175,200,0.4)" },
-  { value: 2, label: "Low",     fill: "#C0B8D4", stroke: "#5A5070", shadow: "rgba(175,165,195,0.4)" },
-  { value: 3, label: "Okay",    fill: "#A89070", stroke: "#4A3820", shadow: "rgba(160,140,110,0.4)" },
-  { value: 4, label: "Good",    fill: "#90C8A8", stroke: "#2A5840", shadow: "rgba(140,195,165,0.4)" },
-  { value: 5, label: "Glowing", fill: "#F0A878", stroke: "#7A3818", shadow: "rgba(240,160,120,0.4)" },
+  { value: 1, label: "Drained", fill: "#C8B8D8", stroke: "#6A4880", shadow: "rgba(180,160,210,0.4)" },
+  { value: 2, label: "Low",     fill: "#D4B8E0", stroke: "#7A4890", shadow: "rgba(190,165,215,0.4)" },
+  { value: 3, label: "Okay",    fill: "#E8A8C8", stroke: "#8A3870", shadow: "rgba(220,155,190,0.4)" },
+  { value: 4, label: "Good",    fill: "#F0B8D8", stroke: "#9A3880", shadow: "rgba(235,170,205,0.4)" },
+  { value: 5, label: "Glowing", fill: "#F8C8E8", stroke: "#A84888", shadow: "rgba(245,185,220,0.4)" },
 ];
 
 function FaceDrained({ active }: { active: boolean }) {
-  const fill = active ? "#B8B4C8" : "#CCC8D8"; const c = "#5A5570";
+  const fill = active ? "#C8B8D8" : "#DDD0E8"; const c = "#6A4880";
   return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>;
 }
 function FaceLow({ active }: { active: boolean }) {
-  const fill = active ? "#C0B8D4" : "#D4CEEA"; const c = "#5A5070";
+  const fill = active ? "#D4B8E0" : "#E4CCF0"; const c = "#7A4890";
   return <svg viewBox="0 0 80 80" fill="none"><rect x="8" y="8" width="64" height="64" rx="22" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><path d="M30 52 Q40 47 50 52" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/></svg>;
 }
 function FaceOkay({ active }: { active: boolean }) {
-  const fill = active ? "#A89070" : "#C4AA88"; const c = "#4A3820";
+  const fill = active ? "#E8A8C8" : "#F0C0D8"; const c = "#8A3870";
   return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><circle cx="28" cy="37" r="3" fill={c}/><circle cx="52" cy="37" r="3" fill={c}/><line x1="30" y1="52" x2="50" y2="52" stroke={c} strokeWidth="2" strokeLinecap="round"/></svg>;
 }
 function FaceGood({ active }: { active: boolean }) {
-  const fill = active ? "#90C8A8" : "#B0D8C0"; const c = "#2A5840";
+  const fill = active ? "#F0B8D8" : "#F8CCE8"; const c = "#9A3880";
   return <svg viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="32" fill={fill}/><path d="M24 36 Q28 31 32 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M48 36 Q52 31 56 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none"/><path d="M30 50 Q40 57 50 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none"/></svg>;
 }
 function FaceGlowing({ active }: { active: boolean }) {
-  const fill = active ? "#F0A878" : "#F8C8A0"; const c = "#7A3818";
+  const fill = active ? "#F8C8E8" : "#FDD8F0"; const c = "#A84888";
   const numRays = 10; const outerR = 38, innerR = 28;
   const points = Array.from({ length: numRays * 2 }, (_, i) => {
     const angle = (i * Math.PI) / numRays - Math.PI / 2;
@@ -383,7 +383,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                 className="w-36 shrink-0" style={{ borderRadius: 0, display: "block" }}
               />
               <div className="pt-2">
-                <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>
+                <p className="text-base leading-relaxed" style={{ color: "oklch(0.28 0.04 320)" }}>
                   Let's set up your day in just a few quick questions. No pressure — answer what you can, skip anything you don't have yet.
                 </p>
                 <p className="text-sm mt-3 italic" style={{ color: M.muted }}>
@@ -429,7 +429,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   <div
                     key={m.value}
                     className="flex-1 h-0.5 transition-all duration-300"
-                    style={{ background: mood !== null && m.value <= mood ? m.fill : "oklch(0.88 0.012 75)" }}
+                    style={{ background: mood !== null && m.value <= mood ? m.fill : "oklch(0.92 0.018 355)" }}
                   />
                 ))}
               </div>
@@ -457,10 +457,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               {newGoals.length > 0 && (
                 <ul className="space-y-1.5 mt-3">
                   {newGoals.map((g, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
                       🎯 <span>{g.text}</span>
                       {g.context && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.92 0.02 75)", color: "oklch(0.45 0.08 35)" }}>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.92 0.018 355)", color: "oklch(0.48 0.12 340)" }}>
                           #{g.context}
                         </span>
                       )}
@@ -511,8 +511,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               {tasks.length > 0 && (
                 <ul className="space-y-1.5 mt-3 max-h-28 overflow-y-auto">
                   {tasks.map((t, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.52 0.07 145 / 0.12)", color: M.muted }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.58 0.10 290 / 0.12)", color: M.muted }}>
                         #{t.context}
                       </span>
                       {t.goalIdx !== null && newGoals[t.goalIdx] && (
@@ -565,7 +565,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               {agents.length > 0 && (
                 <ul className="space-y-1.5 mt-3">
                   {agents.map((a, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
                       <span style={{ color: M.accent }}>⚡</span>
                       <span className="font-medium">{a.name}</span>
                       {a.task !== "General task" && (
@@ -625,7 +625,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   {wins.map((w, i) => {
                     const cat = WIN_CATS[w.catIdx];
                     return (
-                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
+                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}18`, color: cat.color, border: `1px solid ${cat.color}44` }}>
                           {cat.emoji} {cat.label}
                         </span>
@@ -648,14 +648,42 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
                   alt="heartbeat planet"
                   className="w-32 shrink-0" style={{ borderRadius: 0, display: "block" }}
                 />
-                <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
-                  {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
-                  {newGoals.length > 0 && <p>{newGoals.length} goal{newGoals.length > 1 ? "s" : ""} added</p>}
-                  {tasks.length > 0 && <p>{tasks.length} task{tasks.length > 1 ? "s" : ""} added</p>}
-                  {agents.length > 0 && <p>{agents.length} agent{agents.length > 1 ? "s" : ""} logged</p>}
-                  {wins.length > 0 && <p>{wins.length} win{wins.length > 1 ? "s" : ""} from yesterday recorded</p>}
+                <div className="pt-1 space-y-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                  {mood && (
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 14 }}>{["😶","😔","😐","🌸","✨"][MOODS.findIndex((m) => m.value === mood)] ?? "💭"}</span>
+                      <span>Mood: <span className="font-semibold" style={{ color: "oklch(0.55 0.18 340)" }}>{MOODS.find((m) => m.value === mood)?.label}</span></span>
+                    </div>
+                  )}
+                  {newGoals.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 13 }}>🎯</span>
+                      <span><span className="font-semibold" style={{ color: "oklch(0.55 0.14 310)" }}>{newGoals.length}</span> goal{newGoals.length > 1 ? "s" : ""} added</span>
+                    </div>
+                  )}
+                  {tasks.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 13 }}>✅</span>
+                      <span><span className="font-semibold" style={{ color: "oklch(0.55 0.14 290)" }}>{tasks.length}</span> task{tasks.length > 1 ? "s" : ""} added</span>
+                    </div>
+                  )}
+                  {agents.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 13 }}>🤖</span>
+                      <span><span className="font-semibold" style={{ color: "oklch(0.52 0.08 250)" }}>{agents.length}</span> agent{agents.length > 1 ? "s" : ""} logged</span>
+                    </div>
+                  )}
+                  {wins.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 13 }}>⭐</span>
+                      <span><span className="font-semibold" style={{ color: "oklch(0.62 0.18 355)" }}>{wins.length}</span> win{wins.length > 1 ? "s" : ""} from yesterday recorded</span>
+                    </div>
+                  )}
                   {!mood && !newGoals.length && !tasks.length && !agents.length && !wins.length && (
-                    <p className="italic text-muted-foreground">Nothing added — that's okay. Your space is ready.</p>
+                    <div className="flex items-center gap-2">
+                      <span style={{ fontSize: 13 }}>🌙</span>
+                      <span className="italic" style={{ color: "oklch(0.52 0.040 330)" }}>Nothing added — that's okay. Your space is ready.</span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -664,7 +692,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               {(tasks.length > 0 || newGoals.length > 0) && (
                 <div
                   className="mt-4 p-3 rounded-lg"
-                  style={{ background: "oklch(0.52 0.14 35 / 0.07)", border: "1px solid oklch(0.52 0.14 35 / 0.22)" }}
+                  style={{ background: "oklch(0.58 0.18 340 / 0.07)", border: "1px solid oklch(0.58 0.18 340 / 0.22)" }}
                 >
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Sparkles className="w-3.5 h-3.5" style={{ color: M.accent }} />

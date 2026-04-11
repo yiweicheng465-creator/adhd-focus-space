@@ -132,14 +132,14 @@ function IconBlockComplete({ size = 20, color = "#C0622F" }: IconProps) {
 
 // ── Icon registry ──────────────────────────────────────────────────────────────
 const WIN_ICONS = [
-  { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.60 0.10 15)"  },
-  { key: "study",     Component: IconStudy,     label: "Study",     color: "oklch(0.52 0.08 230)" },
-  { key: "work",      Component: IconWork,      label: "Work",      color: "oklch(0.50 0.07 145)" },
-  { key: "social",    Component: IconSocial,    label: "Social",    color: "oklch(0.58 0.09 55)"  },
-  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "oklch(0.55 0.10 300)" },
-  { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "oklch(0.55 0.07 185)" },
-  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "oklch(0.53 0.09 35)"  },
-  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "oklch(0.52 0.10 130)" },
+  { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.58 0.18 355)" },
+  { key: "study",     Component: IconStudy,     label: "Study",     color: "oklch(0.52 0.14 270)" },
+  { key: "work",      Component: IconWork,      label: "Work",      color: "oklch(0.50 0.14 290)" },
+  { key: "social",    Component: IconSocial,    label: "Social",    color: "oklch(0.58 0.18 340)" },
+  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "oklch(0.55 0.14 310)" },
+  { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "oklch(0.55 0.10 250)" },
+  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "oklch(0.53 0.18 340)" },
+  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "oklch(0.52 0.12 320)" },
 ];
 
 const M = {

@@ -51,15 +51,15 @@ function PillFaceLow({ active }: { active: boolean }) {
   return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><rect x="8" y="8" width="64" height="64" rx="22" fill={fill} /><circle cx="28" cy="37" r="3" fill={c} /><circle cx="52" cy="37" r="3" fill={c} /><path d="M30 52 Q40 47 50 52" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
 }
 function PillFaceOkay({ active }: { active: boolean }) {
-  const fill = active ? "#A89070" : "#C4AA88"; const c = "#4A3820";
+  const fill = active ? "#E8A8C8" : "#F0C0D8"; const c = "#8A3870";
   return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill={fill} /><circle cx="28" cy="35" r="3.5" fill={c} /><circle cx="52" cy="35" r="3.5" fill={c} /><circle cx="40" cy="44" r="1.8" fill={c} opacity="0.7" /><line x1="30" y1="53" x2="50" y2="53" stroke={c} strokeWidth="2" strokeLinecap="round" /></svg>;
 }
 function PillFaceGood({ active }: { active: boolean }) {
-  const fill = active ? "#90C8A8" : "#B0D8C0"; const c = "#2A5840";
+  const fill = active ? "#F0B8D8" : "#F8CCE8"; const c = "#9A3880";
   return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill={fill} /><path d="M24 36 Q28 31 32 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M48 36 Q52 31 56 36" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M30 50 Q40 57 50 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
 }
 function PillFaceGlowing({ active }: { active: boolean }) {
-  const fill = active ? "#F0A878" : "#F8C8A0"; const c = "#7A3818";
+  const fill = active ? "#F8C8E8" : "#FDD8F0"; const c = "#A84888";
   const pts = Array.from({ length: 20 }, (_, i) => { const a = (i * Math.PI) / 10 - Math.PI / 2; const r = i % 2 === 0 ? 38 : 28; return `${40 + r * Math.cos(a)},${40 + r * Math.sin(a)}`; }).join(" ");
   return <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><polygon points={pts} fill={fill} /><path d="M26 37 Q30 32 34 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M46 37 Q50 32 54 37" stroke={c} strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M28 50 Q40 60 52 50" stroke={c} strokeWidth="2" strokeLinecap="round" fill="none" /></svg>;
 }
@@ -68,9 +68,9 @@ const PILL_FACES = [PillFaceDrained, PillFaceLow, PillFaceOkay, PillFaceGood, Pi
 const MOOD_DATA = [
   { value: 1, label: "Drained", color: "oklch(0.50 0.06 280)" },
   { value: 2, label: "Low",     color: "oklch(0.48 0.08 290)" },
-  { value: 3, label: "Okay",    color: "oklch(0.45 0.08 60)"  },
-  { value: 4, label: "Good",    color: "oklch(0.40 0.12 155)" },
-  { value: 5, label: "Glowing", color: "oklch(0.52 0.14 40)"  },
+  { value: 3, label: "Okay",    color: "oklch(0.55 0.18 340)" },
+  { value: 4, label: "Good",    color: "oklch(0.55 0.14 310)" },
+  { value: 5, label: "Glowing", color: "oklch(0.58 0.18 355)" },
 ];
 
 function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (v: number) => void }) {
@@ -94,18 +94,18 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         onClick={() => setOpen((o: boolean) => !o)}
         className="flex items-center gap-1.5 px-2.5 py-1 transition-all"
         style={{
-          border: "1px solid oklch(0.87 0.014 75)",
-          background: open ? "oklch(0.965 0.012 78)" : "transparent",
+          border: "1px solid oklch(0.87 0.025 340)",
+          background: open ? "oklch(0.965 0.015 355)" : "transparent",
           borderRadius: 20,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "0.72rem",
-          color: current ? current.color : "oklch(0.55 0.015 70)",
+          color: current ? current.color : "oklch(0.52 0.040 330)",
         }}
         title="How are you feeling?"
       >
         <span style={{ width: 18, height: 18, display: "inline-flex", flexShrink: 0 }}>
           {CurrentFace ? <CurrentFace active={true} /> : (
-            <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill="#B0D8C0" /><path d="M24 36 Q28 31 32 36" stroke="#2A5840" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M48 36 Q52 31 56 36" stroke="#2A5840" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M30 50 Q40 57 50 50" stroke="#2A5840" strokeWidth="2" strokeLinecap="round" fill="none" /></svg>
+            <svg viewBox="0 0 80 80" fill="none" width="100%" height="100%"><circle cx="40" cy="40" r="32" fill="#F0B8D8" /><path d="M24 36 Q28 31 32 36" stroke="#9A3880" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M48 36 Q52 31 56 36" stroke="#9A3880" strokeWidth="2.5" strokeLinecap="round" fill="none" /><path d="M30 50 Q40 57 50 50" stroke="#9A3880" strokeWidth="2" strokeLinecap="round" fill="none" /></svg>
           )}
         </span>
         <span className="hidden sm:inline">{current ? current.label : "Mood"}</span>
@@ -114,10 +114,10 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         <div
           className="absolute right-0 top-full mt-1 z-50 flex gap-1.5 p-2"
           style={{
-            background: "oklch(0.990 0.006 78)",
-            border: "1px solid oklch(0.87 0.014 75)",
+            background: "oklch(0.990 0.006 355)",
+            border: "1px solid oklch(0.87 0.025 340)",
             borderRadius: 12,
-            boxShadow: "0 4px 16px oklch(0.18 0.01 60 / 0.10)",
+            boxShadow: "0 4px 16px oklch(0.18 0.04 320 / 0.10)",
           }}
         >
           {MOOD_DATA.map((m, i) => {
@@ -130,7 +130,7 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
                 className="flex flex-col items-center gap-1 px-2 py-1.5 transition-all"
                 style={{
                   borderRadius: 8,
-                  background: mood === m.value ? "oklch(0.965 0.012 78)" : "transparent",
+                  background: mood === m.value ? "oklch(0.965 0.015 355)" : "transparent",
                   border: mood === m.value ? `1px solid ${m.color}60` : "1px solid transparent",
                 }}
               >
@@ -157,14 +157,13 @@ function GoalFlagIcon({ className, style }: { className?: string; style?: React.
   );
 }
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "braindump" | "goals" | "agents" | "ai";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "goals" | "agents" | "ai";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
   focus:      { title: "Focus Timer",  icon: Clock           },
   tasks:      { title: "My Tasks",     icon: Star     },
   wins:       { title: "Daily Wins",   icon: Sparkles        },
-  braindump:  { title: "Brain Dump",   icon: Brain           },
   goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
   ai:         { title: "AI Features",  icon: Sparkles        },
@@ -411,44 +410,13 @@ export default function Home() {
             style={{ borderRight: "1.5px solid #E8B8D0" }}
           >
 
-            {/* App logo mark — star */}
-            <div
-              className="flex items-center justify-center shrink-0"
-              style={{
-                width: 30, height: 30,
-                background: "oklch(0.58 0.18 340 / 0.15)",
-                border: "1.5px solid oklch(0.58 0.18 340 / 0.45)",
-                position: "relative",
-              }}
-            >
-              <svg width="20" height="20" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* 6-point star */}
-                <path
-                  d="M16 4 L17.8 11.2 L24.5 8.5 L20.8 14.8 L28 16 L20.8 17.2 L24.5 23.5 L17.8 20.8 L16 28 L14.2 20.8 L7.5 23.5 L11.2 17.2 L4 16 L11.2 14.8 L7.5 8.5 L14.2 11.2 Z"
-                  fill="oklch(0.58 0.18 340)"
-                  opacity="0.9"
-                />
-                {/* Inner highlight */}
-                <path
-                  d="M16 9 L17.1 13.4 L21.2 11.8 L18.8 15.4 L23 16 L18.8 16.6 L21.2 20.2 L17.1 18.6 L16 23 L14.9 18.6 L10.8 20.2 L13.2 16.6 L9 16 L13.2 15.4 L10.8 11.8 L14.9 13.4 Z"
-                  fill="white"
-                  opacity="0.5"
-                />
-                {/* Center dot */}
-                <circle cx="16" cy="16" r="2" fill="white" opacity="0.9" />
-              </svg>
-            </div>
-            <div style={{ width: 1, height: 20, background: "#E8B8D0", flexShrink: 0 }} />
+
             {/* Page section icon */}
             <div
               className="flex items-center justify-center w-6 h-6 shrink-0"
                 style={{ opacity: 0.75 }}
             >
-              {activeSection === "braindump" ? (
-                <PixelDump size={13} active={true} />
-              ) : (
-                <Icon className="w-3.5 h-3.5" style={{ color: "#B03878" }} />
-              )}
+              <Icon className="w-3.5 h-3.5" style={{ color: "#B03878" }} />
             </div>
             <h1
               style={{
@@ -573,24 +541,24 @@ export default function Home() {
                   userSelect: "none",
                 }}>
                   {/* Stars */}
-                  <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "oklch(0.62 0.12 55)" }}>✦</div>
-                  <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "oklch(0.62 0.12 55)" }}>✦</div>
-                  <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "oklch(0.58 0.14 45)" }}>★</div>
+                  <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "oklch(0.62 0.18 355)" }}>✦</div>
+                  <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "oklch(0.62 0.18 355)" }}>✦</div>
+                  <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "oklch(0.58 0.18 340)" }}>★</div>
                   {/* Bubble */}
                   <div style={{
-                    background: "oklch(0.985 0.008 76)",
-                    border: "1.5px solid oklch(0.38 0.018 55)",
+                    background: "oklch(0.985 0.010 355)",
+                    border: "1.5px solid oklch(0.72 0.14 340)",
                     borderRadius: 8,
                     padding: "10px 14px",
                     maxWidth: 148,
                     position: "relative",
-                    boxShadow: "2px 2px 0 oklch(0.38 0.018 55 / 0.25)",
+                    boxShadow: "2px 2px 0 oklch(0.72 0.14 340 / 0.30)",
                   }}>
                     <p style={{
                       fontFamily: "'Space Mono', monospace",
                       fontSize: 10,
                       lineHeight: 1.55,
-                      color: "oklch(0.32 0.018 55)",
+                      color: "oklch(0.38 0.18 340)",
                       letterSpacing: "0.03em",
                       textTransform: "uppercase",
                       margin: 0,
@@ -604,7 +572,7 @@ export default function Home() {
                       height: 0,
                       borderLeft: "8px solid transparent",
                       borderRight: "0px solid transparent",
-                      borderTop: "10px solid oklch(0.38 0.018 55)",
+                      borderTop: "10px solid oklch(0.72 0.14 340)",
                     }} />
                     <div style={{
                       position: "absolute",
@@ -614,7 +582,7 @@ export default function Home() {
                       height: 0,
                       borderLeft: "7px solid transparent",
                       borderRight: "0px solid transparent",
-                      borderTop: "9px solid oklch(0.985 0.008 76)",
+                      borderTop: "9px solid oklch(0.985 0.010 355)",
                     }} />
                   </div>
                 </div>
@@ -656,9 +624,9 @@ export default function Home() {
                           <div key={i} className="flex items-start gap-3">
                             <div
                               className="w-1 h-1 mt-1.5 shrink-0"
-                              style={{ background: "oklch(0.52 0.14 35)", transform: "rotate(45deg)" }}
+                              style={{ background: "oklch(0.58 0.18 340)", transform: "rotate(45deg)" }}
                             />
-                            <p className="text-xs" style={{ color: "oklch(0.45 0.01 60)" }}>{tip}</p>
+                            <p className="text-xs" style={{ color: "oklch(0.45 0.04 330)" }}>{tip}</p>
                           </div>
                         ))}
                       </div>
@@ -690,35 +658,6 @@ export default function Home() {
               </RetroPageWrapper>
             )}
 
-            {activeSection === "braindump" && (
-              <RetroPageWrapper title="brain_dump.txt" sticker="sparkle">
-              <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
-                <BrainDumpDecor />
-                <div className="relative z-10">
-                  <BrainDump
-                    onConvertToTask={handleConvertToTask}
-                    onDump={recordDumpEntry}
-                    initialText={pendingDump ?? undefined}
-                    onInitialTextConsumed={() => setPendingDump(null)}
-                    onCreateAgent={(text) => {
-                      setPendingAgentTask(text);
-                      setActiveSection("agents");
-                    }}
-                    onAddGoal={(text) => {
-                      const newGoal: Goal = {
-                        id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-                        text,
-                        progress: 0,
-                        context: "personal",
-                        createdAt: new Date(),
-                      };
-                      setGoals((prev) => [newGoal, ...prev]);
-                    }}
-                  />
-                </div>
-              </div>
-              </RetroPageWrapper>
-            )}
 
             {activeSection === "goals" && (
               <RetroPageWrapper title="goals.md" sticker="leaf">

@@ -25,22 +25,22 @@ export interface DailyLog {
   blocksCompleted?: number; // full 4-session blocks completed
 }
 
-const MOOD_COLORS = ["#C0BCCC","#C8C0D8","#B09878","#90C8A8","#F0A878"];
+const MOOD_COLORS = ["#C8B8D8","#D4B8E0","#E8A8C8","#F0B8D8","#F8C8E8"];
 const MOOD_LABELS = ["Drained","Low","Okay","Good","Glowing"];
 
 const M = {
-  ink:     "oklch(0.28 0.018 65)",
-  muted:   "oklch(0.55 0.018 70)",
-  border:  "oklch(0.88 0.014 75)",
-  card:    "oklch(0.975 0.018 75)",
-  coral:   "oklch(0.55 0.09 35)",
-  coralBg: "oklch(0.55 0.09 35 / 0.08)",
-  sage:    "oklch(0.50 0.07 145)",
-  sageBg:  "oklch(0.50 0.07 145 / 0.08)",
-  gold:    "oklch(0.58 0.09 55)",
-  goldBg:  "oklch(0.58 0.09 55 / 0.08)",
-  pink:    "oklch(0.62 0.06 20)",
-  pinkBg:  "oklch(0.62 0.06 20 / 0.08)",
+  ink:     "oklch(0.22 0.040 320)",
+  muted:   "oklch(0.52 0.040 330)",
+  border:  "oklch(0.82 0.050 340)",
+  card:    "oklch(0.975 0.018 355)",
+  coral:   "oklch(0.58 0.18 340)",
+  coralBg: "oklch(0.58 0.18 340 / 0.08)",
+  sage:    "oklch(0.52 0.040 330)",
+  sageBg:  "oklch(0.55 0.14 290 / 0.08)",
+  gold:    "oklch(0.62 0.14 310)",
+  goldBg:  "oklch(0.62 0.14 310 / 0.08)",
+  pink:    "oklch(0.65 0.14 340)",
+  pinkBg:  "oklch(0.65 0.14 340 / 0.08)",
 };
 
 /* ── Helpers ── */
@@ -117,8 +117,8 @@ function DayCellHoverContent({ log, day, month, year }: { log?: DailyLog; day: n
           {(log?.focusSessions ?? 0) > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                <circle cx="12" cy="12" r="9" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" />
-                <polyline points="12,7 12,12 15,15" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="round" />
+                <circle cx="12" cy="12" r="9" stroke="oklch(0.58 0.18 340)" strokeWidth="1.5" />
+                <polyline points="12,7 12,12 15,15" stroke="oklch(0.58 0.18 340)" strokeWidth="1.5" strokeLinecap="round" />
               </svg>
               <span style={{ fontSize: 11, color: M.ink }}>{log!.focusSessions} focus {log!.focusSessions === 1 ? "session" : "sessions"}</span>
             </div>
@@ -126,7 +126,7 @@ function DayCellHoverContent({ log, day, month, year }: { log?: DailyLog; day: n
           {(log?.blocksCompleted ?? 0) > 0 && (
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" style={{ flexShrink: 0 }}>
-                <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.52 0.14 35)" opacity="0.85" />
+                <path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.58 0.18 340)" opacity="0.85" />
               </svg>
               <span style={{ fontSize: 11, color: M.ink }}>{log!.blocksCompleted} deep focus {log!.blocksCompleted === 1 ? "block" : "blocks"} 🔥</span>
             </div>
@@ -181,13 +181,13 @@ function DayCell({
           ? `2px solid ${M.coral}`
           : isToday
           ? `1.5px solid ${M.gold}`
-          : `1px solid ${hasActivity ? "oklch(0.82 0.02 75)" : M.border}`,
+          : `1px solid ${hasActivity ? "oklch(0.82 0.05 340)" : M.border}`,
         background: isSelected
           ? M.coralBg
           : hasActivity
           ? log?.wrapUpDone
-            ? "oklch(0.97 0.012 80)"
-            : "oklch(0.98 0.008 80)"
+            ? "oklch(0.97 0.015 355)"
+            : "oklch(0.98 0.010 355)"
           : "transparent",
         cursor: "pointer",
         display: "flex",
@@ -248,7 +248,7 @@ function DayCell({
           border: `1px solid ${M.border}`,
           borderRadius: 12,
           padding: "12px 14px",
-          boxShadow: "0 4px 20px oklch(0.28 0.018 65 / 0.10)",
+          boxShadow: "0 4px 20px oklch(0.22 0.040 320 / 0.10)",
           width: "auto",
           minWidth: 180,
         }}
@@ -262,14 +262,14 @@ function DayCell({
 
 /* ── Win category colours/labels (must match DailyWins WIN_ICONS order) ── */
 const WIN_CAT_COLORS = [
-  "oklch(0.60 0.10 15)",  // health
+  "oklch(0.62 0.18 355)",  // health
   "oklch(0.52 0.08 230)", // study
-  "oklch(0.50 0.07 145)", // work
-  "oklch(0.58 0.09 55)",  // social
+  "oklch(0.55 0.14 290)", // work
+  "oklch(0.62 0.14 310)",  // social
   "oklch(0.55 0.10 300)", // creative
   "oklch(0.55 0.07 185)", // mindful
-  "oklch(0.53 0.09 35)",  // fitness
-  "oklch(0.52 0.10 130)", // nutrition
+  "oklch(0.58 0.18 340)",  // fitness
+  "oklch(0.55 0.12 270)", // nutrition
 ];
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
 
@@ -325,16 +325,16 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
       borderRadius: 10,
       fontFamily: "'DM Sans', sans-serif",
       overflow: "hidden",
-      boxShadow: "3px 3px 0 oklch(0.65 0.04 75)",
+      boxShadow: "3px 3px 0 oklch(0.72 0.08 310)",
     }}>
       {/* Retro titlebar */}
-      <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ background: "oklch(0.22 0.040 320)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 4 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.62 0.18 340)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
         </div>
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>day_summary.txt</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.06 330)", marginLeft: 4 }}>day_summary.txt</span>
       </div>
       {/* Header */}
       <div style={{ padding: "14px 18px", borderBottom: `1px solid ${M.border}`, background: M.coralBg, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -597,16 +597,16 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         borderRadius: 10,
         marginBottom: 16,
         overflow: "hidden",
-        boxShadow: "3px 3px 0 oklch(0.65 0.04 75)",
+        boxShadow: "3px 3px 0 oklch(0.72 0.08 310)",
       }}>
         {/* Retro titlebar */}
-        <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ background: "oklch(0.22 0.040 320)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
           <div style={{ display: "flex", gap: 4 }}>
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
-            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.62 0.18 340)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
           </div>
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>calendar.exe</span>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.06 330)", marginLeft: 4 }}>calendar.exe</span>
         </div>
         <div style={{ padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
@@ -675,7 +675,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
             </div>
           ))}
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-            <div style={{ width: 20, height: 3, borderRadius: 2, background: "linear-gradient(to right, #C0BCCC, #F0A878)" }} />
+            <div style={{ width: 20, height: 3, borderRadius: 2, background: "linear-gradient(to right, oklch(0.78 0.06 290), oklch(0.72 0.12 340))" }} />
             <span style={{ fontSize: 10, color: M.muted }}>Mood bar</span>
           </div>
         </div>
@@ -765,25 +765,25 @@ function MonthlyAIReview({
   };
 
   const M2 = {
-    coral:   "oklch(0.55 0.09 35)",
-    coralBg: "oklch(0.55 0.09 35 / 0.08)",
-    coralBdr:"oklch(0.55 0.09 35 / 0.25)",
-    ink:     "oklch(0.28 0.018 65)",
-    muted:   "oklch(0.55 0.018 70)",
-    border:  "oklch(0.88 0.014 75)",
-    card:    "oklch(0.975 0.018 75)",
+    coral:   "oklch(0.58 0.18 340)",
+    coralBg: "oklch(0.58 0.18 340 / 0.08)",
+    coralBdr:"oklch(0.58 0.18 340 / 0.25)",
+    ink:     "oklch(0.22 0.040 320)",
+    muted:   "oklch(0.52 0.040 330)",
+    border:  "oklch(0.88 0.025 340)",
+    card:    "oklch(0.975 0.018 355)",
   };
 
   return (
-    <div style={{ marginTop: 16, background: M2.card, border: `1px solid ${M2.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 oklch(0.65 0.04 75)" }}>
+    <div style={{ marginTop: 16, background: M2.card, border: `1px solid ${M2.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 oklch(0.72 0.08 310)" }}>
       {/* Retro titlebar */}
-      <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ background: "oklch(0.18 0.04 320)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
         <div style={{ display: "flex", gap: 4 }}>
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
-          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.62 0.18 340)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
         </div>
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>ai_review.exe</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.06 330)", marginLeft: 4 }}>ai_review.exe</span>
       </div>
       <div style={{ padding: "16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>

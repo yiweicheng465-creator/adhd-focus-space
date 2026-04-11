@@ -16,14 +16,14 @@ import { Streamdown } from "streamdown";
 
 // ── Win category colours (must match DailyWins WIN_ICONS order) ──
 const WIN_CAT_COLORS = [
-  "oklch(0.60 0.10 15)",   // health
+  "oklch(0.62 0.18 355)",   // health
   "oklch(0.52 0.08 230)",  // study
-  "oklch(0.50 0.07 145)",  // work
-  "oklch(0.58 0.09 55)",   // social
+  "oklch(0.55 0.14 290)",  // work
+  "oklch(0.62 0.14 310)",   // social
   "oklch(0.55 0.10 300)",  // creative
-  "oklch(0.55 0.07 185)",  // mindful
-  "oklch(0.53 0.09 35)",   // fitness
-  "oklch(0.52 0.10 130)",  // nutrition
+  "oklch(0.55 0.07 250)",  // mindful
+  "oklch(0.58 0.18 340)",   // fitness
+  "oklch(0.55 0.12 270)",  // nutrition
 ];
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
 
@@ -84,7 +84,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
 
   if (wins.length === 0) {
     return (
-      <p className="text-sm italic" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif" }}>
+      <p className="text-sm italic" style={{ color: "oklch(0.52 0.040 330)", fontFamily: "'DM Sans', sans-serif" }}>
         No wins logged yet — completing tasks adds them automatically.
       </p>
     );
@@ -149,7 +149,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
       <div style={{ position: "relative", width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
           {/* Background guide ring */}
-          <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="oklch(0.90 0.010 75)" strokeWidth="1" strokeDasharray="3 5" />
+          <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="oklch(0.88 0.025 340)" strokeWidth="1" strokeDasharray="3 5" />
 
           {/* Arc segments — use butt caps so gaps are clean */}
           {arcSegments.map((seg) => {
@@ -173,8 +173,8 @@ function WinsRing({ wins }: { wins: Win[] }) {
           })}
 
           {/* Center count */}
-          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fill: "oklch(0.28 0.018 65)", fontWeight: 700 }}>{total}</text>
-          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "oklch(0.55 0.018 70)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
+          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fill: "oklch(0.22 0.040 320)", fontWeight: 700 }}>{total}</text>
+          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "oklch(0.52 0.040 330)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
         </svg>
 
         {/* Category icons — positioned OUTSIDE the arc ring, fixed small size */}
@@ -245,7 +245,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
                   bottom: "calc(100% + 8px)",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "oklch(0.18 0.01 60 / 0.94)",
+                  background: "oklch(0.12 0.04 320 / 0.94)",
                   color: "white",
                   borderRadius: 8,
                   padding: "7px 12px",
@@ -513,7 +513,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
             ) : (
               <div className="space-y-2">
                 {todayAgents.map((a) => {
-                  const sc: Record<string, string> = { running: M.coral, paused: M.slumber, done: M.sage, failed: "oklch(0.55 0.09 35)" };
+                  const sc: Record<string, string> = { running: M.coral, paused: M.slumber, done: M.sage, failed: "oklch(0.58 0.18 340)" };
                   return (
                     <div key={a.id} className="flex items-start gap-2 p-2.5" style={{ background: M.bg, border: `1px solid ${M.border}` }}>
                       <div className="w-2 h-2 mt-1.5 shrink-0" style={{ background: sc[a.status] }} />
@@ -566,7 +566,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
                   disabled={summaryMutation.isPending}
                   className="flex items-center gap-2 px-3 py-2 text-xs font-medium self-start"
                   style={{
-                    background: summaryMutation.isPending ? "oklch(0.88 0.014 75)" : M.coralBg,
+                    background: summaryMutation.isPending ? "oklch(0.88 0.025 340)" : M.coralBg,
                     border: `1px solid ${M.coralBdr}`,
                     color: M.coral,
                     fontFamily: "'DM Sans', sans-serif",
@@ -632,7 +632,7 @@ function TaskRow({ text, color }: { text: string; color: string }) {
   return (
     <div className="flex items-center gap-2 py-1">
       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color }} />
-      <span className="text-sm" style={{ color: "oklch(0.28 0.018 65)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
+      <span className="text-sm" style={{ color: "oklch(0.22 0.040 320)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
     </div>
   );
 }
@@ -669,7 +669,7 @@ function FocusTrackerSection() {
   })();
 
   const count = Math.max(sessions.length, logCount);
-  const timerColor = "oklch(0.55 0.09 35)"; // coral / timer color
+  const timerColor = "oklch(0.58 0.18 340)"; // coral / timer color
 
   return (
     <Section
@@ -690,8 +690,8 @@ function FocusTrackerSection() {
                 key={s.sessionNumber}
                 className="flex items-center gap-3 py-1.5 px-2.5"
                 style={{
-                  background: "oklch(0.55 0.09 35 / 0.06)",
-                  border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                  background: "oklch(0.58 0.18 340 / 0.06)",
+                  border: "1px solid oklch(0.58 0.18 340 / 0.18)",
                   borderRadius: 6,
                 }}
               >
@@ -724,8 +724,8 @@ function FocusTrackerSection() {
               key={i}
               className="flex items-center gap-3 py-1.5 px-2.5"
               style={{
-                background: "oklch(0.55 0.09 35 / 0.06)",
-                border: "1px solid oklch(0.55 0.09 35 / 0.18)",
+                background: "oklch(0.58 0.18 340 / 0.06)",
+                border: "1px solid oklch(0.58 0.18 340 / 0.18)",
                 borderRadius: 6,
               }}
             >

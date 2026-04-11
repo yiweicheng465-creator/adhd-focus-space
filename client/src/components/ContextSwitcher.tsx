@@ -23,9 +23,9 @@ export const BUILTIN_CONTEXT_CONFIG: Record<string, {
   work: {
     label:  "Work",
     icon:   Briefcase,
-    color:  "oklch(0.42 0.10 168)",
-    bg:     "oklch(0.42 0.10 168 / 0.08)",
-    border: "oklch(0.42 0.10 168 / 0.25)",
+    color:  "oklch(0.48 0.14 290)",
+    bg:     "oklch(0.48 0.14 290 / 0.10)",
+    border: "oklch(0.48 0.14 290 / 0.28)",
   },
   personal: {
     label:  "Personal",

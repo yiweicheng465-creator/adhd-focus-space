@@ -43,15 +43,15 @@ const PRIORITY_CONFIG: Record<TaskPriority, {
   },
   focus: {
     label: "Focus", icon: Zap,
-    color:  "oklch(0.52 0.07 145)",
-    bg:     "oklch(0.52 0.07 145 / 0.08)",
-    border: "oklch(0.52 0.07 145 / 0.28)",
+    color:  "oklch(0.52 0.14 290)",
+    bg:     "oklch(0.52 0.14 290 / 0.08)",
+    border: "oklch(0.52 0.14 290 / 0.28)",
   },
   normal: {
     label: "Normal", icon: Star,
-    color:  "oklch(0.55 0.018 70)",
-    bg:     "oklch(0.72 0.018 75 / 0.15)",
-    border: "oklch(0.72 0.018 75 / 0.40)",
+    color:  "oklch(0.55 0.10 330)",
+    bg:     "oklch(0.72 0.10 330 / 0.10)",
+    border: "oklch(0.72 0.10 330 / 0.30)",
   },
 };
 
@@ -268,9 +268,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
               value={newTaskGoalId ?? ""}
               onChange={(e) => setNewTaskGoalId(e.target.value || null)}
               style={{
-                background: newTaskGoalId ? "oklch(0.52 0.07 145 / 0.10)" : "transparent",
-                color: newTaskGoalId ? "oklch(0.40 0.09 145)" : M.muted,
-                border: `1px solid ${newTaskGoalId ? "oklch(0.52 0.07 145 / 0.40)" : M.border}`,
+                background: newTaskGoalId ? "oklch(0.52 0.14 290 / 0.10)" : "transparent",
+                color: newTaskGoalId ? "oklch(0.40 0.14 290)" : M.muted,
+                border: `1px solid ${newTaskGoalId ? "oklch(0.52 0.14 290 / 0.40)" : M.border}`,
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: "0.62rem",
                 fontWeight: newTaskGoalId ? 600 : 400,

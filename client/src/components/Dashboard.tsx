@@ -133,7 +133,7 @@ const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string; 
   // Muted ink-stamp palette — desaturated, dusty, lo-fi
   urgent:  { color: "#C0306A", bg: "oklch(0.95 0.040 355)",  label: "urgent",  labelBg: "rgba(192, 48, 106, 0.10)" },
   focus:   { color: "#7A50A0", bg: "oklch(0.95 0.030 290)",  label: "focus",   labelBg: "rgba(122, 80, 160, 0.10)" },
-  normal:  { color: "#3A8A7A", bg: "oklch(0.95 0.030 168)",  label: "normal",  labelBg: "rgba(58, 138, 122, 0.08)" },
+  normal:  { color: "#7A50A0", bg: "oklch(0.95 0.025 290)",  label: "normal",  labelBg: "rgba(122, 80, 160, 0.08)" },
   someday: { color: "#6070A0", bg: "oklch(0.95 0.020 240)",  label: "someday", labelBg: "rgba(96, 112, 160, 0.08)" },
 };
 
@@ -489,23 +489,23 @@ export function Dashboard({
         <div className="absolute" style={{ bottom: 6, right: 22, opacity: 0.50 }}>
           <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
             {/* pot */}
-            <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="oklch(0.62 0.10 35)" />
-            <rect x="8" y="28" width="20" height="4" rx="2" fill="oklch(0.55 0.12 32)" />
+            <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="oklch(0.62 0.12 300)" />
+            <rect x="8" y="28" width="20" height="4" rx="2" fill="oklch(0.55 0.14 310)" />
             {/* stem */}
-            <line x1="18" y1="28" x2="18" y2="14" stroke="oklch(0.48 0.10 145)" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="18" y1="28" x2="18" y2="14" stroke="oklch(0.55 0.14 290)" strokeWidth="1.5" strokeLinecap="round" />
             {/* leaves */}
-            <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="oklch(0.52 0.12 145)" />
-            <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="oklch(0.48 0.10 145)" />
-            <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.55 0.11 148)" />
+            <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="oklch(0.60 0.14 290)" />
+            <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="oklch(0.55 0.14 295)" />
+            <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.58 0.13 292)" />
           </svg>
         </div>
         {/* Sticky note moved under greeting — rendered inline below */}
         {/* Leaf sprig — slightly right of left pane edge, peeking under greeting */}
         <div className="absolute" style={{ top: 38, left: 172, opacity: 0.45, transform: "rotate(-15deg)", zIndex: 12 }}>
           <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
-            <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.50 0.10 145)" strokeWidth="1.2" strokeLinecap="round" />
-            <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.54 0.11 145)" />
-            <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="oklch(0.50 0.10 145)" />
+            <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.55 0.14 290)" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.60 0.14 290)" />
+            <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="oklch(0.55 0.14 295)" />
           </svg>
         </div>
         {/* Cloud puff — far right, mid height */}
@@ -627,9 +627,9 @@ export function Dashboard({
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
               {/* leaf sticker */}
               <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ opacity: 0.55 }}>
-                <line x1="5" y1="11" x2="5" y2="2" stroke="oklch(0.48 0.10 145)" strokeWidth="1" strokeLinecap="round" />
-                <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="oklch(0.52 0.12 145)" />
-                <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="oklch(0.48 0.10 145)" />
+                <line x1="5" y1="11" x2="5" y2="2" stroke="oklch(0.55 0.14 290)" strokeWidth="1" strokeLinecap="round" />
+                <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="oklch(0.60 0.14 290)" />
+                <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="oklch(0.55 0.14 295)" />
               </svg>
             </div>
             <div className="retro-titlebar-buttons">
@@ -714,13 +714,13 @@ export function Dashboard({
                         title="Mark done"
                         style={{
                           width: 18, height: 18, flexShrink: 0, borderRadius: 3,
-                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 145)" : "oklch(0.88 0.012 72)"}`,
-                          background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
+                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 290)" : "oklch(0.88 0.018 355)"}`,
+                          background: isCompleting ? "oklch(0.60 0.08 290 / 0.15)" : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           transition: "all 0.2s",
                         }}
                       >
-                        {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 145)" }} />}
+                        {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 290)" }} />}
                       </button>
                     </div>
                   );

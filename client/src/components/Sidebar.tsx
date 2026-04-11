@@ -122,7 +122,6 @@ const NAV: Array<{
   { id: "focus",     short: "FOCUS",  Icon: IconFocus,  title: "Focus Timer"  },
   { id: "tasks",     short: "TASKS",  Icon: IconTasks,  title: "My Tasks"     },
   { id: "wins",      short: "WINS",   Icon: IconWins,   title: "Daily Wins"   },
-  { id: "braindump", short: "DUMP",   Icon: IconDump,   title: "Brain Dump"   },
   { id: "goals",     short: "GOALS",  Icon: IconGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", Icon: IconAgents, title: "AI Agents"    },
   { id: "ai",        short: "AI",     Icon: IconAI,     title: "AI Features"  },
@@ -252,32 +251,6 @@ function MonthlyLink() {
   );
 }
 
-/* Info icon link to /insight */
-function InsightLink() {
-  const [location, navigate] = useLocation();
-  const active = location === "/insight";
-  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
-  return (
-    <button
-      onClick={() => navigate("/insight")}
-      title="Insight"
-      className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
-      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-    >
-      {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
-      )}
-      <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-        <circle cx="9" cy="9" r="7" stroke={color} strokeWidth="1.4"/>
-        <line x1="9" y1="8" x2="9" y2="13" stroke={color} strokeWidth="1.5" strokeLinecap="round"/>
-        <circle cx="9" cy="5.5" r="0.9" fill={color} />
-      </svg>
-      <span style={{ fontSize: 7, marginTop: 2, letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace", color }}>IDEA</span>
-    </button>
-  );
-}
 
 /* Beaker icon link to /timer-prototypes */
 function PrototypesLink() {
@@ -390,7 +363,6 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">
         <MonthlyLink />
-        <InsightLink />
         <PrototypesLink />
       </div>
     </aside>

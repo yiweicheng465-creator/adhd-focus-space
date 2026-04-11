@@ -304,7 +304,7 @@ function StripEditor({ strips, onChange }: {
                 <Pencil size={9} color={BORDER} />
               </button>
               <button onClick={() => removeStrip(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-                <Trash2 size={9} color="#C8603A" />
+                <Trash2 size={9} color="oklch(0.58 0.18 340)" />
               </button>
             </div>
           </div>
@@ -531,7 +531,7 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
       <div style={{ display: "flex", gap: 8, width: "100%" }}>
         {[
           { label: "QUIT" + (quitCount !== 1 ? "S" : "") + " TODAY", value: quitCount, color: BORDER },
-          { label: "SCORE PENALTY", value: `\u2212${penalty}`, color: "#C8603A" },
+          { label: "SCORE PENALTY", value: `-${penalty}`, color: "oklch(0.58 0.18 340)" },
           { label: "STRIPS LEFT", value: stripsLeft, color: BORDER },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ flex: 1, background: PANEL, border: `1px solid ${BORDER}`, padding: "9px 5px", textAlign: "center" }}>
@@ -819,9 +819,9 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           <button
             onClick={() => { setShowSound(s => !s); setShowSettings(false); }}
             title="Sound & music"
-            style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer" }}
+            style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.58 0.18 340 / 0.12)" : "transparent", cursor: "pointer" }}
           >
-            {sound.musicLoading ? <span style={{ fontSize: 6, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={8} color="#5A8A5A" /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
+            {sound.musicLoading ? <span style={{ fontSize: 6, color: "oklch(0.58 0.18 340)" }}>…</span> : sound.musicEnabled ? <Coffee size={8} color="oklch(0.58 0.18 340)" /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
           </button>
           <button
             onClick={() => { setShowSettings(s => !s); setShowSound(false); }}
@@ -885,25 +885,25 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <button onClick={sound.toggleSfx} style={{ width: 18, height: 18, border: `1px solid ${sound.sfxEnabled ? "#C8603A" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
-                {sound.sfxEnabled ? <Volume2 size={8} color="#C8603A" /> : <VolumeX size={8} color={BORDER} />}
+              <button onClick={sound.toggleSfx} style={{ width: 18, height: 18, border: `1px solid ${sound.sfxEnabled ? "oklch(0.55 0.14 310)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.sfxEnabled ? <Volume2 size={8} color="oklch(0.55 0.14 310)" /> : <VolumeX size={8} color={BORDER} />}
               </button>
               <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Sound Effects</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}
                 onChange={e => sound.setSfxVolume(parseFloat(e.target.value))}
                 disabled={!sound.sfxEnabled}
-                style={{ flex: 1, accentColor: "#C8603A", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
+                style={{ flex: 1, accentColor: "oklch(0.55 0.14 310)", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? "#7A8C6E" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", flexShrink: 0 }}>
-                {sound.musicLoading ? <span style={{ fontSize: 6, color: "#7A8C6E" }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? "#7A8C6E" : BORDER} />}
+              <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.58 0.18 340 / 0.12)" : "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.musicLoading ? <span style={{ fontSize: 6, color: "oklch(0.58 0.18 340)" }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER} />}
               </button>
               <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Cafe Music</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
                 onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
                 disabled={!sound.musicEnabled}
-                style={{ flex: 1, accentColor: "#7A8C6E", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
+                style={{ flex: 1, accentColor: "oklch(0.58 0.18 340)", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
             </div>
           </div>
@@ -938,14 +938,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       {/* ── Block complete ── */}
       {phase === "block_complete" && (
         <div style={{ background: BG, padding: "22px 16px", textAlign: "center" }}>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: "#7A8C6E", textTransform: "uppercase", marginBottom: 7 }}>BLOCK COMPLETE</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: "oklch(0.55 0.14 310)", textTransform: "uppercase", marginBottom: 7 }}>BLOCK COMPLETE</p>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700, color: DARK, marginBottom: 5 }}>4 sessions done.</p>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, lineHeight: 1.6, marginBottom: 16 }}>
             You completed a full Pomodoro block.<br />Take a real break — you earned it.
           </p>
           <div style={{ display: "flex", gap: 5, justifyContent: "center", marginBottom: 16 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ width: 7, height: 7, background: "#7A8C6E" }} />
+              <div key={i} style={{ width: 7, height: 7, background: "oklch(0.55 0.14 310)" }} />
             ))}
           </div>
           <button onClick={handleNewSession} style={{
