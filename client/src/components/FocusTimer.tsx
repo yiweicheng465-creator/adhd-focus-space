@@ -26,7 +26,7 @@ const BORDER = "#B87870";   // dusty rose border
 const DARK = "#5C2E2A";     // deep rose/brown dark text
 const ACCENT = "#C4605A";   // coral/dusty red accent
 const BTN_BG = "#E8C4BC";   // light pink button bg
-const SCREEN_BG = "#DDB8B0"; // muted pink screen bg
+const SCREEN_BG = "#EAE0F0"; // soft lavender-white screen bg (contrasts with pink pet)
 
 // ── Inject keyframes once ────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-cyber-keyframes";
@@ -1002,16 +1002,30 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
               fontFamily: "'JetBrains Mono', monospace",
             }}>{petStatus()}</div>
 
-            {/* Timer display bottom-right */}
-            <div style={{
-              position: "absolute", bottom: 5, right: 7,
-              fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 20, fontWeight: 700,
-              color: isRunning ? DARK : `${DARK}88`,
-              letterSpacing: "0.04em",
-              lineHeight: 1,
-              textShadow: "0 0 8px rgba(200,180,232,0.8)",
-            }}>{mm}:{ss}</div>
+            {/* Progress arc bottom-right — replaces duplicate timer */}
+            <div style={{ position: "absolute", bottom: 5, right: 7 }}>
+              {(() => {
+                const r = 11;
+                const circ = 2 * Math.PI * r;
+                return (
+                  <svg width="28" height="28" viewBox="0 0 28 28">
+                    <circle cx="14" cy="14" r={r} fill="none" stroke={`${DARK}22`} strokeWidth="2.5" />
+                    <circle
+                      cx="14" cy="14" r={r}
+                      fill="none"
+                      stroke={isRunning ? ACCENT : `${DARK}44`}
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeDasharray={`${circ}`}
+                      strokeDashoffset={`${circ * (1 - progress)}`}
+                      transform="rotate(-90 14 14)"
+                      style={{ transition: "stroke-dashoffset 1s linear" }}
+                    />
+                    <circle cx="14" cy="14" r="2.5" fill={isRunning ? ACCENT : `${DARK}44`} />
+                  </svg>
+                );
+              })()}
+            </div>
 
             {/* MIT label top-right */}
             {mitLabel && (
@@ -1130,15 +1144,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             </div>
           </div>
 
-          {/* Status bar footer */}
-          <div style={{
-            display: "flex", justifyContent: "space-between",
-            padding: "2px 9px", background: `${DARK}18`,
-            borderTop: `1px solid ${BORDER}30`,
-          }}>
-            <span style={{ fontSize: 6, letterSpacing: "0.18em", color: BORDER, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} MIN · {MODE_LABELS[mode]}</span>
-            <span style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} CROSSED OFF</span>
-          </div>
+
         </>
       )}
     </div>
