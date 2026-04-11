@@ -505,7 +505,7 @@ export function Dashboard({
         <div className="relative z-10 flex" style={{ height: 110 }}>
           {/* Left: illustration — clipped to exact hero height */}
           <div className="hidden md:block shrink-0 overflow-hidden" style={{ width: 144, height: "100%", borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", opacity: 0.95, display: "block" }} />
+            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", opacity: 0.95, display: "block" }} />
           </div>
           {/* Center: greeting + controls */}
           <div className="flex-1 px-6 py-3 flex flex-col justify-between" style={{ minWidth: 0 }}>
