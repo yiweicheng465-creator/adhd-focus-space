@@ -384,6 +384,26 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 })()}
               </div>
 
+              {/* Priority stamp tag */}
+              {!task.done && (
+                <span style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.56rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.07em",
+                  textTransform: "uppercase",
+                  color: pcfg.color,
+                  border: `1.5px solid ${pcfg.border}`,
+                  borderRadius: 2,
+                  padding: "1px 5px",
+                  background: pcfg.bg,
+                  flexShrink: 0,
+                  whiteSpace: "nowrap",
+                }}>
+                  {pcfg.label}
+                </span>
+              )}
+
               {/* Context badge */}
               <ContextBadge context={task.context} />
 
@@ -391,7 +411,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
               <button
                 onClick={() => toggleTask(task.id)}
                 className="flex-shrink-0 transition-all hover:scale-110"
-                style={{ color: task.done ? pcfg.color : "oklch(0.78 0.018 70)" }}
+                style={{ color: task.done ? pcfg.color : "oklch(0.88 0.012 72)" }}
               >
                 {task.done
                   ? <CheckCircle2 className="w-4 h-4" />

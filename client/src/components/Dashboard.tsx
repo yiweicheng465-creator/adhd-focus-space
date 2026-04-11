@@ -657,13 +657,33 @@ export function Dashboard({
                         {cleanText}
                       </p>
 
+                      {/* Priority stamp tag */}
+                      {!isCompleting && (
+                        <span style={{
+                          fontFamily: "'Space Mono', monospace",
+                          fontSize: "0.52rem",
+                          fontWeight: 700,
+                          letterSpacing: "0.07em",
+                          textTransform: "uppercase",
+                          color: pd.color,
+                          border: `1.5px solid ${pd.color}55`,
+                          borderRadius: 2,
+                          padding: "1px 4px",
+                          background: pd.labelBg,
+                          flexShrink: 0,
+                          whiteSpace: "nowrap",
+                        }}>
+                          {pd.label}
+                        </span>
+                      )}
+
                       {/* Checkbox */}
                       <button
                         onClick={() => handleCheck(t.id)}
                         title="Mark done"
                         style={{
                           width: 18, height: 18, flexShrink: 0, borderRadius: 3,
-                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
+                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 145)" : "oklch(0.88 0.012 72)"}`,
                           background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           transition: "all 0.2s",
