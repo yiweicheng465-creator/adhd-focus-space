@@ -81,21 +81,24 @@ export function FilmGrainOverlay() {
     resize();
     window.addEventListener("resize", resize);
 
+    // Grain block size — larger = more visible chunky film grain
+    const GRAIN_SIZE = 3;
+
     function drawGrain() {
       if (!ctx || !canvas) return;
-      // Generate random noise pixels
-      const imageData = ctx.createImageData(w, h);
-      const data = imageData.data;
-      for (let i = 0; i < data.length; i += 4) {
-        // Random luminance grain
-        const v = (Math.random() * 255) | 0;
-        data[i]     = v;   // R
-        data[i + 1] = v;   // G
-        data[i + 2] = v;   // B
-        // Subtle alpha — keeps grain light but visible
-        data[i + 3] = (Math.random() * 28 + 8) | 0;
+      ctx.clearRect(0, 0, w, h);
+      // Draw chunky grain blocks for a visible film-grain look
+      const cols = Math.ceil(w / GRAIN_SIZE);
+      const rows = Math.ceil(h / GRAIN_SIZE);
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const v = (Math.random() * 255) | 0;
+          // Alpha range 30–90 — punchy but not opaque
+          const a = (Math.random() * 60 + 30) / 255;
+          ctx.fillStyle = `rgba(${v},${v},${v},${a.toFixed(3)})`;
+          ctx.fillRect(col * GRAIN_SIZE, row * GRAIN_SIZE, GRAIN_SIZE, GRAIN_SIZE);
+        }
       }
-      ctx.putImageData(imageData, 0, 0);
       rafRef.current = requestAnimationFrame(drawGrain);
     }
 
@@ -117,7 +120,7 @@ export function FilmGrainOverlay() {
         height:        "100vh",
         pointerEvents: "none",
         zIndex:        9999,
-        mixBlendMode:  "overlay",
+        mixBlendMode:  "soft-light",
         opacity:       enabled ? 1 : 0,
         transition:    "opacity 0.4s ease",
       }}
