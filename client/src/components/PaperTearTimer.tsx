@@ -1,49 +1,39 @@
 /* ============================================================
-   ADHD FOCUS SPACE — PaperTearTimer v3.0 (Horizontal Rip)
-   Design: Each strip has a horizontal torn-paper opening that
-   reveals the text inside. The tear starts from the right and
-   expands left as the strip becomes "active". Ragged torn edges
-   on both top and bottom of the opening, like ripping a strip
-   off a notebook page.
-   Retro lo-fi: Space Mono, warm parchment, thick border, 3D shadow.
+   ADHD FOCUS SPACE — PaperTearTimer v4.0 (Peeling Strip)
+   Design: The active strip looks like a physical paper strip
+   that's been partially peeled off the page — raised with a
+   drop shadow underneath, right corner curling up like a
+   sticky note peeling off. Strips below sit flat on the page.
+   Retro lo-fi: Space Mono, warm parchment, ruled lines.
    ============================================================ */
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
-const STYLE_ID = "paper-tear-keyframes-v3";
+const STYLE_ID = "paper-peel-keyframes-v4";
 if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
-    @keyframes cornerPeelPulse {
-      0%,100% { transform: scale(1) rotate(0deg); }
-      50%     { transform: scale(1.15) rotate(-3deg); }
-    }
-    @keyframes tearRipRight {
+    @keyframes stripTearAway {
       0%   { transform: translateX(0) rotate(0deg) scaleY(1); opacity: 1; }
-      20%  { transform: translateX(10px) rotate(2deg) scaleY(0.98); opacity: 0.95; }
-      100% { transform: translateX(160px) rotate(8deg) scaleY(0.6); opacity: 0; }
+      15%  { transform: translateX(-8px) rotate(-1.5deg) scaleY(1.02); opacity: 1; }
+      100% { transform: translateX(140%) rotate(-6deg) scaleY(0.7); opacity: 0; }
     }
-    @keyframes stripShakeH {
+    @keyframes stripShake {
       0%,100% { transform: translateX(0); }
-      20%     { transform: translateX(-4px); }
-      40%     { transform: translateX(5px); }
-      60%     { transform: translateX(-3px); }
-      80%     { transform: translateX(3px); }
+      20%     { transform: translateX(-3px); }
+      40%     { transform: translateX(4px); }
+      60%     { transform: translateX(-2px); }
+      80%     { transform: translateX(2px); }
     }
-    @keyframes paperFlyAway {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-160%) rotate(-12deg); opacity: 0; }
+    @keyframes curlPulse {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.18); }
     }
-    @keyframes ripExpand {
-      0%   { clip-path: inset(0 100% 0 0); }
-      100% { clip-path: inset(0 0% 0 0); }
-    }
-    .strip-tearing    { animation: tearRipRight 0.7s cubic-bezier(0.4,0,1,1) forwards; }
-    .strip-shake      { animation: stripShakeH 0.28s ease-in-out; }
-    .paper-fly-away   { animation: paperFlyAway 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
-    .rip-reveal       { animation: ripExpand 0.45s cubic-bezier(0.2,0,0.4,1) forwards; }
+    .strip-tearing { animation: stripTearAway 0.65s cubic-bezier(0.4,0,1,1) forwards; }
+    .strip-shake   { animation: stripShake 0.25s ease-in-out; }
+    .curl-pulse    { animation: curlPulse 2.8s ease-in-out infinite; }
   `;
   document.head.appendChild(s);
 }
@@ -60,165 +50,21 @@ const STRIPS = [
   "the mental noise",
 ];
 
-const STRIP_H = 42; // px height of each strip
-
-// ── Generate a jagged horizontal path ────────────────────────────────────────────
-function jaggedHPath(
-  fromX: number,
-  toX: number,
-  y: number,
-  seed: number,
-  amplitude: number,
-  direction: 1 | -1 // 1 = jag downward, -1 = jag upward
-): string {
-  const steps = 28;
-  const pts: string[] = [`M ${fromX} ${y}`];
-  for (let i = 0; i <= steps; i++) {
-    const x = fromX + (i / steps) * (toX - fromX);
-    const jag =
-      Math.sin(seed * 4.1 + i * 2.3) * amplitude +
-      Math.cos(seed * 6.7 + i * 1.5) * (amplitude * 0.55);
-    pts.push(`L ${x} ${y + direction * Math.abs(jag)}`);
-  }
-  return pts.join(" ");
-}
-
-// ── Horizontal torn-paper overlay ─────────────────────────────────────────────────
-// The paper is a dark parchment layer covering the strip.
-// A horizontal rip opens from the right side, revealing the content beneath.
-// The opening has ragged torn edges on both the top and bottom.
-// A rolled curl appears on the left side of the opening.
-//
-// revealed = 0 → paper fully covers the strip (no opening)
-// revealed = 1 → paper fully torn away (full strip visible)
-function TornPaperOverlay({
-  width,
-  height,
-  seed,
-  revealed,
-}: {
-  width: number;
-  height: number;
-  seed: number;
-  revealed: number;
-}) {
-  if (revealed <= 0) {
-    // Fully covered — just a flat paper rectangle
-    return (
-      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}
-        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 3 }}>
-        <rect x={0} y={0} width={width} height={height} fill="oklch(0.940 0.018 72)" />
-      </svg>
-    );
-  }
-  if (revealed >= 1) return null; // fully revealed, no overlay needed
-
-  // The rip starts from the right and expands leftward.
-  // ripRight = right edge of the opening (always = width, the rip starts from right)
-  // ripLeft  = left edge of the opening (moves from width→0 as revealed goes 0→1)
-  const ripRight = width;
-  const ripLeft  = width * (1 - revealed);
-
-  // Vertical center of the strip
-  const midY    = height / 2;
-  // Opening half-height: 35% of strip height
-  const halfOpen = height * 0.35;
-  const topEdgeY = midY - halfOpen;
-  const botEdgeY = midY + halfOpen;
-  const amp      = 4.5;
-
-  // Jagged top torn edge (jags downward into the opening)
-  const topEdge = jaggedHPath(ripLeft, ripRight, topEdgeY, seed,       amp,  1);
-  // Jagged bottom torn edge (jags upward into the opening)
-  const botEdge = jaggedHPath(ripLeft, ripRight, botEdgeY, seed + 11,  amp, -1);
-
-  // Rolled curl width on the left side of the rip
-  const curlW = Math.min(12, (ripRight - ripLeft) * 0.15);
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 3 }}
-    >
-      <defs>
-        {/* Gradient for the curl shadow on the left edge of the rip */}
-        <linearGradient id={`curlGrad${seed}`} x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%"   stopColor="oklch(0.40 0.018 60)" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="oklch(0.40 0.018 60)" stopOpacity="0" />
-        </linearGradient>
-        {/* Gradient for inner shadow below top torn edge */}
-        <linearGradient id={`topShadow${seed}`} x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%"   stopColor="oklch(0.35 0.018 60)" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="oklch(0.35 0.018 60)" stopOpacity="0" />
-        </linearGradient>
-        {/* Gradient for inner shadow above bottom torn edge */}
-        <linearGradient id={`botShadow${seed}`} x1="0" x2="0" y1="1" y2="0">
-          <stop offset="0%"   stopColor="oklch(0.35 0.018 60)" stopOpacity="0.18" />
-          <stop offset="100%" stopColor="oklch(0.35 0.018 60)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-
-      {/* TOP paper block: from y=0 down to the top torn edge */}
-      <path
-        d={`M 0 0 L ${width} 0 L ${width} ${topEdgeY} ${topEdge.replace(`M ${ripLeft} ${topEdgeY}`, `L ${ripLeft} ${topEdgeY}`)} L 0 ${topEdgeY} Z`}
-        fill="oklch(0.940 0.018 72)"
-      />
-      {/* BOTTOM paper block: from bottom torn edge down to y=height */}
-      <path
-        d={`M 0 ${botEdgeY} ${botEdge.replace(`M ${ripLeft} ${botEdgeY}`, `L ${ripLeft} ${botEdgeY}`)} L ${width} ${height} L 0 ${height} Z`}
-        fill="oklch(0.940 0.018 72)"
-      />
-
-      {/* Inner shadow under top torn edge */}
-      <rect
-        x={ripLeft} y={topEdgeY}
-        width={ripRight - ripLeft} height={Math.min(8, halfOpen * 0.4)}
-        fill={`url(#topShadow${seed})`}
-      />
-      {/* Inner shadow above bottom torn edge */}
-      <rect
-        x={ripLeft} y={botEdgeY - Math.min(8, halfOpen * 0.4)}
-        width={ripRight - ripLeft} height={Math.min(8, halfOpen * 0.4)}
-        fill={`url(#botShadow${seed})`}
-      />
-
-      {/* Rolled curl on the left edge of the rip */}
-      {curlW > 2 && (
-        <rect
-          x={ripLeft}
-          y={topEdgeY}
-          width={curlW}
-          height={botEdgeY - topEdgeY}
-          fill={`url(#curlGrad${seed})`}
-          rx={curlW / 2}
-        />
-      )}
-
-      {/* Highlight on top torn edge */}
-      <path d={topEdge} fill="none" stroke="oklch(0.75 0.020 68)" strokeWidth="0.8" opacity={0.6} />
-      {/* Highlight on bottom torn edge */}
-      <path d={botEdge} fill="none" stroke="oklch(0.75 0.020 68)" strokeWidth="0.8" opacity={0.6} />
-    </svg>
-  );
-}
+const STRIP_H = 40; // px height per strip
 
 // ── Single strip ──────────────────────────────────────────────────────────────
 function TearStrip({
   text,
-  seed,
+  index,
   state,
-  isLast,
-  isRunning,
-  revealProgress, // 0..1 for the currently-active strip
+  isActive,
+  progress,
 }: {
   text: string;
-  seed: number;
+  index: number;
   state: "attached" | "tearing" | "torn";
-  isLast: boolean;
-  isRunning: boolean;
-  revealProgress: number;
+  isActive: boolean;
+  progress: number; // 0..1 for active strip fill
 }) {
   const [cls, setCls] = useState("");
   const [hidden, setHidden] = useState(false);
@@ -229,8 +75,8 @@ function TearStrip({
       setCls("strip-shake");
       const t1 = setTimeout(() => {
         setCls("strip-tearing");
-        setTimeout(() => setHidden(true), 720);
-      }, 290);
+        setTimeout(() => setHidden(true), 700);
+      }, 260);
       prevState.current = "tearing";
       return () => clearTimeout(t1);
     }
@@ -239,17 +85,18 @@ function TearStrip({
       setHidden(false);
       prevState.current = "attached";
     }
-  }, [state, seed]);
+  }, [state]);
 
   if (hidden || state === "torn") return null;
 
-  const isActive = isLast;
-  // When idle/paused: show fully open rip (revealed=1) so the effect is always visible.
-  // When running: animate from current stripProgress (0→1 as the strip interval elapses).
-  // Non-active strips (already torn or not yet active) stay covered (revealed=0).
-  const revealed = isLast
-    ? (isRunning ? revealProgress : 1)
-    : 0;
+  // Colors
+  const bgActive   = "oklch(0.972 0.014 70)";
+  const bgInactive = "oklch(0.982 0.008 74)";
+  const inkActive  = "oklch(0.28 0.022 55)";
+  const inkInactive = "oklch(0.58 0.014 65)";
+  const dotColor   = "oklch(0.52 0.10 32)";
+  const ruleColor  = "oklch(0.88 0.012 68)";
+  const marginColor = "oklch(0.65 0.12 15)";
 
   return (
     <div
@@ -257,105 +104,147 @@ function TearStrip({
       style={{
         position: "relative",
         height: STRIP_H,
-        transformOrigin: "center right",
-        overflow: "visible",
+        transformOrigin: "left center",
+        // Active strip is raised above the page with shadow
+        zIndex: isActive ? 4 : 1,
+        marginBottom: isActive ? 0 : 0,
       }}
     >
-      {/* Strip background — the "inside" of the torn paper */}
+      {/* ── Strip body ── */}
       <div style={{
         position: "absolute",
         inset: 0,
-        background: isActive
-          ? "oklch(0.968 0.016 70)"
-          : "oklch(0.978 0.010 74)",
-        borderBottom: "1px dashed oklch(0.88 0.014 68 / 0.5)",
-        transition: "background 0.3s",
+        background: isActive ? bgActive : bgInactive,
+        // Active strip: elevated with shadow to look peeled off page
+        boxShadow: isActive
+          ? "0 3px 12px oklch(0.30 0.018 55 / 0.22), 0 1px 3px oklch(0.30 0.018 55 / 0.12)"
+          : "none",
+        borderBottom: `1px solid oklch(0.88 0.012 68 / 0.6)`,
+        transition: "box-shadow 0.3s, background 0.3s",
+        overflow: "hidden",
       }}>
         {/* Red margin line */}
         <div style={{
           position: "absolute",
-          left: 36,
+          left: 34,
           top: 0,
           bottom: 0,
           width: 1,
-          background: "oklch(0.65 0.12 15)",
-          opacity: 0.25,
+          background: marginColor,
+          opacity: 0.22,
         }} />
-        {/* Ruled lines */}
+        {/* Ruled line */}
         <div style={{
           position: "absolute",
-          left: 36,
-          right: 10,
+          left: 34,
+          right: 0,
           top: "50%",
           height: 1,
-          background: "oklch(0.88 0.014 68)",
-          opacity: 0.4,
+          background: ruleColor,
+          opacity: 0.35,
           transform: "translateY(-50%)",
         }} />
+
+        {/* Progress fill for active strip */}
+        {isActive && progress > 0 && (
+          <div style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            width: `${progress * 100}%`,
+            background: "oklch(0.88 0.022 68 / 0.35)",
+            transition: "width 1s linear",
+            pointerEvents: "none",
+          }} />
+        )}
       </div>
 
-      {/* Content — shown through the torn opening */}
+      {/* ── Content ── */}
       <div style={{
         position: "absolute",
         inset: 0,
         display: "flex",
         alignItems: "center",
         paddingLeft: 44,
-        paddingRight: 12,
+        paddingRight: 28,
         zIndex: 2,
       }}>
         {/* Active dot */}
         {isActive && (
           <div style={{
             position: "absolute",
-            left: 14,
+            left: 13,
             top: "50%",
             transform: "translateY(-50%)",
             width: 7,
             height: 7,
             borderRadius: "50%",
-            background: "oklch(0.52 0.10 32)",
-            boxShadow: "0 0 5px oklch(0.52 0.10 32 / 0.5)",
+            background: dotColor,
+            boxShadow: `0 0 5px ${dotColor}80`,
           }} />
+        )}
+        {/* Row number for inactive */}
+        {!isActive && (
+          <span style={{
+            position: "absolute",
+            left: 14,
+            top: "50%",
+            transform: "translateY(-50%)",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 8,
+            color: inkInactive,
+            opacity: 0.5,
+          }}>
+            {index + 1}
+          </span>
         )}
         <span style={{
           fontFamily: "'Space Mono', monospace",
-          fontSize: 9.5,
-          letterSpacing: "0.08em",
-          color: isActive ? "oklch(0.30 0.020 55)" : "oklch(0.60 0.016 65)",
+          fontSize: isActive ? 10 : 9,
+          letterSpacing: "0.07em",
+          color: isActive ? inkActive : inkInactive,
           fontWeight: isActive ? 700 : 400,
-          transition: "color 0.3s",
+          transition: "color 0.3s, font-size 0.2s",
         }}>
           {text}
         </span>
       </div>
 
-      {/* Corner peel on top-right of active strip */}
+      {/* ── Corner peel on active strip ── */}
       {isActive && (
-        <div style={{
-          position: "absolute",
-          top: 0,
-          right: 0,
-          width: 0,
-          height: 0,
-          borderStyle: "solid",
-          borderWidth: "0 18px 18px 0",
-          borderColor: `transparent oklch(0.88 0.022 68) transparent transparent`,
-          zIndex: 10,
-          filter: "drop-shadow(-2px 2px 2px oklch(0.40 0.018 60 / 0.25))",
-          animation: "cornerPeelPulse 3s ease-in-out infinite",
-          transformOrigin: "top right",
-          cursor: "default",
-        }} />
+        <div
+          className="curl-pulse"
+          style={{
+            position: "absolute",
+            bottom: 0,
+            right: 0,
+            zIndex: 10,
+            pointerEvents: "none",
+            transformOrigin: "bottom right",
+          }}
+        >
+          {/* The peeled corner triangle */}
+          <svg width={28} height={28} viewBox="0 0 28 28" style={{ display: "block" }}>
+            <defs>
+              <linearGradient id="peelGrad" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="oklch(0.78 0.022 68)" stopOpacity="1" />
+                <stop offset="100%" stopColor="oklch(0.62 0.018 60)" stopOpacity="1" />
+              </linearGradient>
+              <linearGradient id="peelShadow" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            {/* Shadow cast by the peeled corner onto the page */}
+            <polygon points="4,28 28,4 28,28" fill="url(#peelShadow)" />
+            {/* The peeled corner itself (lighter, curled-up paper) */}
+            <polygon points="10,28 28,10 28,28" fill="url(#peelGrad)" />
+            {/* Subtle highlight on the fold edge */}
+            <line x1="10" y1="28" x2="28" y2="10" stroke="oklch(0.92 0.012 68)" strokeWidth="0.8" opacity="0.7" />
+          </svg>
+        </div>
       )}
-
-      {/* Torn paper overlay — covers the strip, revealing content through the rip */}
-      <TornPaperOverlay
-        width={260}
-        height={STRIP_H}
-        seed={seed}
-        revealed={revealed}
-      />
     </div>
   );
 }
@@ -369,20 +258,21 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   const totalSec = durationMinutes * 60;
   const [remaining, setRemaining] = useState(totalSec);
   const [running, setRunning] = useState(false);
-  const [phase, setPhase] = useState<"idle" | "running" | "paused" | "complete" | "recovering">("idle");
+  const [phase, setPhase] = useState<"idle" | "running" | "paused" | "complete">("idle");
   const [tornCount, setTornCount] = useState(0);
   const [stripStates, setStripStates] = useState<Array<"attached" | "tearing" | "torn">>(
     STRIPS.map(() => "attached")
   );
-  const [paperFlying, setPaperFlying] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const prevTornRef = useRef(0);
+  const [customItems, setCustomItems] = useState<string[]>([]);
+  const [newItem, setNewItem] = useState("");
+
+  const allStrips = [...STRIPS, ...customItems];
 
   const progress = (totalSec - remaining) / totalSec;
-  const stripsToTear = Math.floor(progress * STRIPS.length);
-
-  // Progress within the current strip (0..1)
-  const stripProgress = (progress * STRIPS.length) % 1;
+  const stripsToTear = Math.min(Math.floor(progress * allStrips.length), allStrips.length);
+  const stripProgress = (progress * allStrips.length) % 1;
 
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
@@ -400,246 +290,264 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       setTimeout(() => {
         setStripStates(prev => prev.map((s, i) => i <= idx ? "torn" : s));
         setTornCount(stripsToTear);
-      }, 1100);
+      }, 1000);
     }
   }, [stripsToTear, running]);
 
-  const handleComplete = useCallback(() => {
-    clearInterval(intervalRef.current!);
-    setRunning(false);
-    setPhase("complete");
-    let delay = 0;
-    for (let i = prevTornRef.current; i < STRIPS.length; i++) {
-      const idx = i;
-      setTimeout(() => {
-        setStripStates(prev => prev.map((s, j) => j === idx ? "tearing" : s));
-        setTimeout(() => {
-          setStripStates(prev => prev.map((s, j) => j <= idx ? "torn" : s));
-        }, 700);
-      }, delay);
-      delay += 140;
-    }
-    setTimeout(() => setPaperFlying(true), delay + 400);
-  }, []);
-
+  // Timer tick
   useEffect(() => {
-    if (running && remaining > 0) {
+    if (running) {
       intervalRef.current = setInterval(() => {
         setRemaining(r => {
-          if (r <= 1) { handleComplete(); return 0; }
+          if (r <= 1) {
+            clearInterval(intervalRef.current!);
+            setRunning(false);
+            setPhase("complete");
+            return 0;
+          }
           return r - 1;
         });
       }, 1000);
+    } else {
+      if (intervalRef.current) clearInterval(intervalRef.current);
     }
-    return () => clearInterval(intervalRef.current!);
-  }, [running, handleComplete]);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [running]);
 
   const handleStart = () => {
-    if (phase === "complete" || phase === "recovering") return;
-    setRunning(true);
-    setPhase("running");
-  };
-  const handlePause = () => {
-    clearInterval(intervalRef.current!);
-    setRunning(false);
-    setPhase("paused");
-  };
-  const handleQuit = () => {
-    clearInterval(intervalRef.current!);
-    setRunning(false);
-    setPhase("recovering");
-    setPaperFlying(false);
-    prevTornRef.current = 0;
-    setTimeout(() => {
+    if (phase === "complete") {
       setRemaining(totalSec);
-      setStripStates(STRIPS.map(() => "attached"));
       setTornCount(0);
-      setPhase("idle");
-    }, 500);
-  };
-  const handleNewSession = () => {
-    setRemaining(totalSec);
-    setStripStates(STRIPS.map(() => "attached"));
-    setTornCount(0);
-    setPaperFlying(false);
-    prevTornRef.current = 0;
-    setPhase("idle");
-    setRunning(false);
-  };
-
-  const statusMsg = {
-    idle: "start focusing — rip away the noise.",
-    running: "tearing through the stress…",
-    paused: "paused — the paper waits.",
-    complete: "all torn away. you did it. ✦",
-    recovering: "recovering…",
-  }[phase];
-
-  // Last remaining (bottom-most visible) strip index
-  const lastVisibleIdx = (() => {
-    for (let i = STRIPS.length - 1; i >= 0; i--) {
-      if (stripStates[i] === "attached") return i;
+      prevTornRef.current = 0;
+      setStripStates(allStrips.map(() => "attached"));
+      setPhase("running");
+      setRunning(true);
+    } else {
+      setPhase(running ? "paused" : "running");
+      setRunning(r => !r);
     }
-    return -1;
-  })();
+  };
+
+  const handleReset = () => {
+    setRunning(false);
+    setRemaining(totalSec);
+    setTornCount(0);
+    prevTornRef.current = 0;
+    setStripStates(allStrips.map(() => "attached"));
+    setPhase("idle");
+  };
+
+  const addItem = () => {
+    const t = newItem.trim();
+    if (!t) return;
+    setCustomItems(c => [...c, t]);
+    setStripStates(s => [...s, "attached"]);
+    setNewItem("");
+  };
+
+  // Active strip index = first non-torn strip
+  const activeIdx = stripStates.findIndex(s => s !== "torn");
+
+  // Colors / tokens
+  const C = {
+    bg:       "oklch(0.968 0.016 72)",
+    border:   "oklch(0.82 0.018 68)",
+    ink:      "oklch(0.28 0.022 55)",
+    muted:    "oklch(0.58 0.014 65)",
+    accent:   "oklch(0.52 0.10 32)",
+    shadow:   "oklch(0.28 0.018 55 / 0.15)",
+  };
 
   return (
     <div style={{
-      background: "oklch(0.972 0.010 78)",
-      border: "2px solid oklch(0.28 0.018 55)",
-      boxShadow: "4px 4px 0px oklch(0.28 0.018 55)",
-      borderRadius: 0,
-      padding: "20px 20px 18px",
       fontFamily: "'Space Mono', monospace",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 14,
-      position: "relative",
+      background: C.bg,
+      border: `2px solid ${C.border}`,
+      borderRadius: 4,
+      boxShadow: `4px 4px 0 ${C.shadow}`,
+      overflow: "hidden",
+      userSelect: "none",
     }}>
-
-      {/* Paper */}
-      <div
-        className={paperFlying ? "paper-fly-away" : ""}
-        style={{
-          width: 260,
-          background: "oklch(0.985 0.008 76)",
-          border: "1.5px solid oklch(0.72 0.018 65)",
-          boxShadow: "3px 3px 0px oklch(0.72 0.018 65 / 0.5)",
-          overflow: "hidden",
-          position: "relative",
-        }}
-      >
-        {/* Red margin line */}
-        <div style={{
-          position: "absolute", left: 36, top: 0, bottom: 0, width: 1,
-          background: "oklch(0.65 0.12 15)", opacity: 0.3, zIndex: 0,
-        }} />
-
-        {/* Header */}
-        <div style={{
-          padding: "14px 16px 10px",
-          borderBottom: "1.5px solid oklch(0.82 0.018 68)",
-          position: "relative",
-          zIndex: 1,
-          background: "oklch(0.985 0.008 76)",
-        }}>
-          {[0, 1, 2].map(i => (
-            <div key={i} style={{
-              position: "absolute", left: 16, right: 16,
-              top: 26 + i * 13, height: 1,
-              background: "oklch(0.88 0.014 68)", opacity: 0.45,
-            }} />
-          ))}
-          <p style={{
-            margin: 0, textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
-            fontSize: 10, fontStyle: "italic",
-            color: "oklch(0.45 0.020 60)", opacity: 0.75,
-            letterSpacing: "0.06em",
-            position: "relative", zIndex: 1,
-          }}>
-            things to let go of
-          </p>
-          <p style={{
-            margin: "6px 0 0", textAlign: "center",
-            fontFamily: "'Space Mono', monospace",
-            fontSize: 28, fontWeight: 700, letterSpacing: "0.06em",
-            color: remaining <= 60 ? "oklch(0.48 0.16 22)" : "oklch(0.30 0.020 55)",
-            transition: "color 0.5s",
-            position: "relative", zIndex: 1,
-          }}>
-            {mm}:{ss}
-          </p>
+      {/* ── Header ── */}
+      <div style={{
+        padding: "10px 14px 8px",
+        borderBottom: `1px solid ${C.border}`,
+        background: "oklch(0.960 0.018 70)",
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <span style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, textTransform: "uppercase" }}>
+            FOCUS TIMER
+          </span>
+          <button
+            onClick={handleReset}
+            style={{
+              fontSize: 8, letterSpacing: "0.08em", color: C.muted,
+              background: "none", border: "none", cursor: "pointer",
+              fontFamily: "'Space Mono', monospace", textTransform: "uppercase",
+              opacity: 0.7,
+            }}
+          >
+            reset
+          </button>
         </div>
 
-        {/* Strips */}
-        <div style={{ position: "relative", zIndex: 1 }}>
-          {STRIPS.map((text, i) => (
+        {/* Timer display */}
+        <div style={{ textAlign: "center", padding: "6px 0 2px" }}>
+          <div style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, marginBottom: 2 }}>
+            things to let go of
+          </div>
+          <div style={{
+            fontSize: 36,
+            fontWeight: 700,
+            color: C.accent,
+            letterSpacing: "0.04em",
+            lineHeight: 1,
+          }}>
+            {mm}:{ss}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Strip list ── */}
+      <div style={{
+        position: "relative",
+        background: "oklch(0.978 0.010 74)",
+        // Ruled notebook lines behind the strips
+        backgroundImage: `repeating-linear-gradient(
+          to bottom,
+          transparent,
+          transparent ${STRIP_H - 1}px,
+          oklch(0.88 0.012 68 / 0.3) ${STRIP_H - 1}px,
+          oklch(0.88 0.012 68 / 0.3) ${STRIP_H}px
+        )`,
+      }}>
+        {allStrips.map((text, i) => {
+          const s = stripStates[i] ?? "attached";
+          const isActive = i === activeIdx;
+          return (
             <TearStrip
               key={i}
               text={text}
-              seed={i + 1}
-              state={stripStates[i]}
-              isLast={i === lastVisibleIdx}
-              isRunning={running}
-              revealProgress={i === lastVisibleIdx && running ? stripProgress : 0}
+              index={i}
+              state={s}
+              isActive={isActive}
+              progress={isActive && running ? stripProgress : (isActive ? 0 : 0)}
             />
-          ))}
-        </div>
-
-        {/* Bottom edge */}
-        {lastVisibleIdx >= 0 && (
-          <div style={{
-            height: 5,
-            background: "oklch(0.88 0.014 68)",
-            borderTop: "1px solid oklch(0.78 0.018 65)",
-          }} />
-        )}
+          );
+        })}
       </div>
 
-      {/* Status */}
-      <p style={{
-        fontSize: 9, color: "oklch(0.58 0.016 65)",
-        fontFamily: "'Space Mono', monospace",
-        fontStyle: "italic",
-        textAlign: "center", margin: 0,
-        letterSpacing: "0.04em", minHeight: 16,
-      }}>
-        {statusMsg}
-      </p>
-
-      {/* Progress bar */}
+      {/* ── Add item ── */}
       <div style={{
-        width: 260, height: 6,
-        background: "oklch(0.90 0.012 70)",
-        border: "1px solid oklch(0.78 0.018 65)",
-        overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "8px 12px",
+        borderTop: `1px dashed ${C.border}`,
+        background: "oklch(0.965 0.014 70)",
       }}>
-        <div style={{
-          height: "100%",
-          background: "oklch(0.52 0.10 32)",
-          width: `${progress * 100}%`,
-          transition: "width 1s linear",
-        }} />
+        <input
+          value={newItem}
+          onChange={e => setNewItem(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && addItem()}
+          placeholder="add something to let go of…"
+          style={{
+            flex: 1,
+            background: "none",
+            border: "none",
+            outline: "none",
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            color: C.ink,
+            letterSpacing: "0.06em",
+          }}
+        />
+        <button
+          onClick={addItem}
+          style={{
+            width: 20, height: 20,
+            background: C.accent,
+            border: "none",
+            borderRadius: 2,
+            color: "oklch(0.97 0.010 70)",
+            fontSize: 14,
+            lineHeight: 1,
+            cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "sans-serif",
+          }}
+        >+</button>
       </div>
 
-      {/* Controls */}
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        {(running || phase === "paused") && (
-          <button onClick={handleQuit} className="m-btn-secondary" style={{
-            fontSize: 9, letterSpacing: "0.12em", padding: "5px 12px",
-          }}>
-            ↩ QUIT
-          </button>
-        )}
-        {phase !== "complete" && phase !== "recovering" && (
-          <button
-            onClick={running ? handlePause : handleStart}
-            className="m-btn-primary"
-            style={{ fontSize: 9, letterSpacing: "0.14em", padding: "6px 20px" }}
-          >
-            {running ? "⏸ PAUSE" : phase === "paused" ? "▶ RESUME" : "▶ START"}
-          </button>
-        )}
-        {phase === "complete" && (
-          <button onClick={handleNewSession} className="m-btn-primary" style={{
-            fontSize: 9, letterSpacing: "0.14em", padding: "6px 20px",
-          }}>
-            ✦ NEW SESSION
-          </button>
-        )}
+      {/* ── Footer / Start button ── */}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        padding: "8px 12px",
+        borderTop: `1px solid ${C.border}`,
+        background: "oklch(0.960 0.018 70)",
+      }}>
+        <button
+          onClick={handleStart}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 16px",
+            background: phase === "complete" ? "oklch(0.52 0.10 145)" : C.accent,
+            color: "oklch(0.97 0.010 70)",
+            border: "none",
+            borderRadius: 3,
+            fontFamily: "'Space Mono', monospace",
+            fontSize: 9,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            cursor: "pointer",
+            fontWeight: 700,
+            boxShadow: "2px 2px 0 oklch(0.30 0.018 55 / 0.20)",
+          }}
+        >
+          {phase === "complete" ? "▶ AGAIN" : running ? "⏸ PAUSE" : "▶ START"}
+        </button>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          {/* Progress dots */}
+          <div style={{ display: "flex", gap: 4 }}>
+            {allStrips.slice(0, Math.min(allStrips.length, 8)).map((_, i) => (
+              <div key={i} style={{
+                width: 6, height: 6,
+                borderRadius: "50%",
+                background: i < tornCount
+                  ? C.accent
+                  : i === activeIdx
+                    ? "oklch(0.72 0.040 68)"
+                    : "oklch(0.84 0.014 68)",
+                transition: "background 0.3s",
+              }} />
+            ))}
+          </div>
+          <span style={{ fontSize: 8, color: C.muted, letterSpacing: "0.06em" }}>
+            {tornCount}/{allStrips.length}
+          </span>
+        </div>
       </div>
 
-      {/* Strip count */}
-      <p style={{
-        fontSize: 9, color: "oklch(0.68 0.014 65)", margin: 0,
-        letterSpacing: "0.10em", fontFamily: "'Space Mono', monospace",
+      {/* ── Status bar ── */}
+      <div style={{
+        padding: "4px 12px",
+        borderTop: `1px solid ${C.border}`,
+        display: "flex",
+        justifyContent: "space-between",
+        background: "oklch(0.955 0.016 70)",
       }}>
-        {tornCount}/{STRIPS.length} STRIPS TORN
-      </p>
+        <span style={{ fontSize: 7.5, color: C.muted, letterSpacing: "0.08em" }}>
+          {durationMinutes} MIN · FOCUS
+        </span>
+        <span style={{ fontSize: 7.5, color: C.muted, letterSpacing: "0.08em" }}>
+          {tornCount}/{allStrips.length} STRIPS TORN
+        </span>
+      </div>
     </div>
   );
 }
-
-export default PaperTearTimer;
