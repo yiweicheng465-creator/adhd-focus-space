@@ -515,8 +515,11 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
 
   const SelectedIconDef = WIN_ICONS[selectedIcon] ?? WIN_ICONS[0];
 
+  const CAT_YELLOW = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat5_yellow_small_1870bc42.png";
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full" style={{ position: "relative" }}>
+      {/* Cat sticker: yellow small cat — top-right corner */}
+      <img src={CAT_YELLOW} alt="" aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 58, opacity: 0.42, pointerEvents: "none", zIndex: 5 }} />
       {/* Header stats */}
       <div className="grid grid-cols-3 gap-3">
         <div className="p-3" style={{ background: M.pinkBg, border: `1px solid ${M.pinkBdr}`, borderRadius: 6 }}>

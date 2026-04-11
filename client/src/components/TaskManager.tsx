@@ -181,8 +181,11 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
   const activeCount = contextFiltered.filter((t) => !t.done).length;
   const doneCount   = contextFiltered.filter((t) => t.done).length;
 
+  const CAT_PURPLE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat3_purple_sitting_e38dc6af.png";
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full" style={{ position: "relative" }}>
+      {/* Cat sticker: purple sitting cat — top-right corner */}
+      <img src={CAT_PURPLE} alt="" aria-hidden="true" style={{ position: "absolute", top: 0, right: 0, width: 64, opacity: 0.40, pointerEvents: "none", zIndex: 5 }} />
       {/* Context switcher — shows all known categories */}
       <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={allContexts} onDeleteContext={onDeleteCategory} />
 

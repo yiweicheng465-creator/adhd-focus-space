@@ -115,8 +115,11 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
   const counts: Record<string, number> = { all: goals.length };
   knownCategories.forEach((ctx) => { counts[ctx] = goals.filter((g) => g.context === ctx).length; });
 
+  const CAT_SALMON = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat4_salmon_sitting_2fe20a45.png";
   return (
-    <div className="flex flex-col gap-4 h-full">
+    <div className="flex flex-col gap-4 h-full" style={{ position: "relative" }}>
+      {/* Cat sticker: salmon sitting cat — bottom-right corner */}
+      <img src={CAT_SALMON} alt="" aria-hidden="true" style={{ position: "absolute", bottom: 0, right: 0, width: 70, opacity: 0.38, pointerEvents: "none", zIndex: 5 }} />
       <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={counts} contexts={knownCategories} onDeleteContext={onDeleteCategory} />
 
       {/* Overall progress */}

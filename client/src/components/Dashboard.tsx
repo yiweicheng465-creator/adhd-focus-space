@@ -27,6 +27,9 @@ import { toast } from "sonner";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-pink-windows_f21d8166.png";
+const CAT_BLUE    = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat1_blue_lying_fbb2632f.png";
+const CAT_PINK    = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat2_pink_standing_a0abaf8f.png";
+const CAT_OLIVE   = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat6_olive_playing_2d875a0d.png";
 
 const CHAT_HISTORY_KEY = "adhd-ai-chat-history";
 const MAX_CHAT_HISTORY = 10;
@@ -500,6 +503,8 @@ export function Dashboard({
 
         {/* ── Content ── */}
         <div className="relative z-10 flex items-stretch" style={{ minHeight: 108 }}>
+          {/* Cat sticker: blue lying cat — bottom-right of hero */}
+          <img src={CAT_BLUE} alt="" aria-hidden="true" style={{ position: "absolute", bottom: -18, right: 10, width: 72, opacity: 0.45, pointerEvents: "none", zIndex: 20, transform: "scaleX(-1)" }} />
           {/* Left: illustration */}
           <div className="hidden md:flex w-36 shrink-0 items-end justify-center pb-0 pt-3" style={{ borderRight: `1px solid ${BORDER}` }}>
             <img src={PERSON_IMG} alt="thinking person" className="object-cover w-full" style={{ maxHeight: 120, opacity: 0.92, borderRadius: 16 }} />
@@ -571,7 +576,11 @@ export function Dashboard({
             </div>
           </div>
           <div style={{ flex: 1, minHeight: 0, overflow: "hidden", padding: "14px 16px" }}>
+            <div style={{ position: "relative" }}>
+            {/* Cat sticker: pink standing cat — top-right of focus timer */}
+            <img src={CAT_PINK} alt="" aria-hidden="true" style={{ position: "absolute", top: -8, right: -8, width: 56, opacity: 0.40, pointerEvents: "none", zIndex: 5 }} />
             <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
+          </div>
           </div>
         </div>
 
@@ -726,7 +735,9 @@ export function Dashboard({
 
       {/* ── BOTTOM: Today's wins + focus strip ── */}
       {(todayWins.length > 0 || focusSessions > 0) && (
-        <div style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderRadius: 8 }}>
+        <div style={{ position: "relative", border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderRadius: 8 }}>
+          {/* Cat sticker: olive playing cat — right side of wins strip */}
+          <img src={CAT_OLIVE} alt="" aria-hidden="true" style={{ position: "absolute", right: 8, bottom: -22, width: 60, opacity: 0.42, pointerEvents: "none", zIndex: 5 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
             <Sparkles size={11} style={{ color: "oklch(0.55 0.12 75)" }} />
             <p className="editorial-label" style={{ fontSize: 9 }}>Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}</p>
