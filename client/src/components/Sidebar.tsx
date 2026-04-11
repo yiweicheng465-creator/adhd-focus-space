@@ -7,6 +7,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useTimer } from "@/contexts/TimerContext";
+import { FilmGrainToggle } from "@/components/FilmGrain";
 
 interface SidebarProps {
   activeSection: string;
@@ -366,6 +367,10 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
         <MonthlyLink />
         <PrototypesLink />
       </div>
+
+      {/* Film grain toggle */}
+      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
+      <FilmGrainToggle />
     </aside>
   );
 }

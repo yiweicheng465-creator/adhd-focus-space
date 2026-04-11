@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import AuraBackground from "./components/AuraBackground";
+import { FilmGrainOverlay } from "./components/FilmGrain";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
@@ -30,6 +31,9 @@ function App() {
         <TooltipProvider>
           {/* Global aura gradient background — behind everything */}
           <AuraBackground />
+
+          {/* Film grain overlay — fixed, covers entire app */}
+          <FilmGrainOverlay />
 
           {/* Main app */}
           <div style={{ position: "relative", zIndex: 1 }}>

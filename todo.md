@@ -109,3 +109,4 @@
 ## Active Bugs
 - [ ] Fix GAINS % in CYBER_PET.EXE focus timer — always shows 0% (bottom-right of focus area)
 - [x] Restyle category filter tabs (All/Work/Personal/Video) on main page with retro lo-fi button styling
+- [x] Add toggleable animated film grain overlay effect to the whole app (sidebar toggle button, persisted to localStorage)
