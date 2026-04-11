@@ -411,7 +411,7 @@ export default function Home() {
             style={{ borderRight: "1.5px solid #E8B8D0" }}
           >
 
-            {/* App logo mark — pixel brain with lightning */}
+            {/* App logo mark — pixel cat face */}
             <div
               className="flex items-center justify-center shrink-0"
               style={{
@@ -422,18 +422,32 @@ export default function Home() {
                 position: "relative",
               }}
             >
-              {/* Pixel-art brain + bolt SVG */}
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-                {/* Brain left lobe */}
-                <rect x="2" y="5" width="5" height="6" rx="2.5" fill="#FAF6F1" opacity="0.9"/>
-                {/* Brain right lobe */}
-                <rect x="11" y="5" width="5" height="6" rx="2.5" fill="#FAF6F1" opacity="0.9"/>
-                {/* Brain center connector */}
-                <rect x="6" y="7" width="6" height="2" fill="#FAF6F1" opacity="0.9"/>
-                {/* Brain stem */}
-                <rect x="8" y="11" width="2" height="3" fill="#FAF6F1" opacity="0.7"/>
-                {/* Lightning bolt */}
-                <polygon points="10,2 7,9 9,9 8,16 11,7 9,7" fill="#FFD080" opacity="0.95"/>
+              {/* Pixel-art cat face SVG */}
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                {/* Cat ears — left */}
+                <polygon points="2,7 2,1 6,5" fill="#FAF6F1" opacity="0.95"/>
+                <polygon points="3,6 3,2.5 5.5,5" fill="#F9A8D4" opacity="0.85"/>
+                {/* Cat ears — right */}
+                <polygon points="18,7 18,1 14,5" fill="#FAF6F1" opacity="0.95"/>
+                <polygon points="17,6 17,2.5 14.5,5" fill="#F9A8D4" opacity="0.85"/>
+                {/* Cat head */}
+                <rect x="3" y="5" width="14" height="11" rx="5" fill="#FAF6F1" opacity="0.95"/>
+                {/* Eyes */}
+                <ellipse cx="7" cy="10" rx="1.5" ry="1.8" fill="#4A1030"/>
+                <ellipse cx="13" cy="10" rx="1.5" ry="1.8" fill="#4A1030"/>
+                {/* Eye shine */}
+                <circle cx="7.6" cy="9.3" r="0.5" fill="white"/>
+                <circle cx="13.6" cy="9.3" r="0.5" fill="white"/>
+                {/* Nose */}
+                <ellipse cx="10" cy="12.5" rx="1" ry="0.7" fill="#F9A8D4"/>
+                {/* Mouth */}
+                <path d="M8.5 13.2 Q10 14.2 11.5 13.2" stroke="#C070A0" strokeWidth="0.7" fill="none" strokeLinecap="round"/>
+                {/* Whiskers left */}
+                <line x1="2" y1="12" x2="7" y2="12.5" stroke="#C8A0B8" strokeWidth="0.5" opacity="0.7"/>
+                <line x1="2" y1="13.5" x2="7" y2="13" stroke="#C8A0B8" strokeWidth="0.5" opacity="0.7"/>
+                {/* Whiskers right */}
+                <line x1="18" y1="12" x2="13" y2="12.5" stroke="#C8A0B8" strokeWidth="0.5" opacity="0.7"/>
+                <line x1="18" y1="13.5" x2="13" y2="13" stroke="#C8A0B8" strokeWidth="0.5" opacity="0.7"/>
               </svg>
             </div>
             <div style={{ width: 1, height: 20, background: "#E8B8D0", flexShrink: 0 }} />
@@ -630,16 +644,16 @@ export default function Home() {
                   <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                 </div>
 
-                {/* ── session_tips.txt window — below the timer, slightly tilted ── */}
+                {/* ── session_tips.txt window — bottom-right corner, tucked under timer ── */}
                 <div style={{
                   position: "relative",
-                  zIndex: 3,
+                  zIndex: 1,
                   width: 210,
-                  marginTop: 18,
+                  marginTop: -36,
                   marginLeft: "auto",
-                  marginRight: "auto",
-                  transform: "rotate(-1.5deg)",
-                  transformOrigin: "top center",
+                  marginRight: 24,
+                  transform: "rotate(2deg)",
+                  transformOrigin: "top right",
                   boxShadow: "4px 4px 0 rgba(180,60,120,0.15)",
                 }}>
                   <RetroPageWrapper title="session_tips.txt" sticker="leaf">
