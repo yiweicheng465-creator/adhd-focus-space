@@ -577,7 +577,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       onClick={() => setNoteEditing({ id: agent.id, value: agent.notes ?? "" })}
                       style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: agent.notes ? M.ink : M.muted, fontStyle: agent.notes ? "normal" : "italic", padding: "10px 12px", borderRadius: 8, border: `1px dashed ${M.border}`, background: "oklch(0.990 0.005 78 / 0.60)", cursor: "pointer", minHeight: 40 }}
                     >
-                      {agent.notes ? agent.notes : <span className="italic opacity-60">Click to add notes or output summary…</span>}
+                      {agent.notes ? agent.notes : <span className="italic opacity-60">Add a note, e.g. "Check if tests pass before merging" or paste output summary here…</span>}
                     </div>
                   )}
 
@@ -636,22 +636,13 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 />
               </div>
               <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Brief</label>
+                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>Suggest Prompt</label>
                 <Textarea
-                  value={popupBrief}
-                  onChange={(e) => setPopupBrief(e.target.value)}
-                  placeholder="What should this agent do?"
-                  rows={3}
+                  value={popupBrief + (popupFirstStep ? `\n\nFirst step: ${popupFirstStep}` : "")}
+                  onChange={(e) => { setPopupBrief(e.target.value); setPopupFirstStep(""); }}
+                  placeholder={`e.g. Review the PR at [link], check for:\n- Code quality issues\n- Missing tests\n- Security concerns\nThen summarize what needs fixing before merge.`}
+                  rows={5}
                   style={{ fontFamily: "'DM Sans', sans-serif", resize: "none" }}
-                />
-              </div>
-              <div>
-                <label className="text-xs font-semibold mb-1 block" style={{ color: "oklch(0.55 0.018 70)", fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.06em", textTransform: "uppercase" }}>First Step</label>
-                <Input
-                  value={popupFirstStep}
-                  onChange={(e) => setPopupFirstStep(e.target.value)}
-                  placeholder="First concrete action…"
-                  style={{ fontFamily: "'DM Sans', sans-serif" }}
                 />
               </div>
               {createBriefMutation.isSuccess && (
