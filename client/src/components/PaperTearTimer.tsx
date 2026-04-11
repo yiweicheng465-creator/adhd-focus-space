@@ -10,11 +10,19 @@
 import { useEffect, useRef, useState } from "react";
 
 // ── Inject keyframes once ─────────────────────────────────────────────────────
-const STYLE_ID = "paper-peel-keyframes-v4";
+const STYLE_ID = "paper-peel-keyframes-v5";
 if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
+    @keyframes starTwinkle {
+      0%,100% { opacity: 0.6; transform: scale(1) rotate(0deg); }
+      50%     { opacity: 1;   transform: scale(1.4) rotate(20deg); }
+    }
+    @keyframes starFloat {
+      0%,100% { transform: translateY(0px) rotate(0deg); }
+      50%     { transform: translateY(-3px) rotate(10deg); }
+    }
     @keyframes stripTearAway {
       0%   { transform: translateX(0) rotate(0deg) scaleY(1); opacity: 1; }
       15%  { transform: translateX(-8px) rotate(-1.5deg) scaleY(1.02); opacity: 1; }
@@ -94,14 +102,14 @@ function TearStrip({
 
   if (hidden || state === "torn") return null;
 
-  // Colors
-  const bgActive   = "oklch(0.972 0.014 70)";
-  const bgInactive = "oklch(0.982 0.008 74)";
-  const inkActive  = "oklch(0.28 0.022 55)";
-  const inkInactive = "oklch(0.58 0.014 65)";
-  const dotColor   = "oklch(0.52 0.10 32)";
-  const ruleColor  = "oklch(0.88 0.012 68)";
-  const marginColor = "oklch(0.65 0.12 15)";
+  // Colors — watercolor pastel theme
+  const bgActive   = "oklch(0.96 0.018 310 / 0.55)"; // soft lavender tint
+  const bgInactive = "oklch(0.97 0.010 300 / 0.35)"; // very light lavender
+  const inkActive  = "oklch(0.22 0.030 300)";
+  const inkInactive = "oklch(0.48 0.020 290)";
+  const dotColor   = "oklch(0.55 0.18 340)"; // pink dot
+  const ruleColor  = "oklch(0.80 0.018 300)";
+  const marginColor = "oklch(0.65 0.15 340)";
 
   return (
     <div
@@ -122,13 +130,13 @@ function TearStrip({
         background: isActive ? bgActive : bgInactive,
         // Active strip: elevated with shadow to look peeled off page
         boxShadow: isActive
-          ? "0 3px 12px oklch(0.30 0.018 55 / 0.22), 0 1px 3px oklch(0.30 0.018 55 / 0.12)"
+          ? "0 3px 12px oklch(0.55 0.12 310 / 0.25), 0 1px 3px oklch(0.55 0.12 310 / 0.15)"
           : "none",
-        borderBottom: `1px solid oklch(0.88 0.012 68 / 0.6)`,
+        borderBottom: `1px solid oklch(0.82 0.018 300 / 0.5)`,
         transition: "box-shadow 0.3s, background 0.3s",
         overflow: "hidden",
       }}>
-        {/* Red margin line */}
+        {/* Pink margin line */}
         <div style={{
           position: "absolute",
           left: 34,
@@ -136,7 +144,7 @@ function TearStrip({
           bottom: 0,
           width: 1,
           background: marginColor,
-          opacity: 0.22,
+          opacity: 0.30,
         }} />
         {/* Ruled line */}
         <div style={{
@@ -246,24 +254,21 @@ function TearStrip({
             transformOrigin: "top right",
           }}
         >
-          {/* The peeled corner triangle at top-right */}
+          {/* The peeled corner triangle at top-right — watercolor pastel */}
           <svg width={32} height={32} viewBox="0 0 32 32" style={{ display: "block" }}>
             <defs>
               <linearGradient id="peelGradTR" x1="0" y1="1" x2="1" y2="0">
-                <stop offset="0%" stopColor="oklch(0.76 0.022 68)" stopOpacity="1" />
-                <stop offset="100%" stopColor="oklch(0.60 0.018 58)" stopOpacity="1" />
+                <stop offset="0%" stopColor="#e8d5f0" stopOpacity="1" />
+                <stop offset="100%" stopColor="#c8b4e0" stopOpacity="1" />
               </linearGradient>
               <linearGradient id="peelShadowTR" x1="1" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="oklch(0.28 0.018 55)" stopOpacity="0.35" />
-                <stop offset="100%" stopColor="oklch(0.28 0.018 55)" stopOpacity="0" />
+                <stop offset="0%" stopColor="#9b7fc0" stopOpacity="0.30" />
+                <stop offset="100%" stopColor="#9b7fc0" stopOpacity="0" />
               </linearGradient>
             </defs>
-            {/* Shadow cast by the peeled corner */}
             <polygon points="0,0 32,0 32,28" fill="url(#peelShadowTR)" />
-            {/* The peeled corner itself */}
             <polygon points="10,0 32,0 32,22" fill="url(#peelGradTR)" />
-            {/* Fold edge highlight */}
-            <line x1="10" y1="0" x2="32" y2="22" stroke="oklch(0.93 0.012 68)" strokeWidth="0.9" opacity="0.8" />
+            <line x1="10" y1="0" x2="32" y2="22" stroke="#f0e8ff" strokeWidth="0.9" opacity="0.9" />
           </svg>
         </div>
       )}
@@ -370,14 +375,14 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
   // Active strip index = first non-torn strip
   const activeIdx = stripStates.findIndex(s => s !== "torn");
 
-  // Colors / tokens
+  // Colors / tokens — watercolor pastel
   const C = {
-    bg:       "oklch(0.968 0.016 72)",
-    border:   "oklch(0.82 0.018 68)",
-    ink:      "oklch(0.28 0.022 55)",
-    muted:    "oklch(0.58 0.014 65)",
-    accent:   "oklch(0.52 0.10 32)",
-    shadow:   "oklch(0.28 0.018 55 / 0.15)",
+    bg:       "oklch(0.96 0.020 300)",  // soft lavender
+    border:   "oklch(0.80 0.025 300)",  // lavender border
+    ink:      "oklch(0.22 0.030 300)",  // deep purple-ink
+    muted:    "oklch(0.52 0.022 290)",  // muted lavender
+    accent:   "oklch(0.50 0.18 340)",   // pink-rose accent
+    shadow:   "oklch(0.55 0.12 310 / 0.20)",
   };
 
   return (
@@ -386,7 +391,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       background: C.bg,
       border: `2px solid ${C.border}`,
       borderRadius: 4,
-      boxShadow: `4px 4px 0 ${C.shadow}`,
+      boxShadow: `4px 4px 0 ${C.shadow}, 0 0 0 1px oklch(0.88 0.018 300 / 0.4)`,
       overflow: "hidden",
       userSelect: "none",
     }}>
@@ -394,7 +399,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       <div style={{
         padding: "10px 14px 8px",
         borderBottom: `1px solid ${C.border}`,
-        background: "oklch(0.960 0.018 70)",
+        background: "linear-gradient(135deg, oklch(0.95 0.025 310) 0%, oklch(0.97 0.018 280) 50%, oklch(0.96 0.022 340) 100%)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, textTransform: "uppercase" }}>
@@ -430,19 +435,75 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         </div>
       </div>
 
-      {/* ── Strip list ── */}
+      {/* ── Strip list — watercolor background ── */}
       <div style={{
         position: "relative",
-        background: "oklch(0.978 0.010 74)",
-        // Ruled notebook lines behind the strips
-        backgroundImage: `repeating-linear-gradient(
-          to bottom,
-          transparent,
-          transparent ${STRIP_H - 1}px,
-          oklch(0.88 0.012 68 / 0.3) ${STRIP_H - 1}px,
-          oklch(0.88 0.012 68 / 0.3) ${STRIP_H}px
-        )`,
+        // Dreamy pastel watercolor gradient: lavender → pink → peach
+        background: `
+          radial-gradient(ellipse at 20% 30%, oklch(0.88 0.060 310 / 0.55) 0%, transparent 55%),
+          radial-gradient(ellipse at 75% 15%, oklch(0.90 0.045 340 / 0.45) 0%, transparent 50%),
+          radial-gradient(ellipse at 55% 70%, oklch(0.92 0.038 280 / 0.50) 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 80%, oklch(0.93 0.040 50 / 0.35) 0%, transparent 45%),
+          radial-gradient(ellipse at 10% 85%, oklch(0.90 0.035 200 / 0.30) 0%, transparent 45%),
+          oklch(0.97 0.012 300)
+        `,
+        // Ruled notebook lines
+        backgroundBlendMode: "normal",
       }}>
+        {/* Glitter star confetti — decorative scattered stars */}
+        {[
+          { x: "12%",  y: "8%",  size: 7,  color: "#e060a0", delay: "0s",    rot: 15 },
+          { x: "78%",  y: "5%",  size: 6,  color: "#40b0e0", delay: "0.8s",  rot: -20 },
+          { x: "88%",  y: "28%", size: 5,  color: "#f0a030", delay: "1.4s",  rot: 35 },
+          { x: "6%",   y: "45%", size: 8,  color: "#9060d0", delay: "0.4s",  rot: -10 },
+          { x: "60%",  y: "38%", size: 5,  color: "#e04080", delay: "2.0s",  rot: 50 },
+          { x: "35%",  y: "62%", size: 6,  color: "#30c080", delay: "1.1s",  rot: -30 },
+          { x: "82%",  y: "58%", size: 7,  color: "#d060c0", delay: "0.6s",  rot: 25 },
+          { x: "22%",  y: "80%", size: 5,  color: "#4080e0", delay: "1.7s",  rot: -45 },
+          { x: "65%",  y: "88%", size: 6,  color: "#e08030", delay: "0.3s",  rot: 10 },
+          { x: "48%",  y: "18%", size: 4,  color: "#c050a0", delay: "2.3s",  rot: 60 },
+          { x: "92%",  y: "72%", size: 5,  color: "#50b0d0", delay: "1.5s",  rot: -15 },
+          { x: "15%",  y: "25%", size: 4,  color: "#f0c040", delay: "0.9s",  rot: 40 },
+        ].map((star, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              left: star.x,
+              top: star.y,
+              width: star.size,
+              height: star.size,
+              pointerEvents: "none",
+              zIndex: 0,
+              animation: `starTwinkle ${2.5 + i * 0.3}s ease-in-out infinite`,
+              animationDelay: star.delay,
+            }}
+          >
+            <svg viewBox="0 0 10 10" width={star.size} height={star.size}>
+              <polygon
+                points="5,0 6.2,3.8 10,3.8 7,6.2 8.1,10 5,7.6 1.9,10 3,6.2 0,3.8 3.8,3.8"
+                fill={star.color}
+                opacity="0.85"
+                transform={`rotate(${star.rot}, 5, 5)`}
+              />
+            </svg>
+          </div>
+        ))}
+        {/* Repeating ruled lines overlay */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage: `repeating-linear-gradient(
+            to bottom,
+            transparent,
+            transparent ${STRIP_H - 1}px,
+            oklch(0.78 0.020 300 / 0.20) ${STRIP_H - 1}px,
+            oklch(0.78 0.020 300 / 0.20) ${STRIP_H}px
+          )`,
+          pointerEvents: "none",
+          zIndex: 0,
+        }} />
+        <div style={{ position: "relative", zIndex: 1 }}>
         {allStrips.map((text, i) => {
           const s = stripStates[i] ?? "attached";
           const isActive = i === activeIdx;
@@ -457,6 +518,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             />
           );
         })}
+        </div>
       </div>
 
       {/* ── Add item ── */}
@@ -466,7 +528,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         gap: 8,
         padding: "8px 12px",
         borderTop: `1px dashed ${C.border}`,
-        background: "oklch(0.965 0.014 70)",
+        background: "oklch(0.96 0.018 300 / 0.85)",
       }}>
         <input
           value={newItem}
@@ -508,7 +570,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         justifyContent: "space-between",
         padding: "8px 12px",
         borderTop: `1px solid ${C.border}`,
-        background: "oklch(0.960 0.018 70)",
+        background: "linear-gradient(135deg, oklch(0.95 0.025 310) 0%, oklch(0.97 0.018 280) 100%)",
       }}>
         <button
           onClick={handleStart}
@@ -517,7 +579,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             alignItems: "center",
             gap: 6,
             padding: "6px 16px",
-            background: phase === "complete" ? "oklch(0.52 0.10 145)" : C.accent,
+            background: phase === "complete" ? "oklch(0.52 0.14 145)" : C.accent,
             color: "oklch(0.97 0.010 70)",
             border: "none",
             borderRadius: 3,
@@ -561,7 +623,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         borderTop: `1px solid ${C.border}`,
         display: "flex",
         justifyContent: "space-between",
-        background: "oklch(0.955 0.016 70)",
+        background: "oklch(0.94 0.022 300 / 0.90)",
       }}>
         <span style={{ fontSize: 7.5, color: C.muted, letterSpacing: "0.08em" }}>
           {durationMinutes} MIN · FOCUS
