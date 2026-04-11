@@ -7,6 +7,38 @@ import { useState } from "react";
 import { Loader2, Sparkles, Brain, Clock, CalendarDays, Target, Bot, Wand2, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
+/* ── Retro lo-fi button style ── */
+const retroBtn: React.CSSProperties = {
+  background: "oklch(0.985 0.012 355)",
+  color: "oklch(0.22 0.040 320)",
+  border: "1.5px solid oklch(0.22 0.040 320)",
+  boxShadow: "2px 2px 0px oklch(0.22 0.040 320)",
+  fontFamily: "'Space Mono', monospace",
+  fontSize: "0.70rem",
+  letterSpacing: "0.04em",
+  padding: "5px 12px",
+  cursor: "pointer",
+  display: "inline-flex",
+  alignItems: "center",
+  gap: "5px",
+  transition: "box-shadow 0.1s, transform 0.1s",
+  userSelect: "none" as const,
+};
+
+const retroBtnActive: React.CSSProperties = {
+  ...retroBtn,
+  background: "oklch(0.58 0.18 340)",
+  color: "white",
+  border: "1.5px solid oklch(0.22 0.040 320)",
+  boxShadow: "2px 2px 0px oklch(0.22 0.040 320)",
+};
+
+const retroBtnDisabled: React.CSSProperties = {
+  ...retroBtn,
+  opacity: 0.5,
+  cursor: "not-allowed",
+};
+
 const M = {
   ink:     "oklch(0.22 0.040 320)",
   muted:   "oklch(0.52 0.040 330)",
@@ -110,11 +142,13 @@ function BrainDumpDemo() {
           if (entries.length) mutation.mutate({ entries });
         }}
         disabled={mutation.isPending}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-        Categorise with AI
+        ✦ Categorise with AI
       </button>
       {result && (
         <div className="flex flex-col gap-2 mt-1">
@@ -176,11 +210,13 @@ function DailySummaryDemo() {
       <button
         onClick={runDemo}
         disabled={mutation.isPending}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-        Generate sample summary
+        ✦ Generate sample summary
       </button>
       {result && (
         <p className="text-sm leading-relaxed italic" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
@@ -208,13 +244,7 @@ function FocusReflectionDemo() {
           <button
             key={p}
             onClick={() => { setPhase(p); setResult(null); }}
-            className="px-3 py-1.5 text-xs font-medium transition-all"
-            style={{
-              background: phase === p ? M.accent : "transparent",
-              color: phase === p ? "white" : M.muted,
-              border: `1px solid ${phase === p ? M.accent : M.border}`,
-              fontFamily: "'DM Sans', sans-serif",
-            }}
+            style={phase === p ? retroBtnActive : retroBtn}
           >
             {p === "before" ? "Before session" : "After session"}
           </button>
@@ -241,11 +271,13 @@ function FocusReflectionDemo() {
       <button
         onClick={() => mutation.mutate({ phase, sessionNumber: 1, intention, outcome, blocksCompleted: 0 })}
         disabled={mutation.isPending}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-        Get AI reflection
+        ✦ Get AI reflection
       </button>
       {result && (
         <p className="text-sm leading-relaxed" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
@@ -288,11 +320,13 @@ function MonthlyReviewDemo() {
       <button
         onClick={runDemo}
         disabled={mutation.isPending}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-        Generate sample review
+        ✦ Generate sample review
       </button>
       {result && (
         <p className="text-sm leading-relaxed" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
@@ -335,11 +369,13 @@ function MITDemo() {
       <button
         onClick={runDemo}
         disabled={mutation.isPending}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-        Pick my MIT
+        ✦ Pick my MIT
       </button>
       {result && (
         <div className="flex flex-col gap-2">
@@ -449,8 +485,10 @@ function AICommandDemo() {
         <button
           onClick={send}
           disabled={!input.trim() || mutation.isPending}
-          className="px-4 py-2 text-xs font-medium transition-all hover:opacity-90"
-          style={{ background: input.trim() ? M.accent : M.accentBg, color: input.trim() ? "white" : M.muted, border: `1px solid ${M.accentBdr}`, fontFamily: "'DM Sans', sans-serif" }}
+          style={!input.trim() || mutation.isPending ? retroBtnDisabled : retroBtn}
+          onMouseDown={e => { if (input.trim() && !mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+          onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
           Send
         </button>
@@ -487,11 +525,13 @@ function AgentBriefDemo() {
       <button
         onClick={() => mutation.mutate({ taskText, context: "work" })}
         disabled={mutation.isPending || !taskText.trim()}
-        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
-        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+        style={mutation.isPending || !taskText.trim() ? retroBtnDisabled : retroBtn}
+        onMouseDown={e => { if (!mutation.isPending && taskText.trim()) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
-        Generate agent brief
+        ✦ Generate agent brief
       </button>
       {result && (
         <div className="flex flex-col gap-2">
