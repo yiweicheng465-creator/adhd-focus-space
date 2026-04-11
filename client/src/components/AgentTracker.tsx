@@ -304,33 +304,61 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
 
       {/* Coverage alert */}
       {uncoveredTasks.length > 0 && (
-        <div style={{ padding: "14px 18px", borderRadius: 10, border: `1px solid ${M.roseBdr}`, background: M.roseBg }}>
-          <div className="flex items-center gap-2 mb-3">
-            <Flame className="w-4 h-4" style={{ color: M.rose }} />
-            <p className="text-sm font-medium" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+        <div style={{ padding: "12px 16px", borderRadius: 4, border: `2px solid ${M.roseBdr}`, background: M.roseBg, boxShadow: `3px 3px 0px ${M.roseBdr}` }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
+            <Flame style={{ width: 12, height: 12, color: M.rose, flexShrink: 0 }} />
+            <p style={{ color: M.ink, fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", fontWeight: 700, letterSpacing: "0.10em", textTransform: "uppercase" }}>
               {uncoveredTasks.length} task{uncoveredTasks.length > 1 ? "s" : ""} not yet delegated
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {uncoveredTasks.map((t) => (
-              <button
-                key={t.id}
-                onClick={() => openCreatePopup(t)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-opacity hover:opacity-80"
-                style={{
-                  background: M.card,
-                  border: `1px solid ${M.roseBdr}`,
-                  borderRadius: 20,
-                  color: M.ink,
-                  fontFamily: "'DM Sans', sans-serif",
-                  cursor: "pointer",
-                  maxWidth: 220,
-                }}
-              >
-                <span className="flex flex-wrap items-center gap-0.5" style={{ maxWidth: 180 }}>{renderTaskText(t.text)}</span>
-                <Plus className="w-3 h-3 shrink-0" style={{ color: M.coral }} />
-              </button>
-            ))}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: 5 }}>
+            {uncoveredTasks.map((t) => {
+              const clean = t.text
+                .replace(/(?:^|\s)#[a-zA-Z0-9_-]+/g, "")
+                .replace(/https?:\/\/\S+/g, "[link]")
+                .replace(/\s{2,}/g, " ")
+                .trim() || t.text;
+              const label = clean.length > 26 ? clean.slice(0, 26) + "…" : clean;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => openCreatePopup(t)}
+                  title={t.text}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    gap: 5,
+                    padding: "4px 9px",
+                    height: 30,
+                    background: M.card,
+                    border: `2px solid ${M.roseBdr}`,
+                    borderRadius: 3,
+                    boxShadow: `2px 2px 0px ${M.roseBdr}`,
+                    color: M.ink,
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "0.62rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.02em",
+                    cursor: "pointer",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    transition: "box-shadow 0.08s, transform 0.08s",
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = "none";
+                    (e.currentTarget as HTMLElement).style.transform = "translate(2px,2px)";
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLElement).style.boxShadow = `2px 2px 0px ${M.roseBdr}`;
+                    (e.currentTarget as HTMLElement).style.transform = "";
+                  }}
+                >
+                  <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "left" }}>{label}</span>
+                  <Plus style={{ width: 9, height: 9, flexShrink: 0, color: M.coral }} />
+                </button>
+              );
+            })}
           </div>
         </div>
       )}
