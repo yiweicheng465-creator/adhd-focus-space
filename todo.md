@@ -40,3 +40,6 @@
 - [x] Add MIT "What should I focus on?" button in task panel with glowing border on top task
 - [x] Persist AI chat history (last 10 messages) to localStorage
 - [x] Refine dashboard UI: softer chat panel colors, muted action buttons, warmer overall palette
+- [x] Improve MIT card glow to gradient glow effect (not just box-shadow)
+- [x] Add "Start 25 min focus on this" button after MIT is highlighted
+- [x] Wire mood score from daily check-in into AI greeting (personalised opening message)

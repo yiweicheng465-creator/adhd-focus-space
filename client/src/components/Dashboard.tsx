@@ -19,7 +19,8 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check, Star } from "lucide-react";
+import { useTimer } from "@/contexts/TimerContext";
+import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check, Star, PlayCircle } from "lucide-react";
 import { PixelTrophy } from "@/components/PixelIcons";
 import { Streamdown } from "streamdown";
 import { toast } from "sonner";
@@ -29,6 +30,15 @@ const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WN
 
 const CHAT_HISTORY_KEY = "adhd-ai-chat-history";
 const MAX_CHAT_HISTORY = 10;
+
+const MOOD_LABELS = ["Drained", "Low", "Okay", "Good", "Glowing"];
+const MOOD_GREETINGS: Record<number, string> = {
+  1: "Looks like a low-energy day 🌧 — want me to suggest lighter tasks first, or help you find one small win to start with?",
+  2: "Energy's a bit low today — shall I help you pick just one thing to focus on so it doesn't feel overwhelming?",
+  3: "Feeling okay today! Want me to help you prioritise your tasks, or is there something specific on your mind?",
+  4: "You're in a good headspace today 🌿 — great time to tackle something meaningful. Want me to find your MIT?",
+  5: "You're glowing today ✨ — let's make the most of it! Want me to line up your most important tasks?",
+};
 
 interface DashboardProps {
   tasks: Task[];
@@ -114,6 +124,7 @@ function AICommandPanel({
   });
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
+  const greetedRef = useRef(false);
 
   // Persist last MAX_CHAT_HISTORY messages
   useEffect(() => {
@@ -127,6 +138,21 @@ function AICommandPanel({
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Mood-aware greeting on first open (empty history + mood set)
+  useEffect(() => {
+    if (greetedRef.current) return;
+    if (messages.length > 0) { greetedRef.current = true; return; }
+    if (mood === null || mood === undefined) return;
+    greetedRef.current = true;
+    const greeting = MOOD_GREETINGS[mood];
+    if (greeting) {
+      setTimeout(() => {
+        setMessages([{ role: "assistant", content: greeting }]);
+      }, 600);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mood]);
 
   const commandMutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
@@ -552,25 +578,32 @@ export function Dashboard({
                 const isMIT = mitTaskId === t.id;
                 const cleanText = t.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || t.text;
                 return (
-                  <div
-                    key={t.id}
-                    style={{
-                      display: "flex", alignItems: "center", gap: 8,
-                      padding: "7px 10px",
-                      background: isCompleting
-                        ? "oklch(0.60 0.08 145 / 0.08)"
-                        : isMIT
-                          ? "oklch(0.52 0.14 35 / 0.07)"
-                          : pd.bg,
-                      border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : isMIT ? "oklch(0.52 0.14 35 / 0.40)" : pd.color + "30"}`,
-                      borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
-                      borderRadius: 6,
-                      opacity: isCompleting ? 0.6 : 1,
-                      transition: "all 0.3s ease",
-                      // Glowing border for MIT
-                      boxShadow: isMIT ? `0 0 0 2px oklch(0.52 0.14 35 / 0.18), 0 2px 8px oklch(0.52 0.14 35 / 0.12)` : "none",
-                    }}
-                  >
+                  <div key={t.id} style={{ position: "relative" }}>
+                    {/* Gradient glow layer for MIT */}
+                    {isMIT && (
+                      <div style={{
+                        position: "absolute", inset: -3, borderRadius: 10, zIndex: 0, pointerEvents: "none",
+                        background: "linear-gradient(135deg, oklch(0.52 0.14 35 / 0.35) 0%, oklch(0.65 0.12 55 / 0.20) 50%, oklch(0.52 0.14 35 / 0.30) 100%)",
+                        filter: "blur(6px)",
+                      }} />
+                    )}
+                    <div
+                      style={{
+                        position: "relative", zIndex: 1,
+                        display: "flex", alignItems: "center", gap: 8,
+                        padding: "7px 10px",
+                        background: isCompleting
+                          ? "oklch(0.60 0.08 145 / 0.08)"
+                          : isMIT
+                            ? "oklch(0.985 0.010 75)"
+                            : pd.bg,
+                        border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : isMIT ? "oklch(0.52 0.14 35 / 0.55)" : pd.color + "30"}`,
+                        borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
+                        borderRadius: 6,
+                        opacity: isCompleting ? 0.6 : 1,
+                        transition: "all 0.3s ease",
+                      }}
+                    >
                     {/* Checkbox */}
                     <button
                       onClick={() => handleCheck(t.id)}
@@ -600,6 +633,32 @@ export function Dashboard({
                     <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", borderRadius: 4 }}>
                       {t.context}
                     </span>
+                    </div>
+                    {/* Start 25min focus button — only on MIT card */}
+                    {isMIT && (
+                      <button
+                        onClick={() => {
+                          onNavigate("focus");
+                          setTimeout(() => {
+                            try {
+                              window.dispatchEvent(new CustomEvent("adhd-start-mit-focus", { detail: { taskText: cleanText } }));
+                            } catch { /* ignore */ }
+                          }, 300);
+                          toast.success(`Starting 25 min focus on: ${cleanText}`);
+                        }}
+                        style={{
+                          display: "flex", alignItems: "center", gap: 5, marginTop: 4, marginLeft: 2,
+                          fontSize: 10, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.04em",
+                          color: TC, background: "oklch(0.52 0.14 35 / 0.08)",
+                          border: `1px solid oklch(0.52 0.14 35 / 0.30)`,
+                          borderRadius: 20, padding: "3px 10px", cursor: "pointer",
+                          transition: "all 0.2s",
+                        }}
+                      >
+                        <PlayCircle size={11} />
+                        Start 25 min focus on this
+                      </button>
+                    )}
                   </div>
                 );
               })
