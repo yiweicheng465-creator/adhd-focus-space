@@ -1,50 +1,39 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Focus Timer (Paper Tear Edition)
-   Design: A notebook page. As you focus, bottom strips tear off
-   one by one. Quit = sad wrap-up with score penalty + quit count.
-   Complete = celebration wrap-up with confetti.
-
-   Palette: warm cream bg, ink strokes, terracotta accent
-   Typography: Playfair Display (display), DM Sans (body), JetBrains Mono (digits)
+   ADHD FOCUS SPACE — Focus Timer (Cyber Pet Edition)
+   Design: Tamagotchi-style pixel pet + retro OS window chrome
+   - Purple/dark window chrome
+   - Pixel art pet: alive/paused/dead/idle faces
+   - Floating heart bubbles while running
+   - Care log feed during session
+   - Death counter (quit = pet dies)
+   - Mode tabs: FOCUS / SHORT / LONG
+   - Strip list "things to let go of" with strikethrough
+   - Sound/settings controls
+   - Pomodoro session dots
    ============================================================ */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
 import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
 import { useTimerSound } from "@/hooks/useTimerSound";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 
-// ── Inject keyframes once ─────────────────────────────────────────────────────
-const STYLE_ID = "focus-timer-tear-keyframes";
+// ── Palette ──────────────────────────────────────────────────────────────────
+const BG = "#E8DCFA";
+const PANEL = "#D0C0F0";
+const BORDER = "#7A6A9A";
+const DARK = "#3D2E5E";
+const ACCENT = "#9B7FD4";
+const BTN_BG = "#C8B4E8";
+const SCREEN_BG = "#B8A8D8";
+
+// ── Inject keyframes once ────────────────────────────────────────────────────
+const STYLE_ID = "focus-timer-cyber-keyframes";
 if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
-    @keyframes ft-tearLeft {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
-      25%  { transform: translateY(6px) rotate(-1.5deg); opacity: 0.95; }
-      100% { transform: translateY(110px) rotate(-16deg) translateX(-50px); opacity: 0; max-height: 0; }
-    }
-    @keyframes ft-tearRight {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; max-height: 44px; }
-      25%  { transform: translateY(6px) rotate(2deg); opacity: 0.95; }
-      100% { transform: translateY(120px) rotate(20deg) translateX(55px); opacity: 0; max-height: 0; }
-    }
-    @keyframes ft-shake {
-      0%,100% { transform: translateX(0); }
-      20%     { transform: translateX(-3px) rotate(-1deg); }
-      40%     { transform: translateX(4px) rotate(1.5deg); }
-      60%     { transform: translateX(-2px) rotate(-0.5deg); }
-      80%     { transform: translateX(2px); }
-    }
-    @keyframes ft-flyAway {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-160%) rotate(-10deg); opacity: 0; }
-    }
-    @keyframes ft-sadDrop {
-      0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(80px) rotate(5deg); opacity: 0; }
-    }
     @keyframes ft-fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to   { opacity: 1; transform: translateY(0); }
@@ -53,21 +42,161 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       from { opacity: 0; transform: scale(0.7); }
       to   { opacity: 1; transform: scale(1); }
     }
-    .ft-tear-left  { animation: ft-tearLeft  0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
-    .ft-tear-right { animation: ft-tearRight 0.65s cubic-bezier(0.4,0,1,1) forwards; overflow: hidden; }
-    .ft-shake      { animation: ft-shake 0.3s ease-in-out; }
-    .ft-fly-away   { animation: ft-flyAway 0.9s cubic-bezier(0.4,0,0.2,1) forwards; }
-    .ft-sad-drop   { animation: ft-sadDrop 0.7s cubic-bezier(0.4,0,0.2,1) forwards; }
+    @keyframes ft-petBounce {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-6px); }
+    }
     .ft-fade-in    { animation: ft-fadeIn 0.5s ease forwards; }
     .ft-score-pop  { animation: ft-scoreCount 0.4s cubic-bezier(0.34,1.56,0.64,1) forwards; }
+    .ft-pet-bounce { animation: ft-petBounce 0.3s ease; }
     .strip-row:hover .strip-actions { opacity: 1 !important; }
   `;
   document.head.appendChild(s);
 }
 
-// ── Types re-exported from context (kept for local use) ──────────────────────
+// ── Pixel art pet SVGs ────────────────────────────────────────────────────────
 
-// ── Strip editor (shown in idle state) ───────────────────────────────────────
+function PetAlive({ blink }: { blink: boolean }) {
+  return (
+    <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
+      <rect x="8" y="10" width="16" height="14" fill="#C8B4E8" />
+      <rect x="6" y="12" width="2" height="10" fill="#C8B4E8" />
+      <rect x="24" y="12" width="2" height="10" fill="#C8B4E8" />
+      <rect x="10" y="8" width="12" height="2" fill="#C8B4E8" />
+      <rect x="8" y="24" width="4" height="2" fill="#C8B4E8" />
+      <rect x="20" y="24" width="4" height="2" fill="#C8B4E8" />
+      {blink ? (
+        <>
+          <rect x="11" y="14" width="4" height="1" fill="#3D2E5E" />
+          <rect x="17" y="14" width="4" height="1" fill="#3D2E5E" />
+        </>
+      ) : (
+        <>
+          <rect x="11" y="13" width="4" height="4" fill="#3D2E5E" />
+          <rect x="17" y="13" width="4" height="4" fill="#3D2E5E" />
+          <rect x="12" y="14" width="1" height="1" fill="#fff" />
+          <rect x="18" y="14" width="1" height="1" fill="#fff" />
+        </>
+      )}
+      <rect x="10" y="18" width="3" height="2" fill="#E8A0B8" />
+      <rect x="19" y="18" width="3" height="2" fill="#E8A0B8" />
+      <rect x="13" y="20" width="6" height="1" fill="#3D2E5E" />
+      <rect x="12" y="19" width="1" height="1" fill="#3D2E5E" />
+      <rect x="19" y="19" width="1" height="1" fill="#3D2E5E" />
+      <rect x="4" y="15" width="2" height="2" fill="#C8B4E8" />
+    </svg>
+  );
+}
+
+function PetDead() {
+  return (
+    <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
+      <rect x="8" y="10" width="16" height="14" fill="#B0A8B8" />
+      <rect x="6" y="12" width="2" height="10" fill="#B0A8B8" />
+      <rect x="24" y="12" width="2" height="10" fill="#B0A8B8" />
+      <rect x="10" y="8" width="12" height="2" fill="#B0A8B8" />
+      <rect x="8" y="24" width="4" height="2" fill="#B0A8B8" />
+      <rect x="20" y="24" width="4" height="2" fill="#B0A8B8" />
+      <rect x="11" y="13" width="1" height="1" fill="#5A4A6A" />
+      <rect x="12" y="14" width="1" height="1" fill="#5A4A6A" />
+      <rect x="13" y="15" width="1" height="1" fill="#5A4A6A" />
+      <rect x="14" y="14" width="1" height="1" fill="#5A4A6A" />
+      <rect x="13" y="13" width="1" height="1" fill="#5A4A6A" />
+      <rect x="11" y="15" width="1" height="1" fill="#5A4A6A" />
+      <rect x="17" y="13" width="1" height="1" fill="#5A4A6A" />
+      <rect x="18" y="14" width="1" height="1" fill="#5A4A6A" />
+      <rect x="19" y="15" width="1" height="1" fill="#5A4A6A" />
+      <rect x="20" y="14" width="1" height="1" fill="#5A4A6A" />
+      <rect x="19" y="13" width="1" height="1" fill="#5A4A6A" />
+      <rect x="17" y="15" width="1" height="1" fill="#5A4A6A" />
+      <rect x="13" y="20" width="6" height="1" fill="#5A4A6A" />
+      <rect x="3" y="8" width="2" height="2" fill="#D4C0E8" />
+      <rect x="27" y="10" width="2" height="2" fill="#D4C0E8" />
+      <rect x="5" y="22" width="2" height="2" fill="#D4C0E8" />
+    </svg>
+  );
+}
+
+function PetPaused() {
+  return (
+    <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
+      <rect x="8" y="10" width="16" height="14" fill="#B8A8D8" />
+      <rect x="6" y="12" width="2" height="10" fill="#B8A8D8" />
+      <rect x="24" y="12" width="2" height="10" fill="#B8A8D8" />
+      <rect x="10" y="8" width="12" height="2" fill="#B8A8D8" />
+      <rect x="8" y="24" width="4" height="2" fill="#B8A8D8" />
+      <rect x="20" y="24" width="4" height="2" fill="#B8A8D8" />
+      <rect x="11" y="12" width="1" height="1" fill="#3D2E5E" />
+      <rect x="14" y="11" width="1" height="1" fill="#3D2E5E" />
+      <rect x="17" y="11" width="1" height="1" fill="#3D2E5E" />
+      <rect x="20" y="12" width="1" height="1" fill="#3D2E5E" />
+      <rect x="11" y="13" width="4" height="4" fill="#3D2E5E" />
+      <rect x="17" y="13" width="4" height="4" fill="#3D2E5E" />
+      <rect x="12" y="14" width="1" height="1" fill="#fff" />
+      <rect x="18" y="14" width="1" height="1" fill="#fff" />
+      <rect x="13" y="21" width="2" height="1" fill="#3D2E5E" />
+      <rect x="15" y="20" width="2" height="1" fill="#3D2E5E" />
+      <rect x="17" y="21" width="2" height="1" fill="#3D2E5E" />
+      <rect x="23" y="10" width="1" height="2" fill="#88B4D8" />
+      <rect x="22" y="11" width="1" height="1" fill="#88B4D8" />
+      <rect x="4" y="15" width="2" height="2" fill="#B8A8D8" />
+    </svg>
+  );
+}
+
+function PetIdle() {
+  return (
+    <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
+      <rect x="8" y="10" width="16" height="14" fill="#C8B4E8" />
+      <rect x="6" y="12" width="2" height="10" fill="#C8B4E8" />
+      <rect x="24" y="12" width="2" height="10" fill="#C8B4E8" />
+      <rect x="10" y="8" width="12" height="2" fill="#C8B4E8" />
+      <rect x="8" y="24" width="4" height="2" fill="#C8B4E8" />
+      <rect x="20" y="24" width="4" height="2" fill="#C8B4E8" />
+      <rect x="11" y="15" width="4" height="2" fill="#3D2E5E" />
+      <rect x="17" y="15" width="4" height="2" fill="#3D2E5E" />
+      <rect x="22" y="8" width="2" height="1" fill="#9A88C0" />
+      <rect x="23" y="9" width="1" height="1" fill="#9A88C0" />
+      <rect x="22" y="10" width="2" height="1" fill="#9A88C0" />
+      <rect x="13" y="20" width="6" height="1" fill="#3D2E5E" />
+      <rect x="4" y="15" width="2" height="2" fill="#C8B4E8" />
+    </svg>
+  );
+}
+
+// ── Heart bubble type ─────────────────────────────────────────────────────────
+interface HeartBubble {
+  id: number;
+  x: number;
+  y: number;
+  size: number;
+  opacity: number;
+  vy: number;
+  vx: number;
+}
+
+// ── Care actions ──────────────────────────────────────────────────────────────
+const CARE_ACTIONS = [
+  { emoji: "🍗", text: "feeding chicken" },
+  { emoji: "🛁", text: "bath time" },
+  { emoji: "🎮", text: "playing together" },
+  { emoji: "💤", text: "nap time" },
+  { emoji: "🍵", text: "tea break" },
+  { emoji: "🎵", text: "listening to music" },
+  { emoji: "🌸", text: "flower picking" },
+  { emoji: "🍙", text: "snack time" },
+  { emoji: "🪀", text: "yo-yo tricks" },
+  { emoji: "🌙", text: "stargazing" },
+];
+
+interface CareEntry {
+  id: number;
+  emoji: string;
+  text: string;
+  ts: number;
+}
+
+// ── Strip editor (idle state) ─────────────────────────────────────────────────
 function StripEditor({ strips, onChange }: {
   strips: string[];
   onChange: (strips: string[]) => void;
@@ -108,40 +237,37 @@ function StripEditor({ strips, onChange }: {
   const resetToDefaults = () => onChange([...DEFAULT_STRIPS]);
 
   return (
-    <div style={{ padding: "12px 16px 14px" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+    <div style={{ padding: "10px 12px 12px", background: BG }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
         <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 11, fontStyle: "italic",
-          color: "#8C7B6B", margin: 0,
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 7, letterSpacing: "0.16em",
+          color: BORDER, margin: 0, textTransform: "uppercase",
         }}>things to let go of</p>
         <button
           onClick={resetToDefaults}
-          title="Reset to defaults"
           style={{
-            fontSize: 8, letterSpacing: "0.12em",
-            color: "#B0A090", background: "none", border: "none",
+            fontSize: 7, letterSpacing: "0.12em",
+            color: BORDER, background: "none", border: "none",
             cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
             textDecoration: "underline", padding: 0,
           }}
         >reset</button>
       </div>
 
-      {/* Strip list */}
-      <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 3, marginBottom: 8 }}>
         {strips.map((text, i) => (
           <div key={i} className="strip-row" style={{
             display: "flex", alignItems: "center", gap: 6,
-            padding: "6px 10px",
-            background: i === 0 ? "#EDE0CF" : "#F5EDE0",
-            borderTop: i === 0 ? "none" : "1px solid #EDE0CF",
+            padding: "5px 8px",
+            background: i === 0 ? PANEL : BG,
+            border: `1px solid ${BORDER}60`,
             position: "relative",
           }}>
-            {/* Tear-order number */}
             <span style={{
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 8, color: "#C8C0B0",
-              width: 14, flexShrink: 0, textAlign: "right",
+              fontSize: 7, color: BORDER,
+              width: 12, flexShrink: 0, textAlign: "right",
             }}>{i + 1}</span>
 
             {editingIdx === i ? (
@@ -155,37 +281,36 @@ function StripEditor({ strips, onChange }: {
                 }}
                 onBlur={commitEdit}
                 style={{
-                  flex: 1, fontSize: 10, border: "none",
-                  borderBottom: "1px solid #C8603A",
+                  flex: 1, fontSize: 9, border: "none",
+                  borderBottom: `1px solid ${ACCENT}`,
                   background: "transparent", outline: "none",
                   fontFamily: "'JetBrains Mono', monospace",
-                  color: "#3D2E1E", padding: "1px 0",
+                  color: DARK, padding: "1px 0",
                 }}
               />
             ) : (
               <span style={{
-                flex: 1, fontSize: 10,
+                flex: 1, fontSize: 9,
                 fontFamily: "'JetBrains Mono', monospace",
-                color: "#3D2E1E", letterSpacing: "0.04em",
+                color: DARK, letterSpacing: "0.04em",
               }}>{text}</span>
             )}
 
-            <div style={{ display: "flex", gap: 4, opacity: 0, transition: "opacity 0.15s" }}
+            <div style={{ display: "flex", gap: 3, opacity: 0, transition: "opacity 0.15s" }}
               className="strip-actions">
-              <button onClick={() => startEdit(i)} style={{
-                background: "none", border: "none", cursor: "pointer", padding: 2,
-              }}><Pencil size={10} color="#B0A090" /></button>
-              <button onClick={() => removeStrip(i)} style={{
-                background: "none", border: "none", cursor: "pointer", padding: 2,
-              }}><Trash2 size={10} color="#C8603A" /></button>
+              <button onClick={() => startEdit(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                <Pencil size={9} color={BORDER} />
+              </button>
+              <button onClick={() => removeStrip(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
+                <Trash2 size={9} color="#C8603A" />
+              </button>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Add new strip */}
       {strips.length < 12 && (
-        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+        <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
           <input
             ref={inputRef}
             value={newText}
@@ -193,11 +318,11 @@ function StripEditor({ strips, onChange }: {
             onKeyDown={e => { if (e.key === "Enter") addStrip(); }}
             placeholder="add something to let go of…"
             style={{
-              flex: 1, fontSize: 10,
-              border: "none", borderBottom: "1px solid #D4C4B0",
+              flex: 1, fontSize: 9,
+              border: "none", borderBottom: `1px solid ${BORDER}`,
               background: "transparent", outline: "none",
               fontFamily: "'JetBrains Mono', monospace",
-              color: "#3D2E1E", padding: "4px 0",
+              color: DARK, padding: "3px 0",
               letterSpacing: "0.04em",
             }}
           />
@@ -205,90 +330,71 @@ function StripEditor({ strips, onChange }: {
             onClick={addStrip}
             disabled={!newText.trim()}
             style={{
-              width: 22, height: 22,
-              border: `1px solid ${newText.trim() ? "#C8603A" : "#D4C4B0"}`,
-              background: newText.trim() ? "#C8603A" : "transparent",
-              color: newText.trim() ? "#FAF6F1" : "#B0A090",
+              width: 20, height: 20,
+              border: `1px solid ${newText.trim() ? ACCENT : BORDER}`,
+              background: newText.trim() ? ACCENT : "transparent",
+              color: newText.trim() ? "#fff" : BORDER,
               cursor: newText.trim() ? "pointer" : "default",
               display: "flex", alignItems: "center", justifyContent: "center",
-              borderRadius: 0, flexShrink: 0,
+              flexShrink: 0,
             }}
-          ><Plus size={11} /></button>
+          ><Plus size={10} /></button>
         </div>
       )}
-
       {strips.length >= 12 && (
-        <p style={{ fontSize: 8, color: "#B0A090", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em", margin: 0 }}>max 12 strips</p>
+        <p style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.1em", margin: 0 }}>max 12 strips</p>
       )}
     </div>
   );
 }
 
-// ── Single strip (strikethrough style — no tear animations) ──────────────────
-type StripState = "attached" | "tearing" | "torn"; // local alias
+// ── Single strip row (strikethrough style) ────────────────────────────────────
+type StripState = "attached" | "tearing" | "torn";
 
 function TearStrip({ text, state, isNext }: {
   text: string; seed: number;
   state: StripState; isNext: boolean;
 }) {
   const isDone = state === "tearing" || state === "torn";
-
-  // Torn strips fade out smoothly then disappear
   const [visible, setVisible] = useState(true);
   const prevState = useRef<StripState>(state);
+
   useEffect(() => {
     if (state === "tearing" && prevState.current !== "tearing") {
-      // Brief delay then hide
       const t = setTimeout(() => setVisible(false), 400);
       prevState.current = "tearing";
       return () => clearTimeout(t);
     }
-    if (state === "attached") {
-      setVisible(true); prevState.current = "attached";
-    }
-    if (state === "torn") {
-      setVisible(false); prevState.current = "torn";
-    }
+    if (state === "attached") { setVisible(true); prevState.current = "attached"; }
+    if (state === "torn") { setVisible(false); prevState.current = "torn"; }
   }, [state]);
 
   if (!visible) return null;
 
   return (
     <div style={{
-      padding: "7px 14px",
-      background: isNext
-        ? "rgba(200, 96, 58, 0.07)"
-        : "transparent",
-      borderTop: "1px solid rgba(180, 160, 130, 0.4)",
-      display: "flex",
-      alignItems: "center",
-      gap: 8,
-      opacity: isDone ? 0.5 : 1,
+      padding: "6px 12px",
+      background: isNext ? `${ACCENT}18` : "transparent",
+      borderTop: `1px solid ${BORDER}30`,
+      display: "flex", alignItems: "center", gap: 8,
+      opacity: isDone ? 0.45 : 1,
       transition: "opacity 0.35s",
-      position: "relative",
-      zIndex: 1,
     }}>
-      {/* Row number */}
       <span style={{
         fontFamily: "'JetBrains Mono', monospace",
-        fontSize: 7,
-        color: "#C8B8A0",
-        letterSpacing: "0.04em",
-        width: 14,
-        textAlign: "right",
-        flexShrink: 0,
-        userSelect: "none",
+        fontSize: 7, color: BORDER,
+        width: 12, textAlign: "right", flexShrink: 0, userSelect: "none",
       }}>{isDone ? "✓" : isNext ? "▶" : ""}</span>
       <span style={{
         fontFamily: "'JetBrains Mono', monospace",
-        fontSize: isNext ? 10 : 9,
-        color: isDone ? "#C8B8A0" : isNext ? "#3D2E1E" : "#7A6A5A",
+        fontSize: isNext ? 9 : 8,
+        color: isDone ? BORDER : isNext ? DARK : `${DARK}AA`,
         letterSpacing: "0.05em",
         fontWeight: isNext ? 700 : 400,
         textDecoration: isDone ? "line-through" : "none",
-        textDecorationColor: "#C8603A",
+        textDecorationColor: ACCENT,
         textDecorationThickness: "2px",
-        transition: "color 0.3s, text-decoration 0.3s",
+        transition: "color 0.3s",
         flex: 1,
       }}>{text}</span>
     </div>
@@ -308,7 +414,6 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
   ];
   const msg = messages[sessions % messages.length];
 
-  // AI micro-reflection
   const [intention, setIntention] = useState("");
   const [outcome, setOutcome] = useState("");
   const [reflection, setReflection] = useState<string | null>(null);
@@ -316,8 +421,8 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
 
   const reflectMutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => {
-      const msg = data.message;
-      setReflection(typeof msg === "string" ? msg : "");
+      const m = data.message;
+      setReflection(typeof m === "string" ? m : "");
     },
   });
 
@@ -332,165 +437,67 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
 
   return (
     <div className="ft-fade-in" style={{
-      background: "#F5EDE0",
-      border: "none",
-      padding: "28px 20px 24px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 16,
-      textAlign: "center",
-      minHeight: 260,
+      background: BG, padding: "22px 16px 18px",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      gap: 12, textAlign: "center", minHeight: 220,
     }}>
-      {/* Big celebration icon */}
-      <div style={{ fontSize: 48, lineHeight: 1 }}>✨</div>
-
+      <div style={{ fontSize: 36, lineHeight: 1 }}>🌟</div>
       <div>
-        <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 22,
-          fontWeight: 700,
-          color: "#3D2E1E",
-          margin: 0,
-          lineHeight: 1.2,
-        }}>Session complete</p>
-        <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 13,
-          fontStyle: "italic",
-          color: "#8C7B6B",
-          margin: "6px 0 0",
-        }}>{msg}</p>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 13, fontWeight: 700, color: DARK, margin: 0, letterSpacing: "0.06em" }}>SESSION COMPLETE!</p>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, margin: "4px 0 0", letterSpacing: "0.06em" }}>{msg}</p>
       </div>
-
-      {/* Score ring */}
       <div className="ft-score-pop" style={{
-        width: 80, height: 80,
-        borderRadius: "50%",
-        border: `3px solid ${accentColor}`,
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: `${accentColor}12`,
+        width: 64, height: 64, border: `3px solid ${accentColor}`,
+        display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+        background: `${accentColor}18`,
       }}>
-        <span style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 22,
-          fontWeight: 700,
-          color: accentColor,
-          lineHeight: 1,
-        }}>{sessions}</span>
-        <span style={{
-          fontFamily: "'JetBrains Mono', monospace",
-          fontSize: 8,
-          color: "#8C7B6B",
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          marginTop: 2,
-        }}>SESSION{sessions !== 1 ? "S" : ""}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 18, fontWeight: 700, color: accentColor, lineHeight: 1 }}>{sessions}</span>
+        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 6, color: BORDER, letterSpacing: "0.14em", textTransform: "uppercase", marginTop: 2 }}>SESSION{sessions !== 1 ? "S" : ""}</span>
       </div>
 
-      <div style={{
-        background: "#EDE0CF",
-        border: "1.5px solid #C8B8A0",
-        borderRadius: 0,
-        padding: "10px 18px",
-        fontSize: 11,
-        fontFamily: "'JetBrains Mono', monospace",
-        color: "#6A5A4A",
-        letterSpacing: "0.08em",
-      }}>
-        8 strips torn · all stress released
-      </div>
-
-      {/* AI Micro-Reflection */}
       {!showReflect && !reflection && (
-        <button
-          onClick={() => setShowReflect(true)}
-          style={{
-            background: "oklch(0.55 0.09 35 / 0.10)",
-            border: "1px solid oklch(0.55 0.09 35 / 0.28)",
-            color: "oklch(0.52 0.14 35)",
-            borderRadius: 6,
-            padding: "7px 14px",
-            fontSize: 10,
-            cursor: "pointer",
-            fontFamily: "'JetBrains Mono', monospace",
-            letterSpacing: "0.08em",
-          }}
-        >
-          ✦ REFLECT WITH AI
-        </button>
+        <button onClick={() => setShowReflect(true)} style={{
+          background: `${ACCENT}20`, border: `1px solid ${ACCENT}60`,
+          color: ACCENT, padding: "5px 12px", fontSize: 8,
+          cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+          letterSpacing: "0.08em",
+        }}>✦ REFLECT WITH AI</button>
       )}
 
       {showReflect && !reflection && (
-        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 8, textAlign: "left" }}>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#6A5A4A", margin: 0 }}>What did you intend to do?</p>
-          <input
-            value={intention}
-            onChange={(e) => setIntention(e.target.value)}
+        <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 6, textAlign: "left" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, margin: 0 }}>What did you intend to do?</p>
+          <input value={intention} onChange={(e) => setIntention(e.target.value)}
             placeholder="e.g. finish the report intro"
-            style={{
-              border: "1.5px solid #C8B8A0", borderRadius: 0, padding: "6px 10px",
-              fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
-              background: "#F5EDE0", outline: "none", width: "100%",
-            }}
-          />
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#6A5A4A", margin: 0 }}>What actually happened?</p>
-          <input
-            value={outcome}
-            onChange={(e) => setOutcome(e.target.value)}
+            style={{ border: `1px solid ${BORDER}`, padding: "4px 7px", fontSize: 8, fontFamily: "'JetBrains Mono', monospace", color: DARK, background: PANEL, outline: "none", width: "100%" }} />
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, margin: 0 }}>What actually happened?</p>
+          <input value={outcome} onChange={(e) => setOutcome(e.target.value)}
             placeholder="e.g. got distracted but wrote 2 paragraphs"
+            style={{ border: `1px solid ${BORDER}`, padding: "4px 7px", fontSize: 8, fontFamily: "'JetBrains Mono', monospace", color: DARK, background: PANEL, outline: "none", width: "100%" }} />
+          <button onClick={handleReflect} disabled={reflectMutation.isPending}
             style={{
-              border: "1.5px solid #C8B8A0", borderRadius: 0, padding: "6px 10px",
-              fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
-              background: "#F5EDE0", outline: "none", width: "100%",
-            }}
-          />
-          <button
-            onClick={handleReflect}
-            disabled={reflectMutation.isPending}
-            style={{
-              background: reflectMutation.isPending ? "#C8B8A0" : "#2a1f14",
-              border: "none", color: "#FAF6F1", borderRadius: 4,
-              padding: "8px 16px", fontSize: 10, cursor: reflectMutation.isPending ? "not-allowed" : "pointer",
+              background: reflectMutation.isPending ? BORDER : DARK, border: "none", color: "#FAF6F1",
+              padding: "6px 12px", fontSize: 8, cursor: reflectMutation.isPending ? "not-allowed" : "pointer",
               fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.10em",
-              display: "flex", alignItems: "center", gap: 6, alignSelf: "flex-end",
-            }}
-          >
-            {reflectMutation.isPending ? <><Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> THINKING…</> : "✦ GET REFLECTION"}
+              display: "flex", alignItems: "center", gap: 5, alignSelf: "flex-end",
+            }}>
+            {reflectMutation.isPending ? <><Loader2 style={{ width: 10, height: 10, animation: "spin 1s linear infinite" }} /> THINKING…</> : "✦ GET REFLECTION"}
           </button>
         </div>
       )}
 
       {reflection && (
-        <div style={{
-          background: "#EDE0CF",
-          border: "1.5px solid #C8B8A0",
-          borderRadius: 0, padding: "10px 14px",
-          fontSize: 12, fontFamily: "'DM Sans', sans-serif",
-          color: "#3D2E1E", lineHeight: 1.6, textAlign: "left",
-          width: "100%",
-        }}>
+        <div style={{ background: PANEL, border: `1px solid ${BORDER}`, padding: "8px 10px", fontSize: 10, fontFamily: "'JetBrains Mono', monospace", color: DARK, lineHeight: 1.6, textAlign: "left", width: "100%" }}>
           {reflection}
         </div>
       )}
 
       <button onClick={onNewSession} style={{
-        background: "#2a1f14",
-        border: "none",
-        color: "#FAF6F1",
-        borderRadius: 0,
-        padding: "10px 28px",
-        fontSize: 10,
-        cursor: "pointer",
-        fontFamily: "'JetBrains Mono', monospace",
-        letterSpacing: "0.14em",
-        boxShadow: "2px 2px 0 #1a1208",
-      }}>
-        ✶ NEW SESSION
-      </button>
+        background: DARK, border: "none", color: "#FAF6F1",
+        padding: "8px 22px", fontSize: 8, cursor: "pointer",
+        fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.14em",
+        boxShadow: `2px 2px 0 ${BORDER}`,
+      }}>↺ NEW SESSION</button>
     </div>
   );
 }
@@ -510,127 +517,33 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
 
   return (
     <div className="ft-fade-in" style={{
-      background: "#F5EDE0",
-      border: "none",
-      padding: "28px 20px 24px",
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 14,
-      textAlign: "center",
-      minHeight: 260,
+      background: BG, padding: "22px 16px 18px",
+      display: "flex", flexDirection: "column", alignItems: "center",
+      gap: 10, textAlign: "center", minHeight: 220,
     }}>
-      {/* Sad icon */}
-      <div style={{ fontSize: 44, lineHeight: 1, filter: "grayscale(0.3)" }}>🌧</div>
-
+      <div style={{ fontSize: 32, lineHeight: 1 }}>💀</div>
       <div>
-        <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 20,
-          fontWeight: 700,
-          color: "#5A4A3A",
-          margin: 0,
-          lineHeight: 1.2,
-        }}>Session ended early</p>
-        <p style={{
-          fontFamily: "'Playfair Display', serif",
-          fontSize: 13,
-          fontStyle: "italic",
-          color: "#8C7B6B",
-          margin: "6px 0 0",
-        }}>{msg}</p>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 12, fontWeight: 700, color: DARK, margin: 0, letterSpacing: "0.06em" }}>PET DIED</p>
+        <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, margin: "4px 0 0", letterSpacing: "0.04em" }}>{msg}</p>
       </div>
-
-      {/* Stats */}
-      <div style={{
-        display: "flex",
-        gap: 12,
-        width: "100%",
-      }}>
-        <div style={{
-          flex: 1,
-          background: "#EDE0CF",
-          border: "1.5px solid #C8B8A0",
-          padding: "12px 8px",
-          textAlign: "center",
-        }}>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#8C7B6B",
-            margin: 0,
-          }}>{quitCount}</p>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 8,
-            color: "#A09080",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            margin: "4px 0 0",
-          }}>QUIT{quitCount !== 1 ? "S" : ""} TODAY</p>
-        </div>
-        <div style={{
-          flex: 1,
-          background: "#F0D8CE",
-          border: "1.5px solid #D4A898",
-          padding: "12px 8px",
-          textAlign: "center",
-        }}>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#C8603A",
-            margin: 0,
-          }}>−{penalty}</p>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 8,
-            color: "#C8603A",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            margin: "4px 0 0",
-          }}>SCORE PENALTY</p>
-        </div>
-        <div style={{
-          flex: 1,
-          background: "#EDE0CF",
-          border: "1.5px solid #C8B8A0",
-          padding: "12px 8px",
-          textAlign: "center",
-        }}>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 22,
-            fontWeight: 700,
-            color: "#8C7B6B",
-            margin: 0,
-          }}>{stripsLeft}</p>
-          <p style={{
-            fontFamily: "'JetBrains Mono', monospace",
-            fontSize: 8,
-            color: "#A09080",
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            margin: "4px 0 0",
-          }}>STRIPS LEFT</p>
-        </div>
+      <div style={{ display: "flex", gap: 8, width: "100%" }}>
+        {[
+          { label: "QUIT" + (quitCount !== 1 ? "S" : "") + " TODAY", value: quitCount, color: BORDER },
+          { label: "SCORE PENALTY", value: `\u2212${penalty}`, color: "#C8603A" },
+          { label: "STRIPS LEFT", value: stripsLeft, color: BORDER },
+        ].map(({ label, value, color }) => (
+          <div key={label} style={{ flex: 1, background: PANEL, border: `1px solid ${BORDER}`, padding: "9px 5px", textAlign: "center" }}>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 16, fontWeight: 700, color, margin: 0 }}>{value}</p>
+            <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 6, color: BORDER, letterSpacing: "0.10em", textTransform: "uppercase", margin: "3px 0 0" }}>{label}</p>
+          </div>
+        ))}
       </div>
-
       <button onClick={onNewSession} style={{
-          background: "#EDE0CF",
-          border: "1.5px solid #8C7B6B",
-          color: "#6A5A4A",
-          borderRadius: 0,
-        padding: "9px 24px",
-        fontSize: 10,
-        cursor: "pointer",
-        fontFamily: "'JetBrains Mono', monospace",
-        letterSpacing: "0.12em",
-      }}>
-        TRY AGAIN
-      </button>
+        background: PANEL, border: `1.5px solid ${BORDER}`, color: DARK,
+        padding: "7px 20px", fontSize: 8, cursor: "pointer",
+        fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.12em",
+        boxShadow: `2px 2px 0 ${BORDER}`,
+      }}>↺ TRY AGAIN</button>
     </div>
   );
 }
@@ -643,18 +556,17 @@ interface FocusTimerProps {
 }
 
 export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: FocusTimerProps) {
-  // All timer logic lives in the global context — this component is purely a view
   const {
     mode, phase, running, remaining, sessions, quitCount,
-    durations, strips, stripStates, paperFlying,
-    progress, tornCount, stripsLeft, nextStripIdx, accentColor,
+    durations, strips, stripStates,
+    progress, tornCount, stripsLeft, nextStripIdx,
     pomodoroStep, transitionCountdown, nextMode,
     handleStartPause, handleQuit, handleNewSession, handleSkipTransition,
     switchMode, applyDuration, setCustomStrips,
     setOnSessionComplete, setOnBlockComplete, setOnQuit,
   } = useTimer();
 
-  // MIT pre-label: listen for adhd-start-mit-focus event from Dashboard
+  // MIT pre-label
   const [mitLabel, setMitLabel] = useState<string | null>(null);
   useEffect(() => {
     const handler = (e: Event) => {
@@ -665,26 +577,15 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
     return () => window.removeEventListener("adhd-start-mit-focus", handler);
   }, []);
 
-  // Register callbacks so the context can fire them
-  useEffect(() => {
-    setOnSessionComplete(onSessionComplete ?? null);
-    return () => setOnSessionComplete(null);
+  // Register callbacks
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onSessionComplete]);
-
-  useEffect(() => {
-    setOnBlockComplete(onBlockComplete ?? null);
-    return () => setOnBlockComplete(null);
+  useEffect(() => { setOnSessionComplete(onSessionComplete ?? null); return () => setOnSessionComplete(null); }, [onSessionComplete]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onBlockComplete]);
-
-  useEffect(() => {
-    setOnQuit(onQuit ?? null);
-    return () => setOnQuit(null);
+  useEffect(() => { setOnBlockComplete(onBlockComplete ?? null); return () => setOnBlockComplete(null); }, [onBlockComplete]);
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onQuit]);
+  useEffect(() => { setOnQuit(onQuit ?? null); return () => setOnQuit(null); }, [onQuit]);
 
-  // Local UI-only state (settings panel, inline edit)
+  // Local UI state
   const [showSettings, setShowSettings] = useState(false);
   const [showSound, setShowSound] = useState(false);
   const [editingMode, setEditingMode] = useState<TimerMode | null>(null);
@@ -697,7 +598,6 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
   const prevTornRef = useRef(tornCount);
   const prevTransitionRef = useRef(transitionCountdown);
 
-  // Fire sound effects on phase/strip changes
   useEffect(() => {
     const prev = prevPhaseRef.current;
     prevPhaseRef.current = phase;
@@ -711,9 +611,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
   }, [tornCount, phase, sound]);
 
   useEffect(() => {
-    if (phase === "transition" && transitionCountdown < prevTransitionRef.current && transitionCountdown > 0) {
-      sound.playTickSfx();
-    }
+    if (phase === "transition" && transitionCountdown < prevTransitionRef.current && transitionCountdown > 0) sound.playTickSfx();
     prevTransitionRef.current = transitionCountdown;
   }, [transitionCountdown, phase, sound]);
 
@@ -721,9 +619,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
   const ss = String(remaining % 60).padStart(2, "0");
   const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
 
-  useEffect(() => {
-    if (editingMode) setTimeout(() => editRef.current?.focus(), 40);
-  }, [editingMode]);
+  useEffect(() => { if (editingMode) setTimeout(() => editRef.current?.focus(), 40); }, [editingMode]);
 
   const commitEdit = () => {
     if (!editingMode) return;
@@ -732,31 +628,144 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
     setEditingMode(null);
   };
 
-  // ── Render ────────────────────────────────────────────────────────────────
+  // ── Cyber pet state ────────────────────────────────────────────────────────
+  const [deaths, setDeaths] = useLocalStorage<number>("cyber-pet-deaths", 0);
+  const [blink, setBlink] = useState(false);
+  const [bounce, setBounce] = useState(false);
+  const [hearts, setHearts] = useState<HeartBubble[]>([]);
+  const [careLog, setCareLog] = useState<CareEntry[]>([]);
+  const heartIdRef = useRef(0);
+  const careIdRef = useRef(0);
+  const heartRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const careRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const blinkRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const bounceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const isRunning = phase === "running";
+
+  // Track deaths from quit events
+  const prevPhaseForDeaths = useRef(phase);
+  useEffect(() => {
+    if (phase === "quit" && prevPhaseForDeaths.current !== "quit") {
+      setDeaths((d: number) => d + 1);
+    }
+    prevPhaseForDeaths.current = phase;
+  }, [phase, setDeaths]);
+
+  // Blink while running
+  useEffect(() => {
+    if (!isRunning) { if (blinkRef.current) clearInterval(blinkRef.current); return; }
+    blinkRef.current = setInterval(() => {
+      setBlink(true);
+      setTimeout(() => setBlink(false), 150);
+    }, 4000 + Math.random() * 3000);
+    return () => { if (blinkRef.current) clearInterval(blinkRef.current); };
+  }, [isRunning]);
+
+  // Bounce while running
+  useEffect(() => {
+    if (!isRunning) { if (bounceRef.current) clearInterval(bounceRef.current); return; }
+    bounceRef.current = setInterval(() => {
+      setBounce(true);
+      setTimeout(() => setBounce(false), 300);
+    }, 6000);
+    return () => { if (bounceRef.current) clearInterval(bounceRef.current); };
+  }, [isRunning]);
+
+  // Hearts spawn while running
+  const spawnHeart = useCallback(() => {
+    const id = heartIdRef.current++;
+    const side = Math.random() < 0.5 ? -1 : 1;
+    const newHeart: HeartBubble = {
+      id,
+      x: 42 + Math.random() * 16,
+      y: 42 + Math.random() * 12,
+      size: 8 + Math.random() * 8,
+      opacity: 0.9,
+      vy: 1.0 + Math.random() * 0.6,
+      vx: side * (0.3 + Math.random() * 0.5),
+    };
+    setHearts((prev) => [...prev.slice(-12), newHeart]);
+  }, []);
+
+  useEffect(() => {
+    if (!isRunning) { if (heartRef.current) clearInterval(heartRef.current); return; }
+    heartRef.current = setInterval(spawnHeart, 1200);
+    return () => { if (heartRef.current) clearInterval(heartRef.current); };
+  }, [isRunning, spawnHeart]);
+
+  // Animate hearts upward
+  useEffect(() => {
+    if (hearts.length === 0) return;
+    const id = requestAnimationFrame(() => {
+      setHearts((prev) =>
+        prev
+          .map((h) => ({ ...h, y: h.y + h.vy, x: h.x + h.vx, opacity: h.opacity - 0.010 }))
+          .filter((h) => h.opacity > 0.05 && h.y < 95)
+      );
+    });
+    return () => cancelAnimationFrame(id);
+  }, [hearts]);
+
+  // Care log while running
+  const addCareEntry = useCallback(() => {
+    const action = CARE_ACTIONS[Math.floor(Math.random() * CARE_ACTIONS.length)];
+    const entry: CareEntry = { id: careIdRef.current++, emoji: action.emoji, text: action.text, ts: Date.now() };
+    setCareLog((prev) => [entry, ...prev].slice(0, 8));
+  }, []);
+
+  useEffect(() => {
+    if (!isRunning) { if (careRef.current) clearInterval(careRef.current); return; }
+    addCareEntry();
+    careRef.current = setInterval(addCareEntry, 15000 + Math.random() * 10000);
+    return () => { if (careRef.current) clearInterval(careRef.current); };
+  }, [isRunning, addCareEntry]);
+
+  // Clear hearts/care on idle
+  useEffect(() => {
+    if (phase === "idle") { setHearts([]); setCareLog([]); }
+  }, [phase]);
+
+  const resetDeaths = () => setDeaths(0);
+
+  // Determine pet face
+  const petFace = () => {
+    if (phase === "quit") return <PetDead />;
+    if (phase === "idle") return <PetIdle />;
+    if (phase === "paused") return <PetPaused />;
+    return <PetAlive blink={blink} />;
+  };
+
+  const petStatus = () => {
+    if (phase === "idle") return "SLEEPING...";
+    if (phase === "running") return "HAPPY \u2665";
+    if (phase === "paused") return "WORRIED...";
+    if (phase === "quit") return "GONE...";
+    if (phase === "complete" || phase === "block_complete") return "FULL \u2605";
+    if (phase === "transition") return "RESTING...";
+    return "";
+  };
+
+  const showMainScene = phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete";
+
+  // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <div
-      className="flex flex-col"
-      style={{
-        fontFamily: "'JetBrains Mono', monospace",
-        background: "#F5EDE0",
-        overflow: "hidden",
-      }}
-    >
-      {/* ── Top bar: mode tabs + sound/settings controls ── */}
-      <div style={{ display: "flex", alignItems: "stretch", borderBottom: "2px solid #8C7B6B", background: "#EDE0CF" }}>
+    <div style={{
+      fontFamily: "'JetBrains Mono', monospace",
+      background: BG,
+      overflow: "hidden",
+    }}>
+      {/* ── Top bar: mode tabs + sound/settings + death counter ── */}
+      <div style={{ display: "flex", alignItems: "stretch", borderBottom: `2px solid ${DARK}`, background: PANEL }}>
         {/* Mode tabs */}
         <div style={{ display: "flex", flex: 1 }}>
           {(["focus", "short", "long"] as TimerMode[]).map((m, idx) => (
             <button key={m} onClick={() => switchMode(m)} style={{
-              flex: 1,
-              padding: "6px 0",
-              fontSize: 8,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              border: "none",
-              borderRight: idx < 2 ? "1px solid #D4C4B0" : "none",
-              background: mode === m ? MODE_COLORS[m] : "#EDE0CF",
-              color: mode === m ? "#FAF6F1" : "#8C7B6B",
+              flex: 1, padding: "6px 0",
+              fontSize: 7, letterSpacing: "0.18em", textTransform: "uppercase",
+              border: "none", borderRight: idx < 2 ? `1px solid ${BORDER}50` : "none",
+              background: mode === m ? ACCENT : PANEL,
+              color: mode === m ? "#fff" : BORDER,
               cursor: running ? "not-allowed" : "pointer",
               fontFamily: "'JetBrains Mono', monospace",
               opacity: running && mode !== m ? 0.5 : 1,
@@ -767,258 +776,244 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             </button>
           ))}
         </div>
-        {/* Sound + settings */}
-        <div style={{ display: "flex", alignItems: "center", gap: 3, padding: "0 8px", borderLeft: "1px solid #D4C4B0" }}>
+        {/* Death counter + sound + settings */}
+        <div style={{ display: "flex", alignItems: "center", gap: 4, padding: "0 7px", borderLeft: `1px solid ${BORDER}50` }}>
+          <span style={{ fontSize: 7, color: BORDER, letterSpacing: "0.08em" }}>💀{deaths}</span>
+          {deaths > 0 && (
+            <button onClick={resetDeaths} title="Reset death count" style={{ fontSize: 8, background: "none", border: "none", cursor: "pointer", color: BORDER, padding: "0 1px", lineHeight: 1 }}>×</button>
+          )}
           {sessions > 0 && (
-            <span style={{ fontSize: 8, letterSpacing: "0.10em", color: "#8C7B6B", marginRight: 2 }}>{sessions}×</span>
+            <span style={{ fontSize: 7, letterSpacing: "0.10em", color: BORDER, marginLeft: 2 }}>{sessions}×</span>
           )}
           <button
             onClick={() => { setShowSound(s => !s); setShowSettings(false); }}
             title="Sound & music"
-            style={{ width: 20, height: 20, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "#D4E8D0" : "transparent", cursor: "pointer", borderRadius: 0 }}
+            style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer" }}
           >
-            {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={9} color="#5A8A5A" /> : (sound.sfxEnabled ? <Volume2 size={9} color="#8C7B6B" /> : <VolumeX size={9} color="#B0A090" />)}
+            {sound.musicLoading ? <span style={{ fontSize: 6, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={8} color="#5A8A5A" /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
           </button>
           <button
             onClick={() => { setShowSettings(s => !s); setShowSound(false); }}
-            style={{ width: 20, height: 20, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: showSettings ? `${accentColor}18` : "transparent", cursor: "pointer", borderRadius: 0 }}
+            style={{ width: 18, height: 18, border: `1px solid ${showSettings ? ACCENT : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: showSettings ? `${ACCENT}18` : "transparent", cursor: "pointer" }}
           >
-            <Settings size={9} color={showSettings ? accentColor : "#8C7B6B"} />
+            <Settings size={8} color={showSettings ? ACCENT : BORDER} />
           </button>
         </div>
       </div>
 
       {/* MIT label if set */}
       {mitLabel && phase === "idle" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", background: "#EDE0CF", borderBottom: "1px solid #C8B8A0" }}>
-          <span style={{ fontSize: 8, color: "oklch(0.52 0.10 32)", letterSpacing: "0.06em", flex: 1 }}>★ MIT: {mitLabel.length > 32 ? mitLabel.slice(0, 32) + "…" : mitLabel}</span>
-          <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "oklch(0.52 0.10 32 / 0.60)", fontSize: 12, lineHeight: 1 }}>×</button>
-        </div>
-      )}
-
-      {/* Quit count badge */}
-      {quitCount > 0 && (
-        <div style={{ padding: "3px 12px", background: "#F0D8CE", borderBottom: "1px solid #D4A898" }}>
-          <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#C8603A" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""} LOGGED</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "4px 10px", background: `${ACCENT}18`, borderBottom: `1px solid ${BORDER}` }}>
+          <span style={{ fontSize: 7, color: ACCENT, letterSpacing: "0.06em", flex: 1 }}>★ MIT: {mitLabel.length > 32 ? mitLabel.slice(0, 32) + "…" : mitLabel}</span>
+          <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: ACCENT, fontSize: 12, lineHeight: 1 }}>×</button>
         </div>
       )}
 
       {/* Settings panel */}
       {showSettings && (
-        <div style={{ borderBottom: "2px solid #8C7B6B", padding: "14px", background: "#EDE0CF" }}>
-          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
-          <div style={{ display: "flex", gap: 16 }}>
+        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: PANEL }}>
+          <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
+          <div style={{ display: "flex", gap: 12 }}>
             {(["focus", "short", "long"] as TimerMode[]).map(m => (
               <div key={m} style={{ flex: 1 }}>
-                <p style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" }}>{m}</p>
+                <p style={{ fontSize: 7, letterSpacing: "0.18em", color: BORDER, textTransform: "uppercase", marginBottom: 4, fontFamily: "'JetBrains Mono', monospace" }}>{m}</p>
                 {editingMode === m ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 3 }}>
                     <input ref={editRef} value={editVal} onChange={e => setEditVal(e.target.value)}
                       onKeyDown={e => { if (e.key === "Enter") commitEdit(); if (e.key === "Escape") setEditingMode(null); }}
                       type="number" min={1} max={180}
-                      style={{ width: 44, textAlign: "center", fontSize: 13, fontWeight: 700, border: `1px solid ${MODE_COLORS[m]}`, background: "transparent", outline: "none", padding: "2px 4px", fontFamily: "'JetBrains Mono', monospace", color: "#3D2E1E", borderRadius: 0 }} />
-                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={12} color={MODE_COLORS[m]} /></button>
-                    <button onClick={() => setEditingMode(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><X size={12} color="#8C7B6B" /></button>
+                      style={{ width: 38, textAlign: "center", fontSize: 11, fontWeight: 700, border: `1px solid ${ACCENT}`, background: "transparent", outline: "none", padding: "2px 3px", fontFamily: "'JetBrains Mono', monospace", color: DARK }} />
+                    <button onClick={commitEdit} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><Check size={10} color={ACCENT} /></button>
+                    <button onClick={() => setEditingMode(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}><X size={10} color={BORDER} /></button>
                   </div>
                 ) : (
                   <button onClick={() => { setEditingMode(m); setEditVal(String(durations[m])); }}
-                    style={{ fontSize: 20, fontWeight: 700, color: "#3D2E1E", background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}>
+                    style={{ fontSize: 17, fontWeight: 700, color: DARK, background: "none", border: "none", cursor: "pointer", padding: 0, fontFamily: "'JetBrains Mono', monospace" }}>
                     {durations[m]}
                   </button>
                 )}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginTop: 6 }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 3, marginTop: 5 }}>
                   {PRESETS[m].map(p => (
                     <button key={p} onClick={() => applyDuration(m, p)} style={{
-                      fontSize: 8, padding: "2px 6px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
-                      border: `1px solid ${durations[m] === p ? MODE_COLORS[m] : "#D4C4B0"}`,
-                      background: durations[m] === p ? `${MODE_COLORS[m]}18` : "transparent",
-                      color: durations[m] === p ? MODE_COLORS[m] : "#8C7B6B", borderRadius: 0,
+                      fontSize: 7, padding: "2px 5px", cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                      border: `1px solid ${durations[m] === p ? ACCENT : BORDER}`,
+                      background: durations[m] === p ? `${ACCENT}18` : "transparent",
+                      color: durations[m] === p ? ACCENT : BORDER,
                     }}>{p}</button>
                   ))}
                 </div>
               </div>
             ))}
           </div>
-
-
         </div>
       )}
 
       {/* Sound panel */}
       {showSound && (
-        <div style={{ borderBottom: "2px solid #8C7B6B", padding: "14px", background: "#EDE0CF" }}>
-          <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 12, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {/* Sound effects toggle + volume */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={sound.toggleSfx} style={{ width: 22, height: 22, border: `1px solid ${sound.sfxEnabled ? "#C8603A" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0, flexShrink: 0 }}>
-                {sound.sfxEnabled ? <Volume2 size={10} color="#C8603A" /> : <VolumeX size={10} color="#8C7B6B" />}
+        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: PANEL }}>
+          <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <button onClick={sound.toggleSfx} style={{ width: 18, height: 18, border: `1px solid ${sound.sfxEnabled ? "#C8603A" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.sfxEnabled ? <Volume2 size={8} color="#C8603A" /> : <VolumeX size={8} color={BORDER} />}
               </button>
-              <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 80 }}>Sound Effects</span>
+              <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Sound Effects</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}
                 onChange={e => sound.setSfxVolume(parseFloat(e.target.value))}
                 disabled={!sound.sfxEnabled}
                 style={{ flex: 1, accentColor: "#C8603A", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
-              <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
+              <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
             </div>
-            {/* Coffee shop music toggle + volume */}
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <button onClick={sound.toggleMusic} style={{ width: 22, height: 22, border: `1px solid ${sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", borderRadius: 0, flexShrink: 0 }}>
-                {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : <Coffee size={10} color={sound.musicEnabled ? "#7A8C6E" : "#8C7B6B"} />}
+            <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
+              <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? "#7A8C6E" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.musicLoading ? <span style={{ fontSize: 6, color: "#7A8C6E" }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? "#7A8C6E" : BORDER} />}
               </button>
-              <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 80 }}>Cafe Music</span>
+              <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Cafe Music</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
                 onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
                 disabled={!sound.musicEnabled}
                 style={{ flex: 1, accentColor: "#7A8C6E", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
-              <span style={{ fontSize: 8, color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace", width: 24, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
+              <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
             </div>
           </div>
         </div>
       )}
 
-      {/* Complete wrap-up (manual complete, not auto-cycle) */}
+      {/* ── Complete wrap-up ── */}
       {phase === "complete" && (
         <CompleteWrapUp sessions={sessions} mode={mode} onNewSession={handleNewSession} />
       )}
 
-      {/* Quit wrap-up */}
+      {/* ── Quit wrap-up ── */}
       {phase === "quit" && (
         <QuitWrapUp quitCount={quitCount} stripsLeft={stripsLeft} onNewSession={handleNewSession} />
       )}
 
-      {/* Transition countdown — auto-start next phase */}
+      {/* ── Transition countdown ── */}
       {phase === "transition" && nextMode && (
-        <div style={{
-          border: "none", background: "#F5EDE0",
-          padding: "28px 20px", textAlign: "center",
-        }}>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>
-            NEXT UP
-          </p>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 20, fontWeight: 700, fontStyle: "italic", color: MODE_COLORS[nextMode], marginBottom: 6 }}>
-            {MODE_LABELS[nextMode]}
-          </p>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 32, fontWeight: 700, color: "#3D2E1E", marginBottom: 16 }}>
-            {transitionCountdown}
-          </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#8C7B6B", marginBottom: 16 }}>
-            Starting automatically…
-          </p>
+        <div style={{ background: BG, padding: "22px 16px", textAlign: "center" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: BORDER, textTransform: "uppercase", marginBottom: 7 }}>NEXT UP</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700, color: ACCENT, marginBottom: 4 }}>{MODE_LABELS[nextMode]}</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 26, fontWeight: 700, color: DARK, marginBottom: 12 }}>{transitionCountdown}</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, marginBottom: 12 }}>Starting automatically…</p>
           <button onClick={handleSkipTransition} style={{
-            fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
-            letterSpacing: "0.14em", textTransform: "uppercase",
-            background: MODE_COLORS[nextMode], color: "#FAF6F1",
-            border: "none", padding: "8px 20px", cursor: "pointer",
-          }}>
-            Start now →
-          </button>
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.14em",
+            background: ACCENT, color: "#fff", border: "none", padding: "6px 16px", cursor: "pointer",
+            boxShadow: `2px 2px 0 ${DARK}`,
+          }}>Start now →</button>
         </div>
       )}
 
-      {/* Block complete — all 4 focus rounds done */}
+      {/* ── Block complete ── */}
       {phase === "block_complete" && (
-        <div style={{
-          border: "none", background: "#F5EDE0",
-          padding: "28px 20px", textAlign: "center",
-        }}>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#7A8C6E", textTransform: "uppercase", marginBottom: 10 }}>
-            BLOCK COMPLETE
+        <div style={{ background: BG, padding: "22px 16px", textAlign: "center" }}>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: "#7A8C6E", textTransform: "uppercase", marginBottom: 7 }}>BLOCK COMPLETE</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700, color: DARK, marginBottom: 5 }}>4 sessions done.</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, lineHeight: 1.6, marginBottom: 16 }}>
+            You completed a full Pomodoro block.<br />Take a real break — you earned it.
           </p>
-          <p style={{ fontFamily: "'Playfair Display', serif", fontSize: 22, fontWeight: 700, fontStyle: "italic", color: "#3D2E1E", marginBottom: 8 }}>
-            4 sessions done.
-          </p>
-          <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#8C7B6B", lineHeight: 1.6, marginBottom: 20 }}>
-            You completed a full Pomodoro block.<br />
-            Take a real break — you earned it.
-          </p>
-          <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+          <div style={{ display: "flex", gap: 5, justifyContent: "center", marginBottom: 16 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ width: 10, height: 10, background: "#7A8C6E", borderRadius: 0 }} />
+              <div key={i} style={{ width: 7, height: 7, background: "#7A8C6E" }} />
             ))}
           </div>
-          <div style={{ marginTop: 20 }}>
-            <button onClick={handleNewSession} style={{
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
-              letterSpacing: "0.14em", textTransform: "uppercase",
-              background: "#2a1f14", color: "#FAF6F1",
-              border: "none", padding: "9px 24px", cursor: "pointer",
-              boxShadow: "0 3px 0 #1a1208",
-            }}>
-              Start new block
-            </button>
-          </div>
+          <button onClick={handleNewSession} style={{
+            fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.14em",
+            background: DARK, color: "#FAF6F1", border: "none", padding: "7px 20px", cursor: "pointer",
+            boxShadow: `2px 2px 0 ${BORDER}`,
+          }}>Start new block</button>
         </div>
       )}
 
-      {/* Paper scene — hidden during complete/quit/transition/block_complete */}
-      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div
-          className={paperFlying ? "ft-fly-away" : ""}
-          style={{
-            background: "#F5EDE0",
-            minHeight: 260,
+      {/* ── Main timer scene (idle / running / paused) ── */}
+      {showMainScene && (
+        <>
+          {/* Pet screen */}
+          <div style={{
+            background: SCREEN_BG,
+            margin: "8px 8px 0",
+            border: `2px solid ${DARK}`,
+            position: "relative",
+            height: 130,
+            display: "flex", alignItems: "center", justifyContent: "center",
             overflow: "hidden",
-            position: "relative",
-          }}
-        >
-          {/* Grid paper background */}
-          <div style={{
-            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-            backgroundImage: `
-              linear-gradient(to right, #C8B89A 1px, transparent 1px),
-              linear-gradient(to bottom, #C8B89A 1px, transparent 1px)
-            `,
-            backgroundSize: "20px 20px",
-            opacity: 0.35,
-          }} />
-
-          {/* Clock display row */}
-          <div style={{
-            padding: "14px 16px 10px",
-            borderBottom: "1.5px solid #C8B8A0",
-            background: "#EDE0CF",
-            position: "relative",
-            zIndex: 1,
-            display: "flex",
-            alignItems: "baseline",
-            gap: 12,
           }}>
-            <p style={{
+            {/* Pixel grid overlay */}
+            <div style={{
+              position: "absolute", inset: 0,
+              backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 7px, rgba(0,0,0,0.04) 8px), repeating-linear-gradient(90deg, transparent, transparent 7px, rgba(0,0,0,0.04) 8px)",
+              pointerEvents: "none",
+            }} />
+
+            {/* Hearts floating upward */}
+            {hearts.map((h) => (
+              <div key={h.id} style={{
+                position: "absolute",
+                left: `${h.x}%`,
+                bottom: `${h.y}%`,
+                fontSize: h.size,
+                opacity: h.opacity,
+                transform: "translateX(-50%)",
+                pointerEvents: "none",
+                transition: "none",
+                color: "#E8A0B8",
+              }}>♥</div>
+            ))}
+
+            {/* Pet */}
+            <div className={bounce ? "ft-pet-bounce" : ""} style={{ transition: "transform 0.15s ease" }}>
+              {petFace()}
+            </div>
+
+            {/* Status label top-left */}
+            <div style={{
+              position: "absolute", top: 5, left: 6,
+              fontSize: 6, letterSpacing: "0.10em", color: DARK,
+              textTransform: "uppercase", opacity: 0.7,
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 36,
-              fontWeight: 700,
-              color: phase === "running" ? accentColor : "#3D2E1E",
-              margin: 0,
+            }}>{petStatus()}</div>
+
+            {/* Timer display bottom-right */}
+            <div style={{
+              position: "absolute", bottom: 5, right: 7,
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 20, fontWeight: 700,
+              color: isRunning ? DARK : `${DARK}88`,
               letterSpacing: "0.04em",
               lineHeight: 1,
-              transition: "color 0.5s",
-            }}>{mm}:{ss}</p>
-            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase" }}>things to</span>
-              <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase" }}>let go of</span>
-            </div>
+              textShadow: "0 0 8px rgba(200,180,232,0.8)",
+            }}>{mm}:{ss}</div>
+
+            {/* MIT label top-right */}
+            {mitLabel && (
+              <div style={{
+                position: "absolute", top: 5, right: 6,
+                fontSize: 6, color: ACCENT, letterSpacing: "0.06em",
+                fontFamily: "'JetBrains Mono', monospace", maxWidth: 80,
+                overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+              }}>★ {mitLabel}</div>
+            )}
           </div>
 
-          {/* Idle: show editable strip list */}
+          {/* Progress bar */}
+          <div style={{ margin: "0 8px", display: "flex", gap: 1, background: `${BORDER}30`, border: `1px solid ${DARK}`, borderTop: "none" }}>
+            {segments.map((filled, i) => (
+              <div key={i} style={{ flex: 1, height: 4, background: filled ? ACCENT : "transparent", transition: "background 0.5s" }} />
+            ))}
+          </div>
+
+          {/* Idle: strip editor */}
           {phase === "idle" && (
-            <StripEditor
-              strips={strips}
-              onChange={(next) => {
-                setCustomStrips(next);
-              }}
-            />
+            <StripEditor strips={strips} onChange={(next) => setCustomStrips(next)} />
           )}
 
-          {/* Running / paused: show strips */}
+          {/* Running/paused: strip list */}
           {phase !== "idle" && (
-            <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
+            <div style={{ background: BG, borderTop: `1px solid ${BORDER}30` }}>
               {strips.map((text: string, i: number) => {
                 const baseState = stripStates[i] ?? "attached";
                 const effectiveState: StripState =
-                  i === 0 && baseState === "attached" && tornCount === 0
-                    ? "tearing"
-                    : baseState;
+                  i === 0 && baseState === "attached" && tornCount === 0 ? "tearing" : baseState;
                 return (
                   <TearStrip
                     key={i}
@@ -1029,107 +1024,89 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
                   />
                 );
               })}
+              {tornCount === strips.length && phase === "running" && (
+                <div style={{ padding: "12px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace", color: BORDER, fontSize: 7, letterSpacing: "0.14em" }}>
+                  ALL CLEARED ✓
+                </div>
+              )}
             </div>
           )}
 
-          {/* Empty state when all crossed off */}
-          {tornCount === strips.length && phase === "running" && (
-            <div style={{
-              padding: "20px",
-              textAlign: "center",
-              fontFamily: "'JetBrains Mono', monospace",
-              color: "#8C7B6B",
-              fontSize: 9,
-              letterSpacing: "0.14em",
-              position: "relative",
-              zIndex: 1,
-            }}>
-              ALL CLEARED ✓
+          {/* Care log (while running or paused) */}
+          {careLog.length > 0 && (
+            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL }}>
+              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {careLog.slice(0, 4).map((entry, i) => (
+                  <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : Math.max(0.2, 0.7 - i * 0.15) }}>
+                    <span style={{ fontSize: 9 }}>{entry.emoji}</span>
+                    <span style={{ fontSize: 7, color: DARK, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>{entry.text}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
-        </div>
-      )}
 
-      {/* Progress bar */}
-      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{ display: "flex", gap: 1, borderTop: "2px solid #3D2E1E", background: "#D4C4B0" }}>
-          {segments.map((filled, i) => (
-            <div key={i} style={{ flex: 1, height: 6, background: filled ? accentColor : "#D4C4B0", transition: "background 0.5s" }} />
-          ))}
-        </div>
-      )}
+          {/* Controls row */}
+          <div style={{
+            display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
+            background: PANEL, borderTop: `2px solid ${DARK}`,
+          }}>
+            {/* Quit */}
+            {(running || phase === "paused") && (
+              <button onClick={handleQuit} title="Quit session" style={{
+                display: "flex", alignItems: "center", gap: 4,
+                padding: "4px 9px", background: "transparent",
+                border: `1.5px solid ${BORDER}`, color: BORDER,
+                cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 7, letterSpacing: "0.12em",
+                boxShadow: `2px 2px 0 ${BORDER}`,
+              }}>
+                <RotateCcw size={8} /> QUIT
+              </button>
+            )}
 
-      {/* Controls row */}
-      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 8,
-          padding: "8px 12px",
-          background: "#D8CCBA",
-          borderTop: "2px solid #3D2E1E",
-        }}>
-          {/* Quit */}
-          {(running || phase === "paused") && (
-            <button onClick={handleQuit} title="Quit session" style={{
-              display: "flex", alignItems: "center", gap: 5,
-              padding: "5px 12px",
-              background: "transparent",
-              border: "1.5px solid #B0A090",
-              color: "#8C7B6B", cursor: "pointer",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
-              letterSpacing: "0.12em",
-              boxShadow: "2px 2px 0 #B0A090",
-            }}>
-              <RotateCcw size={10} /> QUIT
-            </button>
-          )}
+            {/* Play / Pause */}
+            {phase !== "recovering" && (
+              <button onClick={handleStartPause} style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "5px 16px",
+                background: running ? BTN_BG : ACCENT,
+                border: `1.5px solid ${running ? BORDER : DARK}`,
+                color: running ? DARK : "#fff",
+                fontFamily: "'JetBrains Mono', monospace", fontSize: 7,
+                letterSpacing: "0.14em", cursor: "pointer",
+                boxShadow: running ? `2px 2px 0 ${BORDER}` : `2px 2px 0 ${DARK}`,
+                fontWeight: 700, transition: "all 0.12s",
+              }}>
+                {running ? <><Pause size={8} /> PAUSE</> : <><Play size={8} /> {phase === "paused" ? "RESUME" : "START"}</>}
+              </button>
+            )}
 
-          {/* Play / Pause */}
-          {phase !== "recovering" && (
-            <button onClick={handleStartPause} style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 20px",
-              background: running ? "#F5EDE0" : accentColor,
-              border: `1.5px solid ${running ? "#8C7B6B" : accentColor}`,
-              color: running ? "#3D2E1E" : "#FAF6F1",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
-              letterSpacing: "0.14em", cursor: "pointer",
-              boxShadow: running ? "2px 2px 0 #B0A090" : `2px 2px 0 #7A3A1A`,
-              fontWeight: 700,
-              transition: "all 0.12s",
-            }}>
-              {running ? <><Pause size={10} /> PAUSE</> : <><Play size={10} /> {phase === "paused" ? "RESUME" : "START"}</>}
-            </button>
-          )}
-
-          {/* Session dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto" }}>
-            {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{
-                width: 8, height: 8,
-                background: i < sessions % 4 ? accentColor : "#C8B8A0",
-                border: `1px solid ${i < sessions % 4 ? accentColor : "#A09080"}`,
-                transition: "background 0.3s",
-              }} />
-            ))}
-            <span style={{ fontSize: 8, letterSpacing: "0.10em", color: "#8C7B6B", marginLeft: 4, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+            {/* Session dots */}
+            <div style={{ display: "flex", alignItems: "center", gap: 3, marginLeft: "auto" }}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} style={{
+                  width: 6, height: 6,
+                  background: i < sessions % 4 ? ACCENT : `${BORDER}40`,
+                  border: `1px solid ${i < sessions % 4 ? ACCENT : BORDER}`,
+                  transition: "background 0.3s",
+                }} />
+              ))}
+              <span style={{ fontSize: 7, letterSpacing: "0.10em", color: BORDER, marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+            </div>
           </div>
-        </div>
-      )}
 
-      {/* Status bar footer */}
-      {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          padding: "3px 10px",
-          background: "#C8B8A0",
-          borderTop: "1px solid #8C7B6B",
-        }}>
-          <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#6A5A4A", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} MIN · {MODE_LABELS[mode]}</span>
-          <span style={{ fontSize: 7, letterSpacing: "0.14em", color: "#6A5A4A", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} CROSSED OFF</span>
-        </div>
+          {/* Status bar footer */}
+          <div style={{
+            display: "flex", justifyContent: "space-between",
+            padding: "2px 9px", background: `${DARK}18`,
+            borderTop: `1px solid ${BORDER}30`,
+          }}>
+            <span style={{ fontSize: 6, letterSpacing: "0.18em", color: BORDER, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} MIN · {MODE_LABELS[mode]}</span>
+            <span style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} CROSSED OFF</span>
+          </div>
+        </>
       )}
     </div>
   );
