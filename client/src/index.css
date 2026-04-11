@@ -697,6 +697,12 @@ input[type="radio"]:not(:disabled) {
   color: oklch(0.40 0 0);
 }
 
+/* Nuclear option: desaturate EVERYTHING — catches all hardcoded inline colors */
+html.work-mode {
+  filter: grayscale(1);
+  transition: filter 0.35s ease;
+}
+
 /* Smooth transition when toggling */
 .work-mode,
 .work-mode * {
