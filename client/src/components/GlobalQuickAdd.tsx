@@ -56,19 +56,21 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
 
   return (
     <>
-      {/* Floating trigger */}
+      {/* Floating trigger — retro lo-fi style */}
       <button
         onClick={() => setOpen(true)}
         title="Quick add task (⌘K)"
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 flex items-center justify-center transition-all duration-200 hover:opacity-80 active:scale-95"
+        className="fixed bottom-6 right-6 z-50 w-12 h-12 flex items-center justify-center transition-all duration-200 active:translate-y-[2px] active:shadow-none"
         style={{
-          background: M.ink,
-          opacity: open ? 0 : 1,
+          background:   "oklch(0.975 0.018 355)",
+          border:       `2px solid ${M.ink}`,
+          boxShadow:    `3px 3px 0 ${M.ink}`,
+          opacity:      open ? 0 : 1,
           pointerEvents: open ? "none" : "auto",
-          border: `1px solid ${M.ink}`,
+          fontFamily:   "'Space Mono', monospace",
         }}
       >
-        <Plus className="w-5 h-5" style={{ color: "oklch(0.97 0.005 80)" }} />
+        <Plus className="w-5 h-5" style={{ color: M.coral }} />
       </button>
 
       {/* Backdrop + modal */}
