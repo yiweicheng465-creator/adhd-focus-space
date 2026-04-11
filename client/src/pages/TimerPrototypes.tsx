@@ -6,6 +6,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { PaperTearTimer } from "@/components/PaperTearTimer";
+import { CyberPetTimer } from "@/components/CyberPetTimer";
 
 // ─── Shared helpers ───────────────────────────────────────────────────────────
 const DEMO_TOTAL = 25 * 60; // 25 min demo
@@ -1557,6 +1558,15 @@ export default function TimerPrototypes() {
           <PaperTearTimer durationMinutes={1} />
           <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
             A piece of paper with your worries written on it. As you focus, the bottom strips tear off one by one. Quit and the paper recovers. Complete the session and the whole page tears away in a satisfying cascade.
+          </p>
+        </div>
+
+        {/* K — Cyber Pet */}
+        <div style={{ gridColumn: "1 / -1" }}>
+          <p className="proto-label">K — Cyber Pet Timer <span className="proto-badge">Experimental</span> <span className="proto-badge-rec">Tamagotchi</span></p>
+          <CyberPetTimer />
+          <p style={{ color: "#8B9E7A", fontSize: 12, marginTop: 10, lineHeight: 1.6 }}>
+            A Tamagotchi-style focus companion. Your cyber pet stays alive as long as you keep focusing — it bubbles hearts and shows care actions (feed, bathe, play). Quit early and the pet dies. Deaths are counted as focus failures. Complete the session and your pet thrives.
           </p>
         </div>
 

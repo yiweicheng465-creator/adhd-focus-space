@@ -133,7 +133,7 @@ function StripEditor({ strips, onChange }: {
           <div key={i} className="strip-row" style={{
             display: "flex", alignItems: "center", gap: 6,
             padding: "6px 10px",
-            background: i === 0 ? "linear-gradient(90deg,#F5EDE0,#EDE0CF)" : "#FAF6F1",
+            background: i === 0 ? "#EDE0CF" : "#F5EDE0",
             borderTop: i === 0 ? "none" : "1px solid #EDE0CF",
             position: "relative",
           }}>
@@ -332,8 +332,8 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
 
   return (
     <div className="ft-fade-in" style={{
-      background: "#FDFAF5",
-      border: "1px solid #E8DDD0",
+      background: "#F5EDE0",
+      border: "none",
       padding: "28px 20px 24px",
       display: "flex",
       flexDirection: "column",
@@ -392,9 +392,9 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
       </div>
 
       <div style={{
-        background: "#F5EDE0",
-        border: "1px solid #E8DDD0",
-        borderRadius: 4,
+        background: "#EDE0CF",
+        border: "1.5px solid #C8B8A0",
+        borderRadius: 0,
         padding: "10px 18px",
         fontSize: 11,
         fontFamily: "'JetBrains Mono', monospace",
@@ -432,9 +432,9 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
             onChange={(e) => setIntention(e.target.value)}
             placeholder="e.g. finish the report intro"
             style={{
-              border: "1px solid #E8DDD0", borderRadius: 4, padding: "6px 10px",
+              border: "1.5px solid #C8B8A0", borderRadius: 0, padding: "6px 10px",
               fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
-              background: "#FDFAF5", outline: "none", width: "100%",
+              background: "#F5EDE0", outline: "none", width: "100%",
             }}
           />
           <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, color: "#6A5A4A", margin: 0 }}>What actually happened?</p>
@@ -443,16 +443,16 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
             onChange={(e) => setOutcome(e.target.value)}
             placeholder="e.g. got distracted but wrote 2 paragraphs"
             style={{
-              border: "1px solid #E8DDD0", borderRadius: 4, padding: "6px 10px",
+              border: "1.5px solid #C8B8A0", borderRadius: 0, padding: "6px 10px",
               fontSize: 11, fontFamily: "'DM Sans', sans-serif", color: "#3D2E1E",
-              background: "#FDFAF5", outline: "none", width: "100%",
+              background: "#F5EDE0", outline: "none", width: "100%",
             }}
           />
           <button
             onClick={handleReflect}
             disabled={reflectMutation.isPending}
             style={{
-              background: reflectMutation.isPending ? "#E8DDD0" : "#2a1f14",
+              background: reflectMutation.isPending ? "#C8B8A0" : "#2a1f14",
               border: "none", color: "#FAF6F1", borderRadius: 4,
               padding: "8px 16px", fontSize: 10, cursor: reflectMutation.isPending ? "not-allowed" : "pointer",
               fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.10em",
@@ -466,9 +466,9 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
 
       {reflection && (
         <div style={{
-          background: "oklch(0.55 0.09 35 / 0.06)",
-          border: "1px solid oklch(0.55 0.09 35 / 0.20)",
-          borderRadius: 6, padding: "10px 14px",
+          background: "#EDE0CF",
+          border: "1.5px solid #C8B8A0",
+          borderRadius: 0, padding: "10px 14px",
           fontSize: 12, fontFamily: "'DM Sans', sans-serif",
           color: "#3D2E1E", lineHeight: 1.6, textAlign: "left",
           width: "100%",
@@ -481,13 +481,13 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
         background: "#2a1f14",
         border: "none",
         color: "#FAF6F1",
-        borderRadius: 999,
+        borderRadius: 0,
         padding: "10px 28px",
         fontSize: 10,
         cursor: "pointer",
         fontFamily: "'JetBrains Mono', monospace",
         letterSpacing: "0.14em",
-        boxShadow: "0 3px 0 #1a1208",
+        boxShadow: "2px 2px 0 #1a1208",
       }}>
         ✶ NEW SESSION
       </button>
@@ -510,8 +510,8 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
 
   return (
     <div className="ft-fade-in" style={{
-      background: "#FDFAF5",
-      border: "1px solid #E8DDD0",
+      background: "#F5EDE0",
+      border: "none",
       padding: "28px 20px 24px",
       display: "flex",
       flexDirection: "column",
@@ -549,8 +549,8 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
       }}>
         <div style={{
           flex: 1,
-          background: "#F5EDE0",
-          border: "1px solid #E8DDD0",
+          background: "#EDE0CF",
+          border: "1.5px solid #C8B8A0",
           padding: "12px 8px",
           textAlign: "center",
         }}>
@@ -572,8 +572,8 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
         </div>
         <div style={{
           flex: 1,
-          background: "#FFF0EC",
-          border: "1px solid #F0D0C4",
+          background: "#F0D8CE",
+          border: "1.5px solid #D4A898",
           padding: "12px 8px",
           textAlign: "center",
         }}>
@@ -595,8 +595,8 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
         </div>
         <div style={{
           flex: 1,
-          background: "#F5EDE0",
-          border: "1px solid #E8DDD0",
+          background: "#EDE0CF",
+          border: "1.5px solid #C8B8A0",
           padding: "12px 8px",
           textAlign: "center",
         }}>
@@ -619,10 +619,10 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
       </div>
 
       <button onClick={onNewSession} style={{
-        background: "transparent",
-        border: "1px solid #8C7B6B",
-        color: "#6A5A4A",
-        borderRadius: 999,
+          background: "#EDE0CF",
+          border: "1.5px solid #8C7B6B",
+          color: "#6A5A4A",
+          borderRadius: 0,
         padding: "9px 24px",
         fontSize: 10,
         cursor: "pointer",
@@ -738,12 +738,12 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       className="flex flex-col"
       style={{
         fontFamily: "'JetBrains Mono', monospace",
-        background: "#FAF8F3",
+        background: "#F5EDE0",
         overflow: "hidden",
       }}
     >
       {/* ── Top bar: mode tabs + sound/settings controls ── */}
-      <div style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #D4C4B0" }}>
+      <div style={{ display: "flex", alignItems: "stretch", borderBottom: "2px solid #8C7B6B", background: "#EDE0CF" }}>
         {/* Mode tabs */}
         <div style={{ display: "flex", flex: 1 }}>
           {(["focus", "short", "long"] as TimerMode[]).map((m, idx) => (
@@ -755,7 +755,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
               textTransform: "uppercase",
               border: "none",
               borderRight: idx < 2 ? "1px solid #D4C4B0" : "none",
-              background: mode === m ? MODE_COLORS[m] : "transparent",
+              background: mode === m ? MODE_COLORS[m] : "#EDE0CF",
               color: mode === m ? "#FAF6F1" : "#8C7B6B",
               cursor: running ? "not-allowed" : "pointer",
               fontFamily: "'JetBrains Mono', monospace",
@@ -790,7 +790,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* MIT label if set */}
       {mitLabel && phase === "idle" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", background: "oklch(0.52 0.10 32 / 0.08)", borderBottom: "1px solid oklch(0.52 0.10 32 / 0.20)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", background: "#EDE0CF", borderBottom: "1px solid #C8B8A0" }}>
           <span style={{ fontSize: 8, color: "oklch(0.52 0.10 32)", letterSpacing: "0.06em", flex: 1 }}>★ MIT: {mitLabel.length > 32 ? mitLabel.slice(0, 32) + "…" : mitLabel}</span>
           <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "oklch(0.52 0.10 32 / 0.60)", fontSize: 12, lineHeight: 1 }}>×</button>
         </div>
@@ -798,14 +798,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* Quit count badge */}
       {quitCount > 0 && (
-        <div style={{ padding: "3px 12px", background: "#FFF0EC", borderBottom: "1px solid #F0C8B8" }}>
+        <div style={{ padding: "3px 12px", background: "#F0D8CE", borderBottom: "1px solid #D4A898" }}>
           <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#C8603A" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""} LOGGED</span>
         </div>
       )}
 
       {/* Settings panel */}
       {showSettings && (
-        <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
+        <div style={{ borderBottom: "2px solid #8C7B6B", padding: "14px", background: "#EDE0CF" }}>
           <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
           <div style={{ display: "flex", gap: 16 }}>
             {(["focus", "short", "long"] as TimerMode[]).map(m => (
@@ -846,7 +846,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* Sound panel */}
       {showSound && (
-        <div style={{ border: "1px solid #D4C4B0", padding: "14px", background: "#FAF6F1" }}>
+        <div style={{ borderBottom: "2px solid #8C7B6B", padding: "14px", background: "#EDE0CF" }}>
           <p style={{ fontSize: 9, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 12, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {/* Sound effects toggle + volume */}
@@ -890,7 +890,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       {/* Transition countdown — auto-start next phase */}
       {phase === "transition" && nextMode && (
         <div style={{
-          border: "1px solid #E8DDD0", background: "#FDFAF5",
+          border: "none", background: "#F5EDE0",
           padding: "28px 20px", textAlign: "center",
         }}>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", marginBottom: 10 }}>
@@ -919,7 +919,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       {/* Block complete — all 4 focus rounds done */}
       {phase === "block_complete" && (
         <div style={{
-          border: "1px solid #E8DDD0", background: "#FDFAF5",
+          border: "none", background: "#F5EDE0",
           padding: "28px 20px", textAlign: "center",
         }}>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, letterSpacing: "0.22em", color: "#7A8C6E", textTransform: "uppercase", marginBottom: 10 }}>
@@ -956,7 +956,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
         <div
           className={paperFlying ? "ft-fly-away" : ""}
           style={{
-            background: "#FAF8F3",
+            background: "#F5EDE0",
             minHeight: 260,
             overflow: "hidden",
             position: "relative",
@@ -966,18 +966,18 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           <div style={{
             position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
             backgroundImage: `
-              linear-gradient(to right, #D8CFC0 1px, transparent 1px),
-              linear-gradient(to bottom, #D8CFC0 1px, transparent 1px)
+              linear-gradient(to right, #C8B89A 1px, transparent 1px),
+              linear-gradient(to bottom, #C8B89A 1px, transparent 1px)
             `,
-            backgroundSize: "18px 18px",
-            opacity: 0.45,
+            backgroundSize: "20px 20px",
+            opacity: 0.35,
           }} />
 
           {/* Clock display row */}
           <div style={{
             padding: "14px 16px 10px",
             borderBottom: "1.5px solid #C8B8A0",
-            background: "transparent",
+            background: "#EDE0CF",
             position: "relative",
             zIndex: 1,
             display: "flex",
@@ -1052,9 +1052,9 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* Progress bar */}
       {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{ display: "flex", gap: 2, borderTop: "2px solid #3D2E1E" }}>
+        <div style={{ display: "flex", gap: 1, borderTop: "2px solid #3D2E1E", background: "#D4C4B0" }}>
           {segments.map((filled, i) => (
-            <div key={i} style={{ flex: 1, height: 6, background: filled ? accentColor : "#EDE0CF", transition: "background 0.5s" }} />
+            <div key={i} style={{ flex: 1, height: 6, background: filled ? accentColor : "#D4C4B0", transition: "background 0.5s" }} />
           ))}
         </div>
       )}
@@ -1066,7 +1066,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           alignItems: "center",
           gap: 8,
           padding: "8px 12px",
-          background: "#EDE0CF",
+          background: "#D8CCBA",
           borderTop: "2px solid #3D2E1E",
         }}>
           {/* Quit */}
@@ -1090,8 +1090,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             <button onClick={handleStartPause} style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "6px 20px",
-              background: running ? "#FAF8F3" : accentColor,
-              border: `1.5px solid ${running ? "#B0A090" : accentColor}`,
+              background: running ? "#F5EDE0" : accentColor,
+              border: `1.5px solid ${running ? "#8C7B6B" : accentColor}`,
               color: running ? "#3D2E1E" : "#FAF6F1",
               fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
               letterSpacing: "0.14em", cursor: "pointer",
@@ -1124,8 +1124,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           display: "flex",
           justifyContent: "space-between",
           padding: "3px 10px",
-          background: "#D8CCBA",
-          borderTop: "1px solid #B0A090",
+          background: "#C8B8A0",
+          borderTop: "1px solid #8C7B6B",
         }}>
           <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#6A5A4A", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} MIN · {MODE_LABELS[mode]}</span>
           <span style={{ fontSize: 7, letterSpacing: "0.14em", color: "#6A5A4A", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} CROSSED OFF</span>
