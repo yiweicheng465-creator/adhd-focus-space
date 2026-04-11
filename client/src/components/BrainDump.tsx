@@ -316,29 +316,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
 
         <div className="flex items-center justify-between">
           <span className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>⌘ + Enter to capture</span>
-          <div className="flex items-center gap-2">
-            {entries.filter((e) => !e.converted).length > 0 && (
-              <button
-                onClick={handleAiCategorise}
-                disabled={categorizeMutation.isPending}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-all"
-                style={{
-                  background: categorizeMutation.isPending ? "oklch(0.88 0.014 75)" : "oklch(0.55 0.09 35 / 0.10)",
-                  border: `1px solid oklch(0.55 0.09 35 / 0.28)`,
-                  color: M.coral,
-                  fontFamily: "'DM Sans', sans-serif",
-                  borderRadius: 6,
-                  cursor: categorizeMutation.isPending ? "not-allowed" : "pointer",
-                }}
-              >
-                <Sparkles className="w-3 h-3" />
-                {categorizeMutation.isPending ? "Sorting…" : "AI Sort"}
-              </button>
-            )}
-            <button onClick={dump} className="m-btn-primary">
-              Dump It
-            </button>
-          </div>
+          <button onClick={dump} className="m-btn-primary">
+            Dump It
+          </button>
         </div>
       </div>
 
@@ -487,9 +467,27 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
             {activeTag ? `#${activeTag}` : "All thoughts"}{" "}
             <span style={{ color: M.muted }}>({visibleEntries.length})</span>
           </p>
-          <button onClick={clearAll} className="m-btn-link">
-            Clear all
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleAiCategorise}
+              disabled={categorizeMutation.isPending}
+              className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-all"
+              style={{
+                background: categorizeMutation.isPending ? "oklch(0.88 0.014 75)" : "oklch(0.55 0.09 35 / 0.10)",
+                border: `1px solid oklch(0.55 0.09 35 / 0.28)`,
+                color: M.coral,
+                fontFamily: "'DM Sans', sans-serif",
+                borderRadius: 6,
+                cursor: categorizeMutation.isPending ? "not-allowed" : "pointer",
+              }}
+            >
+              <Sparkles className="w-3 h-3" />
+              {categorizeMutation.isPending ? "Sorting…" : "AI Sort"}
+            </button>
+            <button onClick={clearAll} className="m-btn-link">
+              Clear all
+            </button>
+          </div>
         </div>
       )}
 
