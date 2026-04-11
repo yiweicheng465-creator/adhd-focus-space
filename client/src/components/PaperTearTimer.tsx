@@ -200,9 +200,13 @@ function TearStrip({
 
   if (hidden || state === "torn") return null;
 
-  const isActive = isLast && isRunning;
-  // How much is revealed: active strip shows revealProgress, others show 0 (fully covered)
-  const revealed = isActive ? revealProgress : 0;
+  const isActive = isLast;
+  // When idle/paused: show fully open rip (revealed=1) so the effect is always visible.
+  // When running: animate from current stripProgress (0→1 as the strip interval elapses).
+  // Non-active strips (already torn or not yet active) stay covered (revealed=0).
+  const revealed = isLast
+    ? (isRunning ? revealProgress : 1)
+    : 0;
 
   return (
     <div
