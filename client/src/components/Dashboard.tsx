@@ -418,17 +418,8 @@ export function Dashboard({
 
       {/* ── HERO: Retro Lo-Fi Desktop Window ── */}
       <div className="retro-window relative overflow-hidden" style={{ minHeight: 148 }}>
-        {/* Grid paper background */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(oklch(0.78 0.022 68 / 0.18) 1px, transparent 1px),
-            linear-gradient(90deg, oklch(0.78 0.022 68 / 0.18) 1px, transparent 1px)
-          `,
-          backgroundSize: "20px 20px",
-          backgroundPosition: "0 0",
-        }} />
         {/* Warm parchment overlay */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, oklch(0.985 0.010 78 / 0.92) 0%, oklch(0.978 0.014 72 / 0.85) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, oklch(0.985 0.010 78 / 0.98) 0%, oklch(0.978 0.014 72 / 0.96) 100%)" }} />
 
         {/* ── Retro title bar ── */}
         <div className="retro-titlebar relative z-10">

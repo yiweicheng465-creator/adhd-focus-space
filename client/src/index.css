@@ -179,10 +179,10 @@
     @apply bg-background text-foreground;
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
-    /* Grid paper background texture */
+    /* Grid paper background texture — visible on page bg, not on cards */
     background-image:
-      linear-gradient(oklch(0.86 0.018 72 / 0.35) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.86 0.018 72 / 0.35) 1px, transparent 1px);
+      linear-gradient(oklch(0.75 0.022 68 / 0.55) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.75 0.022 68 / 0.55) 1px, transparent 1px);
     background-size: 24px 24px;
     background-attachment: fixed;
   }

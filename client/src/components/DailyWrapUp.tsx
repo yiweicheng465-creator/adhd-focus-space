@@ -427,12 +427,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Grid paper background */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: `linear-gradient(oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px), linear-gradient(90deg, oklch(0.78 0.022 68 / 0.10) 1px, transparent 1px)`,
-          backgroundSize: "20px 20px",
-          zIndex: 0,
-        }} />
+
 
         {/* Retro title bar */}
         <div className="relative z-10" style={{

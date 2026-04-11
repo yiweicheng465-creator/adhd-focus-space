@@ -72,3 +72,20 @@
 - [x] Restyle DailyCheckIn modal with retro window chrome (title bar, grid bg, pencil borders)
 - [x] Restyle DailyWrapUp modal with retro window chrome
 - [x] Restyle WeeklyResetNudge modal with retro window chrome
+
+## Full-Page Retro Styling
+- [ ] Apply retro window chrome to TaskManager page
+- [ ] Apply retro window chrome to BrainDump page
+- [ ] Apply retro window chrome to Goals page
+- [ ] Apply retro window chrome to AgentTracker page
+- [ ] Apply retro window chrome to DailyWins page
+- [ ] Apply retro window chrome to MonthlyProgress page
+- [ ] Apply retro window chrome to FocusTimer full page (if separate)
+
+## Grid/Plaid Background Refactor
+- [x] Add grid pattern to global page background (body/html in index.css)
+- [x] Remove grid pattern from Dashboard panel interiors
+- [x] Remove grid pattern from DailyCheckIn modal interior
+- [x] Remove grid pattern from DailyWrapUp modal interior
+- [x] Remove grid pattern from WeeklyResetNudge interior
+- [x] Remove grid pattern from RetroPageWrapper interior
