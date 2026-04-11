@@ -24,6 +24,7 @@ interface BrainDumpEntry {
 interface BrainDumpProps {
   onConvertToTask: (task: Task) => void;
   onCreateAgent?: (taskText: string) => void;
+  onAddGoal?: (text: string) => void;
   onDump?: () => void;
   initialText?: string;
   onInitialTextConsumed?: () => void;
@@ -101,7 +102,7 @@ function loadEntries(): BrainDumpEntry[] {
   }
 }
 
-export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
+export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, initialText, onInitialTextConsumed }: BrainDumpProps) {
   const [currentThought, setCurrentThought] = useState("");
   const [entries,        setEntries]        = useState<BrainDumpEntry[]>(() => loadEntries());
   const [activeTag,      setActiveTag]      = useState<string | null>(null);
@@ -165,8 +166,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
   // ── AI Categorise ──
   const [aiResults, setAiResults] = useState<Array<{
     original: string;
-    category: "task" | "worry" | "idea" | "reminder" | "other";
-    action: "add_to_tasks" | "archive" | "keep";
+    category: "task" | "goal" | "worry" | "idea" | "reminder" | "other";
+    action: "add_to_tasks" | "add_to_goals" | "archive" | "keep";
     rewritten: string;
     emoji: string;
   }> | null>(null);
@@ -245,12 +246,15 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
     toast.success(`${taskItems.length} item${taskItems.length !== 1 ? "s" : ""} added to tasks.`, { duration: 2500 });
   };
 
-  const sendToAgent = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
+  const pushItemToGoal = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
     if (!item) return;
     const text = item.rewritten || item.original;
-    onCreateAgent?.(text);
+    onAddGoal?.(text);
+    setEntries((prev) => prev.map((e) =>
+      e.text === item.original ? { ...e, converted: true } : e
+    ));
     setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
-    toast.success("Sent to AI Agents.", { duration: 2000 });
+    toast.success("Added to goals.", { duration: 2000 });
   };
 
   // Auto-dump initialText (from quick-capture bar) once on mount
@@ -322,86 +326,172 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
         </div>
       </div>
 
-      {/* AI Results Panel */}
+      {/* AI Results Panel — retro OS window */}
       {aiResults && !aiDismissed && aiResults.length > 0 && (
-        <div
-          className="flex flex-col gap-2 p-3"
-          style={{ background: "oklch(0.55 0.09 35 / 0.05)", border: `1px solid oklch(0.55 0.09 35 / 0.20)`, borderRadius: 8 }}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" style={{ color: M.coral }} />
-              <span className="text-xs font-semibold" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>AI sorted your thoughts</span>
-            </div>
-            <div className="flex items-center gap-2">
-              {aiResults && aiResults.filter((r) => r.action === "add_to_tasks" || r.category === "task").length > 1 && (
+        <div style={{
+          border: "2px solid #3D2E1E",
+          boxShadow: "3px 3px 0 #3D2E1E",
+          background: "#FAF8F3",
+          overflow: "hidden",
+          marginTop: 4,
+        }}>
+          {/* Title bar */}
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            background: "#EDE0CF",
+            borderBottom: "2px solid #3D2E1E",
+            padding: "0 10px",
+            height: 28,
+            userSelect: "none",
+          }}>
+            <Sparkles style={{ width: 10, height: 10, color: M.coral, marginRight: 6, flexShrink: 0 }} />
+            <span style={{
+              flex: 1,
+              fontSize: 8,
+              letterSpacing: "0.20em",
+              textTransform: "uppercase",
+              color: "#3D2E1E",
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>ai_sort.exe</span>
+            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+              {aiResults.filter((r) => r.action === "add_to_tasks" || r.category === "task").length > 1 && (
                 <button
                   onClick={pushAllToTasks}
-                  className="flex items-center gap-1 px-2 py-1 text-xs font-medium"
-                  style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                  style={{
+                    display: "flex", alignItems: "center", gap: 4,
+                    padding: "2px 8px",
+                    background: "transparent",
+                    border: "1px solid #B0A090",
+                    color: "#6A5A4A",
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 7,
+                    letterSpacing: "0.12em",
+                    boxShadow: "1px 1px 0 #B0A090",
+                  }}
                 >
-                  <ArrowRight className="w-3 h-3" /> Push all tasks
+                  <ArrowRight style={{ width: 8, height: 8 }} /> ALL TASKS
                 </button>
               )}
-              <button onClick={() => setAiDismissed(true)} style={{ color: M.muted, background: "none", border: "none", cursor: "pointer" }}><X className="w-3.5 h-3.5" /></button>
+              <button
+                onClick={() => setAiDismissed(true)}
+                style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7B6B", padding: 0, display: "flex" }}
+              >
+                <X style={{ width: 12, height: 12 }} />
+              </button>
             </div>
           </div>
-          <div className="flex flex-col gap-1.5">
+
+          {/* Items */}
+          <div style={{ display: "flex", flexDirection: "column" }}>
             {aiResults.map((item, i) => (
               <div
                 key={i}
-                className="flex items-start gap-2 p-2"
-                style={{ background: M.card, border: `1px solid ${M.border}`, borderRadius: 6 }}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  padding: "7px 10px",
+                  borderBottom: i < aiResults.length - 1 ? "1px solid #E8DDD0" : "none",
+                  background: "#FAF8F3",
+                }}
               >
-                <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1.4 }}>{item.emoji}</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
-                    {item.action === "add_to_tasks" ? item.rewritten : item.original}
+                <span style={{ fontSize: 13, flexShrink: 0, lineHeight: 1 }}>{item.emoji}</span>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{
+                    margin: 0,
+                    fontSize: 9,
+                    color: "#3D2E1E",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    letterSpacing: "0.04em",
+                    lineHeight: 1.4,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  }}>
+                    {item.action === "add_to_tasks" || item.action === "add_to_goals" ? item.rewritten : item.original}
                   </p>
-                  <span
-                    className="inline-block mt-0.5 px-1.5 py-0.5 text-xs"
-                    style={{
-                      background: item.category === "task" ? "oklch(0.52 0.07 145 / 0.12)" : item.category === "worry" ? "oklch(0.55 0.09 35 / 0.10)" : "oklch(0.58 0.09 55 / 0.12)",
-                      color: item.category === "task" ? M.sage : item.category === "worry" ? M.coral : "oklch(0.58 0.09 55)",
-                      fontFamily: "'DM Sans', sans-serif",
-                      borderRadius: 4,
-                    }}
-                  >
+                  <span style={{
+                    display: "inline-block",
+                    marginTop: 2,
+                    padding: "1px 5px",
+                    fontSize: 7,
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    background: item.category === "task" ? "#E8F0E0" : item.category === "goal" ? "#E8E0F0" : item.category === "worry" ? "#F0E0E0" : "#EDE0CF",
+                    color: item.category === "task" ? "#5A7A4A" : item.category === "goal" ? "#5A4A7A" : item.category === "worry" ? "#8A4A3A" : "#6A5A4A",
+                    border: `1px solid ${item.category === "task" ? "#B8D0A8" : item.category === "goal" ? "#B8A8D0" : item.category === "worry" ? "#D0A8A8" : "#C8B8A0"}`,
+                  }}>
                     {item.category}
                   </span>
                 </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  {/* Push to task — available for all items */}
+                <div style={{ display: "flex", alignItems: "center", gap: 4, flexShrink: 0 }}>
+                  {/* Task button */}
                   <button
                     onClick={() => pushItemToTask(item)}
                     title="Add to tasks"
-                    className="flex items-center gap-1 px-2 py-1 text-xs"
-                    style={{ background: M.sage, color: "white", borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 3,
+                      padding: "3px 8px",
+                      background: "#EDE0CF",
+                      border: "1px solid #B0A090",
+                      color: "#3D2E1E",
+                      cursor: "pointer",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      fontSize: 7,
+                      letterSpacing: "0.10em",
+                      boxShadow: "1px 1px 0 #B0A090",
+                    }}
                   >
-                    <ArrowRight className="w-3 h-3" /> Task
+                    <ArrowRight style={{ width: 8, height: 8 }} /> TASK
                   </button>
-                  {/* Send to AI Agent */}
-                  {onCreateAgent && (
+                  {/* Goal button */}
+                  {onAddGoal && (
                     <button
-                      onClick={() => sendToAgent(item)}
-                      title="Create AI agent for this"
-                      className="flex items-center gap-1 px-2 py-1 text-xs"
-                      style={{ background: "oklch(0.52 0.14 35 / 0.12)", color: M.coral, borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: `1px solid oklch(0.52 0.14 35 / 0.25)` }}
+                      onClick={() => pushItemToGoal(item)}
+                      title="Add to goals"
+                      style={{
+                        display: "flex", alignItems: "center", gap: 3,
+                        padding: "3px 8px",
+                        background: "#EDE0CF",
+                        border: "1px solid #B0A090",
+                        color: "#3D2E1E",
+                        cursor: "pointer",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 7,
+                        letterSpacing: "0.10em",
+                        boxShadow: "1px 1px 0 #B0A090",
+                      }}
                     >
-                      <Sparkles className="w-3 h-3" /> Agent
+                      <Sparkles style={{ width: 8, height: 8 }} /> GOAL
                     </button>
                   )}
                   {item.action === "archive" && (
                     <button
                       onClick={() => applyAiAction(item)}
-                      className="flex items-center gap-1 px-2 py-1 text-xs"
-                      style={{ background: "oklch(0.88 0.014 75)", color: M.muted, borderRadius: 4, fontFamily: "'DM Sans', sans-serif", border: "none" }}
+                      style={{
+                        display: "flex", alignItems: "center", gap: 3,
+                        padding: "3px 8px",
+                        background: "transparent",
+                        border: "1px solid #D4C4B0",
+                        color: "#8C7B6B",
+                        cursor: "pointer",
+                        fontFamily: "'JetBrains Mono', monospace",
+                        fontSize: 7,
+                        letterSpacing: "0.10em",
+                      }}
                     >
-                      Archive
+                      ARCHIVE
                     </button>
                   )}
-                  <button onClick={() => setAiResults((prev) => prev ? prev.filter((_, j) => j !== i) : null)} style={{ color: M.muted, background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-                    <X className="w-3 h-3" />
+                  <button
+                    onClick={() => setAiResults((prev) => prev ? prev.filter((_, j) => j !== i) : null)}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "#B0A090", display: "flex" }}
+                  >
+                    <X style={{ width: 10, height: 10 }} />
                   </button>
                 </div>
               </div>

@@ -255,35 +255,41 @@ function TearStrip({ text, state, isNext }: {
 
   return (
     <div style={{
-      padding: "9px 16px",
+      padding: "7px 14px",
       background: isNext
-        ? "linear-gradient(90deg, #F5EDE0 0%, #EDE0CF 100%)"
-        : isDone ? "#FAF6F1" : "#FAF6F1",
-      borderTop: "1px solid #EDE0CF",
+        ? "rgba(200, 96, 58, 0.07)"
+        : "transparent",
+      borderTop: "1px solid rgba(180, 160, 130, 0.4)",
       display: "flex",
       alignItems: "center",
-      gap: 10,
-      opacity: isDone ? 0.45 : 1,
+      gap: 8,
+      opacity: isDone ? 0.5 : 1,
       transition: "opacity 0.35s",
+      position: "relative",
+      zIndex: 1,
     }}>
-      {isNext && (
-        <div style={{
-          width: 6, height: 6, borderRadius: "50%",
-          background: "#C8603A",
-          boxShadow: "0 0 6px #C8603A",
-          flexShrink: 0,
-        }} />
-      )}
+      {/* Row number */}
       <span style={{
         fontFamily: "'JetBrains Mono', monospace",
-        fontSize: isNext ? 11 : 10,
-        color: isDone ? "#B0A090" : isNext ? "#3D2E1E" : "#8C7B6B",
-        letterSpacing: "0.06em",
-        fontWeight: isNext ? 600 : 400,
+        fontSize: 7,
+        color: "#C8B8A0",
+        letterSpacing: "0.04em",
+        width: 14,
+        textAlign: "right",
+        flexShrink: 0,
+        userSelect: "none",
+      }}>{isDone ? "✓" : isNext ? "▶" : ""}</span>
+      <span style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        fontSize: isNext ? 10 : 9,
+        color: isDone ? "#C8B8A0" : isNext ? "#3D2E1E" : "#7A6A5A",
+        letterSpacing: "0.05em",
+        fontWeight: isNext ? 700 : 400,
         textDecoration: isDone ? "line-through" : "none",
         textDecorationColor: "#C8603A",
-        textDecorationThickness: "1.5px",
+        textDecorationThickness: "2px",
         transition: "color 0.3s, text-decoration 0.3s",
+        flex: 1,
       }}>{text}</span>
     </div>
   );
@@ -728,54 +734,74 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="flex flex-col gap-3" style={{ fontFamily: "'DM Sans', system-ui" }}>
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>Focus Timer</p>
-          <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{MODE_LABELS[mode]}</p>
-          {mitLabel && phase === "idle" && (
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4, padding: "3px 8px", background: "oklch(0.52 0.10 32 / 0.08)", border: "1px solid oklch(0.52 0.10 32 / 0.25)", borderRadius: 4 }}>
-              <span style={{ fontSize: 9, color: "oklch(0.52 0.10 32)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>★ MIT: {mitLabel.length > 28 ? mitLabel.slice(0, 28) + "…" : mitLabel}</span>
-              <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "oklch(0.52 0.10 32 / 0.60)", fontSize: 10, lineHeight: 1 }}>×</button>
-            </div>
-          )}
+    <div
+      className="flex flex-col"
+      style={{
+        fontFamily: "'JetBrains Mono', monospace",
+        background: "#FAF8F3",
+        overflow: "hidden",
+      }}
+    >
+      {/* ── Top bar: mode tabs + sound/settings controls ── */}
+      <div style={{ display: "flex", alignItems: "stretch", borderBottom: "1px solid #D4C4B0" }}>
+        {/* Mode tabs */}
+        <div style={{ display: "flex", flex: 1 }}>
+          {(["focus", "short", "long"] as TimerMode[]).map((m, idx) => (
+            <button key={m} onClick={() => switchMode(m)} style={{
+              flex: 1,
+              padding: "6px 0",
+              fontSize: 8,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              border: "none",
+              borderRight: idx < 2 ? "1px solid #D4C4B0" : "none",
+              background: mode === m ? MODE_COLORS[m] : "transparent",
+              color: mode === m ? "#FAF6F1" : "#8C7B6B",
+              cursor: running ? "not-allowed" : "pointer",
+              fontFamily: "'JetBrains Mono', monospace",
+              opacity: running && mode !== m ? 0.5 : 1,
+              fontWeight: mode === m ? 700 : 400,
+              transition: "background 0.15s",
+            }}>
+              {m === "focus" ? "FOCUS" : m === "short" ? "SHORT" : "LONG"}
+            </button>
+          ))}
         </div>
-        <div className="flex items-center gap-2">
+        {/* Sound + settings */}
+        <div style={{ display: "flex", alignItems: "center", gap: 3, padding: "0 8px", borderLeft: "1px solid #D4C4B0" }}>
           {sessions > 0 && (
-            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{sessions} SESSION{sessions !== 1 ? "S" : ""}</span>
+            <span style={{ fontSize: 8, letterSpacing: "0.10em", color: "#8C7B6B", marginRight: 2 }}>{sessions}×</span>
           )}
-          {quitCount > 0 && (
-            <span style={{ fontSize: 9, letterSpacing: "0.16em", color: "#C8603A", fontFamily: "'JetBrains Mono', monospace" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""}</span>
-          )}
-          {/* Single sound button */}
           <button
             onClick={() => { setShowSound(s => !s); setShowSettings(false); }}
             title="Sound & music"
-            style={{ width: 26, height: 26, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.52 0.07 145 / 0.12)" : "transparent", cursor: "pointer", borderRadius: 0, position: "relative" }}
+            style={{ width: 20, height: 20, border: `1px solid ${showSound || sound.musicEnabled ? "#7A8C6E" : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "#D4E8D0" : "transparent", cursor: "pointer", borderRadius: 0 }}
           >
-            {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={11} color="#7A8C6E" /> : (sound.sfxEnabled ? <Volume2 size={11} color="#8C7B6B" /> : <VolumeX size={11} color="#8C7B6B" />)}
+            {sound.musicLoading ? <span style={{ fontSize: 7, color: "#7A8C6E" }}>…</span> : sound.musicEnabled ? <Coffee size={9} color="#5A8A5A" /> : (sound.sfxEnabled ? <Volume2 size={9} color="#8C7B6B" /> : <VolumeX size={9} color="#B0A090" />)}
           </button>
-          <button onClick={() => { setShowSettings(s => !s); setShowSound(false); }} style={{ width: 26, height: 26, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", borderRadius: 0 }}>
-            <Settings size={11} color={showSettings ? accentColor : "#8C7B6B"} />
+          <button
+            onClick={() => { setShowSettings(s => !s); setShowSound(false); }}
+            style={{ width: 20, height: 20, border: `1px solid ${showSettings ? accentColor : "#D4C4B0"}`, display: "flex", alignItems: "center", justifyContent: "center", background: showSettings ? `${accentColor}18` : "transparent", cursor: "pointer", borderRadius: 0 }}
+          >
+            <Settings size={9} color={showSettings ? accentColor : "#8C7B6B"} />
           </button>
         </div>
       </div>
 
-      {/* Mode tabs */}
-      <div style={{ display: "flex", gap: 6 }}>
-        {(["focus", "short", "long"] as TimerMode[]).map(m => (
-          <button key={m} onClick={() => switchMode(m)} style={{
-            flex: 1, padding: "6px 0", fontSize: 9, letterSpacing: "0.18em",
-            textTransform: "uppercase", border: `1px solid ${mode === m ? MODE_COLORS[m] : "#D4C4B0"}`,
-            background: mode === m ? MODE_COLORS[m] : "transparent",
-            color: mode === m ? "#FAF6F1" : "#8C7B6B", cursor: running ? "not-allowed" : "pointer",
-            borderRadius: 0, fontFamily: "'JetBrains Mono', monospace", opacity: running ? 0.6 : 1,
-          }}>
-            {m === "focus" ? "Focus" : m === "short" ? "Short" : "Long"}
-          </button>
-        ))}
-      </div>
+      {/* MIT label if set */}
+      {mitLabel && phase === "idle" && (
+        <div style={{ display: "flex", alignItems: "center", gap: 6, padding: "5px 12px", background: "oklch(0.52 0.10 32 / 0.08)", borderBottom: "1px solid oklch(0.52 0.10 32 / 0.20)" }}>
+          <span style={{ fontSize: 8, color: "oklch(0.52 0.10 32)", letterSpacing: "0.06em", flex: 1 }}>★ MIT: {mitLabel.length > 32 ? mitLabel.slice(0, 32) + "…" : mitLabel}</span>
+          <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "oklch(0.52 0.10 32 / 0.60)", fontSize: 12, lineHeight: 1 }}>×</button>
+        </div>
+      )}
+
+      {/* Quit count badge */}
+      {quitCount > 0 && (
+        <div style={{ padding: "3px 12px", background: "#FFF0EC", borderBottom: "1px solid #F0C8B8" }}>
+          <span style={{ fontSize: 8, letterSpacing: "0.14em", color: "#C8603A" }}>{quitCount} QUIT{quitCount !== 1 ? "S" : ""} LOGGED</span>
+        </div>
+      )}
 
       {/* Settings panel */}
       {showSettings && (
@@ -930,52 +956,48 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
         <div
           className={paperFlying ? "ft-fly-away" : ""}
           style={{
-            background: "#FDFAF5",
-            border: "1px solid #E8DDD0",
+            background: "#FAF8F3",
             minHeight: 260,
             overflow: "hidden",
             position: "relative",
           }}
         >
-          {/* Notebook header — time display */}
+          {/* Grid paper background */}
+          <div style={{
+            position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+            backgroundImage: `
+              linear-gradient(to right, #D8CFC0 1px, transparent 1px),
+              linear-gradient(to bottom, #D8CFC0 1px, transparent 1px)
+            `,
+            backgroundSize: "18px 18px",
+            opacity: 0.45,
+          }} />
+
+          {/* Clock display row */}
           <div style={{
             padding: "14px 16px 10px",
-            borderBottom: "1px solid #E8DDD0",
-            background: "#FAF6F1",
+            borderBottom: "1.5px solid #C8B8A0",
+            background: "transparent",
             position: "relative",
+            zIndex: 1,
+            display: "flex",
+            alignItems: "baseline",
+            gap: 12,
           }}>
-            {/* Red margin line */}
-            <div style={{
-              position: "absolute", left: 36, top: 0, bottom: 0,
-              width: 1, background: "#E8A090", opacity: 0.5,
-            }} />
-            {/* Ruled lines */}
-            {[0,1,2].map(i => (
-              <div key={i} style={{
-                position: "absolute", left: 0, right: 0,
-                top: 14 + i * 10,
-                height: 1, background: "#E8DDD0", opacity: 0.6,
-              }} />
-            ))}
-            <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontSize: 11,
-              fontStyle: "italic",
-              color: "#8C7B6B",
-              margin: "0 0 4px 44px",
-              position: "relative",
-            }}>things to let go of</p>
             <p style={{
               fontFamily: "'JetBrains Mono', monospace",
-              fontSize: 32,
+              fontSize: 36,
               fontWeight: 700,
               color: phase === "running" ? accentColor : "#3D2E1E",
-              margin: "0 0 0 44px",
+              margin: 0,
               letterSpacing: "0.04em",
               lineHeight: 1,
-              position: "relative",
               transition: "color 0.5s",
             }}>{mm}:{ss}</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase" }}>things to</span>
+              <span style={{ fontSize: 8, letterSpacing: "0.18em", color: "#8C7B6B", textTransform: "uppercase" }}>let go of</span>
+            </div>
           </div>
 
           {/* Idle: show editable strip list */}
@@ -990,9 +1012,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
           {/* Running / paused: show strips */}
           {phase !== "idle" && (
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", flexDirection: "column", position: "relative", zIndex: 1 }}>
               {strips.map((text: string, i: number) => {
-                // Pre-strike the very first strip as a visual preview of the effect
                 const baseState = stripStates[i] ?? "attached";
                 const effectiveState: StripState =
                   i === 0 && baseState === "attached" && tornCount === 0
@@ -1011,80 +1032,103 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             </div>
           )}
 
-          {/* Empty state when all torn */}
+          {/* Empty state when all crossed off */}
           {tornCount === strips.length && phase === "running" && (
             <div style={{
               padding: "20px",
               textAlign: "center",
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: "italic",
+              fontFamily: "'JetBrains Mono', monospace",
               color: "#8C7B6B",
-              fontSize: 13,
+              fontSize: 9,
+              letterSpacing: "0.14em",
+              position: "relative",
+              zIndex: 1,
             }}>
-              All torn away…
+              ALL CLEARED ✓
             </div>
           )}
         </div>
       )}
 
-      {/* Progress segments */}
+      {/* Progress bar */}
       {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{ display: "flex", gap: 3 }}>
+        <div style={{ display: "flex", gap: 2, borderTop: "2px solid #3D2E1E" }}>
           {segments.map((filled, i) => (
-            <div key={i} style={{ flex: 1, height: 5, background: filled ? accentColor : "#E8DDD0", transition: "background 0.5s" }} />
+            <div key={i} style={{ flex: 1, height: 6, background: filled ? accentColor : "#EDE0CF", transition: "background 0.5s" }} />
           ))}
         </div>
       )}
 
-      {/* Controls */}
+      {/* Controls row */}
       {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
+          padding: "8px 12px",
+          background: "#EDE0CF",
+          borderTop: "2px solid #3D2E1E",
+        }}>
           {/* Quit */}
           {(running || phase === "paused") && (
             <button onClick={handleQuit} title="Quit session" style={{
               display: "flex", alignItems: "center", gap: 5,
-              padding: "7px 14px", borderRadius: 999,
-              background: "transparent", border: "1px solid #D4C4B0",
+              padding: "5px 12px",
+              background: "transparent",
+              border: "1.5px solid #B0A090",
               color: "#8C7B6B", cursor: "pointer",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 8,
               letterSpacing: "0.12em",
+              boxShadow: "2px 2px 0 #B0A090",
             }}>
-              <RotateCcw size={11} /> QUIT
+              <RotateCcw size={10} /> QUIT
             </button>
           )}
 
           {/* Play / Pause */}
           {phase !== "recovering" && (
             <button onClick={handleStartPause} style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "9px 24px", borderRadius: 999,
-              background: running ? "transparent" : "#2a1f14",
-              border: "1px solid #2a1f14",
-              color: running ? "#2a1f14" : "#FAF6F1",
-              fontFamily: "'JetBrains Mono', monospace", fontSize: 10,
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 20px",
+              background: running ? "#FAF8F3" : accentColor,
+              border: `1.5px solid ${running ? "#B0A090" : accentColor}`,
+              color: running ? "#3D2E1E" : "#FAF6F1",
+              fontFamily: "'JetBrains Mono', monospace", fontSize: 9,
               letterSpacing: "0.14em", cursor: "pointer",
-              boxShadow: "none",
-              transition: "all 0.15s",
+              boxShadow: running ? "2px 2px 0 #B0A090" : `2px 2px 0 #7A3A1A`,
+              fontWeight: 700,
+              transition: "all 0.12s",
             }}>
-              {running ? <><Pause size={11} /> PAUSE</> : <><Play size={11} /> {phase === "paused" ? "RESUME" : "START"}</>}
+              {running ? <><Pause size={10} /> PAUSE</> : <><Play size={10} /> {phase === "paused" ? "RESUME" : "START"}</>}
             </button>
           )}
 
           {/* Session dots */}
-          <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 4, marginLeft: "auto" }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ width: 7, height: 7, background: i < sessions % 4 ? accentColor : "#E8DDD0", transition: "background 0.3s" }} />
+              <div key={i} style={{
+                width: 8, height: 8,
+                background: i < sessions % 4 ? accentColor : "#C8B8A0",
+                border: `1px solid ${i < sessions % 4 ? accentColor : "#A09080"}`,
+                transition: "background 0.3s",
+              }} />
             ))}
-            <span style={{ fontSize: 9, letterSpacing: "0.12em", color: "#8C7B6B", marginLeft: 3, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
+            <span style={{ fontSize: 8, letterSpacing: "0.10em", color: "#8C7B6B", marginLeft: 4, fontFamily: "'JetBrains Mono', monospace" }}>{sessions}/4</span>
           </div>
         </div>
       )}
 
-      {/* Footer */}
+      {/* Status bar footer */}
       {phase !== "complete" && phase !== "quit" && phase !== "transition" && phase !== "block_complete" && (
-        <div style={{ borderTop: "1px solid #E8DDD0", paddingTop: 8, display: "flex", justifyContent: "space-between" }}>
-          <span style={{ fontSize: 8, letterSpacing: "0.2em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} min · {MODE_LABELS[mode]}</span>
-          <span style={{ fontSize: 8, letterSpacing: "0.15em", color: "#8C7B6B", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} STRIPS TORN</span>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          padding: "3px 10px",
+          background: "#D8CCBA",
+          borderTop: "1px solid #B0A090",
+        }}>
+          <span style={{ fontSize: 7, letterSpacing: "0.18em", color: "#6A5A4A", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{durations[mode]} MIN · {MODE_LABELS[mode]}</span>
+          <span style={{ fontSize: 7, letterSpacing: "0.14em", color: "#6A5A4A", fontFamily: "'JetBrains Mono', monospace" }}>{tornCount}/{strips.length} CROSSED OFF</span>
         </div>
       )}
     </div>

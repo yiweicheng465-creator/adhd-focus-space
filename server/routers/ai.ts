@@ -37,17 +37,17 @@ const CATEGORY_SCHEMA = {
               original: { type: "string", description: "The original entry text" },
               category: {
                 type: "string",
-                enum: ["task", "worry", "idea", "reminder", "other"],
-                description: "Category of the entry",
+                enum: ["task", "goal", "worry", "idea", "reminder", "other"],
+                description: "Category of the entry: task=actionable single step, goal=bigger aspiration or outcome to achieve over time, worry=emotional/venting, idea=creative thought, reminder=time-based, other=misc",
               },
               action: {
                 type: "string",
-                enum: ["add_to_tasks", "archive", "keep"],
-                description: "Suggested action: add_to_tasks for actionable items, archive for worries/venting, keep for ideas/reminders",
+                enum: ["add_to_tasks", "add_to_goals", "archive", "keep"],
+                description: "Suggested action: add_to_tasks for single actionable items, add_to_goals for bigger aspirations or multi-step outcomes, archive for worries/venting, keep for ideas/reminders",
               },
               rewritten: {
                 type: "string",
-                description: "If category is task, rewrite as a clear actionable task (verb + object). Otherwise same as original.",
+                description: "If category is task, rewrite as a clear actionable task (verb + object). If category is goal, rewrite as a clear goal statement. Otherwise same as original.",
               },
               emoji: { type: "string", description: "A single relevant emoji" },
             },
@@ -149,7 +149,7 @@ export const aiRouter = router({
           { role: "system", content: ADHD_SYSTEM },
           {
             role: "user",
-            content: `Categorise these brain dump entries. For each one, decide if it's a task (actionable), worry (emotional/venting), idea, reminder, or other. If it's a task, rewrite it as a clear action.\n\nEntries:\n${entriesList}`,
+            content: `Categorise these brain dump entries. For each one, decide the best category:\n- task: a single actionable step (rewrite as clear verb+object)\n- goal: a bigger aspiration or multi-step outcome to work toward over time (rewrite as a clear goal statement)\n- worry: emotional venting or anxiety (action: archive)\n- idea: creative thought worth keeping (action: keep)\n- reminder: time-based or logistical note (action: keep)\n- other: anything else (action: keep)\n\nEntries:\n${entriesList}`,
           },
         ],
         response_format: CATEGORY_SCHEMA,
@@ -160,8 +160,8 @@ export const aiRouter = router({
       return JSON.parse(content) as {
         items: Array<{
           original: string;
-          category: "task" | "worry" | "idea" | "reminder" | "other";
-          action: "add_to_tasks" | "archive" | "keep";
+          category: "task" | "goal" | "worry" | "idea" | "reminder" | "other";
+          action: "add_to_tasks" | "add_to_goals" | "archive" | "keep";
           rewritten: string;
           emoji: string;
         }>;

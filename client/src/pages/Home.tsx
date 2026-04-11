@@ -731,6 +731,16 @@ export default function Home() {
                       setPendingAgentTask(text);
                       setActiveSection("agents");
                     }}
+                    onAddGoal={(text) => {
+                      const newGoal: Goal = {
+                        id: `g-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+                        text,
+                        progress: 0,
+                        context: "personal",
+                        createdAt: new Date(),
+                      };
+                      setGoals((prev) => [newGoal, ...prev]);
+                    }}
                   />
                 </div>
               </div>
