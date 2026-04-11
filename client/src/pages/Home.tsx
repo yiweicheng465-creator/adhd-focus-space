@@ -558,7 +558,7 @@ export default function Home() {
             )}
 
             {activeSection === "focus" && (
-              <div className="relative py-8 px-4" style={{ minHeight: 700 }}>
+              <div className="relative py-8 px-4" style={{ minHeight: 700, overflow: "visible" }}>
                 <FocusDecor />
 
                 {/* ── Speech bubble — top-left decorative ── */}
@@ -631,17 +631,17 @@ export default function Home() {
                   <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                 </div>
 
-                {/* ── session_tips.txt window — below timer, timer overlaps slightly on top ── */}
+                {/* ── session_tips.txt window — pinned to bottom-right corner of timer, peeking outside ── */}
                 <div style={{
                   position: "relative",
-                  zIndex: 1,
-                  width: 220,
-                  marginTop: -16,
+                  zIndex: 3,
+                  width: 210,
+                  marginTop: -28,
                   marginLeft: "auto",
-                  marginRight: 24,
-                  transform: "rotate(1.5deg)",
+                  marginRight: -48,
+                  transform: "rotate(2.5deg)",
                   transformOrigin: "top right",
-                  boxShadow: "5px 5px 0 oklch(0.28 0.018 55 / 0.18)",
+                  boxShadow: "6px 6px 0 oklch(0.28 0.018 55 / 0.18)",
                 }}>
                   <RetroPageWrapper title="session_tips.txt" sticker="leaf">
                     <div style={{ padding: "10px 14px 12px" }}>

@@ -19,14 +19,16 @@ import { useTimerSound } from "@/hooks/useTimerSound";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 
-// ── Palette (pink/cream/dusty rose — from reference illustration) ────────────
-const BG = "#F5E6E8";       // soft blush pink background
-const PANEL = "#EDD5CC";    // warm cream/dusty rose panel
-const BORDER = "#B87870";   // dusty rose border
-const DARK = "#5C2E2A";     // deep rose/brown dark text
-const ACCENT = "#C4605A";   // coral/dusty red accent
-const BTN_BG = "#E8C4BC";   // light pink button bg
-const SCREEN_BG = "#EAE0F0"; // soft lavender-white screen bg (contrasts with pink pet)
+// ── Palette (dreamy pink/lavender/mint — SukiSketch reference) ───────────────
+const BG = "#F9D6E8";       // dreamy bubblegum pink
+const PANEL = "#F2C4DC";    // soft rose panel
+const BORDER = "#C87AAA";   // muted mauve/pink border
+const DARK = "#4A2040";     // deep plum dark text
+const ACCENT = "#D45898";   // vivid hot pink accent
+const BTN_BG = "#E8B4D4";   // pale pink button bg
+const SCREEN_BG = "#D8E8F8"; // dreamy sky-blue screen bg
+const MINT = "#A8D8C8";     // mint/seafoam highlight
+const LAVENDER = "#C8B4E8"; // soft lavender accent
 
 // ── Inject keyframes once ────────────────────────────────────────────────────
 const STYLE_ID = "focus-timer-cyber-keyframes";
@@ -840,7 +842,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* Settings panel */}
       {showSettings && (
-        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: PANEL }}>
+        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: `linear-gradient(135deg, ${PANEL} 0%, #EAD4F0 100%)` }}>
           <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Duration (min) — click to edit</p>
           <div style={{ display: "flex", gap: 12 }}>
             {(["focus", "short", "long"] as TimerMode[]).map(m => (
@@ -879,7 +881,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* Sound panel */}
       {showSound && (
-        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: PANEL }}>
+        <div style={{ borderBottom: `2px solid ${DARK}`, padding: "11px 12px", background: `linear-gradient(135deg, ${PANEL} 0%, #EAD4F0 100%)` }}>
           <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
