@@ -395,33 +395,56 @@ export default function Home() {
 
       {/* Main content */}
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
-        {/* Top header bar */}
+        {/* Top header bar — retro lo-fi style */}
         <header
-          className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
+          className="sticky top-0 z-30 flex items-center gap-0"
           style={{
-            background: "#EFE0C8E6",
-            backdropFilter: "blur(8px)",
-            borderBottom: "1px solid #C9A87C",
+            background: "#2A1F14",
+            borderBottom: "3px solid #C8603A",
+            boxShadow: "0 3px 0 #7A3A1A, 0 6px 16px oklch(0.18 0.04 40 / 0.35)",
+            minHeight: 48,
           }}
         >
-          <div className="flex items-center gap-3 flex-1 min-w-0">
-            {activeSection === "braindump" ? (
-            <PixelDump size={16} active={false} />
-          ) : (
-            <Icon className="w-4 h-4 shrink-0" style={{ color: "oklch(0.52 0.14 35)" }} />
-          )}
+          {/* Left: page icon + title */}
+          <div
+            className="flex items-center gap-3 px-6 py-3 flex-1 min-w-0"
+            style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}
+          >
+            <div
+              className="flex items-center justify-center w-7 h-7 shrink-0"
+              style={{
+                background: "#C8603A",
+                border: "1.5px solid #E8804A",
+                boxShadow: "2px 2px 0 #7A3A1A",
+              }}
+            >
+              {activeSection === "braindump" ? (
+                <PixelDump size={14} active={true} />
+              ) : (
+                <Icon className="w-3.5 h-3.5" style={{ color: "#FAF6F1" }} />
+              )}
+            </div>
             <h1
-              className="text-base font-bold italic leading-tight truncate"
-              style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.8rem",
+                fontWeight: 700,
+                letterSpacing: "0.18em",
+                textTransform: "uppercase",
+                color: "#FAF6F1",
+                margin: 0,
+                lineHeight: 1,
+              }}
             >
               {meta.title}
             </h1>
           </div>
 
-          <div className="flex items-center gap-4 shrink-0">
-            {/* Dashboard quick-stats in header — clickable, only shown on dashboard */}
+          {/* Right: stats + mood + wrap-up */}
+          <div className="flex items-center shrink-0" style={{ gap: 0 }}>
+            {/* Dashboard quick-stats */}
             {activeSection === "dashboard" && (
-              <div className="hidden sm:flex items-center gap-3">
+              <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}>
                 {[
                   { label: "tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section },
                   { label: "wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section },
@@ -430,14 +453,19 @@ export default function Home() {
                   <React.Fragment key={label}>
                     <button
                       onClick={() => setActiveSection(section)}
-                      className="flex items-baseline gap-1.5 transition-all hover:opacity-60 cursor-pointer"
-                      style={{ background: "transparent", border: "none", padding: 0 }}
+                      className="flex items-baseline gap-1.5 transition-all cursor-pointer px-4 py-3"
+                      style={{
+                        background: "transparent",
+                        border: "none",
+                      }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(1 0 0 / 0.06)"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                     >
-                      <span style={{ fontSize: "0.95rem", fontWeight: 400, fontFamily: "'DM Sans', sans-serif", color: "oklch(0.45 0.010 70)", letterSpacing: "-0.01em" }}>{value}</span>
-                      <span style={{ fontSize: "0.78rem", fontWeight: 400, fontFamily: "'DM Sans', sans-serif", color: "oklch(0.55 0.010 70)" }}>{label}</span>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#FAF6F1", letterSpacing: "0.02em" }}>{value}</span>
+                      <span style={{ fontSize: "0.65rem", fontWeight: 400, fontFamily: "'Space Mono', monospace", color: "oklch(0.78 0.025 68)", letterSpacing: "0.10em", textTransform: "uppercase" }}>{label}</span>
                     </button>
                     {i < arr.length - 1 && (
-                      <span style={{ color: "oklch(0.70 0.008 70)", fontSize: "0.5rem", lineHeight: 1 }}>·</span>
+                      <div style={{ width: 1, height: 20, background: "oklch(1 0 0 / 0.10)" }} />
                     )}
                   </React.Fragment>
                 ))}
@@ -445,18 +473,30 @@ export default function Home() {
             )}
 
             {/* Mood pill */}
-            <MoodPill mood={mood} onMoodChange={setMood} />
+            <div className="px-4 py-3" style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}>
+              <MoodPill mood={mood} onMoodChange={setMood} />
+            </div>
 
             {/* Wrap-up */}
             <button
               onClick={() => setWrapUpOpen(true)}
-              className="flex items-center gap-1.5 text-xs transition-colors hover:text-foreground"
-              style={{ color: "oklch(0.55 0.015 70)" }}
+              className="flex items-center gap-2 transition-all px-5 py-3"
+              style={{
+                color: "oklch(0.78 0.025 68)",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.65rem",
+                letterSpacing: "0.14em",
+                textTransform: "uppercase",
+              }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(1 0 0 / 0.06)"; (e.currentTarget as HTMLButtonElement).style.color = "#FAF6F1"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.78 0.025 68)"; }}
             >
               <Moon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Wrap up</span>
             </button>
-
           </div>
         </header>
 
