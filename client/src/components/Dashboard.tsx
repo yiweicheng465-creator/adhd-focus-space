@@ -139,20 +139,7 @@ function AICommandPanel({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Mood-aware greeting on first open (empty history + mood set)
-  useEffect(() => {
-    if (greetedRef.current) return;
-    if (messages.length > 0) { greetedRef.current = true; return; }
-    if (mood === null || mood === undefined) return;
-    greetedRef.current = true;
-    const greeting = MOOD_GREETINGS[mood];
-    if (greeting) {
-      setTimeout(() => {
-        setMessages([{ role: "assistant", content: greeting }]);
-      }, 600);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mood]);
+  // greetedRef kept for future use but auto-greeting removed — panel starts with suggestion chips
 
   const commandMutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
@@ -404,10 +391,20 @@ export function Dashboard({
   const mitMutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
       setMitLoading(false);
-      // Try to find the MIT task by matching text in the reply
+      // First try: look for a task ID in the reply (format: "TASK_ID:<id>")
+      const idMatch = data.reply.match(/TASK_ID:([\w-]+)/);
+      if (idMatch) {
+        const found = activeTasks.find(t => t.id === idMatch[1]);
+        if (found) {
+          setMitTaskId(found.id);
+          toast.success("MIT highlighted!", { duration: 2000 });
+          return;
+        }
+      }
+      // Second try: fuzzy text match against full task text
       const reply = data.reply.toLowerCase();
       const found = activeTasks.find(t =>
-        reply.includes(t.text.toLowerCase().slice(0, 20))
+        reply.includes(t.text.toLowerCase().replace(/(?:^|\s)#[\w-]+/g, "").trim().slice(0, 30))
       );
       if (found) {
         setMitTaskId(found.id);
@@ -434,7 +431,7 @@ export function Dashboard({
     mitMutation.mutate({
       messages: [{
         role: "user",
-        content: `Given my current tasks, what is the single most important task I should focus on right now? My tasks: ${activeTasks.map(t => `"${t.text}" (${t.priority}, ${t.context})`).join(", ")}. Reply with a short sentence naming the task.`,
+        content: `You are helping an ADHD user identify their single most important task. From the list below, pick ONE task and reply in this exact format: "TASK_ID:<id> — <short reason why>". Tasks: ${activeTasks.map(t => `[TASK_ID:${t.id}] "${t.text.replace(/(?:^|\s)#[\w-]+/g, "").trim()}" (priority: ${t.priority}, context: ${t.context})`).join(" | ")}`,
       }],
       tasks: activeTasks.map(t => ({ id: t.id, text: t.text, priority: t.priority, context: t.context, done: t.done })),
       goals: goals.map(g => ({ id: g.id, text: g.text, progress: g.progress, context: g.context })),

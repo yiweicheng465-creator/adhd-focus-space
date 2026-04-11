@@ -43,3 +43,5 @@
 - [x] Improve MIT card glow to gradient glow effect (not just box-shadow)
 - [x] Add "Start 25 min focus on this" button after MIT is highlighted
 - [x] Wire mood score from daily check-in into AI greeting (personalised opening message)
+- [x] Fix MIT task not getting gradient glow highlight (mitTaskId not matching task id)
+- [x] Replace AI auto-greeting with suggestion chips as the default empty state
