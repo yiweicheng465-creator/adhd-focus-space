@@ -395,27 +395,27 @@ export default function Home() {
 
       {/* Main content */}
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
-        {/* Top header bar — retro lo-fi style */}
+        {/* Top header bar — retro lo-fi light style */}
         <header
           className="sticky top-0 z-30 flex items-center gap-0"
           style={{
-            background: "#2A1F14",
+            background: "#F5EDE0",
             borderBottom: "3px solid #C8603A",
-            boxShadow: "0 3px 0 #7A3A1A, 0 6px 16px oklch(0.18 0.04 40 / 0.35)",
+            boxShadow: "0 3px 0 #C8A87C, 0 5px 12px oklch(0.60 0.04 50 / 0.12)",
             minHeight: 48,
           }}
         >
           {/* Left: page icon + title */}
           <div
             className="flex items-center gap-3 px-6 py-3 flex-1 min-w-0"
-            style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}
+            style={{ borderRight: "1.5px solid #D4C4B0" }}
           >
             <div
               className="flex items-center justify-center w-7 h-7 shrink-0"
               style={{
                 background: "#C8603A",
                 border: "1.5px solid #E8804A",
-                boxShadow: "2px 2px 0 #7A3A1A",
+                boxShadow: "2px 2px 0 #A84828",
               }}
             >
               {activeSection === "braindump" ? (
@@ -431,7 +431,7 @@ export default function Home() {
                 fontWeight: 700,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "#FAF6F1",
+                color: "#2A1F14",
                 margin: 0,
                 lineHeight: 1,
               }}
@@ -444,7 +444,7 @@ export default function Home() {
           <div className="flex items-center shrink-0" style={{ gap: 0 }}>
             {/* Dashboard quick-stats */}
             {activeSection === "dashboard" && (
-              <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}>
+              <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid #D4C4B0" }}>
                 {[
                   { label: "tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section },
                   { label: "wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section },
@@ -454,18 +454,15 @@ export default function Home() {
                     <button
                       onClick={() => setActiveSection(section)}
                       className="flex items-baseline gap-1.5 transition-all cursor-pointer px-4 py-3"
-                      style={{
-                        background: "transparent",
-                        border: "none",
-                      }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(1 0 0 / 0.06)"; }}
+                      style={{ background: "transparent", border: "none" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.60 0.04 50 / 0.08)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                     >
-                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#FAF6F1", letterSpacing: "0.02em" }}>{value}</span>
-                      <span style={{ fontSize: "0.65rem", fontWeight: 400, fontFamily: "'Space Mono', monospace", color: "oklch(0.78 0.025 68)", letterSpacing: "0.10em", textTransform: "uppercase" }}>{label}</span>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#2A1F14", letterSpacing: "0.02em" }}>{value}</span>
+                      <span style={{ fontSize: "0.65rem", fontWeight: 400, fontFamily: "'Space Mono', monospace", color: "#8C7B6B", letterSpacing: "0.10em", textTransform: "uppercase" }}>{label}</span>
                     </button>
                     {i < arr.length - 1 && (
-                      <div style={{ width: 1, height: 20, background: "oklch(1 0 0 / 0.10)" }} />
+                      <div style={{ width: 1, height: 20, background: "#D4C4B0" }} />
                     )}
                   </React.Fragment>
                 ))}
@@ -473,7 +470,7 @@ export default function Home() {
             )}
 
             {/* Mood pill */}
-            <div className="px-4 py-3" style={{ borderRight: "1.5px solid oklch(1 0 0 / 0.08)" }}>
+            <div className="px-4 py-3" style={{ borderRight: "1.5px solid #D4C4B0" }}>
               <MoodPill mood={mood} onMoodChange={setMood} />
             </div>
 
@@ -482,7 +479,7 @@ export default function Home() {
               onClick={() => setWrapUpOpen(true)}
               className="flex items-center gap-2 transition-all px-5 py-3"
               style={{
-                color: "oklch(0.78 0.025 68)",
+                color: "#8C7B6B",
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
@@ -491,8 +488,8 @@ export default function Home() {
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(1 0 0 / 0.06)"; (e.currentTarget as HTMLButtonElement).style.color = "#FAF6F1"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "oklch(0.78 0.025 68)"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.60 0.04 50 / 0.08)"; (e.currentTarget as HTMLButtonElement).style.color = "#2A1F14"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#8C7B6B"; }}
             >
               <Moon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Wrap up</span>

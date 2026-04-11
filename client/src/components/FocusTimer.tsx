@@ -988,18 +988,26 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             />
           )}
 
-          {/* Running / paused: show tear strips */}
+          {/* Running / paused: show strips */}
           {phase !== "idle" && (
             <div style={{ display: "flex", flexDirection: "column" }}>
-              {strips.map((text: string, i: number) => (
-                <TearStrip
-                  key={i}
-                  text={text}
-                  seed={i + 1}
-                  state={stripStates[i] ?? "attached"}
-                  isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
-                />
-              ))}
+              {strips.map((text: string, i: number) => {
+                // Pre-strike the very first strip as a visual preview of the effect
+                const baseState = stripStates[i] ?? "attached";
+                const effectiveState: StripState =
+                  i === 0 && baseState === "attached" && tornCount === 0
+                    ? "tearing"
+                    : baseState;
+                return (
+                  <TearStrip
+                    key={i}
+                    text={text}
+                    seed={i + 1}
+                    state={effectiveState}
+                    isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
+                  />
+                );
+              })}
             </div>
           )}
 
