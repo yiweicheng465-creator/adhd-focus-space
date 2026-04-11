@@ -502,10 +502,10 @@ export function Dashboard({
         </div>
 
         {/* ── Content ── */}
-        <div className="relative z-10 flex" style={{ height: 110 }}>
-          {/* Left: illustration — clipped to exact hero height */}
-          <div className="hidden md:block shrink-0 overflow-hidden" style={{ width: 144, height: "100%", borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center 60%", opacity: 0.95, display: "block" }} />
+        <div className="relative z-10 flex" style={{ height: 160 }}>
+          {/* Left: illustration — full image, no crop, pink bg fill */}
+          <div className="hidden md:block shrink-0" style={{ width: 160, height: "100%", borderRight: `1px solid ${BORDER}`, background: "#f5d5d0", display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
+            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "contain", objectPosition: "center center", display: "block" }} />
           </div>
           {/* Center: greeting + controls */}
           <div className="flex-1 px-6 py-3 flex flex-col justify-between" style={{ minWidth: 0 }}>
