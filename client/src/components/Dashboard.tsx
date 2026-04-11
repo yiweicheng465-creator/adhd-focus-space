@@ -97,10 +97,11 @@ function CornerMark() {
 /* Priority config — distinct colors per level, sorted urgent → focus → normal → someday */
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, focus: 1, normal: 2, someday: 3 };
 const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string; labelBg: string }> = {
-  urgent:  { color: "oklch(0.52 0.20 18)",  bg: "oklch(0.97 0.025 18)",  label: "URGENT",  labelBg: "oklch(0.52 0.20 18 / 0.12)" },
-  focus:   { color: "oklch(0.50 0.16 35)",  bg: "oklch(0.97 0.018 35)",  label: "FOCUS",   labelBg: "oklch(0.50 0.16 35 / 0.12)" },
-  normal:  { color: "oklch(0.45 0.10 145)", bg: "oklch(0.97 0.014 145)", label: "NORMAL",  labelBg: "oklch(0.45 0.10 145 / 0.10)" },
-  someday: { color: "oklch(0.55 0.06 240)", bg: "oklch(0.97 0.010 240)", label: "SOMEDAY", labelBg: "oklch(0.55 0.06 240 / 0.10)" },
+  // Muted ink-stamp palette — desaturated, dusty, lo-fi
+  urgent:  { color: "#8B4A3A", bg: "oklch(0.97 0.025 18)",  label: "urgent",  labelBg: "rgba(139, 74, 58, 0.10)" },
+  focus:   { color: "#7A5C3A", bg: "oklch(0.97 0.018 35)",  label: "focus",   labelBg: "rgba(122, 92, 58, 0.10)" },
+  normal:  { color: "#4A6B4A", bg: "oklch(0.97 0.014 145)", label: "normal",  labelBg: "rgba(74, 107, 74, 0.08)" },
+  someday: { color: "#5A6070", bg: "oklch(0.97 0.010 240)", label: "someday", labelBg: "rgba(90, 96, 112, 0.08)" },
 };
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -658,14 +659,14 @@ export function Dashboard({
                         {cleanText}
                       </p>
 
-                      {/* Priority badge */}
+                      {/* Priority badge — lo-fi ink stamp */}
                       <span style={{
-                        fontSize: 8, padding: "1px 5px", flexShrink: 0,
+                        fontSize: 7.5, padding: "1px 5px", flexShrink: 0,
                         color: pd.color, background: pd.labelBg,
-                        border: `1px solid ${pd.color}40`,
-                        fontFamily: "'JetBrains Mono', monospace",
-                        letterSpacing: "0.08em", borderRadius: 3,
-                        fontWeight: 600,
+                        border: `1px solid ${pd.color}55`,
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.06em", borderRadius: 2,
+                        fontWeight: 400, opacity: 0.85,
                       }}>
                         {pd.label}
                       </span>
