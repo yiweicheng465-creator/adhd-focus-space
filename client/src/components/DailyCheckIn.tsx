@@ -378,9 +378,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "greeting" && (
             <div className="flex gap-6 items-start">
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/stamp-mewtwo_2f86b4c1.png"
-                alt="Kanto stamp — Mewtwo"
-                className="w-32 shrink-0" style={{ borderRadius: 0, display: "block" }}
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/retro-desktop-collage_1dc4de3f.jpg"
+                alt="retro desktop collage"
+                className="w-36 shrink-0" style={{ borderRadius: 0, display: "block" }}
               />
               <div className="pt-2">
                 <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>

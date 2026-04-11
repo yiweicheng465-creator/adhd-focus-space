@@ -518,9 +518,9 @@ export function Dashboard({
 
         {/* ── Content ── */}
         <div className="relative z-10 flex" style={{ height: 160 }}>
-          {/* Left: stamp illustration — full image, no crop, no rounded corners */}
-          <div className="hidden md:block shrink-0" style={{ width: 160, height: "100%", borderRight: `1px solid ${BORDER}`, background: "#f5d5d0", display: "flex", alignItems: "center", justifyContent: "center", padding: 8 }}>
-            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/stamp-mew_8d91d86b.png" alt="Kanto stamp — Mew" style={{ width: "100%", height: "auto", display: "block", borderRadius: 0 }} />
+          {/* Left: heartbeat planet illustration — full image, no crop, no rounded corners */}
+          <div className="hidden md:block shrink-0" style={{ width: 160, height: "100%", borderRight: `1px solid ${BORDER}`, overflow: "hidden" }}>
+            <img src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/pink-planet-heartbeat_16e01928.png" alt="heartbeat" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", borderRadius: 0 }} />
           </div>
           {/* Center: greeting + controls */}
           <div className="flex-1 px-6 py-3 flex flex-col justify-between" style={{ minWidth: 0 }}>
