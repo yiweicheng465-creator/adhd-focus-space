@@ -410,25 +410,42 @@ export default function Home() {
             className="flex items-center gap-3 px-6 py-3 flex-1 min-w-0"
             style={{ borderRight: "1.5px solid #D4C4B0" }}
           >
-            {/* Logo */}
-            <img
-              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
-              alt="ADHD Focus Space"
-              style={{ width: 28, height: 28, objectFit: "contain", flexShrink: 0, filter: "saturate(0.85) sepia(0.15)" }}
-            />
-            <div style={{ width: 1, height: 20, background: "#D4C4B0", flexShrink: 0 }} />
+
+            {/* App logo mark — pixel brain with lightning */}
             <div
-              className="flex items-center justify-center w-7 h-7 shrink-0"
+              className="flex items-center justify-center shrink-0"
               style={{
+                width: 30, height: 30,
                 background: "#C8603A",
-                border: "1.5px solid #E8804A",
-                boxShadow: "2px 2px 0 #A84828",
+                border: "2px solid #A84828",
+                boxShadow: "2px 2px 0 #7A3018, inset 0 1px 0 #E8804A",
+                position: "relative",
               }}
             >
+              {/* Pixel-art brain + bolt SVG */}
+              <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+                {/* Brain left lobe */}
+                <rect x="2" y="5" width="5" height="6" rx="2.5" fill="#FAF6F1" opacity="0.9"/>
+                {/* Brain right lobe */}
+                <rect x="11" y="5" width="5" height="6" rx="2.5" fill="#FAF6F1" opacity="0.9"/>
+                {/* Brain center connector */}
+                <rect x="6" y="7" width="6" height="2" fill="#FAF6F1" opacity="0.9"/>
+                {/* Brain stem */}
+                <rect x="8" y="11" width="2" height="3" fill="#FAF6F1" opacity="0.7"/>
+                {/* Lightning bolt */}
+                <polygon points="10,2 7,9 9,9 8,16 11,7 9,7" fill="#FFD080" opacity="0.95"/>
+              </svg>
+            </div>
+            <div style={{ width: 1, height: 20, background: "#D4C4B0", flexShrink: 0 }} />
+            {/* Page section icon */}
+            <div
+              className="flex items-center justify-center w-6 h-6 shrink-0"
+              style={{ opacity: 0.75 }}
+            >
               {activeSection === "braindump" ? (
-                <PixelDump size={14} active={true} />
+                <PixelDump size={13} active={true} />
               ) : (
-                <Icon className="w-3.5 h-3.5" style={{ color: "#FAF6F1" }} />
+                <Icon className="w-3.5 h-3.5" style={{ color: "#8A6A4A" }} />
               )}
             </div>
             <h1

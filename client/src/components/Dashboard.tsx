@@ -609,28 +609,12 @@ export function Dashboard({
       {/* ── MIDDLE: 3-column grid ── */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, minHeight: 0 }}>
 
-        {/* Col 1: Focus Timer */}
-        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-          <div className="retro-titlebar">
-            <span>focus_timer.exe</span>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
-              {/* star sticker */}
-              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.55 }}>
-                <path d="M6 1 L7 4.2 L10.5 4.2 L7.8 6.3 L8.8 9.5 L6 7.4 L3.2 9.5 L4.2 6.3 L1.5 4.2 L5 4.2 Z" fill="oklch(0.62 0.10 50)" />
-              </svg>
-            </div>
-            <div className="retro-titlebar-buttons">
-              <span className="retro-titlebar-btn">_</span>
-              <span className="retro-titlebar-btn">□</span>
-              <span className="retro-titlebar-btn">✕</span>
-            </div>
-          </div>
-          <div style={{ flex: 1, minHeight: 0, overflow: "hidden", padding: "14px 16px" }}>
-            <div style={{ position: "relative" }}>
+        {/* Col 1: Focus Timer — FocusTimer has its own CYBER_PET.EXE chrome, no outer title bar */}
+        <div style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", position: "relative" }}>
+          <div style={{ position: "relative" }}>
             {/* Cat sticker: pink standing cat — top-right of focus timer */}
             <img src={CAT_PINK} alt="" aria-hidden="true" style={{ position: "absolute", top: -8, right: -8, width: 56, opacity: 0.40, pointerEvents: "none", zIndex: 5 }} />
             <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
-          </div>
           </div>
         </div>
 

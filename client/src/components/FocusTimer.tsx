@@ -59,31 +59,31 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
 function PetAlive({ blink }: { blink: boolean }) {
   return (
     <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
-      <rect x="8" y="10" width="16" height="14" fill="#C8B4E8" />
-      <rect x="6" y="12" width="2" height="10" fill="#C8B4E8" />
-      <rect x="24" y="12" width="2" height="10" fill="#C8B4E8" />
-      <rect x="10" y="8" width="12" height="2" fill="#C8B4E8" />
-      <rect x="8" y="24" width="4" height="2" fill="#C8B4E8" />
-      <rect x="20" y="24" width="4" height="2" fill="#C8B4E8" />
+      <rect x="8" y="10" width="16" height="14" fill="#F0A8B8" />
+      <rect x="6" y="12" width="2" height="10" fill="#F0A8B8" />
+      <rect x="24" y="12" width="2" height="10" fill="#F0A8B8" />
+      <rect x="10" y="8" width="12" height="2" fill="#F0A8B8" />
+      <rect x="8" y="24" width="4" height="2" fill="#F0A8B8" />
+      <rect x="20" y="24" width="4" height="2" fill="#F0A8B8" />
       {blink ? (
         <>
-          <rect x="11" y="14" width="4" height="1" fill="#3D2E5E" />
-          <rect x="17" y="14" width="4" height="1" fill="#3D2E5E" />
+          <rect x="11" y="14" width="4" height="1" fill="#6B2A3A" />
+          <rect x="17" y="14" width="4" height="1" fill="#6B2A3A" />
         </>
       ) : (
         <>
-          <rect x="11" y="13" width="4" height="4" fill="#3D2E5E" />
-          <rect x="17" y="13" width="4" height="4" fill="#3D2E5E" />
+          <rect x="11" y="13" width="4" height="4" fill="#6B2A3A" />
+          <rect x="17" y="13" width="4" height="4" fill="#6B2A3A" />
           <rect x="12" y="14" width="1" height="1" fill="#fff" />
           <rect x="18" y="14" width="1" height="1" fill="#fff" />
         </>
       )}
       <rect x="10" y="18" width="3" height="2" fill="#E8A0B8" />
       <rect x="19" y="18" width="3" height="2" fill="#E8A0B8" />
-      <rect x="13" y="20" width="6" height="1" fill="#3D2E5E" />
-      <rect x="12" y="19" width="1" height="1" fill="#3D2E5E" />
-      <rect x="19" y="19" width="1" height="1" fill="#3D2E5E" />
-      <rect x="4" y="15" width="2" height="2" fill="#C8B4E8" />
+      <rect x="13" y="20" width="6" height="1" fill="#6B2A3A" />
+      <rect x="12" y="19" width="1" height="1" fill="#6B2A3A" />
+      <rect x="19" y="19" width="1" height="1" fill="#6B2A3A" />
+      <rect x="4" y="15" width="2" height="2" fill="#F0A8B8" />
     </svg>
   );
 }
@@ -97,22 +97,22 @@ function PetDead() {
       <rect x="10" y="8" width="12" height="2" fill="#B0A8B8" />
       <rect x="8" y="24" width="4" height="2" fill="#B0A8B8" />
       <rect x="20" y="24" width="4" height="2" fill="#B0A8B8" />
-      <rect x="11" y="13" width="1" height="1" fill="#5A4A6A" />
-      <rect x="12" y="14" width="1" height="1" fill="#5A4A6A" />
-      <rect x="13" y="15" width="1" height="1" fill="#5A4A6A" />
-      <rect x="14" y="14" width="1" height="1" fill="#5A4A6A" />
-      <rect x="13" y="13" width="1" height="1" fill="#5A4A6A" />
-      <rect x="11" y="15" width="1" height="1" fill="#5A4A6A" />
-      <rect x="17" y="13" width="1" height="1" fill="#5A4A6A" />
-      <rect x="18" y="14" width="1" height="1" fill="#5A4A6A" />
-      <rect x="19" y="15" width="1" height="1" fill="#5A4A6A" />
-      <rect x="20" y="14" width="1" height="1" fill="#5A4A6A" />
-      <rect x="19" y="13" width="1" height="1" fill="#5A4A6A" />
-      <rect x="17" y="15" width="1" height="1" fill="#5A4A6A" />
-      <rect x="13" y="20" width="6" height="1" fill="#5A4A6A" />
-      <rect x="3" y="8" width="2" height="2" fill="#D4C0E8" />
-      <rect x="27" y="10" width="2" height="2" fill="#D4C0E8" />
-      <rect x="5" y="22" width="2" height="2" fill="#D4C0E8" />
+      <rect x="11" y="13" width="1" height="1" fill="#8A3A5A" />
+      <rect x="12" y="14" width="1" height="1" fill="#8A3A5A" />
+      <rect x="13" y="15" width="1" height="1" fill="#8A3A5A" />
+      <rect x="14" y="14" width="1" height="1" fill="#8A3A5A" />
+      <rect x="13" y="13" width="1" height="1" fill="#8A3A5A" />
+      <rect x="11" y="15" width="1" height="1" fill="#8A3A5A" />
+      <rect x="17" y="13" width="1" height="1" fill="#8A3A5A" />
+      <rect x="18" y="14" width="1" height="1" fill="#8A3A5A" />
+      <rect x="19" y="15" width="1" height="1" fill="#8A3A5A" />
+      <rect x="20" y="14" width="1" height="1" fill="#8A3A5A" />
+      <rect x="19" y="13" width="1" height="1" fill="#8A3A5A" />
+      <rect x="17" y="15" width="1" height="1" fill="#8A3A5A" />
+      <rect x="13" y="20" width="6" height="1" fill="#8A3A5A" />
+      <rect x="3" y="8" width="2" height="2" fill="#F4C0D0" />
+      <rect x="27" y="10" width="2" height="2" fill="#F4C0D0" />
+      <rect x="5" y="22" width="2" height="2" fill="#F4C0D0" />
     </svg>
   );
 }
@@ -120,26 +120,26 @@ function PetDead() {
 function PetPaused() {
   return (
     <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
-      <rect x="8" y="10" width="16" height="14" fill="#B8A8D8" />
-      <rect x="6" y="12" width="2" height="10" fill="#B8A8D8" />
-      <rect x="24" y="12" width="2" height="10" fill="#B8A8D8" />
-      <rect x="10" y="8" width="12" height="2" fill="#B8A8D8" />
-      <rect x="8" y="24" width="4" height="2" fill="#B8A8D8" />
-      <rect x="20" y="24" width="4" height="2" fill="#B8A8D8" />
-      <rect x="11" y="12" width="1" height="1" fill="#3D2E5E" />
-      <rect x="14" y="11" width="1" height="1" fill="#3D2E5E" />
-      <rect x="17" y="11" width="1" height="1" fill="#3D2E5E" />
-      <rect x="20" y="12" width="1" height="1" fill="#3D2E5E" />
-      <rect x="11" y="13" width="4" height="4" fill="#3D2E5E" />
-      <rect x="17" y="13" width="4" height="4" fill="#3D2E5E" />
+      <rect x="8" y="10" width="16" height="14" fill="#E890A8" />
+      <rect x="6" y="12" width="2" height="10" fill="#E890A8" />
+      <rect x="24" y="12" width="2" height="10" fill="#E890A8" />
+      <rect x="10" y="8" width="12" height="2" fill="#E890A8" />
+      <rect x="8" y="24" width="4" height="2" fill="#E890A8" />
+      <rect x="20" y="24" width="4" height="2" fill="#E890A8" />
+      <rect x="11" y="12" width="1" height="1" fill="#6B2A3A" />
+      <rect x="14" y="11" width="1" height="1" fill="#6B2A3A" />
+      <rect x="17" y="11" width="1" height="1" fill="#6B2A3A" />
+      <rect x="20" y="12" width="1" height="1" fill="#6B2A3A" />
+      <rect x="11" y="13" width="4" height="4" fill="#6B2A3A" />
+      <rect x="17" y="13" width="4" height="4" fill="#6B2A3A" />
       <rect x="12" y="14" width="1" height="1" fill="#fff" />
       <rect x="18" y="14" width="1" height="1" fill="#fff" />
-      <rect x="13" y="21" width="2" height="1" fill="#3D2E5E" />
-      <rect x="15" y="20" width="2" height="1" fill="#3D2E5E" />
-      <rect x="17" y="21" width="2" height="1" fill="#3D2E5E" />
+      <rect x="13" y="21" width="2" height="1" fill="#6B2A3A" />
+      <rect x="15" y="20" width="2" height="1" fill="#6B2A3A" />
+      <rect x="17" y="21" width="2" height="1" fill="#6B2A3A" />
       <rect x="23" y="10" width="1" height="2" fill="#88B4D8" />
       <rect x="22" y="11" width="1" height="1" fill="#88B4D8" />
-      <rect x="4" y="15" width="2" height="2" fill="#B8A8D8" />
+      <rect x="4" y="15" width="2" height="2" fill="#E890A8" />
     </svg>
   );
 }
@@ -147,19 +147,19 @@ function PetPaused() {
 function PetIdle() {
   return (
     <svg viewBox="0 0 32 32" width="80" height="80" style={{ imageRendering: "pixelated" }}>
-      <rect x="8" y="10" width="16" height="14" fill="#C8B4E8" />
-      <rect x="6" y="12" width="2" height="10" fill="#C8B4E8" />
-      <rect x="24" y="12" width="2" height="10" fill="#C8B4E8" />
-      <rect x="10" y="8" width="12" height="2" fill="#C8B4E8" />
-      <rect x="8" y="24" width="4" height="2" fill="#C8B4E8" />
-      <rect x="20" y="24" width="4" height="2" fill="#C8B4E8" />
-      <rect x="11" y="15" width="4" height="2" fill="#3D2E5E" />
-      <rect x="17" y="15" width="4" height="2" fill="#3D2E5E" />
-      <rect x="22" y="8" width="2" height="1" fill="#9A88C0" />
-      <rect x="23" y="9" width="1" height="1" fill="#9A88C0" />
-      <rect x="22" y="10" width="2" height="1" fill="#9A88C0" />
-      <rect x="13" y="20" width="6" height="1" fill="#3D2E5E" />
-      <rect x="4" y="15" width="2" height="2" fill="#C8B4E8" />
+      <rect x="8" y="10" width="16" height="14" fill="#F0A8B8" />
+      <rect x="6" y="12" width="2" height="10" fill="#F0A8B8" />
+      <rect x="24" y="12" width="2" height="10" fill="#F0A8B8" />
+      <rect x="10" y="8" width="12" height="2" fill="#F0A8B8" />
+      <rect x="8" y="24" width="4" height="2" fill="#F0A8B8" />
+      <rect x="20" y="24" width="4" height="2" fill="#F0A8B8" />
+      <rect x="11" y="15" width="4" height="2" fill="#6B2A3A" />
+      <rect x="17" y="15" width="4" height="2" fill="#6B2A3A" />
+      <rect x="22" y="8" width="2" height="1" fill="#C87090" />
+      <rect x="23" y="9" width="1" height="1" fill="#C87090" />
+      <rect x="22" y="10" width="2" height="1" fill="#C87090" />
+      <rect x="13" y="20" width="6" height="1" fill="#6B2A3A" />
+      <rect x="4" y="15" width="2" height="2" fill="#F0A8B8" />
     </svg>
   );
 }
@@ -758,6 +758,32 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       overflow: "hidden",
     }}>
 
+      {/* ── Inner window title bar: CYBER_PET.EXE ── */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "4px 8px",
+        background: ACCENT,
+        borderBottom: `2px solid ${DARK}`,
+      }}>
+        <span style={{
+          fontFamily: "'JetBrains Mono', monospace",
+          fontSize: 7, letterSpacing: "0.14em",
+          color: "#FAF6F1", fontWeight: 700,
+          textTransform: "uppercase",
+        }}>CYBER_PET.EXE</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <span style={{ fontSize: 7, color: "#FAF6F1", letterSpacing: "0.06em", opacity: 0.9 }}>♥ {Math.max(0, 3 - deaths)}</span>
+          <button
+            onClick={running ? undefined : undefined}
+            style={{
+              width: 12, height: 12, fontSize: 8, lineHeight: 1,
+              background: "#FAF6F1", border: "none", cursor: "default",
+              color: DARK, display: "flex", alignItems: "center", justifyContent: "center",
+              fontFamily: "monospace",
+            }}
+          >×</button>
+        </div>
+      </div>
       {/* ── Top bar: mode tabs + sound/settings + death counter ── */}
       <div style={{ display: "flex", alignItems: "stretch", borderBottom: `2px solid ${DARK}`, background: PANEL }}>
         {/* Mode tabs */}
