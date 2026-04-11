@@ -82,9 +82,14 @@ export function FilmGrainOverlay() {
 
     const GRAIN_SIZE = 3; // 3×3 blocks for chunky film-grain look
 
+    // Use ImageData for fast per-block pixel writes — much faster than fillRect loop
+    const imageData = ctx.createImageData(w, h);
+    const data = imageData.data;
+
     function drawGrain() {
       const lvl = intensityRef.current;
-      if (!ctx || !canvas) { rafRef.current = requestAnimationFrame(drawGrain); return; }
+
+      if (!ctx) { rafRef.current = requestAnimationFrame(drawGrain); return; }
 
       if (lvl === 0) {
         ctx.clearRect(0, 0, w, h);
@@ -92,25 +97,37 @@ export function FilmGrainOverlay() {
         return;
       }
 
-      ctx.clearRect(0, 0, w, h);
-
-      // Map intensity 1–100 → alpha range
-      // At 1:  max alpha ≈ 0.04  (barely visible)
-      // At 50: max alpha ≈ 0.22  (noticeable)
-      // At 100: max alpha ≈ 0.55 (heavy grain)
-      const maxAlpha = (lvl / 100) * 0.55;
-      const minAlpha = maxAlpha * 0.3;
+      // Map intensity 1–100 → alpha range (0–255)
+      const maxA = ((lvl / 100) * 0.55 * 255) | 0;  // e.g. 140 at 100%
+      const minA = (maxA * 0.3) | 0;
 
       const cols = Math.ceil(w / GRAIN_SIZE);
       const rows = Math.ceil(h / GRAIN_SIZE);
+
+      // Fill every block with a single random grey + alpha
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
-          const v = (Math.random() * 255) | 0;
-          const a = minAlpha + Math.random() * (maxAlpha - minAlpha);
-          ctx.fillStyle = `rgba(${v},${v},${v},${a.toFixed(3)})`;
-          ctx.fillRect(col * GRAIN_SIZE, row * GRAIN_SIZE, GRAIN_SIZE, GRAIN_SIZE);
+          const v = (Math.random() * 256) | 0;
+          const a = (minA + Math.random() * (maxA - minA)) | 0;
+          // Paint all pixels in this GRAIN_SIZE×GRAIN_SIZE block
+          for (let dy = 0; dy < GRAIN_SIZE; dy++) {
+            const py = row * GRAIN_SIZE + dy;
+            if (py >= h) break;
+            for (let dx = 0; dx < GRAIN_SIZE; dx++) {
+              const px = col * GRAIN_SIZE + dx;
+              if (px >= w) break;
+              const i = (py * w + px) * 4;
+              data[i]     = v;
+              data[i + 1] = v;
+              data[i + 2] = v;
+              data[i + 3] = a;
+            }
+          }
         }
       }
+
+      if (ctx) ctx.putImageData(imageData, 0, 0);
+      // Request next frame immediately — no throttling, full 60fps flicker
       rafRef.current = requestAnimationFrame(drawGrain);
     }
 
