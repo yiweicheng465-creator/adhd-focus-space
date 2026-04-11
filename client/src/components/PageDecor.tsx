@@ -13,14 +13,6 @@
 
 import React, { useEffect, useState } from "react";
 
-/* ── Sticker CDN URLs ── */
-const STICKER_NEVER_GIVE_UP = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/never-give-up_a5640f07.jpg";
-const STICKER_CAT_STAMPS = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/cat-stamps_8d29f382.jpg";
-const STICKER_SMILEY_TAPE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/smiley-tape_04486d6f.jpg";
-const STICKER_FLOWER_DOODLE = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/flower-doodle_63f575b6.jpg";
-const STICKER_PINK_FLOWERS = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/pink-flowers_5d884354.jpg";
-const STICKER_PRESSED_FLOWERS = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/pressed-flowers_9076452c.jpg";
-
 /* ── Shared float animation via CSS keyframes injected once ── */
 const STYLE_ID = "page-decor-anim";
 function injectStyles() {
@@ -102,10 +94,6 @@ export function DashboardDecor() {
           <circle cx="48" cy="40" r="2.5" fill="#C8603A" />
         </svg>
       </DecorWrap>
-      {/* Cat stamps washi tape sticker — top left */}
-      <div style={{ position: "absolute", top: 6, left: 10, zIndex: 50, pointerEvents: "none", transform: "rotate(-3deg)" }}>
-        <img src={STICKER_CAT_STAMPS} alt="" style={{ width: 150, opacity: 0.92, borderRadius: 4 }} />
-      </div>
       {/* Small leaf sprig — bottom right */}
       <DecorWrap style={{ bottom: 40, right: 80, opacity: 0.10 }}>
         <svg width="80" height="80" viewBox="0 0 80 80" fill="none" className="decor-drift-r">
@@ -123,10 +111,6 @@ export function DashboardDecor() {
 export function FocusDecor() {
   return (
     <>
-      {/* Never give up! torn paper sticker — bottom left */}
-      <div style={{ position: "absolute", bottom: 18, left: 8, zIndex: 50, pointerEvents: "none", transform: "rotate(3deg)" }}>
-        <img src={STICKER_NEVER_GIVE_UP} alt="" style={{ width: 175, opacity: 0.90 }} />
-      </div>
       {/* Large cloud — top right */}
       <DecorWrap style={{ top: 30, right: 40, opacity: 0.14 }}>
         <svg width="180" height="100" viewBox="0 0 180 100" fill="none" className="decor-float-c">
@@ -158,10 +142,6 @@ export function FocusDecor() {
 export function TasksDecor() {
   return (
     <>
-      {/* Pink baby's breath flowers sticker — top right */}
-      <div style={{ position: "absolute", top: -12, right: 8, zIndex: 50, pointerEvents: "none", transform: "rotate(5deg)" }}>
-        <img src={STICKER_PINK_FLOWERS} alt="" style={{ width: 95, opacity: 0.90 }} />
-      </div>
       {/* Branch with leaves — top right */}
       <DecorWrap style={{ top: 10, right: 30, opacity: 0.15 }}>
         <svg width="120" height="160" viewBox="0 0 120 160" fill="none" className="decor-float-b">
@@ -197,10 +177,6 @@ export function TasksDecor() {
 export function WinsDecor() {
   return (
     <>
-      {/* Smiley tape sticker — top right */}
-      <div style={{ position: "absolute", top: 4, right: 6, zIndex: 50, pointerEvents: "none", transform: "rotate(2deg)" }}>
-        <img src={STICKER_SMILEY_TAPE} alt="" style={{ width: 120, opacity: 0.88 }} />
-      </div>
       {/* Large flower — top right */}
       <DecorWrap style={{ top: 20, right: 50, opacity: 0.15 }}>
         <svg width="120" height="120" viewBox="0 0 120 120" fill="none" className="decor-float-a">
@@ -253,14 +229,6 @@ export function WinsDecor() {
 export function BrainDumpDecor() {
   return (
     <>
-      {/* Flower doodle taped paper sticker — top right */}
-      <div style={{ position: "absolute", top: 4, right: 12, zIndex: 50, pointerEvents: "none", transform: "rotate(-4deg)" }}>
-        <img src={STICKER_FLOWER_DOODLE} alt="" style={{ width: 88, opacity: 0.92 }} />
-      </div>
-      {/* Pressed flowers sticker — bottom left */}
-      <div style={{ position: "absolute", bottom: 8, left: 12, zIndex: 50, pointerEvents: "none", transform: "rotate(6deg)" }}>
-        <img src={STICKER_PRESSED_FLOWERS} alt="" style={{ width: 78, opacity: 0.88 }} />
-      </div>
       {/* Spiral — top right */}
       <DecorWrap style={{ top: 20, right: 40, opacity: 0.13 }}>
         <svg width="120" height="120" viewBox="0 0 120 120" fill="none" className="decor-float-c">
@@ -294,10 +262,6 @@ export function BrainDumpDecor() {
 export function GoalsDecor() {
   return (
     <>
-      {/* Pressed flowers sticker — top right */}
-      <div style={{ position: "absolute", top: -10, right: 10, zIndex: 50, pointerEvents: "none", transform: "rotate(-5deg)" }}>
-        <img src={STICKER_PRESSED_FLOWERS} alt="" style={{ width: 88, opacity: 0.90 }} />
-      </div>
       {/* Target rings + flower — top right */}
       <DecorWrap style={{ top: 10, right: 40, opacity: 0.14 }}>
         <svg width="130" height="130" viewBox="0 0 130 130" fill="none" className="decor-float-b">
