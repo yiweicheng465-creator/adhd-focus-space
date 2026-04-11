@@ -523,8 +523,8 @@ input[type="radio"]:not(:disabled) {
   align-items: center;
   gap: 10px;
   padding: 8px 10px 8px 10px;
-  background: oklch(0.978 0.008 76);
-  border: 2px solid oklch(0.82 0.018 68);
+  background: oklch(0.978 0.008 76 / 0.55);
+  border: 1.5px solid oklch(0.82 0.018 68 / 0.6);
   border-radius: 4px;
   position: relative;
   transition: box-shadow 0.08s, transform 0.08s;
@@ -540,20 +540,16 @@ input[type="radio"]:not(:disabled) {
 }
 /* Priority: color via left border + subtle bg tint — no text tag needed */
 .retro-task-row.urgent {
-  border-left: 4px solid oklch(0.52 0.10 32);
-  background: oklch(0.52 0.10 32 / 0.04);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.focus {
-  border-left: 4px solid oklch(0.48 0.09 145);
-  background: oklch(0.48 0.09 145 / 0.04);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.normal {
-  border-left: 4px solid oklch(0.68 0.022 68);
-  background: oklch(0.978 0.008 76);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.someday {
-  border-left: 4px solid oklch(0.60 0.06 220);
-  background: oklch(0.60 0.06 220 / 0.04);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 /* Hide icon box — no longer used */
 .retro-task-icon-box { display: none; }
