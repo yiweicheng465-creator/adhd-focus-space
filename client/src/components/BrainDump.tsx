@@ -70,7 +70,7 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
               style={{
                 background: isActive ? M.coral : M.tagBg,
                 border: `1px solid ${isActive ? M.coral : M.tagBdr}`,
-                color: isActive ? "oklch(0.97 0.005 80)" : M.coral,
+                color: isActive ? "oklch(0.97 0.010 355)" : M.coral,
                 fontFamily: "'DM Sans', sans-serif",
                 letterSpacing: "0.04em",
               }}
@@ -329,9 +329,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       {/* AI Results Panel — retro OS window */}
       {aiResults && !aiDismissed && aiResults.length > 0 && (
         <div style={{
-          border: "2px solid #3D2E1E",
-          boxShadow: "3px 3px 0 #3D2E1E",
-          background: "#FAF8F3",
+          border: `2px solid ${M.border}`,
+          boxShadow: `3px 3px 0 ${M.border}`,
+          background: M.card,
           overflow: "hidden",
           marginTop: 4,
         }}>
@@ -339,8 +339,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
           <div style={{
             display: "flex",
             alignItems: "center",
-            background: "#EDE0CF",
-            borderBottom: "2px solid #3D2E1E",
+            background: "oklch(0.88 0.060 340)",
+            borderBottom: `2px solid ${M.border}`,
             padding: "0 10px",
             height: 28,
             userSelect: "none",
@@ -351,7 +351,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               fontSize: 8,
               letterSpacing: "0.20em",
               textTransform: "uppercase",
-              color: "#3D2E1E",
+              color: M.ink,
               fontWeight: 700,
               fontFamily: "'JetBrains Mono', monospace",
             }}>ai_sort.exe</span>
@@ -363,13 +363,13 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     display: "flex", alignItems: "center", gap: 4,
                     padding: "2px 8px",
                     background: "transparent",
-                    border: "1px solid #B0A090",
-                    color: "#6A5A4A",
+                    border: `1px solid ${M.border}`,
+                    color: M.ink,
                     cursor: "pointer",
                     fontFamily: "'JetBrains Mono', monospace",
                     fontSize: 7,
                     letterSpacing: "0.12em",
-                    boxShadow: "1px 1px 0 #B0A090",
+                    boxShadow: `1px 1px 0 ${M.border}`,
                   }}
                 >
                   <ArrowRight style={{ width: 8, height: 8 }} /> ALL TASKS
@@ -377,7 +377,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               )}
               <button
                 onClick={() => setAiDismissed(true)}
-                style={{ background: "none", border: "none", cursor: "pointer", color: "#8C7B6B", padding: 0, display: "flex" }}
+                style={{ background: "none", border: "none", cursor: "pointer", color: M.muted, padding: 0, display: "flex" }}
               >
                 <X style={{ width: 12, height: 12 }} />
               </button>
@@ -394,8 +394,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                   alignItems: "center",
                   gap: 8,
                   padding: "7px 10px",
-                  borderBottom: i < aiResults.length - 1 ? "1px solid #E8DDD0" : "none",
-                  background: "#FAF8F3",
+                  borderBottom: i < aiResults.length - 1 ? `1px solid ${M.border}` : "none",
+                  background: M.card,
                 }}
               >
                 <span style={{ fontSize: 13, flexShrink: 0, lineHeight: 1 }}>{item.emoji}</span>
@@ -403,7 +403,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                   <p style={{
                     margin: 0,
                     fontSize: 9,
-                    color: "#3D2E1E",
+                    color: M.ink,
                     fontFamily: "'JetBrains Mono', monospace",
                     letterSpacing: "0.04em",
                     lineHeight: 1.4,
@@ -421,9 +421,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     letterSpacing: "0.12em",
                     textTransform: "uppercase",
                     fontFamily: "'JetBrains Mono', monospace",
-                    background: item.category === "task" ? "#E8F0E0" : item.category === "goal" ? "#E8E0F0" : item.category === "worry" ? "#F0E0E0" : "#EDE0CF",
-                    color: item.category === "task" ? "#5A7A4A" : item.category === "goal" ? "#5A4A7A" : item.category === "worry" ? "#8A4A3A" : "#6A5A4A",
-                    border: `1px solid ${item.category === "task" ? "#B8D0A8" : item.category === "goal" ? "#B8A8D0" : item.category === "worry" ? "#D0A8A8" : "#C8B8A0"}`,
+                    background: item.category === "task" ? "oklch(0.93 0.030 168)" : item.category === "goal" ? "oklch(0.93 0.030 290)" : item.category === "worry" ? "oklch(0.93 0.030 355)" : "oklch(0.93 0.020 340)",
+                    color: item.category === "task" ? "oklch(0.40 0.10 168)" : item.category === "goal" ? "oklch(0.40 0.10 290)" : item.category === "worry" ? "oklch(0.40 0.10 355)" : M.muted,
+                    border: `1px solid ${item.category === "task" ? "oklch(0.75 0.08 168)" : item.category === "goal" ? "oklch(0.75 0.08 290)" : item.category === "worry" ? "oklch(0.75 0.08 355)" : M.border}`,
                   }}>
                     {item.category}
                   </span>
@@ -436,14 +436,14 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     style={{
                       display: "flex", alignItems: "center", gap: 3,
                       padding: "3px 8px",
-                      background: "#EDE0CF",
-                      border: "1px solid #B0A090",
-                      color: "#3D2E1E",
+                      background: "oklch(0.88 0.060 340)",
+                      border: `1px solid ${M.border}`,
+                      color: M.ink,
                       cursor: "pointer",
                       fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 7,
                       letterSpacing: "0.10em",
-                      boxShadow: "1px 1px 0 #B0A090",
+                      boxShadow: `1px 1px 0 ${M.border}`,
                     }}
                   >
                     <ArrowRight style={{ width: 8, height: 8 }} /> TASK
@@ -456,14 +456,14 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                       style={{
                         display: "flex", alignItems: "center", gap: 3,
                         padding: "3px 8px",
-                        background: "#EDE0CF",
-                        border: "1px solid #B0A090",
-                        color: "#3D2E1E",
+                        background: "oklch(0.88 0.060 340)",
+                        border: `1px solid ${M.border}`,
+                        color: M.ink,
                         cursor: "pointer",
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 7,
                         letterSpacing: "0.10em",
-                        boxShadow: "1px 1px 0 #B0A090",
+                        boxShadow: `1px 1px 0 ${M.border}`,
                       }}
                     >
                       <Sparkles style={{ width: 8, height: 8 }} /> GOAL
@@ -476,8 +476,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                         display: "flex", alignItems: "center", gap: 3,
                         padding: "3px 8px",
                         background: "transparent",
-                        border: "1px solid #D4C4B0",
-                        color: "#8C7B6B",
+                        border: `1px solid ${M.border}`,
+                        color: M.muted,
                         cursor: "pointer",
                         fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 7,
@@ -489,7 +489,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                   )}
                   <button
                     onClick={() => setAiResults((prev) => prev ? prev.filter((_, j) => j !== i) : null)}
-                    style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: "#B0A090", display: "flex" }}
+                    style={{ background: "none", border: "none", cursor: "pointer", padding: 2, color: M.muted, display: "flex" }}
                   >
                     <X style={{ width: 10, height: 10 }} />
                   </button>
@@ -563,8 +563,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               disabled={categorizeMutation.isPending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-all"
               style={{
-                background: categorizeMutation.isPending ? "oklch(0.88 0.014 75)" : "oklch(0.55 0.09 35 / 0.10)",
-                border: `1px solid oklch(0.55 0.09 35 / 0.28)`,
+                background: categorizeMutation.isPending ? "oklch(0.88 0.060 340)" : "oklch(0.58 0.18 340 / 0.10)",
+                border: `1px solid oklch(0.58 0.18 340 / 0.28)`,
                 color: M.coral,
                 fontFamily: "'DM Sans', sans-serif",
                 borderRadius: 6,
@@ -604,7 +604,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
             key={entry.id}
             className={cn("group flex flex-col gap-2 p-3 transition-all")}
             style={{
-              background: entry.converted ? "oklch(0.93 0.012 78 / 0.5)" : M.card,
+              background: entry.converted ? "oklch(0.93 0.030 355 / 0.5)" : M.card,
               border:     `1px solid ${M.border}`,
               opacity:    entry.converted ? 0.55 : 1,
             }}

@@ -279,10 +279,12 @@ function AICommandPanel({
   };
 
   const COMMANDS = [
-    "Add task: review the PR, urgent",
-    "Log a win: shipped the feature",
-    "Set a goal: finish the project",
-    "How should I prioritise today?",
+    "Add task: review the PR — urgent, work",
+    "Set a goal: ship the redesign by end of month",
+    "Create an agent to research competitors",
+    "Log a win: finished the design system",
+    "What should I focus on first today?",
+    "Mark 'review the PR' as done",
   ];
 
   const hasMessages = messages.length > 0;
@@ -306,7 +308,7 @@ function AICommandPanel({
         )}
         {!hasMessages && (
           <span style={{ fontSize: 9, color: MUTED, marginLeft: "auto", fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>
-            TASKS · GOALS · AGENTS · WINS
+            TASKS · GOALS · AGENTS · WINS · COACH
           </span>
         )}
       </div>
@@ -316,7 +318,7 @@ function AICommandPanel({
         {!hasMessages ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
             <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginBottom: 4 }}>
-              Tell me what you need — I can create tasks, set goals, launch agents, log wins, or just help you think.
+              Tell me what to do — I can create tasks, set goals, launch AI agents, log wins, complete tasks, or help you prioritise. Try a suggestion below:
             </p>
             {COMMANDS.map((c) => (
               <button

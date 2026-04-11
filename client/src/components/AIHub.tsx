@@ -1,19 +1,22 @@
 /* ============================================================
    ADHD FOCUS SPACE — AI Hub Page
-   5 AI features, each with a description card + live demo
+   7 AI features, each with a description card + live demo
    ============================================================ */
 
 import { useState } from "react";
-import { Loader2, Sparkles, Brain, Clock, CalendarDays, Target, ChevronRight } from "lucide-react";
+import { Loader2, Sparkles, Brain, Clock, CalendarDays, Target, Bot, Wand2, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const M = {
-  ink: "oklch(0.18 0.01 60)",
-  muted: "oklch(0.52 0.015 70)",
-  border: "oklch(0.87 0.014 75)",
-  accent: "oklch(0.52 0.14 35)",
-  bg: "oklch(0.985 0.008 80)",
-  card: "oklch(0.975 0.012 80)",
+  ink:     "oklch(0.22 0.040 320)",
+  muted:   "oklch(0.52 0.040 330)",
+  border:  "oklch(0.82 0.050 340)",
+  accent:  "oklch(0.58 0.18 340)",
+  accentBg:"oklch(0.58 0.18 340 / 0.10)",
+  accentBdr:"oklch(0.58 0.18 340 / 0.25)",
+  bg:      "oklch(0.985 0.012 355)",
+  card:    "oklch(0.975 0.018 355)",
+  demoBg:  "oklch(0.96 0.015 355)",
 };
 
 /* ── Feature card shell ── */
@@ -38,7 +41,7 @@ function FeatureCard({
       <div className="flex items-start gap-3">
         <div
           className="w-9 h-9 flex items-center justify-center shrink-0"
-          style={{ background: "oklch(0.52 0.14 35 / 0.10)", border: `1px solid oklch(0.52 0.14 35 / 0.25)` }}
+          style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}` }}
         >
           <Icon className="w-4 h-4" style={{ color: M.accent }} />
         </div>
@@ -50,10 +53,10 @@ function FeatureCard({
             <span
               className="text-[9px] font-bold tracking-widest px-1.5 py-0.5"
               style={{
-                background: "oklch(0.52 0.14 35 / 0.12)",
+                background: M.accentBg,
                 color: M.accent,
                 fontFamily: "'JetBrains Mono', monospace",
-                border: `1px solid oklch(0.52 0.14 35 / 0.25)`,
+                border: `1px solid ${M.accentBdr}`,
               }}
             >
               {badge}
@@ -66,7 +69,7 @@ function FeatureCard({
       </div>
       <div
         className="p-4"
-        style={{ background: "oklch(0.96 0.010 78)", border: `1px solid ${M.border}` }}
+        style={{ background: M.demoBg, border: `1px solid ${M.border}` }}
       >
         {children}
       </div>
@@ -83,11 +86,12 @@ function BrainDumpDemo() {
   });
 
   const CATEGORY_COLORS: Record<string, string> = {
-    task: "oklch(0.40 0.12 155)",
-    worry: "oklch(0.50 0.10 30)",
-    idea: "oklch(0.50 0.12 270)",
-    reminder: "oklch(0.45 0.10 60)",
-    other: M.muted,
+    task:     "oklch(0.40 0.10 168)",
+    worry:    "oklch(0.50 0.10 355)",
+    idea:     "oklch(0.50 0.12 290)",
+    reminder: "oklch(0.45 0.10 220)",
+    goal:     "oklch(0.45 0.10 270)",
+    other:    M.muted,
   };
 
   return (
@@ -127,9 +131,10 @@ function BrainDumpDemo() {
               <span
                 className="shrink-0 text-[9px] px-1.5 py-0.5"
                 style={{
-                  background: item.action === "add_to_tasks" ? "oklch(0.40 0.12 155 / 0.12)" : "oklch(0.88 0.012 75)",
-                  color: item.action === "add_to_tasks" ? "oklch(0.40 0.12 155)" : M.muted,
+                  background: item.action === "add_to_tasks" ? "oklch(0.40 0.10 168 / 0.12)" : item.action === "add_to_goals" ? "oklch(0.40 0.10 290 / 0.12)" : M.accentBg,
+                  color: item.action === "add_to_tasks" ? "oklch(0.40 0.10 168)" : item.action === "add_to_goals" ? "oklch(0.40 0.10 290)" : M.muted,
                   fontFamily: "'JetBrains Mono', monospace",
+                  border: `1px solid ${M.border}`,
                 }}
               >
                 {item.action.replace(/_/g, " ")}
@@ -340,7 +345,7 @@ function MITDemo() {
         <div className="flex flex-col gap-2">
           <div
             className="p-3"
-            style={{ background: "oklch(0.52 0.14 35 / 0.08)", border: "1px solid oklch(0.52 0.14 35 / 0.25)" }}
+            style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}` }}
           >
             <p className="text-xs font-bold mb-1" style={{ color: M.accent, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.05em" }}>
               MOST IMPORTANT THING
@@ -364,6 +369,145 @@ function MITDemo() {
   );
 }
 
+/* ── 6. AI Command Center demo ── */
+function AICommandDemo() {
+  const [input, setInput] = useState("");
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; content: string }>>([]);
+  const mutation = trpc.ai.command.useMutation({
+    onSuccess: (data) => {
+      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+    },
+  });
+
+  const send = () => {
+    const text = input.trim();
+    if (!text || mutation.isPending) return;
+    const newMsgs = [...messages, { role: "user" as const, content: text }];
+    setMessages(newMsgs);
+    setInput("");
+    mutation.mutate({ messages: newMsgs });
+  };
+
+  const EXAMPLES = [
+    "Add task: review the PR — urgent, work",
+    "Set a goal: ship the redesign by end of month",
+    "Log a win: finished the design system",
+    "What should I focus on first today?",
+  ];
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+        Type a natural language command or try one of the examples below. The AI will create tasks, set goals, log wins, launch agents, or coach you — directly from the Dashboard.
+      </p>
+      {messages.length === 0 && (
+        <div className="flex flex-col gap-1.5">
+          {EXAMPLES.map((e) => (
+            <button
+              key={e}
+              onClick={() => { setInput(e); }}
+              className="text-left text-xs px-3 py-2 transition-all hover:opacity-80"
+              style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}
+            >
+              {e}
+            </button>
+          ))}
+        </div>
+      )}
+      {messages.length > 0 && (
+        <div className="flex flex-col gap-2 max-h-40 overflow-y-auto">
+          {messages.map((m, i) => (
+            <div key={i} className={`text-xs px-3 py-2 ${m.role === "user" ? "self-end" : "self-start"}`}
+              style={{
+                background: m.role === "user" ? M.accent : M.accentBg,
+                color: m.role === "user" ? "white" : M.ink,
+                border: m.role === "user" ? "none" : `1px solid ${M.border}`,
+                maxWidth: "90%",
+                fontFamily: "'DM Sans', sans-serif",
+                lineHeight: 1.5,
+              }}
+            >
+              {m.content}
+            </div>
+          ))}
+          {mutation.isPending && (
+            <div className="flex items-center gap-2 text-xs" style={{ color: M.muted }}>
+              <Loader2 className="w-3 h-3 animate-spin" /> Working on it…
+            </div>
+          )}
+        </div>
+      )}
+      <div className="flex gap-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") send(); }}
+          placeholder="Type a command…"
+          className="flex-1 px-3 py-2 text-xs bg-transparent focus:outline-none"
+          style={{ border: `1px solid ${M.border}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}
+        />
+        <button
+          onClick={send}
+          disabled={!input.trim() || mutation.isPending}
+          className="px-4 py-2 text-xs font-medium transition-all hover:opacity-90"
+          style={{ background: input.trim() ? M.accent : M.accentBg, color: input.trim() ? "white" : M.muted, border: `1px solid ${M.accentBdr}`, fontFamily: "'DM Sans', sans-serif" }}
+        >
+          Send
+        </button>
+      </div>
+      {messages.length > 0 && (
+        <button onClick={() => setMessages([])} className="text-xs self-start" style={{ color: M.muted, background: "none", border: "none", cursor: "pointer" }}>
+          Clear chat
+        </button>
+      )}
+    </div>
+  );
+}
+
+/* ── 7. Agent Brief Generator demo ── */
+function AgentBriefDemo() {
+  const [taskText, setTaskText] = useState("Research competitor pricing pages and summarise key differences");
+  const [result, setResult] = useState<{ name: string; brief: string } | null>(null);
+  const mutation = trpc.ai.createAgentBrief.useMutation({
+    onSuccess: (data) => setResult(data),
+  });
+
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+        From any task in the Agents page, click "Create Agent" to auto-generate a ready-to-paste AI agent prompt and a suggested agent name.
+      </p>
+      <input
+        value={taskText}
+        onChange={(e) => setTaskText(e.target.value)}
+        placeholder="Describe the task for the agent…"
+        className="px-3 py-2 text-xs bg-transparent focus:outline-none"
+        style={{ border: `1px solid ${M.border}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}
+      />
+      <button
+        onClick={() => mutation.mutate({ taskText, context: "work" })}
+        disabled={mutation.isPending || !taskText.trim()}
+        className="flex items-center gap-2 px-4 py-2 text-xs font-medium self-start transition-all hover:opacity-90"
+        style={{ background: M.accent, color: "white", fontFamily: "'DM Sans', sans-serif" }}
+      >
+        {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+        Generate agent brief
+      </button>
+      {result && (
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center gap-2">
+            <Bot className="w-3.5 h-3.5" style={{ color: M.accent }} />
+            <span className="text-xs font-bold" style={{ color: M.ink, fontFamily: "'JetBrains Mono', monospace" }}>{result.name}</span>
+          </div>
+          <div className="p-3 text-xs leading-relaxed" style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}`, color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>
+            {result.brief}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ── Main AI Hub ── */
 export function AIHub() {
   return (
@@ -372,7 +516,7 @@ export function AIHub() {
       <div className="flex items-center gap-3 mb-2">
         <div
           className="w-8 h-8 flex items-center justify-center"
-          style={{ background: "oklch(0.52 0.14 35 / 0.10)", border: "1px solid oklch(0.52 0.14 35 / 0.25)" }}
+          style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}` }}
         >
           <Sparkles className="w-4 h-4" style={{ color: M.accent }} />
         </div>
@@ -384,7 +528,7 @@ export function AIHub() {
             AI Features
           </h2>
           <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-            5 AI tools built into your workspace — try them here or find them in context
+            7 AI tools built into your workspace — try them live or find them in context
           </p>
         </div>
       </div>
@@ -392,17 +536,19 @@ export function AIHub() {
       {/* Where to find each feature */}
       <div
         className="p-4 flex flex-col gap-2"
-        style={{ background: "oklch(0.52 0.14 35 / 0.05)", border: "1px solid oklch(0.52 0.14 35 / 0.18)" }}
+        style={{ background: M.accentBg, border: `1px solid ${M.accentBdr}` }}
       >
         <p className="text-xs font-semibold mb-1" style={{ color: M.accent, fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.05em" }}>
           WHERE TO FIND EACH FEATURE
         </p>
         {[
-          { label: "Brain Dump → AI Categorise", where: "Brain Dump page → \"✦ AI Categorise\" button" },
+          { label: "Brain Dump → AI Categorise", where: "Brain Dump page → \"✦ AI Sort\" button above your entries" },
           { label: "Daily Summary", where: "Wrap-up panel → \"✦ Generate AI summary\" button" },
-          { label: "Focus Micro-Reflection", where: "Focus Timer → session complete screen" },
+          { label: "Focus Micro-Reflection", where: "Focus Timer → session start & complete screen" },
           { label: "Monthly AI Review", where: "Monthly page → \"✦ Generate AI Review\" button" },
-          { label: "MIT Morning Suggestion", where: "Daily Check-in → final step (auto-generates)" },
+          { label: "MIT — Most Important Thing", where: "Daily Check-in → final step (auto-generates from your tasks & goals)" },
+          { label: "AI Command Center", where: "Dashboard → right panel (chat with AI to manage tasks, goals, agents & wins)" },
+          { label: "Agent Brief Generator", where: "Agents page → any task card → \"Create Agent\" button" },
         ].map(({ label, where }, i) => (
           <div key={i} className="flex items-start gap-2 text-xs" style={{ fontFamily: "'DM Sans', sans-serif" }}>
             <ChevronRight className="w-3 h-3 mt-0.5 shrink-0" style={{ color: M.accent }} />
@@ -418,19 +564,28 @@ export function AIHub() {
       <FeatureCard
         icon={Brain}
         title="Brain Dump Categoriser"
-        description="Paste your brain dump entries and AI will sort them into tasks, worries, ideas, and reminders — and suggest which ones to add to your task list."
+        description="Paste your brain dump entries and AI will sort them into tasks, goals, worries, ideas, and reminders — and suggest which ones to add to your task list or goals."
         badge="BRAIN DUMP"
       >
         <BrainDumpDemo />
       </FeatureCard>
 
       <FeatureCard
-        icon={Sparkles}
-        title="Daily Summary"
-        description="At the end of your day, AI reads your wins, tasks, focus sessions, and mood to write a warm, personal summary — not a generic template."
-        badge="WRAP-UP"
+        icon={Bot}
+        title="AI Command Center"
+        description="Chat with your AI assistant directly from the Dashboard. Create tasks, set goals, launch agents, log wins, complete tasks, or ask for prioritisation advice — all in natural language."
+        badge="DASHBOARD"
       >
-        <DailySummaryDemo />
+        <AICommandDemo />
+      </FeatureCard>
+
+      <FeatureCard
+        icon={Target}
+        title="MIT — Most Important Thing"
+        description="Every morning during check-in, AI looks at your tasks, goals, and mood to pick the single most important thing to focus on today. Reduces decision paralysis."
+        badge="CHECK-IN"
+      >
+        <MITDemo />
       </FeatureCard>
 
       <FeatureCard
@@ -443,6 +598,15 @@ export function AIHub() {
       </FeatureCard>
 
       <FeatureCard
+        icon={Sparkles}
+        title="Daily Summary"
+        description="At the end of your day, AI reads your wins, tasks, focus sessions, and mood to write a warm, personal summary — not a generic template."
+        badge="WRAP-UP"
+      >
+        <DailySummaryDemo />
+      </FeatureCard>
+
+      <FeatureCard
         icon={CalendarDays}
         title="Monthly AI Review"
         description="At any point in the month, AI reads your full data and writes a personalised review: what went well, one pattern it noticed, and one thing to try next month."
@@ -452,12 +616,12 @@ export function AIHub() {
       </FeatureCard>
 
       <FeatureCard
-        icon={Target}
-        title="MIT — Most Important Thing"
-        description="Every morning during check-in, AI looks at your tasks, goals, and mood to pick the single most important thing to focus on today. Reduces decision paralysis."
-        badge="CHECK-IN"
+        icon={Wand2}
+        title="Agent Brief Generator"
+        description="Turn any task into a ready-to-paste AI agent prompt. AI generates a focused agent name and a detailed brief you can drop directly into any AI assistant."
+        badge="AGENTS"
       >
-        <MITDemo />
+        <AgentBriefDemo />
       </FeatureCard>
     </div>
   );
