@@ -26,6 +26,7 @@ import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useBlockStreak } from "@/hooks/useBlockStreak";
 import { useTimer } from "@/contexts/TimerContext";
+import { nanoid } from "nanoid";
 import {
   DashboardDecor,
   FocusDecor,
@@ -157,13 +158,14 @@ function GoalFlagIcon({ className, style }: { className?: string; style?: React.
   );
 }
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "goals" | "agents" | "ai";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "dump" | "goals" | "agents" | "ai";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
   focus:      { title: "Focus Timer",  icon: Clock           },
   tasks:      { title: "My Tasks",     icon: Star     },
   wins:       { title: "Daily Wins",   icon: Sparkles        },
+  dump:       { title: "Brain Dump",   icon: Brain           },
   goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
   ai:         { title: "AI Features",  icon: Sparkles        },
@@ -658,6 +660,22 @@ export default function Home() {
               </RetroPageWrapper>
             )}
 
+
+            {activeSection === "dump" && (
+              <RetroPageWrapper title="dump.txt" sticker="star">
+              <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
+                <BrainDumpDecor />
+                <div className="relative z-10">
+                  <BrainDump
+                    onConvertToTask={(task) => setTasks((p) => [task, ...p])}
+                    onCreateAgent={(taskText) => { toast("Agent created from dump!"); }}
+                    onAddGoal={(text) => setGoals((p) => [{ id: nanoid(), text, progress: 0, context: "personal", createdAt: new Date() }, ...p])}
+                    onDump={() => recordDumpEntry()}
+                  />
+                </div>
+              </div>
+              </RetroPageWrapper>
+            )}
 
             {activeSection === "goals" && (
               <RetroPageWrapper title="goals.md" sticker="leaf">

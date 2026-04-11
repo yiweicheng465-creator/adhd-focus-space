@@ -9,7 +9,6 @@ import { TimerProvider } from "./contexts/TimerContext";
 import Home from "./pages/Home";
 import TimerPrototypes from "./pages/TimerPrototypes";
 import Monthly from "@/pages/Monthly";
-import Insight from "@/pages/Insight";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -17,7 +16,6 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/timer-prototypes"} component={TimerPrototypes} />
         <Route path="/monthly" component={Monthly} />
-        <Route path="/insight" component={Insight} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

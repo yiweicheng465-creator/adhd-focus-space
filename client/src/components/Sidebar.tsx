@@ -122,6 +122,7 @@ const NAV: Array<{
   { id: "focus",     short: "FOCUS",  Icon: IconFocus,  title: "Focus Timer"  },
   { id: "tasks",     short: "TASKS",  Icon: IconTasks,  title: "My Tasks"     },
   { id: "wins",      short: "WINS",   Icon: IconWins,   title: "Daily Wins"   },
+  { id: "dump",      short: "DUMP",   Icon: IconDump,   title: "Brain Dump"   },
   { id: "goals",     short: "GOALS",  Icon: IconGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", Icon: IconAgents, title: "AI Agents"    },
   { id: "ai",        short: "AI",     Icon: IconAI,     title: "AI Features"  },

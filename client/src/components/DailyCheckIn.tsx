@@ -306,7 +306,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         style={{
           background: M.bg,
           border: `1.5px solid ${M.border}`,
-          boxShadow: "4px 6px 20px rgba(212,88,152,0.18), 0 0 0 1px rgba(232,184,208,0.60)",
+          boxShadow: "0 8px 32px rgba(180,130,160,0.18), 4px 6px 20px rgba(212,88,152,0.18), 0 0 0 1px rgba(232,184,208,0.60)",
           position: "relative",
         }}
       >
@@ -749,7 +749,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               className="flex items-center gap-2 px-5 py-2.5 text-sm font-medium transition-all hover:opacity-90 active:scale-95"
               style={{ background: M.accent, color: "white" }}
             >
-              {step === "greeting" ? "Let's go" : "Next"}
+              {step === "greeting" ? "Start my day ✦" : "Next"}
               <ArrowRight className="w-4 h-4" />
             </button>
           ) : (
