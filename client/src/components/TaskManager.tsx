@@ -352,8 +352,25 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 opacity: isCompleting ? 0.5 : 1,
                 transform: isCompleting ? "scale(0.98)" : undefined,
                 transition: "all 0.3s ease",
+                alignItems: "flex-start",
               }}
             >
+              {/* Left: priority icon box */}
+              <div style={{
+                flexShrink: 0,
+                width: 28,
+                height: 28,
+                border: `1.5px solid ${pcfg.border}`,
+                borderRadius: 4,
+                background: pcfg.bg,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 1,
+              }}>
+                <PIcon size={12} style={{ color: pcfg.color }} />
+              </div>
+
               {/* Text + goal link */}
               <div className="flex-1 min-w-0">
                 <p
@@ -373,10 +390,12 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                   const linkedGoal = goals.find((g) => g.id === task.goalId);
                   return linkedGoal ? (
                     <span style={{
+                      display: "block",
                       fontSize: "0.62rem",
                       color: task.done ? M.muted : "oklch(0.40 0.09 145)",
                       fontFamily: "'DM Sans', sans-serif",
                       letterSpacing: "0.06em",
+                      marginTop: 1,
                     }}>
                       ↳ {linkedGoal.text.length > 30 ? linkedGoal.text.slice(0, 30) + "…" : linkedGoal.text}
                     </span>
@@ -384,49 +403,48 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 })()}
               </div>
 
-              {/* Priority stamp tag */}
-              {!task.done && (
-                <span style={{
-                  fontFamily: "'Space Mono', monospace",
-                  fontSize: "0.56rem",
-                  fontWeight: 700,
-                  letterSpacing: "0.07em",
-                  textTransform: "uppercase",
-                  color: pcfg.color,
-                  border: `1.5px solid ${pcfg.border}`,
-                  borderRadius: 2,
-                  padding: "1px 5px",
-                  background: pcfg.bg,
-                  flexShrink: 0,
-                  whiteSpace: "nowrap",
-                }}>
-                  {pcfg.label}
-                </span>
-              )}
-
-              {/* Context badge */}
-              <ContextBadge context={task.context} />
-
-              {/* Checkbox */}
-              <button
-                onClick={() => toggleTask(task.id)}
-                className="flex-shrink-0 transition-all hover:scale-110"
-                style={{ color: task.done ? pcfg.color : "oklch(0.88 0.012 72)" }}
-              >
-                {task.done
-                  ? <CheckCircle2 className="w-4 h-4" />
-                  : <Circle       className="w-4 h-4" />
-                }
-              </button>
-
-              {/* Delete */}
-              <button
-                onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity"
-                style={{ color: M.muted }}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {/* Right side: context badge + priority stamp + checkbox */}
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginTop: 2 }}>
+                {/* Context badge */}
+                <ContextBadge context={task.context} />
+                {/* Priority stamp */}
+                {!task.done && (
+                  <span style={{
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: "0.52rem",
+                    fontWeight: 700,
+                    letterSpacing: "0.07em",
+                    textTransform: "uppercase",
+                    color: pcfg.color,
+                    border: `1.5px solid ${pcfg.border}`,
+                    borderRadius: 2,
+                    padding: "1px 5px",
+                    background: pcfg.bg,
+                    whiteSpace: "nowrap",
+                  }}>
+                    {pcfg.label}
+                  </span>
+                )}
+                {/* Checkbox */}
+                <button
+                  onClick={() => toggleTask(task.id)}
+                  className="flex-shrink-0 transition-all hover:scale-110"
+                  style={{ color: task.done ? pcfg.color : "oklch(0.82 0.012 72)" }}
+                >
+                  {task.done
+                    ? <CheckCircle2 className="w-4 h-4" />
+                    : <Circle       className="w-4 h-4" />
+                  }
+                </button>
+                {/* Delete */}
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{ color: M.muted }}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           );
         })}
