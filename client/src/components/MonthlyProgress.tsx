@@ -328,13 +328,13 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
       boxShadow: "3px 3px 0 oklch(0.72 0.08 310)",
     }}>
       {/* Retro titlebar */}
-      <div style={{ background: "oklch(0.22 0.040 320)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+      <div style={{ background: "#F9D6E8", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6, borderBottom: "1.5px solid oklch(0.78 0.08 330)" }}>
         <div style={{ display: "flex", gap: 4 }}>
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.62 0.18 340)" }} />
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
           <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
         </div>
-        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.06 330)", marginLeft: 4 }}>day_summary.txt</span>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8A3060", marginLeft: 4 }}>day_summary.txt</span>
       </div>
       {/* Header */}
       <div style={{ padding: "14px 18px", borderBottom: `1px solid ${M.border}`, background: M.coralBg, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -600,13 +600,13 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
         boxShadow: "3px 3px 0 oklch(0.72 0.08 310)",
       }}>
         {/* Retro titlebar */}
-        <div style={{ background: "oklch(0.22 0.040 320)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ background: "#F9D6E8", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6, borderBottom: "1.5px solid oklch(0.78 0.08 330)" }}>
           <div style={{ display: "flex", gap: 4 }}>
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.62 0.18 340)" }} />
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
             <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.72 0.08 310)" }} />
           </div>
-          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.06 330)", marginLeft: 4 }}>calendar.exe</span>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8A3060", marginLeft: 4 }}>calendar.exe</span>
         </div>
         <div style={{ padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
