@@ -9,10 +9,10 @@ import { trpc } from "@/lib/trpc";
 
 /* ── Retro lo-fi button style ── */
 const retroBtn: React.CSSProperties = {
-  background: "oklch(0.985 0.012 355)",
-  color: "oklch(0.22 0.040 320)",
-  border: "1.5px solid oklch(0.22 0.040 320)",
-  boxShadow: "2px 2px 0px oklch(0.22 0.040 320)",
+  background: "oklch(0.58 0.18 340)",
+  color: "white",
+  border: "1.5px solid oklch(0.30 0.10 320)",
+  boxShadow: "2px 2px 0px oklch(0.30 0.10 320)",
   fontFamily: "'Space Mono', monospace",
   fontSize: "0.70rem",
   letterSpacing: "0.04em",
@@ -35,7 +35,7 @@ const retroBtnActive: React.CSSProperties = {
 
 const retroBtnDisabled: React.CSSProperties = {
   ...retroBtn,
-  opacity: 0.5,
+  opacity: 0.45,
   cursor: "not-allowed",
 };
 
