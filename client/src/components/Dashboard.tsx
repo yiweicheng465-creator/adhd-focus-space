@@ -20,7 +20,7 @@ import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
 import { useTimer } from "@/contexts/TimerContext";
-import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check, Star, PlayCircle } from "lucide-react";
+import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check } from "lucide-react";
 import { PixelTrophy } from "@/components/PixelIcons";
 import { Streamdown } from "streamdown";
 import { toast } from "sonner";
@@ -94,11 +94,13 @@ function CornerMark() {
   );
 }
 
-/* Priority dot config */
-const PRIORITY_DOTS: Record<string, { color: string; bg: string; glow: string }> = {
-  urgent: { color: "oklch(0.55 0.16 20)",  bg: "oklch(0.55 0.16 20 / 0.08)",  glow: "oklch(0.55 0.16 20 / 0.35)" },
-  focus:  { color: "oklch(0.52 0.14 35)",  bg: "oklch(0.52 0.14 35 / 0.08)",  glow: "oklch(0.52 0.14 35 / 0.35)" },
-  normal: { color: "oklch(0.60 0.08 145)", bg: "oklch(0.60 0.08 145 / 0.06)", glow: "oklch(0.60 0.08 145 / 0.30)" },
+/* Priority config — distinct colors per level, sorted urgent → focus → normal → someday */
+const PRIORITY_ORDER: Record<string, number> = { urgent: 0, focus: 1, normal: 2, someday: 3 };
+const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string; labelBg: string }> = {
+  urgent:  { color: "oklch(0.52 0.20 18)",  bg: "oklch(0.97 0.025 18)",  label: "URGENT",  labelBg: "oklch(0.52 0.20 18 / 0.12)" },
+  focus:   { color: "oklch(0.50 0.16 35)",  bg: "oklch(0.97 0.018 35)",  label: "FOCUS",   labelBg: "oklch(0.50 0.16 35 / 0.12)" },
+  normal:  { color: "oklch(0.45 0.10 145)", bg: "oklch(0.97 0.014 145)", label: "NORMAL",  labelBg: "oklch(0.45 0.10 145 / 0.10)" },
+  someday: { color: "oklch(0.55 0.06 240)", bg: "oklch(0.97 0.010 240)", label: "SOMEDAY", labelBg: "oklch(0.55 0.06 240 / 0.10)" },
 };
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -375,8 +377,6 @@ export function Dashboard({
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const [completing, setCompleting] = useState<string | null>(null);
-  const [mitTaskId, setMitTaskId] = useState<string | null>(null);
-  const [mitLoading, setMitLoading] = useState(false);
   const now = new Date();
 
   const contextTasks = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
@@ -391,53 +391,15 @@ export function Dashboard({
 
   const handleCheck = (taskId: string) => {
     setCompleting(taskId);
-    if (taskId === mitTaskId) setMitTaskId(null);
     setTimeout(() => {
       onTaskToggle?.(taskId);
       setCompleting(null);
     }, 350);
   };
 
-  const mitMutation = trpc.ai.command.useMutation({
-    onSuccess: (data) => {
-      setMitLoading(false);
-      // First try: look for a task ID in the reply (format: "TASK_ID:<id>")
-      const idMatch = data.reply.match(/TASK_ID:([\w-]+)/);
-      if (idMatch) {
-        const found = activeTasks.find(t => t.id === idMatch[1]);
-        if (found) {
-          setMitTaskId(found.id);
-          toast.success("MIT highlighted!", { duration: 2000 });
-          return;
-        }
-      }
-      // Second try: fuzzy text match against full task text
-      const reply = data.reply.toLowerCase();
-      const found = activeTasks.find(t =>
-        reply.includes(t.text.toLowerCase().replace(/(?:^|\s)#[\w-]+/g, "").trim().slice(0, 30))
-      );
-      if (found) {
-        setMitTaskId(found.id);
-        toast.success("MIT highlighted!", { duration: 2000 });
-      } else if (activeTasks.length > 0) {
-        // Fallback: highlight the first urgent/focus task, or just the first
-        const priority = activeTasks.find(t => t.priority === "urgent") ??
-                         activeTasks.find(t => t.priority === "focus") ??
-                         activeTasks[0];
-        setMitTaskId(priority.id);
-        toast.success("Most important task highlighted!", { duration: 2000 });
-      }
-    },
-    onError: () => {
-      setMitLoading(false);
-      toast.error("Couldn't determine MIT. Try again.");
-    },
-  });
-
   // / keyboard shortcut: focus the AI input
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // Only trigger if not already in an input/textarea
       const tag = (e.target as HTMLElement).tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable) return;
       if (e.key === "/") {
@@ -450,23 +412,6 @@ export function Dashboard({
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, []);
-
-  const handleMIT = () => {
-    if (activeTasks.length === 0) return;
-    setMitLoading(true);
-    setMitTaskId(null);
-    mitMutation.mutate({
-      messages: [{
-        role: "user",
-        content: `You are helping an ADHD user identify their single most important task. From the list below, pick ONE task and reply in this exact format: "TASK_ID:<id> — <short reason why>". Tasks: ${activeTasks.map(t => `[TASK_ID:${t.id}] "${t.text.replace(/(?:^|\s)#[\w-]+/g, "").trim()}" (priority: ${t.priority}, context: ${t.context})`).join(" | ")}`,
-      }],
-      tasks: activeTasks.map(t => ({ id: t.id, text: t.text, priority: t.priority, context: t.context, done: t.done })),
-      goals: goals.map(g => ({ id: g.id, text: g.text, progress: g.progress, context: g.context })),
-      agents: [],
-      focusSessions,
-      mood,
-    });
-  };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -571,31 +516,6 @@ export function Dashboard({
             <button className="m-btn-link" onClick={() => onNavigate("tasks")}>All tasks</button>
           </div>
 
-          {/* MIT button */}
-          {activeTasks.length > 0 && (
-            <button
-              onClick={handleMIT}
-              disabled={mitLoading}
-              style={{
-                display: "flex", alignItems: "center", gap: 6, marginBottom: 8,
-                padding: "5px 10px", cursor: mitLoading ? "default" : "pointer",
-                background: mitTaskId ? "oklch(0.52 0.14 35 / 0.10)" : "oklch(0.965 0.012 75 / 0.70)",
-                border: `1px solid ${mitTaskId ? "oklch(0.52 0.14 35 / 0.40)" : BORDER}`,
-                borderRadius: 20, transition: "all 0.2s", flexShrink: 0,
-                width: "100%",
-              }}
-            >
-              {mitLoading ? (
-                <Loader2 size={11} style={{ color: TC, animation: "spin 1s linear infinite", flexShrink: 0 }} />
-              ) : (
-                <Star size={11} style={{ color: TC, flexShrink: 0 }} />
-              )}
-              <span style={{ fontSize: 11, color: mitTaskId ? TC : MUTED, fontFamily: "'DM Sans', sans-serif" }}>
-                {mitLoading ? "Finding your MIT…" : mitTaskId ? "MIT highlighted ✓" : "What should I focus on?"}
-              </span>
-            </button>
-          )}
-
           <div style={{ flex: 1, overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column", gap: 5 }}>
             {activeTasks.length === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 10, textAlign: "center" }}>
@@ -608,104 +528,77 @@ export function Dashboard({
                 <button className="m-btn-primary" onClick={() => onNavigate("tasks")}>Add a task</button>
               </div>
             ) : (
-              activeTasks.slice(0, 7).map((t) => {
-                const pd = PRIORITY_DOTS[t.priority] ?? PRIORITY_DOTS.normal;
-                const ctxColor = getContextConfig(t.context).color;
-                const isCompleting = completing === t.id;
-                const isMIT = mitTaskId === t.id;
-                const cleanText = t.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || t.text;
-                return (
-                  <div key={t.id} style={{ position: "relative" }}>
-                    {/* Gradient glow layer for MIT */}
-                    {isMIT && (
-                      <div style={{
-                        position: "absolute", inset: -3, borderRadius: 10, zIndex: 0, pointerEvents: "none",
-                        background: "linear-gradient(135deg, oklch(0.52 0.14 35 / 0.35) 0%, oklch(0.65 0.12 55 / 0.20) 50%, oklch(0.52 0.14 35 / 0.30) 100%)",
-                        filter: "blur(6px)",
-                      }} />
-                    )}
+              [...activeTasks]
+                .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
+                .slice(0, 8)
+                .map((t) => {
+                  const pd = PRIORITY_DOTS[t.priority] ?? PRIORITY_DOTS.normal;
+                  const ctxColor = getContextConfig(t.context).color;
+                  const isCompleting = completing === t.id;
+                  const cleanText = t.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || t.text;
+                  return (
                     <div
+                      key={t.id}
                       style={{
-                        position: "relative", zIndex: 1,
                         display: "flex", alignItems: "center", gap: 8,
                         padding: "7px 10px",
-                        background: isCompleting
-                          ? "oklch(0.60 0.08 145 / 0.08)"
-                          : isMIT
-                            ? "oklch(0.985 0.010 75)"
-                            : pd.bg,
-                        border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : isMIT ? "oklch(0.52 0.14 35 / 0.55)" : pd.color + "30"}`,
-                        borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
+                        background: isCompleting ? "oklch(0.60 0.08 145 / 0.08)" : pd.bg,
+                        border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : pd.color + "40"}`,
+                        borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
                         borderRadius: 6,
                         opacity: isCompleting ? 0.6 : 1,
                         transition: "all 0.3s ease",
                       }}
                     >
-                    {/* Checkbox */}
-                    <button
-                      onClick={() => handleCheck(t.id)}
-                      title="Mark done"
-                      style={{
-                        width: 18, height: 18, flexShrink: 0, borderRadius: "50%",
-                        border: `1.5px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
-                        background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
-                        display: "flex", alignItems: "center", justifyContent: "center",
-                        cursor: "pointer", transition: "all 0.2s",
-                      }}
-                    >
-                      {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 145)" }} />}
-                    </button>
-
-                    {/* Task text */}
-                    <p style={{
-                      fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                      color: INK, textDecoration: isCompleting ? "line-through" : "none",
-                      fontWeight: isMIT ? 600 : 400,
-                    }}>
-                      {isMIT && <Star size={9} style={{ color: TC, marginRight: 4, display: "inline", verticalAlign: "middle" }} />}
-                      {cleanText}
-                    </p>
-
-                    {/* Context badge */}
-                    <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", borderRadius: 4 }}>
-                      {t.context}
-                    </span>
-                    </div>
-                    {/* Start 25min focus button — only on MIT card */}
-                    {isMIT && (
+                      {/* Checkbox */}
                       <button
-                        onClick={() => {
-                          onNavigate("focus");
-                          setTimeout(() => {
-                            try {
-                              window.dispatchEvent(new CustomEvent("adhd-start-mit-focus", { detail: { taskText: cleanText } }));
-                            } catch { /* ignore */ }
-                          }, 300);
-                          toast.success(`Starting 25 min focus on: ${cleanText}`);
-                        }}
+                        onClick={() => handleCheck(t.id)}
+                        title="Mark done"
                         style={{
-                          display: "flex", alignItems: "center", gap: 5, marginTop: 4, marginLeft: 2,
-                          fontSize: 10, fontFamily: "'DM Sans', sans-serif", fontWeight: 600, letterSpacing: "0.04em",
-                          color: TC, background: "oklch(0.52 0.14 35 / 0.08)",
-                          border: `1px solid oklch(0.52 0.14 35 / 0.30)`,
-                          borderRadius: 20, padding: "3px 10px", cursor: "pointer",
-                          transition: "all 0.2s",
+                          width: 18, height: 18, flexShrink: 0, borderRadius: "50%",
+                          border: `1.5px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
+                          background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          cursor: "pointer", transition: "all 0.2s",
                         }}
                       >
-                        <PlayCircle size={11} />
-                        Start 25 min focus on this
+                        {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 145)" }} />}
                       </button>
-                    )}
-                  </div>
-                );
-              })
+
+                      {/* Task text */}
+                      <p style={{
+                        fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        color: INK, textDecoration: isCompleting ? "line-through" : "none",
+                      }}>
+                        {cleanText}
+                      </p>
+
+                      {/* Priority badge */}
+                      <span style={{
+                        fontSize: 8, padding: "1px 5px", flexShrink: 0,
+                        color: pd.color, background: pd.labelBg,
+                        border: `1px solid ${pd.color}40`,
+                        fontFamily: "'JetBrains Mono', monospace",
+                        letterSpacing: "0.08em", borderRadius: 3,
+                        fontWeight: 600,
+                      }}>
+                        {pd.label}
+                      </span>
+
+                      {/* Context badge */}
+                      <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", borderRadius: 4 }}>
+                        {t.context}
+                      </span>
+                    </div>
+                  );
+                })
             )}
-            {activeTasks.length > 7 && (
+            {activeTasks.length > 8 && (
               <button
                 onClick={() => onNavigate("tasks")}
                 style={{ fontSize: 10, textAlign: "center", paddingTop: 2, color: MUTED, background: "none", border: "none", cursor: "pointer" }}
               >
-                +{activeTasks.length - 7} more →
+                +{activeTasks.length - 8} more →
               </button>
             )}
           </div>

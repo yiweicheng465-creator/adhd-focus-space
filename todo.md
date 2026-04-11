@@ -57,3 +57,8 @@
 - [x] FocusTimer.tsx: Already uses warm cream/terracotta palette consistent with retro aesthetic
 - [x] MIT to FocusTimer pre-label: adhd-start-mit-focus event listener added to FocusTimer; MIT task name shown as label badge when timer is idle
 - [x] / keyboard shortcut: Press / anywhere on dashboard to focus the AI input field
+
+## Current Session
+- [x] Remove MIT highlight feature from dashboard (button, glow, "Start 25 min focus" button, mitTaskId state)
+- [x] Sort dashboard task list by urgency: urgent > focus > normal > someday
+- [x] Color-code task cards by priority (distinct colors per level, clearly visible)
