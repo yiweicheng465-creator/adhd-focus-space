@@ -26,7 +26,7 @@ import { Streamdown } from "streamdown";
 import { toast } from "sonner";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
-const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-ds-ouija_c3b2a30f.png";
+const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-pink-windows_f21d8166.png";
 
 const CHAT_HISTORY_KEY = "adhd-ai-chat-history";
 const MAX_CHAT_HISTORY = 10;
@@ -502,7 +502,7 @@ export function Dashboard({
         <div className="relative z-10 flex items-stretch" style={{ minHeight: 108 }}>
           {/* Left: illustration */}
           <div className="hidden md:flex w-36 shrink-0 items-end justify-center pb-0 pt-3" style={{ borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" className="object-cover w-full rounded-lg" style={{ maxHeight: 120, opacity: 0.88 }} />
+            <img src={PERSON_IMG} alt="thinking person" className="object-cover w-full" style={{ maxHeight: 120, opacity: 0.92, borderRadius: 16 }} />
           </div>
           {/* Right: greeting + controls */}
           <div className="flex-1 px-6 py-4 flex flex-col gap-3">
