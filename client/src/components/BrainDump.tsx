@@ -92,7 +92,10 @@ function loadEntries(): BrainDumpEntry[] {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as Array<BrainDumpEntry & { createdAt: string }>;
-    return parsed.map((e) => ({ ...e, createdAt: new Date(e.createdAt) }));
+    // Filter out entries that were already moved to Tasks — they should not reappear on refresh
+    return parsed
+      .filter((e) => !e.converted)
+      .map((e) => ({ ...e, createdAt: new Date(e.createdAt) }));
   } catch {
     return [];
   }
@@ -119,10 +122,11 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onDump, initialText,
     return Array.from(tagSet).sort();
   }, [entries]);
 
-  // Entries filtered by active tag
+  // Entries filtered by active tag — also exclude converted entries from display
   const visibleEntries = useMemo(() => {
-    if (!activeTag) return entries;
-    return entries.filter((e) => e.tags.includes(activeTag));
+    const active = entries.filter((e) => !e.converted);
+    if (!activeTag) return active;
+    return active.filter((e) => e.tags.includes(activeTag));
   }, [entries, activeTag]);
 
   const dump = () => {
