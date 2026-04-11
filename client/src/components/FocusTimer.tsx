@@ -679,6 +679,17 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
     setOnSessionComplete, setOnBlockComplete, setOnQuit,
   } = useTimer();
 
+  // MIT pre-label: listen for adhd-start-mit-focus event from Dashboard
+  const [mitLabel, setMitLabel] = useState<string | null>(null);
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.taskText) setMitLabel(detail.taskText);
+    };
+    window.addEventListener("adhd-start-mit-focus", handler);
+    return () => window.removeEventListener("adhd-start-mit-focus", handler);
+  }, []);
+
   // Register callbacks so the context can fire them
   useEffect(() => {
     setOnSessionComplete(onSessionComplete ?? null);
@@ -754,6 +765,12 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
         <div>
           <p style={{ fontSize: 9, letterSpacing: "0.22em", color: "#8C7B6B", textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>Focus Timer</p>
           <p style={{ fontSize: 11, letterSpacing: "0.14em", color: "#3D2E1E", fontWeight: 600, marginTop: 2, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>{MODE_LABELS[mode]}</p>
+          {mitLabel && phase === "idle" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 4, padding: "3px 8px", background: "oklch(0.52 0.10 32 / 0.08)", border: "1px solid oklch(0.52 0.10 32 / 0.25)", borderRadius: 4 }}>
+              <span style={{ fontSize: 9, color: "oklch(0.52 0.10 32)", fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.06em" }}>★ MIT: {mitLabel.length > 28 ? mitLabel.slice(0, 28) + "…" : mitLabel}</span>
+              <button onClick={() => setMitLabel(null)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, color: "oklch(0.52 0.10 32 / 0.60)", fontSize: 10, lineHeight: 1 }}>×</button>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {sessions > 0 && (

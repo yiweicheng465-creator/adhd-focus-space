@@ -1,20 +1,12 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Morandi / Modern Terra Design System v3.0
-   
-   Palette (Morandi + Sherwin-Williams Modern Terra):
-   ─ Parchment:     oklch(0.972 0.010 78)   — main background
-   ─ Cream:         oklch(0.985 0.007 80)   — card/panel bg
-   ─ Slumber:       oklch(0.78 0.018 75)    — warm grey, muted UI
-   ─ Pinky Beige:   oklch(0.82 0.025 20)    — soft rose-beige accent
-   ─ Caribbean Coral (muted): oklch(0.58 0.10 35) — primary CTA
-   ─ Griffin:       oklch(0.38 0.018 75)    — dark charcoal text
-   ─ Sage:          oklch(0.68 0.06 145)    — secondary accent
-   ─ Lavender mist: oklch(0.80 0.025 300)   — personal context
-   
-   Rules:
-   - NO teal, NO bright green, NO vivid red, NO blue
-   - All interactive elements use muted coral or sage
-   - Text is always Griffin charcoal on parchment
+   ADHD FOCUS SPACE — Retro Lo-Fi Desktop Design System v4.0
+
+   Aesthetic: Soft retro-desktop / lo-fi corkboard
+   - Background: warm beige grid paper texture
+   - Cards: vintage OS window panels (cream/parchment, pencil borders)
+   - Typography: Space Mono for labels, Playfair for headings, DM Sans body
+   - Palette: dusty rose, warm sand, muted sage, faded terracotta
+   - Buttons: retro OS style — flat, bordered, uppercase tiny labels
    ============================================================ */
 
 @import "tailwindcss";
@@ -62,107 +54,139 @@
 }
 
 :root {
-  --radius: 0.1rem; /* near-square — editorial, no pill shapes */
+  --radius: 0.25rem; /* slightly rounded — soft retro feel */
 
-  /* ── Morandi Backgrounds ── */
-  --background:          oklch(0.972 0.010 78);   /* parchment */
-  --foreground:          oklch(0.28 0.018 65);    /* griffin charcoal */
-  --card:                oklch(0.985 0.007 80);   /* cream */
-  --card-foreground:     oklch(0.28 0.018 65);
-  --popover:             oklch(0.985 0.007 80);
-  --popover-foreground:  oklch(0.28 0.018 65);
+  /* ── Retro Lo-Fi Palette ── */
+  /* Warm beige grid paper */
+  --background:          oklch(0.960 0.014 72);
+  --foreground:          oklch(0.30 0.020 60);
 
-  /* ── Primary: muted coral (Caribbean Coral desaturated) ── */
-  --primary:             oklch(0.55 0.09 35);
-  --primary-foreground:  oklch(0.97 0.005 80);
+  /* Parchment card / window panel */
+  --card:                oklch(0.975 0.010 75);
+  --card-foreground:     oklch(0.30 0.020 60);
+  --popover:             oklch(0.975 0.010 75);
+  --popover-foreground:  oklch(0.30 0.020 60);
 
-  /* ── Secondary: slumber grey ── */
-  --secondary:           oklch(0.93 0.014 75);
-  --secondary-foreground: oklch(0.38 0.018 65);
+  /* Dusty terracotta — primary CTA */
+  --primary:             oklch(0.52 0.10 32);
+  --primary-foreground:  oklch(0.97 0.005 75);
 
-  /* ── Muted ── */
-  --muted:               oklch(0.93 0.012 78);
-  --muted-foreground:    oklch(0.55 0.018 70);
+  /* Warm sand — secondary */
+  --secondary:           oklch(0.92 0.018 72);
+  --secondary-foreground: oklch(0.38 0.018 62);
 
-  /* ── Accent: soft sage ── */
-  --accent:              oklch(0.90 0.022 140);
-  --accent-foreground:   oklch(0.32 0.05 140);
+  /* Muted */
+  --muted:               oklch(0.92 0.014 74);
+  --muted-foreground:    oklch(0.54 0.018 68);
 
-  /* ── Destructive: muted rose ── */
-  --destructive:         oklch(0.60 0.12 20);
-  --destructive-foreground: oklch(0.97 0.005 80);
+  /* Sage green — accent */
+  --accent:              oklch(0.88 0.030 138);
+  --accent-foreground:   oklch(0.32 0.055 138);
 
-  /* ── Borders ── */
-  --border:              oklch(0.88 0.014 75);
-  --input:               oklch(0.88 0.014 75);
-  --ring:                oklch(0.55 0.09 35 / 0.35);
+  /* Dusty rose — destructive */
+  --destructive:         oklch(0.58 0.12 18);
+  --destructive-foreground: oklch(0.97 0.005 75);
 
-  /* ── Charts (all muted Morandi tones) ── */
-  --chart-1:             oklch(0.55 0.09 35);    /* coral */
-  --chart-2:             oklch(0.68 0.06 145);   /* sage */
-  --chart-3:             oklch(0.72 0.04 75);    /* slumber */
-  --chart-4:             oklch(0.75 0.05 300);   /* lavender */
-  --chart-5:             oklch(0.55 0.06 145);   /* sage green */
+  /* Pencil-stroke borders */
+  --border:              oklch(0.86 0.018 72);
+  --input:               oklch(0.86 0.018 72);
+  --ring:                oklch(0.52 0.10 32 / 0.30);
 
-  /* ── Sidebar ── */
-  --sidebar:             oklch(0.955 0.016 76);
-  --sidebar-foreground:  oklch(0.28 0.018 65);
-  --sidebar-primary:     oklch(0.55 0.09 35);
-  --sidebar-primary-foreground: oklch(0.97 0.005 80);
-  --sidebar-accent:      oklch(0.93 0.014 75);
-  --sidebar-accent-foreground: oklch(0.28 0.018 65);
-  --sidebar-border:      oklch(0.87 0.014 75);
-  --sidebar-ring:        oklch(0.55 0.09 35 / 0.35);
+  /* Charts — all muted retro tones */
+  --chart-1:             oklch(0.52 0.10 32);    /* terracotta */
+  --chart-2:             oklch(0.62 0.07 138);   /* sage */
+  --chart-3:             oklch(0.68 0.06 72);    /* sand */
+  --chart-4:             oklch(0.68 0.06 295);   /* dusty lavender */
+  --chart-5:             oklch(0.58 0.08 200);   /* dusty blue */
+
+  /* Sidebar — slightly darker parchment */
+  --sidebar:             oklch(0.950 0.018 70);
+  --sidebar-foreground:  oklch(0.30 0.020 60);
+  --sidebar-primary:     oklch(0.52 0.10 32);
+  --sidebar-primary-foreground: oklch(0.97 0.005 75);
+  --sidebar-accent:      oklch(0.92 0.018 72);
+  --sidebar-accent-foreground: oklch(0.30 0.020 60);
+  --sidebar-border:      oklch(0.85 0.018 70);
+  --sidebar-ring:        oklch(0.52 0.10 32 / 0.30);
 }
 
-/* ── Morandi semantic color tokens (use in components) ── */
+/* ── Semantic color tokens ── */
 :root {
-  /* Primary coral */
-  --m-coral:         oklch(0.55 0.09 35);
-  --m-coral-light:   oklch(0.55 0.09 35 / 0.10);
-  --m-coral-border:  oklch(0.55 0.09 35 / 0.30);
+  /* Terracotta */
+  --r-terra:         oklch(0.52 0.10 32);
+  --r-terra-light:   oklch(0.52 0.10 32 / 0.10);
+  --r-terra-border:  oklch(0.52 0.10 32 / 0.28);
 
-  /* Sage green */
-  --m-sage:          oklch(0.62 0.07 145);
-  --m-sage-light:    oklch(0.62 0.07 145 / 0.10);
-  --m-sage-border:   oklch(0.62 0.07 145 / 0.30);
+  /* Dusty rose */
+  --r-rose:          oklch(0.72 0.06 18);
+  --r-rose-light:    oklch(0.72 0.06 18 / 0.12);
+  --r-rose-border:   oklch(0.72 0.06 18 / 0.30);
 
-  /* Slumber grey */
-  --m-slumber:       oklch(0.72 0.018 75);
-  --m-slumber-light: oklch(0.72 0.018 75 / 0.15);
+  /* Sage */
+  --r-sage:          oklch(0.60 0.07 138);
+  --r-sage-light:    oklch(0.60 0.07 138 / 0.10);
+  --r-sage-border:   oklch(0.60 0.07 138 / 0.28);
 
-  /* Pinky beige */
-  --m-pink:          oklch(0.78 0.04 20);
-  --m-pink-light:    oklch(0.78 0.04 20 / 0.12);
-  --m-pink-border:   oklch(0.78 0.04 20 / 0.35);
+  /* Dusty blue */
+  --r-blue:          oklch(0.58 0.08 220);
+  --r-blue-light:    oklch(0.58 0.08 220 / 0.10);
+  --r-blue-border:   oklch(0.58 0.08 220 / 0.28);
 
-  /* Lavender (personal context) */
-  --m-lavender:      oklch(0.72 0.05 300);
-  --m-lavender-light: oklch(0.72 0.05 300 / 0.10);
-  --m-lavender-border: oklch(0.72 0.05 300 / 0.30);
+  /* Lavender */
+  --r-lavender:      oklch(0.68 0.06 290);
+  --r-lavender-light: oklch(0.68 0.06 290 / 0.10);
+  --r-lavender-border: oklch(0.68 0.06 290 / 0.28);
 
-  /* Work context (muted indigo) */
-  --m-indigo:        oklch(0.50 0.06 145);   /* sage — Work context */
-  --m-indigo-light:  oklch(0.50 0.06 145 / 0.08);
-  --m-indigo-border: oklch(0.50 0.06 145 / 0.25);
+  /* Sand / parchment */
+  --r-sand:          oklch(0.92 0.018 72);
+  --r-ink:           oklch(0.30 0.020 60);
+  --r-muted:         oklch(0.54 0.018 68);
+  --r-border:        oklch(0.86 0.018 72);
+  --r-bg:            oklch(0.960 0.014 72);
+  --r-card:          oklch(0.975 0.010 75);
 
-  /* Griffin charcoal */
-  --m-ink:           oklch(0.28 0.018 65);
-  --m-muted:         oklch(0.55 0.018 70);
-  --m-border:        oklch(0.88 0.014 75);
-  --m-bg:            oklch(0.972 0.010 78);
-  --m-card:          oklch(0.985 0.007 80);
+  /* Aliases for backward compat */
+  --m-coral:         oklch(0.52 0.10 32);
+  --m-coral-light:   oklch(0.52 0.10 32 / 0.10);
+  --m-coral-border:  oklch(0.52 0.10 32 / 0.28);
+  --m-sage:          oklch(0.60 0.07 138);
+  --m-sage-light:    oklch(0.60 0.07 138 / 0.10);
+  --m-sage-border:   oklch(0.60 0.07 138 / 0.28);
+  --m-slumber:       oklch(0.72 0.018 72);
+  --m-slumber-light: oklch(0.72 0.018 72 / 0.15);
+  --m-pink:          oklch(0.72 0.06 18);
+  --m-pink-light:    oklch(0.72 0.06 18 / 0.12);
+  --m-pink-border:   oklch(0.72 0.06 18 / 0.30);
+  --m-lavender:      oklch(0.68 0.06 290);
+  --m-lavender-light: oklch(0.68 0.06 290 / 0.10);
+  --m-lavender-border: oklch(0.68 0.06 290 / 0.28);
+  --m-indigo:        oklch(0.50 0.06 138);
+  --m-indigo-light:  oklch(0.50 0.06 138 / 0.08);
+  --m-indigo-border: oklch(0.50 0.06 138 / 0.25);
+  --m-ink:           oklch(0.30 0.020 60);
+  --m-muted:         oklch(0.54 0.018 68);
+  --m-border:        oklch(0.86 0.018 72);
+  --m-bg:            oklch(0.960 0.014 72);
+  --m-card:          oklch(0.975 0.010 75);
 }
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
+    /* Grid paper background texture */
+    background-image:
+      linear-gradient(oklch(0.86 0.018 72 / 0.35) 1px, transparent 1px),
+      linear-gradient(90deg, oklch(0.86 0.018 72 / 0.35) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-attachment: fixed;
   }
+
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   [type="button"]:not(:disabled),
@@ -175,11 +199,10 @@
     @apply cursor-pointer;
   }
 
-  /* Lighter, smaller placeholder text across all inputs */
   input::placeholder {
     font-weight: 300;
     font-size: 0.8rem;
-    color: oklch(0.72 0.012 70);
+    color: oklch(0.68 0.012 68);
     letter-spacing: 0.01em;
   }
 }
@@ -201,150 +224,222 @@
     .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
   }
 
-  /* Editorial display type */
+  /* ── Retro OS Window Panel ──
+     Mimics the vintage desktop window aesthetic from the reference image:
+     cream/parchment fill, thin pencil-stroke border, subtle shadow */
+  .retro-window {
+    background: oklch(0.975 0.010 75);
+    border: 1.5px solid oklch(0.82 0.022 68);
+    border-radius: 4px;
+    box-shadow:
+      2px 3px 0px oklch(0.82 0.022 68 / 0.50),
+      0 1px 8px oklch(0.60 0.020 60 / 0.06);
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Retro window title bar */
+  .retro-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    background: oklch(0.940 0.020 70);
+    border-bottom: 1px solid oklch(0.82 0.022 68);
+    font-family: 'Space Mono', monospace;
+    font-size: 0.60rem;
+    letter-spacing: 0.08em;
+    color: oklch(0.45 0.020 62);
+    user-select: none;
+  }
+
+  .retro-titlebar-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+
+  .retro-titlebar-btn {
+    width: 10px;
+    height: 10px;
+    border: 1px solid oklch(0.72 0.025 65);
+    background: oklch(0.960 0.014 72);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 7px;
+    color: oklch(0.55 0.020 62);
+    cursor: default;
+    border-radius: 1px;
+  }
+
+  /* Morandi card base (backward compat) */
+  .m-card {
+    background: oklch(0.975 0.010 75);
+    border: 1.5px solid oklch(0.82 0.022 68);
+    border-radius: 4px;
+  }
+
+  /* ── Display type ── */
   .font-display {
     font-family: 'Playfair Display', Georgia, serif;
   }
 
-  /* Small caps label */
+  /* ── Retro monospace label ── */
+  .retro-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.60rem;
+    font-weight: 400;
+    letter-spacing: 0.10em;
+    text-transform: uppercase;
+    color: oklch(0.54 0.018 68);
+  }
+
+  /* Small caps editorial label (kept for compat) */
   .editorial-label {
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.65rem;
-    font-weight: 500;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.60rem;
+    font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.55 0.018 70);
+    color: oklch(0.54 0.018 68);
   }
 
-  /* Morandi card base */
-  .m-card {
-    background: oklch(0.985 0.007 80);
-    border: 1px solid oklch(0.88 0.014 75);
-  }
+  /* ── Retro Button System ──
+     Flat, bordered, uppercase — vintage OS dialog style */
 
-  /* ── Editorial Button System (inspired by VJ Type + Little Valley Studio) ──
-     Rules: square corners, all-caps tracking-wide, flat/no shadow,
-     primary = solid dark fill, ghost = thin 1px border only            */
-
-  /* Primary: solid coral fill, white text, square */
+  /* Primary: terracotta fill */
   .m-btn-primary {
-    background: oklch(0.52 0.09 35);
-    color: oklch(0.97 0.005 80);
-    border: 1px solid oklch(0.52 0.09 35);
-    border-radius: 0;
-    padding: 0.55rem 1.25rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    background: oklch(0.52 0.10 32);
+    color: oklch(0.97 0.005 75);
+    border: 1.5px solid oklch(0.44 0.10 32);
+    border-radius: 2px;
+    padding: 0.45rem 1.1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: background 0.18s, color 0.18s;
-    box-shadow: none;
+    transition: background 0.15s, box-shadow 0.15s;
+    box-shadow: 1px 2px 0px oklch(0.44 0.10 32 / 0.60);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
   }
   .m-btn-primary:hover {
-    background: oklch(0.44 0.09 35);
-    border-color: oklch(0.44 0.09 35);
+    background: oklch(0.44 0.10 32);
+    box-shadow: 0px 1px 0px oklch(0.44 0.10 32 / 0.60);
+  }
+  .m-btn-primary:active {
+    box-shadow: none;
+    transform: translateY(1px);
   }
 
-  /* Primary dark: solid griffin charcoal, white text */
+  /* Dark: charcoal fill */
   .m-btn-dark {
-    background: oklch(0.28 0.018 65);
-    color: oklch(0.97 0.005 80);
-    border: 1px solid oklch(0.28 0.018 65);
-    border-radius: 0;
-    padding: 0.55rem 1.25rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.68rem;
-    font-weight: 600;
-    letter-spacing: 0.14em;
+    background: oklch(0.30 0.020 60);
+    color: oklch(0.97 0.005 75);
+    border: 1.5px solid oklch(0.22 0.020 60);
+    border-radius: 2px;
+    padding: 0.45rem 1.1rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: background 0.18s;
-    box-shadow: none;
+    transition: background 0.15s;
+    box-shadow: 1px 2px 0px oklch(0.22 0.020 60 / 0.60);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
   }
   .m-btn-dark:hover {
-    background: oklch(0.20 0.018 65);
-    border-color: oklch(0.20 0.018 65);
+    background: oklch(0.22 0.020 60);
+  }
+  .m-btn-dark:active {
+    box-shadow: none;
+    transform: translateY(1px);
   }
 
-  /* Ghost: transparent, 1px border, dark text — VJ Type 'TRIALS' style */
+  /* Ghost: transparent, pencil border */
   .m-btn-ghost {
-    background: transparent;
-    border: 1px solid oklch(0.72 0.018 75);
-    color: oklch(0.38 0.018 65);
-    border-radius: 0;
-    padding: 0.5rem 1.1rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.14em;
+    background: oklch(0.975 0.010 75);
+    border: 1.5px solid oklch(0.78 0.022 68);
+    color: oklch(0.40 0.020 62);
+    border-radius: 2px;
+    padding: 0.42rem 1.0rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 400;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: border-color 0.18s, color 0.18s;
-    box-shadow: none;
+    transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
+    box-shadow: 1px 2px 0px oklch(0.78 0.022 68 / 0.50);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
   }
   .m-btn-ghost:hover {
-    border-color: oklch(0.52 0.09 35);
-    color: oklch(0.52 0.09 35);
+    border-color: oklch(0.52 0.10 32);
+    color: oklch(0.52 0.10 32);
+  }
+  .m-btn-ghost:active {
+    box-shadow: none;
+    transform: translateY(1px);
   }
 
-  /* Inline text-link button — Little Valley Studio 'TAKE ME THERE' style */
+  /* Link button */
   .m-btn-link {
     background: transparent;
     border: none;
-    border-bottom: 1px solid oklch(0.72 0.018 75);
+    border-bottom: 1px solid oklch(0.72 0.018 68);
     border-radius: 0;
     padding: 0 0 0.1rem 0;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.68rem;
-    font-weight: 500;
-    letter-spacing: 0.14em;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.60rem;
+    font-weight: 400;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.38 0.018 65);
-    transition: border-color 0.18s, color 0.18s;
+    color: oklch(0.40 0.020 62);
+    transition: border-color 0.15s, color 0.15s;
     box-shadow: none;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
   }
   .m-btn-link:hover {
-    border-color: oklch(0.52 0.09 35);
-    color: oklch(0.52 0.09 35);
+    border-color: oklch(0.52 0.10 32);
+    color: oklch(0.52 0.10 32);
   }
 
-  /* Chip/tag button — compact, square, for filters */
+  /* Chip/tag */
   .m-chip {
-    background: transparent;
-    border: 1px solid oklch(0.82 0.012 75);
-    border-radius: 0;
-    padding: 0.25rem 0.65rem;
-    font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
+    background: oklch(0.975 0.010 75);
+    border: 1.5px solid oklch(0.80 0.018 70);
+    border-radius: 2px;
+    padding: 0.22rem 0.60rem;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.58rem;
+    font-weight: 400;
+    letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: oklch(0.50 0.018 70);
+    color: oklch(0.50 0.018 68);
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
+    box-shadow: 1px 1px 0px oklch(0.80 0.018 70 / 0.50);
   }
   .m-chip:hover, .m-chip.active {
-    background: oklch(0.52 0.09 35);
-    border-color: oklch(0.52 0.09 35);
-    color: oklch(0.97 0.005 80);
+    background: oklch(0.52 0.10 32);
+    border-color: oklch(0.44 0.10 32);
+    color: oklch(0.97 0.005 75);
+    box-shadow: 1px 1px 0px oklch(0.44 0.10 32 / 0.50);
   }
   .m-chip.active-sage {
-    background: oklch(0.62 0.07 145);
-    border-color: oklch(0.62 0.07 145);
-    color: oklch(0.97 0.005 80);
+    background: oklch(0.60 0.07 138);
+    border-color: oklch(0.50 0.07 138);
+    color: oklch(0.97 0.005 75);
   }
 }
 
@@ -365,8 +460,22 @@
   from { opacity: 0; transform: scale(0.96); }
   to   { opacity: 1; transform: scale(1); }
 }
+@keyframes floatUp {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
 
 .animate-fade-up    { animation: fadeUp 0.35s ease forwards; }
 .animate-fade-in    { animation: fadeIn 0.25s ease forwards; }
 .animate-slide-left { animation: slideInLeft 0.3s ease forwards; }
 .animate-scale-in   { animation: scaleIn 0.28s ease forwards; }
+.animate-float      { animation: floatUp 3s ease-in-out infinite; }
+
+/* ── Retro scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: oklch(0.92 0.014 72); }
+::-webkit-scrollbar-thumb {
+  background: oklch(0.78 0.022 68);
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover { background: oklch(0.65 0.025 65); }

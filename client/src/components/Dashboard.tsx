@@ -71,17 +71,19 @@ function getGreeting() {
   return "Good evening";
 }
 
-/* ── Warm editorial palette ── */
-const TC        = "oklch(0.52 0.14 35)";   // terracotta accent
-const CREAM     = "oklch(0.985 0.008 80)"; // warm cream background
-const BORDER    = "oklch(0.87 0.014 75)";  // soft warm border
-const INK       = "oklch(0.22 0.01 60)";   // near-black ink
-const MUTED     = "oklch(0.55 0.015 70)";  // warm muted text
-// AI panel: warm sand tones instead of cold blue
-const AI_BG     = "oklch(0.978 0.010 75 / 0.70)";  // warm sand
-const AI_BORDER = "oklch(0.82 0.020 70 / 0.60)";   // warm sand border
-const AI_MSG_BG = "oklch(0.965 0.012 75 / 0.80)";  // slightly deeper sand for AI messages
-const AI_ACCENT = "oklch(0.48 0.12 35)";            // terracotta for AI header/icons
+/* ── Retro Lo-Fi Palette (aligned with index.css CSS vars) ── */
+const TC        = "oklch(0.52 0.10 32)";   // terracotta accent
+const CREAM     = "oklch(0.975 0.010 75)"; // parchment card bg
+const BORDER    = "oklch(0.82 0.022 68)";  // pencil-stroke border
+const INK       = "oklch(0.30 0.020 60)";  // near-black ink
+const MUTED     = "oklch(0.54 0.018 68)";  // warm muted text
+// AI panel: same parchment as other panels
+const AI_BG     = "oklch(0.975 0.010 75)";  // parchment
+const AI_BORDER = "oklch(0.82 0.022 68)";   // pencil border
+const AI_MSG_BG = "oklch(0.960 0.014 72)";  // slightly deeper sand for AI messages
+const AI_ACCENT = "oklch(0.52 0.10 32)";    // terracotta for AI header/icons
+const TITLEBAR  = "oklch(0.940 0.020 70)";  // retro title bar bg
+const TITLEBAR_TEXT = "oklch(0.45 0.020 62)"; // title bar text
 
 function CornerMark() {
   return (
@@ -125,6 +127,13 @@ function AICommandPanel({
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const greetedRef = useRef(false);
+  const aiInputRef = useRef<HTMLInputElement>(null);
+
+  // Expose aiInputRef globally so the / shortcut can focus it
+  useEffect(() => {
+    (window as Window & { __adhd_ai_input?: HTMLInputElement | null }).__adhd_ai_input = aiInputRef.current;
+    return () => { (window as Window & { __adhd_ai_input?: HTMLInputElement | null }).__adhd_ai_input = null; };
+  });
 
   // Persist last MAX_CHAT_HISTORY messages
   useEffect(() => {
@@ -331,6 +340,7 @@ function AICommandPanel({
         }}
       >
         <input
+          ref={aiInputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
@@ -424,6 +434,23 @@ export function Dashboard({
     },
   });
 
+  // / keyboard shortcut: focus the AI input
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      // Only trigger if not already in an input/textarea
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable) return;
+      if (e.key === "/") {
+        e.preventDefault();
+        const el = (window as Window & { __adhd_ai_input?: HTMLInputElement | null }).__adhd_ai_input;
+        el?.focus();
+        el?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   const handleMIT = () => {
     if (activeTasks.length === 0) return;
     setMitLoading(true);
@@ -511,18 +538,31 @@ export function Dashboard({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, minHeight: 0 }}>
 
         {/* Col 1: Focus Timer */}
-        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10, flexShrink: 0 }}>
-            <Clock size={12} style={{ color: TC }} />
-            <p className="editorial-label">Focus Timer</p>
+        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+          <div className="retro-titlebar">
+            <span>focus_timer.exe</span>
+            <div className="retro-titlebar-buttons">
+              <span className="retro-titlebar-btn">_</span>
+              <span className="retro-titlebar-btn">□</span>
+              <span className="retro-titlebar-btn">✕</span>
+            </div>
           </div>
-          <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
+          <div style={{ flex: 1, minHeight: 0, overflow: "hidden", padding: "14px 16px" }}>
             <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
           </div>
         </div>
 
         {/* Col 2: Next Up — cute cards with checkboxes + MIT button */}
-        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
+        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+          <div className="retro-titlebar">
+            <span>next_up.txt</span>
+            <div className="retro-titlebar-buttons">
+              <span className="retro-titlebar-btn">_</span>
+              <span className="retro-titlebar-btn">□</span>
+              <span className="retro-titlebar-btn">✕</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", padding: "14px 16px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <Zap size={12} style={{ color: TC }} />
@@ -669,10 +709,20 @@ export function Dashboard({
               </button>
             )}
           </div>
-        </div>
+          </div>{/* /inner padding div */}
+        </div>{/* /retro-window Col 2 */}
 
-        {/* Col 3: AI Command Center — warm sand palette */}
-        <div style={{ border: `1px solid ${AI_BORDER}`, background: AI_BG, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
+        {/* Col 3: AI Command Center */}
+        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+          <div className="retro-titlebar">
+            <span>ai_assistant.app</span>
+            <div className="retro-titlebar-buttons">
+              <span className="retro-titlebar-btn">_</span>
+              <span className="retro-titlebar-btn">□</span>
+              <span className="retro-titlebar-btn">✕</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", padding: "14px 16px" }}>
           <AICommandPanel
             tasks={tasks}
             goals={goals}
@@ -685,8 +735,9 @@ export function Dashboard({
             onAgentCreate={onAgentCreate}
             onWinCreate={onWinCreate}
           />
-        </div>
-      </div>
+          </div>{/* /inner padding div */}
+        </div>{/* /retro-window Col 3 */}
+      </div>{/* /grid */}
 
       {/* ── BOTTOM: Today's wins + focus strip ── */}
       {(todayWins.length > 0 || focusSessions > 0) && (

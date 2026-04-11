@@ -45,3 +45,15 @@
 - [x] Wire mood score from daily check-in into AI greeting (personalised opening message)
 - [x] Fix MIT task not getting gradient glow highlight (mitTaskId not matching task id)
 - [x] Replace AI auto-greeting with suggestion chips as the default empty state
+- [ ] Full visual restyle to soft retro-desktop lo-fi aesthetic (grid paper bg, vintage OS windows, monospace labels, dusty rose/sand palette)
+
+## Retro Lo-Fi Restyle (Completed)
+- [x] Global CSS updated: grid-paper background, Space Mono font, warm palette CSS variables
+- [x] .retro-window class: cream/parchment fill, pencil-stroke border, subtle shadow
+- [x] .retro-titlebar class: warm title bar with _ □ X controls
+- [x] Dashboard.tsx: All 3 panels (Focus Timer, Next Up, AI Command Center) now use retro-window + retro-titlebar
+- [x] Dashboard.tsx: Color constants aligned with CSS variables (terracotta, parchment, pencil border)
+- [x] Sidebar.tsx: Already using retro lo-fi aesthetic (Space Mono, terracotta active state, warm parchment bg)
+- [x] FocusTimer.tsx: Already uses warm cream/terracotta palette consistent with retro aesthetic
+- [x] MIT to FocusTimer pre-label: adhd-start-mit-focus event listener added to FocusTimer; MIT task name shown as label badge when timer is idle
+- [x] / keyboard shortcut: Press / anywhere on dashboard to focus the AI input field
