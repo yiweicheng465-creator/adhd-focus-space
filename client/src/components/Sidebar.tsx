@@ -7,8 +7,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useTimer } from "@/contexts/TimerContext";
-import { FilmGrainToggle } from "@/components/FilmGrain";
-import { WorkModeToggle } from "@/components/WorkModeToggle";
+import { EffectsPanel } from "@/components/EffectsPanel";
 
 interface SidebarProps {
   activeSection: string;
@@ -255,33 +254,7 @@ function MonthlyLink() {
 }
 
 
-/* Beaker icon link to /timer-prototypes */
-function PrototypesLink() {
-  const [location, navigate] = useLocation();
-  const active = location === "/timer-prototypes";
-  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
-  return (
-    <button
-      onClick={() => navigate("/timer-prototypes")}
-      title="Timer Prototypes"
-      className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
-      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
-    >
-      {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
-      )}
-      <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
-        <path d="M6 2v6L2 14a1 1 0 00.9 1.5h12.2A1 1 0 0016 14l-4-6V2" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
-        <line x1="5" y1="2" x2="13" y2="2" stroke={color} strokeWidth="1.4" strokeLinecap="round"/>
-        <circle cx="7" cy="12" r="1" fill={color} />
-        <circle cx="11" cy="13.5" r="0.7" fill={color} />
-      </svg>
-      <span style={{ fontSize: 7, marginTop: 2, letterSpacing: "0.12em", fontFamily: "'Space Mono', monospace", color }}>LAB</span>
-    </button>
-  );
-}
+
 
 if (typeof document !== "undefined" && !document.getElementById("sidebar-timer-pulse")) {
   const s = document.createElement("style");
@@ -366,15 +339,11 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">
         <MonthlyLink />
-        <PrototypesLink />
       </div>
 
-      {/* Film grain toggle */}
+      {/* Effects panel (grain + work mode) */}
       <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
-      <FilmGrainToggle />
-
-      {/* Work mode toggle */}
-      <WorkModeToggle />
+      <EffectsPanel />
     </aside>
   );
 }
