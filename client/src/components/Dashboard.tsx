@@ -12,6 +12,36 @@
    ============================================================ */
 
 import { useState, useEffect, useRef } from "react";
+
+// ── Inject sticker peel keyframes once ───────────────────────────────────────
+const STICKER_STYLE_ID = "adhd-sticker-peel-kf";
+if (typeof document !== "undefined" && !document.getElementById(STICKER_STYLE_ID)) {
+  const s = document.createElement("style");
+  s.id = STICKER_STYLE_ID;
+  s.textContent = `
+    @keyframes stickerPeelIn {
+      0%   { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px oklch(0.60 0.04 60 / 0.18); }
+      100% { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px oklch(0.60 0.04 60 / 0.28); }
+    }
+    @keyframes stickerPeelOut {
+      0%   { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px oklch(0.60 0.04 60 / 0.28); }
+      100% { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px oklch(0.60 0.04 60 / 0.18); }
+    }
+    @keyframes curlGrow {
+      0%   { border-width: 10px 10px 0 0; }
+      100% { border-width: 16px 16px 0 0; }
+    }
+    @keyframes curlShrink {
+      0%   { border-width: 16px 16px 0 0; }
+      100% { border-width: 10px 10px 0 0; }
+    }
+    .sticker-hover     { animation: stickerPeelIn  0.22s ease forwards; }
+    .sticker-idle      { animation: stickerPeelOut 0.22s ease forwards; }
+    .curl-hover        { animation: curlGrow   0.22s ease forwards; }
+    .curl-idle         { animation: curlShrink 0.22s ease forwards; }
+  `;
+  document.head.appendChild(s);
+}
 import { trpc } from "@/lib/trpc";
 import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";

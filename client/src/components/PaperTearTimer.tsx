@@ -58,31 +58,35 @@ const STRIPS = [
 
 const STRIP_H = 42; // px height of each strip
 
-// ── Generate a jagged vertical path (for right-side tear) ────────────────────
-// Returns an SVG path string that zigzags vertically along x = tearX
-function jaggedVerticalPath(
-  tearX: number,
-  height: number,
+// ── Generate a jagged horizontal path ────────────────────────────────────────────
+function jaggedHPath(
+  fromX: number,
+  toX: number,
+  y: number,
   seed: number,
-  amplitude = 5
+  amplitude: number,
+  direction: 1 | -1 // 1 = jag downward, -1 = jag upward
 ): string {
-  const steps = 24;
-  const pts: string[] = [`M ${tearX} 0`];
+  const steps = 28;
+  const pts: string[] = [`M ${fromX} ${y}`];
   for (let i = 0; i <= steps; i++) {
-    const y = (i / steps) * height;
+    const x = fromX + (i / steps) * (toX - fromX);
     const jag =
-      Math.sin(seed * 3.7 + i * 2.3) * amplitude +
-      Math.cos(seed * 5.1 + i * 1.7) * (amplitude * 0.5);
-    pts.push(`L ${tearX + jag} ${y}`);
+      Math.sin(seed * 4.1 + i * 2.3) * amplitude +
+      Math.cos(seed * 6.7 + i * 1.5) * (amplitude * 0.55);
+    pts.push(`L ${x} ${y + direction * Math.abs(jag)}`);
   }
   return pts.join(" ");
 }
 
-// ── Torn paper overlay — right-side vertical rip ─────────────────────────────
-// The paper covers the RIGHT portion of the strip (from tearX to the right).
-// The jagged vertical edge at tearX is the torn right edge.
-// revealed = 0 → fully covered (tearX = 0, nothing visible)
-// revealed = 1 → fully revealed (tearX = width, all content visible)
+// ── Horizontal torn-paper overlay ─────────────────────────────────────────────────
+// The paper is a dark parchment layer covering the strip.
+// A horizontal rip opens from the right side, revealing the content beneath.
+// The opening has ragged torn edges on both the top and bottom.
+// A rolled curl appears on the left side of the opening.
+//
+// revealed = 0 → paper fully covers the strip (no opening)
+// revealed = 1 → paper fully torn away (full strip visible)
 function TornPaperOverlay({
   width,
   height,
@@ -94,52 +98,104 @@ function TornPaperOverlay({
   seed: number;
   revealed: number;
 }) {
-  // tearX is how far from the LEFT the paper has been torn away
-  // revealed=0 → tearX=0 (paper covers everything)
-  // revealed=1 → tearX=width (paper fully gone)
-  const tearX = width * revealed;
-  const amp = 5;
+  if (revealed <= 0) {
+    // Fully covered — just a flat paper rectangle
+    return (
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}
+        style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 3 }}>
+        <rect x={0} y={0} width={width} height={height} fill="oklch(0.940 0.018 72)" />
+      </svg>
+    );
+  }
+  if (revealed >= 1) return null; // fully revealed, no overlay needed
 
-  // Jagged vertical path at tearX
-  const jagPath = jaggedVerticalPath(tearX, height, seed, amp);
+  // The rip starts from the right and expands leftward.
+  // ripRight = right edge of the opening (always = width, the rip starts from right)
+  // ripLeft  = left edge of the opening (moves from width→0 as revealed goes 0→1)
+  const ripRight = width;
+  const ripLeft  = width * (1 - revealed);
+
+  // Vertical center of the strip
+  const midY    = height / 2;
+  // Opening half-height: 35% of strip height
+  const halfOpen = height * 0.35;
+  const topEdgeY = midY - halfOpen;
+  const botEdgeY = midY + halfOpen;
+  const amp      = 4.5;
+
+  // Jagged top torn edge (jags downward into the opening)
+  const topEdge = jaggedHPath(ripLeft, ripRight, topEdgeY, seed,       amp,  1);
+  // Jagged bottom torn edge (jags upward into the opening)
+  const botEdge = jaggedHPath(ripLeft, ripRight, botEdgeY, seed + 11,  amp, -1);
+
+  // Rolled curl width on the left side of the rip
+  const curlW = Math.min(12, (ripRight - ripLeft) * 0.15);
 
   return (
     <svg
       width={width}
       height={height}
       viewBox={`0 0 ${width} ${height}`}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        pointerEvents: "none",
-        zIndex: 3,
-      }}
+      style={{ position: "absolute", top: 0, left: 0, pointerEvents: "none", zIndex: 3 }}
     >
-      {/* Paper covers from tearX to the right */}
-      {revealed < 1 && (
-        <path
-          d={`${jagPath} L ${width} ${height} L ${width} 0 Z`}
-          fill="oklch(0.978 0.010 74)"
+      <defs>
+        {/* Gradient for the curl shadow on the left edge of the rip */}
+        <linearGradient id={`curlGrad${seed}`} x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"   stopColor="oklch(0.40 0.018 60)" stopOpacity="0.35" />
+          <stop offset="100%" stopColor="oklch(0.40 0.018 60)" stopOpacity="0" />
+        </linearGradient>
+        {/* Gradient for inner shadow below top torn edge */}
+        <linearGradient id={`topShadow${seed}`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stopColor="oklch(0.35 0.018 60)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="oklch(0.35 0.018 60)" stopOpacity="0" />
+        </linearGradient>
+        {/* Gradient for inner shadow above bottom torn edge */}
+        <linearGradient id={`botShadow${seed}`} x1="0" x2="0" y1="1" y2="0">
+          <stop offset="0%"   stopColor="oklch(0.35 0.018 60)" stopOpacity="0.18" />
+          <stop offset="100%" stopColor="oklch(0.35 0.018 60)" stopOpacity="0" />
+        </linearGradient>
+      </defs>
+
+      {/* TOP paper block: from y=0 down to the top torn edge */}
+      <path
+        d={`M 0 0 L ${width} 0 L ${width} ${topEdgeY} ${topEdge.replace(`M ${ripLeft} ${topEdgeY}`, `L ${ripLeft} ${topEdgeY}`)} L 0 ${topEdgeY} Z`}
+        fill="oklch(0.940 0.018 72)"
+      />
+      {/* BOTTOM paper block: from bottom torn edge down to y=height */}
+      <path
+        d={`M 0 ${botEdgeY} ${botEdge.replace(`M ${ripLeft} ${botEdgeY}`, `L ${ripLeft} ${botEdgeY}`)} L ${width} ${height} L 0 ${height} Z`}
+        fill="oklch(0.940 0.018 72)"
+      />
+
+      {/* Inner shadow under top torn edge */}
+      <rect
+        x={ripLeft} y={topEdgeY}
+        width={ripRight - ripLeft} height={Math.min(8, halfOpen * 0.4)}
+        fill={`url(#topShadow${seed})`}
+      />
+      {/* Inner shadow above bottom torn edge */}
+      <rect
+        x={ripLeft} y={botEdgeY - Math.min(8, halfOpen * 0.4)}
+        width={ripRight - ripLeft} height={Math.min(8, halfOpen * 0.4)}
+        fill={`url(#botShadow${seed})`}
+      />
+
+      {/* Rolled curl on the left edge of the rip */}
+      {curlW > 2 && (
+        <rect
+          x={ripLeft}
+          y={topEdgeY}
+          width={curlW}
+          height={botEdgeY - topEdgeY}
+          fill={`url(#curlGrad${seed})`}
+          rx={curlW / 2}
         />
       )}
-      {/* Jagged torn edge highlight — thin warm shadow on the rip */}
-      {revealed > 0 && revealed < 1 && (
-        <>
-          <path
-            d={jagPath}
-            fill="none"
-            stroke="oklch(0.70 0.025 65)"
-            strokeWidth="1.5"
-            opacity={0.5}
-          />
-          {/* Curl/shadow strip just to the right of the tear */}
-          <path
-            d={`${jagPath} L ${tearX + 8} ${height} L ${tearX + 8} 0 Z`}
-            fill="oklch(0.55 0.018 60 / 0.10)"
-          />
-        </>
-      )}
+
+      {/* Highlight on top torn edge */}
+      <path d={topEdge} fill="none" stroke="oklch(0.75 0.020 68)" strokeWidth="0.8" opacity={0.6} />
+      {/* Highlight on bottom torn edge */}
+      <path d={botEdge} fill="none" stroke="oklch(0.75 0.020 68)" strokeWidth="0.8" opacity={0.6} />
     </svg>
   );
 }

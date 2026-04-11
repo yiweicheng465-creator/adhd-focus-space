@@ -499,83 +499,162 @@ export default function Home() {
             )}
 
             {activeSection === "focus" && (
-              <div className="flex flex-col items-center gap-6 py-4 relative">
+              <div className="relative py-8 px-4" style={{ minHeight: 700 }}>
                 <FocusDecor />
-                {/* Atmospheric sunset panel behind the timer */}
-                <RetroPageWrapper title="focus_timer.exe" sticker="moon" className="w-full" style={{ maxWidth: 680 }}>
-                  {/* Sunset background */}
-                  <div
-                    className="absolute inset-0"
-                    style={{
-                      backgroundImage: `url(${SUNSET_WIDE})`,
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                      opacity: 0.15,
-                    }}
-                  />
-                  <div
-                    className="absolute inset-0"
-                    style={{ background: "oklch(0.985 0.008 80 / 0.88)" }}
-                  />
-                  {/* Corner marks */}
-                  {[
-                    "top-2 left-2",
-                    "top-2 right-2 rotate-90",
-                    "bottom-2 left-2 -rotate-90",
-                    "bottom-2 right-2 rotate-180",
-                  ].map((cls, i) => (
-                    <div key={i} className={`absolute ${cls}`}>
-                      <svg width="10" height="10" viewBox="0 0 10 10" style={{ opacity: 0.35 }}>
-                        <line x1="5" y1="0" x2="5" y2="4" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
-                        <line x1="6" y1="5" x2="10" y2="5" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
-                      </svg>
-                    </div>
-                  ))}
-                  <div className="relative p-6" style={{ minWidth: 0, overflow: "hidden" }}>
-                    {/* Small header */}
-                    <div className="mb-7 text-center">
-                      {/* Geometric clock icon */}
-                      <svg width="36" height="36" viewBox="0 0 36 36" className="mx-auto mb-3" style={{ opacity: 0.45 }}>
-                        <circle cx="18" cy="18" r="16" fill="none" stroke="oklch(0.52 0.14 35)" strokeWidth="1" />
-                        <circle cx="18" cy="18" r="1.5" fill="oklch(0.52 0.14 35)" />
-                        <line x1="18" y1="18" x2="18" y2="8" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="square" />
-                        <line x1="18" y1="18" x2="25" y2="18" stroke="oklch(0.52 0.14 35)" strokeWidth="1" strokeLinecap="square" />
-                        {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => {
-                          const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
-                          const r1 = 13, r2 = i % 3 === 0 ? 11 : 12;
-                          return <line key={i} x1={18 + r1 * Math.cos(a)} y1={18 + r1 * Math.sin(a)} x2={18 + r2 * Math.cos(a)} y2={18 + r2 * Math.sin(a)} stroke="oklch(0.52 0.14 35)" strokeWidth="0.8" />;
-                        })}
-                      </svg>
-                      <h2
-                        className="text-xl font-bold italic"
-                        style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
-                      >
-                        Deep Work
-                      </h2>
-                    </div>
-                    <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
-                  </div>
-                </RetroPageWrapper>
 
-                {/* Focus tips — minimal, geometric */}
-                <RetroPageWrapper title="session_tips.txt" sticker="leaf" className="w-full max-w-md">
-                  <p className="editorial-label mb-3">Session tips</p>
-                  <div className="space-y-2">
+                {/* ── Speech bubble — top-left decorative ── */}
+                <div style={{
+                  position: "absolute",
+                  top: 18,
+                  left: 12,
+                  zIndex: 10,
+                  transform: "rotate(-2deg)",
+                  pointerEvents: "none",
+                  userSelect: "none",
+                }}>
+                  {/* Stars */}
+                  <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "oklch(0.62 0.12 55)" }}>✦</div>
+                  <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "oklch(0.62 0.12 55)" }}>✦</div>
+                  <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "oklch(0.58 0.14 45)" }}>★</div>
+                  {/* Bubble */}
+                  <div style={{
+                    background: "oklch(0.985 0.008 76)",
+                    border: "1.5px solid oklch(0.38 0.018 55)",
+                    borderRadius: 8,
+                    padding: "10px 14px",
+                    maxWidth: 148,
+                    position: "relative",
+                    boxShadow: "2px 2px 0 oklch(0.38 0.018 55 / 0.25)",
+                  }}>
+                    <p style={{
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 10,
+                      lineHeight: 1.55,
+                      color: "oklch(0.32 0.018 55)",
+                      letterSpacing: "0.03em",
+                      textTransform: "uppercase",
+                      margin: 0,
+                    }}>let it go,<br />so you can<br />grow.</p>
+                    {/* Tail pointing right-down */}
+                    <div style={{
+                      position: "absolute",
+                      bottom: -10,
+                      right: 18,
+                      width: 0,
+                      height: 0,
+                      borderLeft: "8px solid transparent",
+                      borderRight: "0px solid transparent",
+                      borderTop: "10px solid oklch(0.38 0.018 55)",
+                    }} />
+                    <div style={{
+                      position: "absolute",
+                      bottom: -8,
+                      right: 19,
+                      width: 0,
+                      height: 0,
+                      borderLeft: "7px solid transparent",
+                      borderRight: "0px solid transparent",
+                      borderTop: "9px solid oklch(0.985 0.008 76)",
+                    }} />
+                  </div>
+                </div>
+
+                {/* ── Main focus_timer.exe window — slight tilt left ── */}
+                <div style={{
+                  position: "relative",
+                  zIndex: 2,
+                  transform: "rotate(-1deg)",
+                  transformOrigin: "top center",
+                  marginLeft: "auto",
+                  marginRight: "auto",
+                  maxWidth: 660,
+                }}>
+                  <RetroPageWrapper title="focus_timer.exe" sticker="moon">
+                    {/* Sunset background */}
+                    <div
+                      className="absolute inset-0"
+                      style={{
+                        backgroundImage: `url(${SUNSET_WIDE})`,
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        opacity: 0.12,
+                      }}
+                    />
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: "oklch(0.985 0.008 80 / 0.88)" }}
+                    />
+                    {/* Corner marks */}
                     {[
-                      "Phone face-down or in another room",
-                      "Close all unneeded browser tabs",
-                      "Use Brain Dump for distracting thoughts",
-                    ].map((tip, i) => (
-                      <div key={i} className="flex items-start gap-3">
-                        <div
-                          className="w-1 h-1 mt-1.5 shrink-0"
-                          style={{ background: "oklch(0.52 0.14 35)", transform: "rotate(45deg)" }}
-                        />
-                        <p className="text-xs" style={{ color: "oklch(0.45 0.01 60)" }}>{tip}</p>
+                      "top-2 left-2",
+                      "top-2 right-2 rotate-90",
+                      "bottom-2 left-2 -rotate-90",
+                      "bottom-2 right-2 rotate-180",
+                    ].map((cls, i) => (
+                      <div key={i} className={`absolute ${cls}`}>
+                        <svg width="10" height="10" viewBox="0 0 10 10" style={{ opacity: 0.35 }}>
+                          <line x1="5" y1="0" x2="5" y2="4" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
+                          <line x1="6" y1="5" x2="10" y2="5" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
+                        </svg>
                       </div>
                     ))}
-                  </div>
-                </RetroPageWrapper>
+                    <div className="relative p-6" style={{ minWidth: 0, overflow: "hidden" }}>
+                      <div className="mb-7 text-center">
+                        <svg width="36" height="36" viewBox="0 0 36 36" className="mx-auto mb-3" style={{ opacity: 0.45 }}>
+                          <circle cx="18" cy="18" r="16" fill="none" stroke="oklch(0.52 0.14 35)" strokeWidth="1" />
+                          <circle cx="18" cy="18" r="1.5" fill="oklch(0.52 0.14 35)" />
+                          <line x1="18" y1="18" x2="18" y2="8" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="square" />
+                          <line x1="18" y1="18" x2="25" y2="18" stroke="oklch(0.52 0.14 35)" strokeWidth="1" strokeLinecap="square" />
+                          {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => {
+                            const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
+                            const r1 = 13, r2 = i % 3 === 0 ? 11 : 12;
+                            return <line key={i} x1={18 + r1 * Math.cos(a)} y1={18 + r1 * Math.sin(a)} x2={18 + r2 * Math.cos(a)} y2={18 + r2 * Math.sin(a)} stroke="oklch(0.52 0.14 35)" strokeWidth="0.8" />;
+                          })}
+                        </svg>
+                        <h2
+                          className="text-xl font-bold italic"
+                          style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
+                        >
+                          Deep Work
+                        </h2>
+                      </div>
+                      <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
+                    </div>
+                  </RetroPageWrapper>
+                </div>
+
+                {/* ── session_tips.txt window — overlaps bottom-right, rotated ── */}
+                <div style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  zIndex: 5,
+                  width: 260,
+                  transform: "rotate(2.5deg)",
+                  transformOrigin: "bottom right",
+                  boxShadow: "6px 6px 0 oklch(0.28 0.018 55 / 0.18)",
+                }}>
+                  <RetroPageWrapper title="session_tips.txt" sticker="leaf">
+                    <div style={{ padding: "10px 14px 12px" }}>
+                      <p className="editorial-label mb-3">Session tips</p>
+                      <div className="space-y-2">
+                        {[
+                          "Phone face-down or in another room",
+                          "Close all unneeded browser tabs",
+                          "Use Brain Dump for distracting thoughts",
+                        ].map((tip, i) => (
+                          <div key={i} className="flex items-start gap-3">
+                            <div
+                              className="w-1 h-1 mt-1.5 shrink-0"
+                              style={{ background: "oklch(0.52 0.14 35)", transform: "rotate(45deg)" }}
+                            />
+                            <p className="text-xs" style={{ color: "oklch(0.45 0.01 60)" }}>{tip}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </RetroPageWrapper>
+                </div>
               </div>
             )}
 
