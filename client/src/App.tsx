@@ -4,6 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import AuraBackground from "./components/AuraBackground";
 import { FilmGrainOverlay } from "./components/FilmGrain";
+import { useWorkMode } from "./components/WorkModeToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
@@ -24,6 +25,9 @@ function Router() {
 }
 
 function App() {
+  // Initialise work mode from localStorage on mount
+  useWorkMode();
+
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">

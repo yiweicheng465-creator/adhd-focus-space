@@ -564,3 +564,145 @@ input[type="radio"]:not(:disabled) {
 }
 /* Hide icon box — no longer used */
 .retro-task-icon-box { display: none; }
+
+/* ============================================================
+   WORK MODE — Monochrome professional palette
+   Applied via .work-mode class on <html> element.
+   Overrides all pink/lavender tokens to grey/black/white.
+   ============================================================ */
+
+.work-mode {
+  /* ── Shadcn/Tailwind CSS variables ── */
+  --background:          oklch(0.975 0 0);
+  --foreground:          oklch(0.15 0 0);
+
+  --card:                oklch(0.99 0 0);
+  --card-foreground:     oklch(0.15 0 0);
+  --popover:             oklch(0.99 0 0);
+  --popover-foreground:  oklch(0.15 0 0);
+
+  --primary:             oklch(0.20 0 0);
+  --primary-foreground:  oklch(0.98 0 0);
+
+  --secondary:           oklch(0.92 0 0);
+  --secondary-foreground: oklch(0.25 0 0);
+
+  --muted:               oklch(0.94 0 0);
+  --muted-foreground:    oklch(0.50 0 0);
+
+  --accent:              oklch(0.88 0 0);
+  --accent-foreground:   oklch(0.20 0 0);
+
+  --destructive:         oklch(0.45 0.18 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  --border:              oklch(0.82 0 0);
+  --input:               oklch(0.82 0 0);
+  --ring:                oklch(0.40 0 0 / 0.30);
+
+  --chart-1:             oklch(0.30 0 0);
+  --chart-2:             oklch(0.50 0 0);
+  --chart-3:             oklch(0.65 0 0);
+  --chart-4:             oklch(0.75 0 0);
+  --chart-5:             oklch(0.85 0 0);
+
+  --sidebar:             oklch(0.96 0 0);
+  --sidebar-foreground:  oklch(0.20 0 0);
+  --sidebar-primary:     oklch(0.20 0 0);
+  --sidebar-primary-foreground: oklch(0.98 0 0);
+  --sidebar-accent:      oklch(0.90 0 0);
+  --sidebar-accent-foreground: oklch(0.20 0 0);
+  --sidebar-border:      oklch(0.80 0 0);
+  --sidebar-ring:        oklch(0.40 0 0 / 0.25);
+
+  /* ── Semantic tokens ── */
+  --r-terra:         oklch(0.25 0 0);
+  --r-terra-light:   oklch(0.25 0 0 / 0.08);
+  --r-terra-border:  oklch(0.25 0 0 / 0.20);
+  --r-rose:          oklch(0.78 0 0);
+  --r-rose-light:    oklch(0.78 0 0 / 0.10);
+  --r-rose-border:   oklch(0.78 0 0 / 0.25);
+  --r-sage:          oklch(0.68 0 0);
+  --r-sage-light:    oklch(0.68 0 0 / 0.10);
+  --r-sage-border:   oklch(0.68 0 0 / 0.22);
+  --r-blue:          oklch(0.58 0 0);
+  --r-blue-light:    oklch(0.58 0 0 / 0.10);
+  --r-blue-border:   oklch(0.58 0 0 / 0.22);
+  --r-lavender:      oklch(0.72 0 0);
+  --r-lavender-light: oklch(0.72 0 0 / 0.10);
+  --r-lavender-border: oklch(0.72 0 0 / 0.22);
+  --r-sand:          oklch(0.94 0 0);
+  --r-ink:           oklch(0.15 0 0);
+  --r-muted:         oklch(0.50 0 0);
+  --r-border:        oklch(0.82 0 0);
+  --r-bg:            oklch(0.975 0 0);
+  --r-card:          oklch(0.99 0 0);
+
+  /* ── Legacy aliases ── */
+  --m-coral:         oklch(0.25 0 0);
+  --m-coral-light:   oklch(0.25 0 0 / 0.08);
+  --m-coral-border:  oklch(0.25 0 0 / 0.20);
+  --m-sage:          oklch(0.68 0 0);
+  --m-sage-light:    oklch(0.68 0 0 / 0.10);
+  --m-sage-border:   oklch(0.68 0 0 / 0.22);
+  --m-slumber:       oklch(0.85 0 0);
+  --m-slumber-light: oklch(0.85 0 0 / 0.14);
+  --m-pink:          oklch(0.78 0 0);
+  --m-pink-light:    oklch(0.78 0 0 / 0.10);
+  --m-pink-border:   oklch(0.78 0 0 / 0.25);
+  --m-lavender:      oklch(0.72 0 0);
+  --m-lavender-light: oklch(0.72 0 0 / 0.10);
+  --m-lavender-border: oklch(0.72 0 0 / 0.22);
+  --m-indigo:        oklch(0.40 0 0);
+  --m-indigo-light:  oklch(0.40 0 0 / 0.08);
+  --m-indigo-border: oklch(0.40 0 0 / 0.22);
+  --m-ink:           oklch(0.15 0 0);
+  --m-muted:         oklch(0.50 0 0);
+  --m-border:        oklch(0.82 0 0);
+  --m-bg:            oklch(0.975 0 0);
+  --m-card:          oklch(0.99 0 0);
+}
+
+/* Override body background grid — clean white grid paper */
+.work-mode body {
+  background-color: #f8f8f8 !important;
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.06) 1px, transparent 1px),
+    linear-gradient(rgba(0, 0, 0, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.025) 1px, transparent 1px) !important;
+  background-size: 128px 128px, 128px 128px, 32px 32px, 32px 32px !important;
+}
+
+/* Hide the coloured aura orbs in work mode */
+.work-mode [aria-hidden="true"] svg ellipse {
+  opacity: 0 !important;
+  transition: opacity 0.4s;
+}
+
+/* Retro window overrides */
+.work-mode .retro-window {
+  background: oklch(0.99 0 0);
+  border-color: oklch(0.80 0 0);
+  box-shadow: 2px 3px 0px oklch(0.75 0 0 / 0.40), 0 1px 8px oklch(0 0 0 / 0.05);
+}
+.work-mode .retro-titlebar {
+  background: oklch(0.90 0 0);
+  border-bottom-color: oklch(0.82 0 0);
+  color: oklch(0.25 0 0);
+}
+.work-mode .retro-titlebar-btn {
+  border-color: oklch(0.72 0 0);
+  background: oklch(0.97 0 0);
+  color: oklch(0.40 0 0);
+}
+
+/* Smooth transition when toggling */
+.work-mode,
+.work-mode * {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    box-shadow 0.25s ease;
+}
