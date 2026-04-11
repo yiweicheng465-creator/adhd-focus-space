@@ -218,9 +218,8 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
         boxShadow: "2px 0 8px oklch(0.60 0.020 60 / 0.06)",
       }}
     >
-      {/* Logo */}
+      {/* Live time at top */}
       <div className="mb-3 flex flex-col items-center gap-1">
-        <LogoMark />
         <LiveTime />
       </div>
 
