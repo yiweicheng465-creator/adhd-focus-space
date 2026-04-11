@@ -57,8 +57,8 @@
   --radius: 0.25rem; /* slightly rounded — soft retro feel */
 
   /* ── Retro Lo-Fi Palette ── */
-  /* Warm beige grid paper */
-  --background:          oklch(0.960 0.014 72);
+  /* Warm caramel sand — lo-fi grid paper base */
+  --background:          oklch(0.920 0.030 72);
   --foreground:          oklch(0.30 0.020 60);
 
   /* Parchment card / window panel */
@@ -179,11 +179,14 @@
     @apply bg-background text-foreground;
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
-    /* Grid paper background texture — visible on page bg, not on cards */
+    /* Lo-fi grid paper — warm caramel lines clearly visible on sand bg */
+    background-color: #EFE0C8;
     background-image:
-      linear-gradient(oklch(0.75 0.022 68 / 0.55) 1px, transparent 1px),
-      linear-gradient(90deg, oklch(0.75 0.022 68 / 0.55) 1px, transparent 1px);
-    background-size: 24px 24px;
+      linear-gradient(rgba(160, 110, 60, 0.45) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(160, 110, 60, 0.45) 1px, transparent 1px),
+      linear-gradient(rgba(160, 110, 60, 0.15) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(160, 110, 60, 0.15) 1px, transparent 1px);
+    background-size: 128px 128px, 128px 128px, 32px 32px, 32px 32px;
     background-attachment: fixed;
   }
 

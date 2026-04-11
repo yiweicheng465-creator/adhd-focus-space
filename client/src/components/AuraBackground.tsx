@@ -34,36 +34,36 @@ export default function AuraBackground() {
 
           {/* Rose-coral orb — top left */}
           <radialGradient id="aura-rose" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#e8a09a" stopOpacity="0.55" />
-            <stop offset="60%" stopColor="#d4837a" stopOpacity="0.22" />
+            <stop offset="0%" stopColor="#e8a09a" stopOpacity="0.20" />
+            <stop offset="60%" stopColor="#d4837a" stopOpacity="0.08" />
             <stop offset="100%" stopColor="#d4837a" stopOpacity="0" />
           </radialGradient>
 
           {/* Warm orange orb — top right */}
           <radialGradient id="aura-orange" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#e8935a" stopOpacity="0.45" />
-            <stop offset="55%" stopColor="#e07840" stopOpacity="0.18" />
+            <stop offset="0%" stopColor="#e8935a" stopOpacity="0.18" />
+            <stop offset="55%" stopColor="#e07840" stopOpacity="0.07" />
             <stop offset="100%" stopColor="#e07840" stopOpacity="0" />
           </radialGradient>
 
           {/* Dusty gold orb — bottom center */}
           <radialGradient id="aura-gold" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#d4a96a" stopOpacity="0.42" />
-            <stop offset="55%" stopColor="#c49050" stopOpacity="0.16" />
+            <stop offset="0%" stopColor="#d4a96a" stopOpacity="0.16" />
+            <stop offset="55%" stopColor="#c49050" stopOpacity="0.06" />
             <stop offset="100%" stopColor="#c49050" stopOpacity="0" />
           </radialGradient>
 
           {/* Blush pink orb — bottom left */}
           <radialGradient id="aura-blush" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#e8b4b8" stopOpacity="0.38" />
-            <stop offset="60%" stopColor="#dda0a4" stopOpacity="0.14" />
+            <stop offset="0%" stopColor="#e8b4b8" stopOpacity="0.14" />
+            <stop offset="60%" stopColor="#dda0a4" stopOpacity="0.05" />
             <stop offset="100%" stopColor="#dda0a4" stopOpacity="0" />
           </radialGradient>
 
           {/* Sage green orb — mid right */}
           <radialGradient id="aura-sage" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="#b8c9a8" stopOpacity="0.28" />
-            <stop offset="60%" stopColor="#9ab88a" stopOpacity="0.10" />
+            <stop offset="0%" stopColor="#b8c9a8" stopOpacity="0.10" />
+            <stop offset="60%" stopColor="#9ab88a" stopOpacity="0.04" />
             <stop offset="100%" stopColor="#9ab88a" stopOpacity="0" />
           </radialGradient>
 
@@ -72,8 +72,7 @@ export default function AuraBackground() {
           </filter>
         </defs>
 
-        {/* Base warm cream */}
-        <rect width="1440" height="900" fill="url(#aura-base)" />
+        {/* Base is transparent — body CSS grid shows through */}
 
         {/* Orbs — blurred */}
         <g filter="url(#aura-blur)">

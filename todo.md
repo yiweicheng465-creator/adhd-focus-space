@@ -89,3 +89,9 @@
 - [x] Remove grid pattern from DailyWrapUp modal interior
 - [x] Remove grid pattern from WeeklyResetNudge interior
 - [x] Remove grid pattern from RetroPageWrapper interior
+
+## Full Lo-Fi Palette Overhaul
+- [ ] Shift global palette to warm caramel/sand (body bg, card bg, borders)
+- [ ] Restyle retro window chrome: warmer title bars, rounded corners, terracotta borders
+- [ ] Add scattered background sticker SVGs (moon, stars, plants, folder, speech bubble, diamonds)
+- [ ] Update task priority colors to warm lo-fi palette (no harsh reds/greens)

@@ -159,7 +159,7 @@ export default function Insight() {
   const [, navigate] = useLocation();
 
   return (
-    <div className="min-h-screen flex" style={{ background: M.bg }}>
+    <div className="min-h-screen flex">
       <Sidebar activeSection="" onSectionChange={() => navigate("/")} />
 
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
@@ -167,9 +167,9 @@ export default function Insight() {
         <header
           className="sticky top-0 z-30 px-8 py-4 flex items-center gap-3"
           style={{
-            background: `${M.bg}e8`,
+            background: "#EFE0C8E6",
             backdropFilter: "blur(8px)",
-            borderBottom: `1px solid ${M.border}`,
+            borderBottom: "1px solid #C9A87C",
           }}
         >
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">

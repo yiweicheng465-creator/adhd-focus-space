@@ -388,7 +388,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
+    <div className="min-h-screen flex">
       {/* Sidebar */}
       <Sidebar activeSection={activeSection} onSectionChange={(s) => setActiveSection(s as Section)} onClearData={handleClearTestData} />
 
@@ -398,9 +398,9 @@ export default function Home() {
         <header
           className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
           style={{
-            background: "oklch(0.975 0.012 80 / 0.9)",
+            background: "#EFE0C8E6",
             backdropFilter: "blur(8px)",
-            borderBottom: "1px solid oklch(0.88 0.012 75)",
+            borderBottom: "1px solid #C9A87C",
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">

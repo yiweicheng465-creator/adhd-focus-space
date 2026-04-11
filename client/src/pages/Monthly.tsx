@@ -18,7 +18,7 @@ export default function Monthly() {
   const { streak: blockStreak, history: blockHistory } = useBlockStreak();
 
   return (
-    <div className="min-h-screen flex" style={{ background: "oklch(0.975 0.012 80)" }}>
+    <div className="min-h-screen flex">
       <Sidebar activeSection="" onSectionChange={(s) => navigate("/")} />
 
       <main className="flex-1 ml-14 min-h-screen flex flex-col">
@@ -26,9 +26,9 @@ export default function Monthly() {
         <header
           className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
           style={{
-            background: "oklch(0.975 0.012 80 / 0.9)",
+            background: "#EFE0C8E6",
             backdropFilter: "blur(8px)",
-            borderBottom: "1px solid oklch(0.88 0.012 75)",
+            borderBottom: "1px solid #C9A87C",
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
