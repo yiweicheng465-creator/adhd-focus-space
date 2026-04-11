@@ -90,8 +90,18 @@
 - [x] Remove grid pattern from WeeklyResetNudge interior
 - [x] Remove grid pattern from RetroPageWrapper interior
 
+## Retro UI Polish (Current Session)
+- [ ] Restyle all buttons to retro lo-fi flat style (thick dark border, 3D offset shadow, cream fill, Space Mono font)
+- [ ] Replace cursor with pixel-art hand pointer SVG via CSS cursor property
+- [ ] Simplify sidebar icons to thin-line minimal geometric style (no pixel art, clean outlines)
+- [ ] Redesign task list to retro dashed-border card rows with icon boxes and dotted line connectors
+
 ## Full Lo-Fi Palette Overhaul
 - [ ] Shift global palette to warm caramel/sand (body bg, card bg, borders)
 - [ ] Restyle retro window chrome: warmer title bars, rounded corners, terracotta borders
 - [ ] Add scattered background sticker SVGs (moon, stars, plants, folder, speech bubble, diamonds)
 - [ ] Update task priority colors to warm lo-fi palette (no harsh reds/greens)
+- [x] Restyle all buttons to retro lo-fi 3D offset style (thick dark border, offset shadow, Space Mono font)
+- [x] Replace cursor with pixel-art hand pointer SVG via CSS cursor property
+- [x] Simplify sidebar icons to thin-line minimal geometric SVGs (clean outlines, no pixel art)
+- [x] Redesign task list to retro dashed-border card rows with icon boxes and dotted connectors

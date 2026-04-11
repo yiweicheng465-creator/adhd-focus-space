@@ -611,14 +611,14 @@ export function Dashboard({
             <button className="m-btn-link" onClick={() => onNavigate("tasks")}>All tasks</button>
           </div>
 
-          <div style={{ flex: 1, overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column", gap: 5 }}>
+          {/* Retro task list — dashed-border rows with icon box */}
+          <div className="retro-task-list" style={{ flex: 1, overflowY: "auto", minHeight: 0 }}>
             {activeTasks.length === 0 ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%", gap: 10, textAlign: "center" }}>
                 <svg width="32" height="32" viewBox="0 0 40 40" style={{ opacity: 0.15 }}>
-                  <circle cx="20" cy="20" r="18" fill="none" stroke={INK} strokeWidth="1" />
-                  <line x1="20" y1="8" x2="20" y2="32" stroke={INK} strokeWidth="0.8" />
-                  <line x1="8" y1="20" x2="32" y2="20" stroke={INK} strokeWidth="0.8" />
-                  <circle cx="20" cy="20" r="3" fill={INK} />
+                  <rect x="6" y="6" width="28" height="28" rx="2" fill="none" stroke={INK} strokeWidth="1.5" />
+                  <line x1="14" y1="20" x2="26" y2="20" stroke={INK} strokeWidth="1" />
+                  <line x1="20" y1="14" x2="20" y2="26" stroke={INK} strokeWidth="1" />
                 </svg>
                 <button className="m-btn-primary" onClick={() => onNavigate("tasks")}>Add a task</button>
               </div>
@@ -634,56 +634,58 @@ export function Dashboard({
                   return (
                     <div
                       key={t.id}
+                      className={`retro-task-row ${t.priority}`}
                       style={{
-                        display: "flex", alignItems: "center", gap: 8,
-                        padding: "7px 10px",
-                        background: isCompleting ? "oklch(0.60 0.08 145 / 0.08)" : pd.bg,
-                        border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : pd.color + "40"}`,
-                        borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
-                        borderRadius: 6,
-                        opacity: isCompleting ? 0.6 : 1,
+                        opacity: isCompleting ? 0.5 : 1,
                         transition: "all 0.3s ease",
+                        padding: "6px 8px",
                       }}
                     >
+                      {/* Icon box */}
+                      <div className="retro-task-icon-box" style={{ width: 22, height: 22, borderColor: pd.color + "60" }}>
+                        <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
+                          <circle cx="6" cy="6" r="4" stroke={pd.color} strokeWidth="1.5"/>
+                          <circle cx="6" cy="6" r="1.5" fill={pd.color}/>
+                        </svg>
+                      </div>
+
+                      {/* Task text */}
+                      <p style={{
+                        fontSize: 11, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                        color: isCompleting ? MUTED : INK,
+                        textDecoration: isCompleting ? "line-through" : "none",
+                        fontFamily: "'DM Sans', sans-serif",
+                        fontWeight: 500,
+                      }}>
+                        {cleanText}
+                      </p>
+
+                      {/* Priority stamp */}
+                      <span style={{
+                        fontSize: 7, padding: "1px 4px", flexShrink: 0,
+                        color: pd.color, background: pd.labelBg,
+                        border: `1.5px solid ${pd.color}55`,
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.06em", borderRadius: 2,
+                        fontWeight: 700,
+                      }}>
+                        {pd.label}
+                      </span>
+
                       {/* Checkbox */}
                       <button
                         onClick={() => handleCheck(t.id)}
                         title="Mark done"
                         style={{
-                          width: 18, height: 18, flexShrink: 0, borderRadius: "50%",
-                          border: `1.5px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
+                          width: 18, height: 18, flexShrink: 0, borderRadius: 3,
+                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
                           background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
-                          cursor: "pointer", transition: "all 0.2s",
+                          transition: "all 0.2s",
                         }}
                       >
                         {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 145)" }} />}
                       </button>
-
-                      {/* Task text */}
-                      <p style={{
-                        fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
-                        color: INK, textDecoration: isCompleting ? "line-through" : "none",
-                      }}>
-                        {cleanText}
-                      </p>
-
-                      {/* Priority badge — lo-fi ink stamp */}
-                      <span style={{
-                        fontSize: 7.5, padding: "1px 5px", flexShrink: 0,
-                        color: pd.color, background: pd.labelBg,
-                        border: `1px solid ${pd.color}55`,
-                        fontFamily: "'Space Mono', monospace",
-                        letterSpacing: "0.06em", borderRadius: 2,
-                        fontWeight: 400, opacity: 0.85,
-                      }}>
-                        {pd.label}
-                      </span>
-
-                      {/* Context badge */}
-                      <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", borderRadius: 4 }}>
-                        {t.context}
-                      </span>
                     </div>
                   );
                 })
@@ -691,7 +693,8 @@ export function Dashboard({
             {activeTasks.length > 8 && (
               <button
                 onClick={() => onNavigate("tasks")}
-                style={{ fontSize: 10, textAlign: "center", paddingTop: 2, color: MUTED, background: "none", border: "none", cursor: "pointer" }}
+                className="m-btn-link"
+                style={{ fontSize: 9, textAlign: "center", paddingTop: 4, width: "100%", justifyContent: "center" }}
               >
                 +{activeTasks.length - 8} more →
               </button>

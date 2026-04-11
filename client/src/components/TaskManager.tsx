@@ -323,14 +323,14 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
         })}
       </div>
 
-      {/* Task list */}
-      <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+      {/* Task list — retro dashed-border rows with icon box + dotted connectors */}
+      <div className="flex-1 overflow-y-auto pr-1 retro-task-list">
         {filtered.length === 0 && (
           <div className="flex flex-col items-center justify-center py-12 text-center gap-3">
             <svg width="40" height="40" viewBox="0 0 40 40" style={{ opacity: 0.18 }}>
-              <rect x="8" y="8" width="24" height="24" fill="none" stroke={M.muted} strokeWidth="1" />
-              <line x1="14" y1="20" x2="26" y2="20" stroke={M.muted} strokeWidth="0.8" />
-              <line x1="20" y1="14" x2="20" y2="26" stroke={M.muted} strokeWidth="0.8" />
+              <rect x="8" y="8" width="24" height="24" rx="2" fill="none" stroke={M.muted} strokeWidth="1.5" />
+              <line x1="14" y1="20" x2="26" y2="20" stroke={M.muted} strokeWidth="1" />
+              <line x1="20" y1="14" x2="20" y2="26" stroke={M.muted} strokeWidth="1" />
             </svg>
             <p className="text-sm" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
               {filter === "active" ? "All clear." : "Nothing here."}
@@ -342,35 +342,27 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
           const pcfg        = PRIORITY_CONFIG[task.priority];
           const PIcon       = pcfg.icon;
           const isCompleting = completingId === task.id;
+          const cleanText = task.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || task.text;
 
           return (
             <div
               key={task.id}
-              className={cn("group flex items-center gap-3 px-4 py-3 transition-all duration-300 relative")}
+              className={cn("retro-task-row group", task.priority, task.done ? "done" : "")}
               style={{
-                background:   task.done ? "oklch(0.97 0.006 78)" : M.card,
-                borderTop:    `1px solid ${M.border}`,
-                borderRight:  `1px solid ${M.border}`,
-                borderBottom: `1px solid ${M.border}`,
-                // Priority accent: thin left bar
-                borderLeft:   `3px solid ${task.done ? M.border : pcfg.color}`,
-                opacity:      isCompleting ? 0.5 : task.done ? 0.55 : 1,
-                transform:    isCompleting ? "scale(0.98)" : "scale(1)",
+                opacity: isCompleting ? 0.5 : 1,
+                transform: isCompleting ? "scale(0.98)" : undefined,
+                transition: "all 0.3s ease",
               }}
             >
-              {/* Checkbox — minimal circle/check */}
-              <button
-                onClick={() => toggleTask(task.id)}
-                className="flex-shrink-0 transition-all hover:scale-110"
-                style={{ color: task.done ? pcfg.color : "oklch(0.80 0.012 75)" }}
-              >
-                {task.done
-                  ? <CheckCircle2 className="w-4 h-4" />
-                  : <Circle       className="w-4 h-4" />
-                }
-              </button>
+              {/* Icon box — priority icon in a small bordered square */}
+              <div className="retro-task-icon-box" style={{ borderColor: task.done ? M.border : pcfg.color + "60" }}>
+                <PIcon
+                  className="w-3 h-3"
+                  style={{ color: task.done ? M.muted : pcfg.color }}
+                />
+              </div>
 
-              {/* Text */}
+              {/* Text + goal link */}
               <div className="flex-1 min-w-0">
                 <p
                   className={cn(task.done && "line-through")}
@@ -378,12 +370,12 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                     color:      task.done ? M.muted : M.ink,
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize:   "0.82rem",
-                    fontWeight: task.done ? 300 : 400,
+                    fontWeight: task.done ? 300 : 500,
                     letterSpacing: "0.01em",
                     lineHeight: 1.4,
                   }}
                 >
-                  {task.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || task.text}
+                  {cleanText}
                 </p>
                 {task.goalId && (() => {
                   const linkedGoal = goals.find((g) => g.id === task.goalId);
@@ -400,19 +392,38 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 })()}
               </div>
 
-              {/* Context badge — tiny dot + label */}
+              {/* Context badge */}
               <ContextBadge context={task.context} />
 
-              {/* Priority — just the icon, no pill */}
-              <PIcon
-                className="w-3 h-3 shrink-0 opacity-60"
-                style={{ color: pcfg.color }}
-              />
+              {/* Priority stamp */}
+              <span style={{
+                fontSize: 7, padding: "2px 5px", flexShrink: 0,
+                color: task.done ? M.muted : pcfg.color,
+                background: task.done ? "transparent" : pcfg.bg,
+                border: `1.5px solid ${task.done ? M.border : pcfg.color + "55"}`,
+                fontFamily: "'Space Mono', monospace",
+                letterSpacing: "0.08em", borderRadius: 2,
+                fontWeight: 700, textTransform: "uppercase" as const,
+              }}>
+                {pcfg.label.toLowerCase()}
+              </span>
+
+              {/* Checkbox */}
+              <button
+                onClick={() => toggleTask(task.id)}
+                className="flex-shrink-0 transition-all hover:scale-110"
+                style={{ color: task.done ? pcfg.color : "oklch(0.78 0.018 70)" }}
+              >
+                {task.done
+                  ? <CheckCircle2 className="w-4 h-4" />
+                  : <Circle       className="w-4 h-4" />
+                }
+              </button>
 
               {/* Delete */}
               <button
                 onClick={() => deleteTask(task.id)}
-                className="opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                className="opacity-0 group-hover:opacity-100 transition-opacity"
                 style={{ color: M.muted }}
               >
                 <Trash2 className="w-3.5 h-3.5" />

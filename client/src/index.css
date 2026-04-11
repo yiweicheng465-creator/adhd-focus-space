@@ -199,7 +199,7 @@
   select:not(:disabled),
   input[type="checkbox"]:not(:disabled),
   input[type="radio"]:not(:disabled) {
-    @apply cursor-pointer;
+    cursor: var(--cursor-hand, pointer);
   }
 
   input::placeholder {
@@ -309,106 +309,117 @@
   }
 
   /* ── Retro Button System ──
-     Flat, bordered, uppercase — vintage OS dialog style */
+     Thick-border 3D offset style — vintage OS dialog / lo-fi zine aesthetic
+     Inspired by: retro OK button, pixel game UI, job board Apply Now */
 
-  /* Primary: terracotta fill */
+  /* Primary: terracotta fill — the main CTA button */
   .m-btn-primary {
     background: oklch(0.52 0.10 32);
     color: oklch(0.97 0.005 75);
-    border: 1.5px solid oklch(0.44 0.10 32);
-    border-radius: 2px;
-    padding: 0.45rem 1.1rem;
+    border: 2.5px solid oklch(0.26 0.06 32);
+    border-radius: 3px;
+    padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
     font-size: 0.62rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: background 0.15s, box-shadow 0.15s;
-    box-shadow: 1px 2px 0px oklch(0.44 0.10 32 / 0.60);
+    /* 3D offset shadow — the key retro effect */
+    box-shadow: 3px 3px 0px oklch(0.26 0.06 32);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    transition: box-shadow 0.08s, transform 0.08s;
+    cursor: pointer;
   }
   .m-btn-primary:hover {
-    background: oklch(0.44 0.10 32);
-    box-shadow: 0px 1px 0px oklch(0.44 0.10 32 / 0.60);
+    background: oklch(0.48 0.10 32);
+    box-shadow: 4px 4px 0px oklch(0.22 0.06 32);
+    transform: translate(-1px, -1px);
   }
   .m-btn-primary:active {
-    box-shadow: none;
-    transform: translateY(1px);
+    box-shadow: 1px 1px 0px oklch(0.26 0.06 32);
+    transform: translate(2px, 2px);
   }
 
   /* Dark: charcoal fill */
   .m-btn-dark {
     background: oklch(0.30 0.020 60);
     color: oklch(0.97 0.005 75);
-    border: 1.5px solid oklch(0.22 0.020 60);
-    border-radius: 2px;
-    padding: 0.45rem 1.1rem;
+    border: 2.5px solid oklch(0.16 0.012 60);
+    border-radius: 3px;
+    padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
     font-size: 0.62rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: background 0.15s;
-    box-shadow: 1px 2px 0px oklch(0.22 0.020 60 / 0.60);
+    box-shadow: 3px 3px 0px oklch(0.16 0.012 60);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    transition: box-shadow 0.08s, transform 0.08s;
+    cursor: pointer;
   }
   .m-btn-dark:hover {
-    background: oklch(0.22 0.020 60);
+    background: oklch(0.24 0.018 60);
+    box-shadow: 4px 4px 0px oklch(0.12 0.010 60);
+    transform: translate(-1px, -1px);
   }
   .m-btn-dark:active {
-    box-shadow: none;
-    transform: translateY(1px);
+    box-shadow: 1px 1px 0px oklch(0.16 0.012 60);
+    transform: translate(2px, 2px);
   }
 
-  /* Ghost: transparent, pencil border */
+  /* Ghost: cream fill, dark pencil border — secondary action */
   .m-btn-ghost {
     background: oklch(0.975 0.010 75);
-    border: 1.5px solid oklch(0.78 0.022 68);
-    color: oklch(0.40 0.020 62);
-    border-radius: 2px;
-    padding: 0.42rem 1.0rem;
+    border: 2.5px solid oklch(0.40 0.018 62);
+    color: oklch(0.38 0.020 62);
+    border-radius: 3px;
+    padding: 0.40rem 1.0rem;
     font-family: 'Space Mono', monospace;
     font-size: 0.62rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    transition: border-color 0.15s, color 0.15s, box-shadow 0.15s;
-    box-shadow: 1px 2px 0px oklch(0.78 0.022 68 / 0.50);
+    box-shadow: 3px 3px 0px oklch(0.40 0.018 62);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
+    transition: box-shadow 0.08s, transform 0.08s, border-color 0.08s, color 0.08s;
+    cursor: pointer;
   }
   .m-btn-ghost:hover {
     border-color: oklch(0.52 0.10 32);
     color: oklch(0.52 0.10 32);
+    box-shadow: 4px 4px 0px oklch(0.52 0.10 32 / 0.70);
+    transform: translate(-1px, -1px);
   }
   .m-btn-ghost:active {
-    box-shadow: none;
-    transform: translateY(1px);
+    box-shadow: 1px 1px 0px oklch(0.40 0.018 62);
+    transform: translate(2px, 2px);
   }
 
-  /* Link button */
+  /* Link button — underline only */
   .m-btn-link {
     background: transparent;
     border: none;
-    border-bottom: 1px solid oklch(0.72 0.018 68);
+    border-bottom: 2px solid oklch(0.58 0.018 68);
     border-radius: 0;
     padding: 0 0 0.1rem 0;
     font-family: 'Space Mono', monospace;
     font-size: 0.60rem;
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: oklch(0.40 0.020 62);
-    transition: border-color 0.15s, color 0.15s;
+    transition: border-color 0.12s, color 0.12s;
     box-shadow: none;
     display: inline-flex;
     align-items: center;
     gap: 0.35rem;
+    cursor: pointer;
   }
   .m-btn-link:hover {
     border-color: oklch(0.52 0.10 32);
@@ -482,3 +493,83 @@
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover { background: oklch(0.65 0.025 65); }
+
+/* ── Pixel-art hand cursor ──
+   A classic pointing hand for all interactive elements */
+:root {
+  --cursor-hand: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' shape-rendering='crispEdges'%3E%3Crect x='6' y='10' width='2' height='10' fill='%23F5EAD8'/%3E%3Crect x='8' y='8' width='2' height='12' fill='%23F5EAD8'/%3E%3Crect x='10' y='7' width='2' height='13' fill='%23F5EAD8'/%3E%3Crect x='12' y='8' width='2' height='12' fill='%23F5EAD8'/%3E%3Crect x='14' y='10' width='2' height='10' fill='%23F5EAD8'/%3E%3Crect x='6' y='20' width='10' height='2' fill='%23F5EAD8'/%3E%3Crect x='5' y='9' width='1' height='12' fill='%232A1F14'/%3E%3Crect x='6' y='8' width='2' height='1' fill='%232A1F14'/%3E%3Crect x='7' y='7' width='1' height='1' fill='%232A1F14'/%3E%3Crect x='8' y='6' width='2' height='1' fill='%232A1F14'/%3E%3Crect x='9' y='5' width='1' height='1' fill='%232A1F14'/%3E%3Crect x='10' y='5' width='2' height='1' fill='%232A1F14'/%3E%3Crect x='11' y='4' width='1' height='1' fill='%232A1F14'/%3E%3Crect x='12' y='5' width='2' height='1' fill='%232A1F14'/%3E%3Crect x='13' y='6' width='1' height='1' fill='%232A1F14'/%3E%3Crect x='14' y='7' width='2' height='1' fill='%232A1F14'/%3E%3Crect x='15' y='8' width='1' height='1' fill='%232A1F14'/%3E%3Crect x='16' y='9' width='1' height='11' fill='%232A1F14'/%3E%3Crect x='6' y='21' width='10' height='1' fill='%232A1F14'/%3E%3Crect x='5' y='21' width='1' height='1' fill='%232A1F14'/%3E%3C/svg%3E") 6 4, pointer;
+}
+
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+[type="button"]:not(:disabled),
+[type="submit"]:not(:disabled),
+a[href],
+select:not(:disabled),
+label[for],
+input[type="checkbox"]:not(:disabled),
+input[type="radio"]:not(:disabled) {
+  cursor: var(--cursor-hand) !important;
+}
+
+/* ── Retro Task List ──
+   Dashed-border rows with icon box + dotted connectors (like shipping tracking) */
+.retro-task-list {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+.retro-task-list::before {
+  content: '';
+  position: absolute;
+  left: 19px;
+  top: 32px;
+  bottom: 32px;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    oklch(0.72 0.022 68) 0px,
+    oklch(0.72 0.022 68) 4px,
+    transparent 4px,
+    transparent 8px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+.retro-task-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 10px 8px 8px;
+  background: oklch(0.978 0.008 76);
+  border: 2px solid oklch(0.78 0.022 68);
+  border-radius: 4px;
+  position: relative;
+  z-index: 1;
+  transition: box-shadow 0.08s, transform 0.08s;
+  margin-bottom: 6px;
+}
+.retro-task-row:hover {
+  box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
+  transform: translate(-1px, -1px);
+}
+.retro-task-row.done {
+  opacity: 0.55;
+  background: oklch(0.970 0.006 76);
+}
+.retro-task-row.urgent { border-left: 4px solid oklch(0.52 0.10 32); }
+.retro-task-row.focus  { border-left: 4px solid oklch(0.52 0.09 145); }
+.retro-task-row.normal { border-left: 4px solid oklch(0.62 0.022 68); }
+.retro-task-row.someday { border-left: 4px solid oklch(0.60 0.06 220); }
+.retro-task-icon-box {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  border: 2px solid oklch(0.78 0.022 68);
+  border-radius: 3px;
+  background: oklch(0.965 0.012 74);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 1px 1px 0px oklch(0.72 0.022 68);
+}
