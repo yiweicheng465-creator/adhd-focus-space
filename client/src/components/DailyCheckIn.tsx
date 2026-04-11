@@ -644,9 +644,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             <>
               <div className="flex gap-6 items-start">
                 <img
-                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/stamp-mew_8d91d86b.png"
-                  alt="Kanto stamp — Mew"
-                  className="w-28 shrink-0" style={{ borderRadius: 0, display: "block" }}
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/heartbeat-planet-v2_ffb8e7f5.png"
+                  alt="heartbeat planet"
+                  className="w-32 shrink-0" style={{ borderRadius: 0, display: "block" }}
                 />
                 <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
                   {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}

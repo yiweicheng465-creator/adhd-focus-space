@@ -176,12 +176,28 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
 function LogoMark() {
   return (
     <div className="w-10 h-10 flex items-center justify-center" title="ADHD Focus Space">
-      <img
-        src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
-        alt="ADHD Focus Space logo"
-        className="w-9 h-9 object-contain"
-        style={{ filter: "saturate(0.85) sepia(0.15)" }}
-      />
+      <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        {/* Outer glow ring */}
+        <circle cx="16" cy="16" r="14" fill="oklch(0.58 0.18 340 / 0.12)" />
+        {/* 6-point star */}
+        <path
+          d="M16 4 L17.8 11.2 L24.5 8.5 L20.8 14.8 L28 16 L20.8 17.2 L24.5 23.5 L17.8 20.8 L16 28 L14.2 20.8 L7.5 23.5 L11.2 17.2 L4 16 L11.2 14.8 L7.5 8.5 L14.2 11.2 Z"
+          fill="oklch(0.58 0.18 340)"
+          opacity="0.9"
+        />
+        {/* Inner star highlight */}
+        <path
+          d="M16 9 L17.1 13.4 L21.2 11.8 L18.8 15.4 L23 16 L18.8 16.6 L21.2 20.2 L17.1 18.6 L16 23 L14.9 18.6 L10.8 20.2 L13.2 16.6 L9 16 L13.2 15.4 L10.8 11.8 L14.9 13.4 Z"
+          fill="white"
+          opacity="0.55"
+        />
+        {/* Center dot */}
+        <circle cx="16" cy="16" r="2" fill="white" opacity="0.9" />
+        {/* Sparkle top-right */}
+        <path d="M24 7 L24.5 8.5 L26 7 L24.5 5.5 Z" fill="oklch(0.78 0.12 340)" opacity="0.8" />
+        {/* Sparkle bottom-left */}
+        <path d="M8 25 L8.5 26.5 L10 25 L8.5 23.5 Z" fill="oklch(0.78 0.12 340)" opacity="0.6" />
+      </svg>
     </div>
   );
 }
