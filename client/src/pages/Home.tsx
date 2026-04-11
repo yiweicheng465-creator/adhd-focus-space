@@ -606,58 +606,7 @@ export default function Home() {
                   marginRight: "auto",
                   maxWidth: 660,
                 }}>
-                  <RetroPageWrapper title="focus_timer.exe" sticker="moon">
-                    {/* Sunset background */}
-                    <div
-                      className="absolute inset-0"
-                      style={{
-                        backgroundImage: `url(${SUNSET_WIDE})`,
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        opacity: 0.12,
-                      }}
-                    />
-                    <div
-                      className="absolute inset-0"
-                      style={{ background: "oklch(0.985 0.008 80 / 0.88)" }}
-                    />
-                    {/* Corner marks */}
-                    {[
-                      "top-2 left-2",
-                      "top-2 right-2 rotate-90",
-                      "bottom-2 left-2 -rotate-90",
-                      "bottom-2 right-2 rotate-180",
-                    ].map((cls, i) => (
-                      <div key={i} className={`absolute ${cls}`}>
-                        <svg width="10" height="10" viewBox="0 0 10 10" style={{ opacity: 0.35 }}>
-                          <line x1="5" y1="0" x2="5" y2="4" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
-                          <line x1="6" y1="5" x2="10" y2="5" stroke="oklch(0.28 0.018 65)" strokeWidth="1" />
-                        </svg>
-                      </div>
-                    ))}
-                    <div className="relative p-6" style={{ minWidth: 0, overflow: "hidden" }}>
-                      <div className="mb-7 text-center">
-                        <svg width="36" height="36" viewBox="0 0 36 36" className="mx-auto mb-3" style={{ opacity: 0.45 }}>
-                          <circle cx="18" cy="18" r="16" fill="none" stroke="oklch(0.52 0.14 35)" strokeWidth="1" />
-                          <circle cx="18" cy="18" r="1.5" fill="oklch(0.52 0.14 35)" />
-                          <line x1="18" y1="18" x2="18" y2="8" stroke="oklch(0.52 0.14 35)" strokeWidth="1.5" strokeLinecap="square" />
-                          <line x1="18" y1="18" x2="25" y2="18" stroke="oklch(0.52 0.14 35)" strokeWidth="1" strokeLinecap="square" />
-                          {[0,1,2,3,4,5,6,7,8,9,10,11].map((i) => {
-                            const a = (i / 12) * 2 * Math.PI - Math.PI / 2;
-                            const r1 = 13, r2 = i % 3 === 0 ? 11 : 12;
-                            return <line key={i} x1={18 + r1 * Math.cos(a)} y1={18 + r1 * Math.sin(a)} x2={18 + r2 * Math.cos(a)} y2={18 + r2 * Math.sin(a)} stroke="oklch(0.52 0.14 35)" strokeWidth="0.8" />;
-                          })}
-                        </svg>
-                        <h2
-                          className="text-xl font-bold italic"
-                          style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.18 0.01 60)" }}
-                        >
-                          Deep Work
-                        </h2>
-                      </div>
-                      <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
-                    </div>
-                  </RetroPageWrapper>
+                  <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                 </div>
 
                 {/* ── session_tips.txt window — top-right corner, doesn't block timer ── */}
