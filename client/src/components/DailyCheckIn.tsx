@@ -381,7 +381,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               <img
                 src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-ds-ouija_c3b2a30f.png"
                 alt="illustration"
-                className="w-28 opacity-90 shrink-0 rounded-lg"
+                className="w-28 opacity-90 shrink-0" style={{ borderRadius: 16 }}
               />
               <div className="pt-2">
                 <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>
