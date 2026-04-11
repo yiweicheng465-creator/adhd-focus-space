@@ -407,24 +407,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginTop: 2 }}>
                 {/* Context badge */}
                 <ContextBadge context={task.context} />
-                {/* Priority stamp */}
-                {!task.done && (
-                  <span style={{
-                    fontFamily: "'Space Mono', monospace",
-                    fontSize: "0.52rem",
-                    fontWeight: 700,
-                    letterSpacing: "0.07em",
-                    textTransform: "uppercase",
-                    color: pcfg.color,
-                    border: `1.5px solid ${pcfg.border}`,
-                    borderRadius: 2,
-                    padding: "1px 5px",
-                    background: pcfg.bg,
-                    whiteSpace: "nowrap",
-                  }}>
-                    {pcfg.label}
-                  </span>
-                )}
+                {/* Priority stamp removed — icon box on left is sufficient */}
                 {/* Checkbox */}
                 <button
                   onClick={() => toggleTask(task.id)}

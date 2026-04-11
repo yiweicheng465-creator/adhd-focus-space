@@ -1,11 +1,7 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Eisenhower Matrix (Priority Matrix)
-   Design: Morandi palette, pixel-art accents, hand-crafted feel
-   Quadrant → Priority mapping:
-     Q1 (urgent+important)     → "urgent"
-     Q2 (not urgent+important) → "focus"
-     Q3 (urgent+not important) → "normal"
-     Q4 (not urgent+not important) → "normal"
+   ADHD FOCUS SPACE — Eisenhower Matrix v2.0 (Retro Lo-fi)
+   Design: thick offset borders, parchment quads, Space Mono
+   stamps, ruled notebook lines, warm muted palette.
    ============================================================ */
 
 import { useState, useRef } from "react";
@@ -25,8 +21,9 @@ interface QuadrantDef {
   color: string;
   bg: string;
   border: string;
-  headerBg: string;
+  shadow: string;
   numeral: string;
+  ruledColor: string;
 }
 
 const QUADRANTS: QuadrantDef[] = [
@@ -38,11 +35,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "urgent",
     urgent: true,
     important: true,
-    color: "oklch(0.52 0.09 35)",
-    bg: "oklch(0.98 0.007 35)",
-    border: "oklch(0.55 0.09 35 / 0.22)",
-    headerBg: "oklch(0.55 0.09 35 / 0.10)",
-    numeral: "I",
+    color:      "oklch(0.50 0.09 35)",
+    bg:         "oklch(0.975 0.010 38)",
+    border:     "oklch(0.50 0.09 35 / 0.55)",
+    shadow:     "oklch(0.50 0.09 35 / 0.18)",
+    numeral:    "I",
+    ruledColor: "oklch(0.50 0.09 35 / 0.07)",
   },
   {
     id: "q2",
@@ -52,11 +50,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "focus",
     urgent: false,
     important: true,
-    color: "oklch(0.48 0.07 145)",
-    bg: "oklch(0.98 0.007 145)",
-    border: "oklch(0.52 0.07 145 / 0.22)",
-    headerBg: "oklch(0.52 0.07 145 / 0.10)",
-    numeral: "II",
+    color:      "oklch(0.44 0.07 145)",
+    bg:         "oklch(0.975 0.010 145)",
+    border:     "oklch(0.44 0.07 145 / 0.50)",
+    shadow:     "oklch(0.44 0.07 145 / 0.16)",
+    numeral:    "II",
+    ruledColor: "oklch(0.44 0.07 145 / 0.07)",
   },
   {
     id: "q3",
@@ -66,11 +65,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "normal",
     urgent: true,
     important: false,
-    color: "oklch(0.55 0.06 55)",
-    bg: "oklch(0.98 0.007 70)",
-    border: "oklch(0.60 0.05 65 / 0.22)",
-    headerBg: "oklch(0.60 0.05 65 / 0.10)",
-    numeral: "III",
+    color:      "oklch(0.52 0.06 55)",
+    bg:         "oklch(0.975 0.010 65)",
+    border:     "oklch(0.52 0.06 55 / 0.45)",
+    shadow:     "oklch(0.52 0.06 55 / 0.14)",
+    numeral:    "III",
+    ruledColor: "oklch(0.52 0.06 55 / 0.07)",
   },
   {
     id: "q4",
@@ -80,11 +80,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "normal",
     urgent: false,
     important: false,
-    color: "oklch(0.55 0.018 70)",
-    bg: "oklch(0.975 0.005 80)",
-    border: "oklch(0.72 0.018 75 / 0.22)",
-    headerBg: "oklch(0.72 0.018 75 / 0.12)",
-    numeral: "IV",
+    color:      "oklch(0.52 0.018 70)",
+    bg:         "oklch(0.972 0.008 75)",
+    border:     "oklch(0.68 0.018 72 / 0.45)",
+    shadow:     "oklch(0.68 0.018 72 / 0.14)",
+    numeral:    "IV",
+    ruledColor: "oklch(0.68 0.018 72 / 0.07)",
   },
 ];
 
@@ -105,7 +106,6 @@ function quadrantToPriority(q: QuadrantId): TaskPriority {
 interface EisenhowerMatrixProps {
   tasks: Task[];
   onTasksChange: (tasks: Task[]) => void;
-  /** quadrantMap: taskId → quadrantId, persisted by parent */
   quadrantMap: Record<string, QuadrantId>;
   onQuadrantMapChange: (map: Record<string, QuadrantId>) => void;
 }
@@ -122,7 +122,6 @@ export function EisenhowerMatrix({
 
   const activeTasks = tasks.filter((t) => !t.done);
 
-  // Tasks not yet placed go to their default quadrant
   function getTaskQuadrant(task: Task): QuadrantId {
     return quadrantMap[task.id] ?? priorityToQuadrant(task.priority);
   }
@@ -130,8 +129,7 @@ export function EisenhowerMatrix({
   function handleDragStart(e: React.DragEvent, taskId: string) {
     draggingId.current = taskId;
     e.dataTransfer.effectAllowed = "move";
-    // ghost image styling
-    (e.currentTarget as HTMLElement).style.opacity = "0.45";
+    (e.currentTarget as HTMLElement).style.opacity = "0.40";
   }
 
   function handleDragEnd(e: React.DragEvent) {
@@ -150,12 +148,8 @@ export function EisenhowerMatrix({
     e.preventDefault();
     const id = draggingId.current;
     if (!id) return;
-
-    // Update quadrant map
     const newMap = { ...quadrantMap, [id]: qId };
     onQuadrantMapChange(newMap);
-
-    // Update task priority to match quadrant
     const newPriority = quadrantToPriority(qId);
     const updated = tasks.map((t) =>
       t.id === id ? { ...t, priority: newPriority } : t
@@ -166,56 +160,52 @@ export function EisenhowerMatrix({
 
   return (
     <div style={{ marginTop: 32 }}>
-      {/* Section header */}
+      {/* ── Section header ── */}
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <div style={{
-          width: 3,
-          height: 18,
-          background: "oklch(0.55 0.09 35)",
-          borderRadius: 2,
-          flexShrink: 0,
+          width: 3, height: 18,
+          background: "oklch(0.50 0.09 35)",
+          borderRadius: 2, flexShrink: 0,
         }} />
         <span style={{
           fontFamily: "'Playfair Display', serif",
-          fontSize: 15,
-          fontWeight: 700,
+          fontSize: 15, fontWeight: 700,
           color: "oklch(0.28 0.018 65)",
           fontStyle: "italic",
         }}>
           Priority Matrix
         </span>
         <span style={{
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 10,
-          color: "oklch(0.60 0.018 70)",
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 9,
+          color: "oklch(0.62 0.018 70)",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           marginLeft: 2,
         }}>
-          Drag tasks between quadrants
+          drag tasks between quadrants
         </span>
       </div>
 
-      {/* Axis labels */}
-      <div style={{ position: "relative", paddingLeft: 36, paddingBottom: 22 }}>
+      {/* ── Axis labels + grid ── */}
+      <div style={{ position: "relative", paddingLeft: 36, paddingBottom: 26 }}>
 
-        {/* Y-axis label: Importance */}
+        {/* Y-axis: Importance */}
         <div style={{
           position: "absolute",
-          left: -2,
-          top: "50%",
+          left: -2, top: "50%",
           width: 20,
           transform: "translateX(-50%) translateY(-50%) rotate(-90deg)",
           transformOrigin: "center center",
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 9,
-          letterSpacing: "0.12em",
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 8,
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: "oklch(0.60 0.018 70)",
+          color: "oklch(0.62 0.018 70)",
           whiteSpace: "nowrap",
           textAlign: "center",
         }}>
-          Importance ↑
+          importance ↑
         </div>
 
         {/* Grid */}
@@ -223,8 +213,8 @@ export function EisenhowerMatrix({
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gridTemplateRows: "1fr 1fr",
-          gap: 6,
-          minHeight: 380,
+          gap: 8,
+          minHeight: 390,
         }}>
           {QUADRANTS.map((q) => {
             const qTasks = activeTasks.filter((t) => getTaskQuadrant(t) === q.id);
@@ -237,37 +227,62 @@ export function EisenhowerMatrix({
                 onDragLeave={() => setDragOverQ(null)}
                 onDrop={(e) => handleDrop(e, q.id)}
                 style={{
-                  background: isOver ? q.headerBg : q.bg,
-                  border: `1.5px ${isOver ? "dashed" : "solid"} ${isOver ? q.color : q.border}`,
-                  borderRadius: 10,
+                  background: q.bg,
+                  /* Thick retro border + 3-D offset shadow */
+                  border: `2px ${isOver ? "dashed" : "solid"} ${q.border}`,
+                  borderRadius: 3,
+                  boxShadow: isOver
+                    ? `3px 3px 0 ${q.border}`
+                    : `4px 4px 0 ${q.shadow}`,
                   display: "flex",
                   flexDirection: "column",
                   overflow: "hidden",
-                  transition: "background 0.15s, border-color 0.15s",
-                  minHeight: 185,
+                  transition: "box-shadow 0.12s, border-color 0.12s",
+                  minHeight: 190,
+                  position: "relative",
                 }}
               >
+                {/* Ruled notebook lines (decorative) */}
+                <div style={{
+                  position: "absolute",
+                  inset: 0,
+                  pointerEvents: "none",
+                  backgroundImage: `repeating-linear-gradient(
+                    to bottom,
+                    transparent,
+                    transparent 19px,
+                    ${q.ruledColor} 19px,
+                    ${q.ruledColor} 20px
+                  )`,
+                  backgroundPositionY: "38px",
+                  zIndex: 0,
+                }} />
+
                 {/* Quadrant header */}
                 <div style={{
-                  padding: "8px 12px 6px",
-                  background: q.headerBg,
-                  borderBottom: `1px solid ${q.border}`,
+                  padding: "7px 10px 6px",
+                  borderBottom: `1.5px solid ${q.border}`,
                   display: "flex",
                   alignItems: "center",
-                  gap: 8,
+                  gap: 7,
                   flexShrink: 0,
+                  position: "relative",
+                  zIndex: 1,
+                  background: `${q.bg}cc`,
                 }}>
-                  {/* Roman numeral badge */}
+                  {/* Roman numeral — Playfair italic */}
                   <span style={{
                     fontFamily: "'Playfair Display', serif",
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: 700,
+                    fontStyle: "italic",
                     color: q.color,
-                    opacity: 0.7,
-                    minWidth: 18,
+                    opacity: 0.75,
+                    minWidth: 20,
                   }}>
                     {q.numeral}
                   </span>
+
                   <div style={{ flex: 1 }}>
                     <div style={{
                       fontFamily: "'DM Sans', sans-serif",
@@ -279,10 +294,10 @@ export function EisenhowerMatrix({
                       {q.label}
                     </div>
                     <div style={{
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 9,
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 8,
                       color: q.color,
-                      opacity: 0.65,
+                      opacity: 0.60,
                       letterSpacing: "0.06em",
                       textTransform: "uppercase",
                       marginTop: 1,
@@ -290,17 +305,20 @@ export function EisenhowerMatrix({
                       {q.sub}
                     </div>
                   </div>
+
+                  {/* Action stamp */}
                   <span style={{
-                    fontFamily: "'DM Sans', sans-serif",
-                    fontSize: 8,
+                    fontFamily: "'Space Mono', monospace",
+                    fontSize: 7,
                     fontWeight: 700,
-                    letterSpacing: "0.12em",
+                    letterSpacing: "0.10em",
                     textTransform: "uppercase",
                     color: q.color,
-                    opacity: 0.5,
-                    background: `${q.color}18`,
+                    border: `1.5px solid ${q.border}`,
+                    borderRadius: 2,
                     padding: "2px 6px",
-                    borderRadius: 3,
+                    background: `${q.color}10`,
+                    flexShrink: 0,
                   }}>
                     {q.action}
                   </span>
@@ -309,11 +327,13 @@ export function EisenhowerMatrix({
                 {/* Task cards */}
                 <div style={{
                   flex: 1,
-                  padding: "8px 8px 6px",
+                  padding: "7px 7px 5px",
                   display: "flex",
                   flexDirection: "column",
-                  gap: 5,
+                  gap: 4,
                   overflowY: "auto",
+                  position: "relative",
+                  zIndex: 1,
                 }}>
                   {qTasks.length === 0 && (
                     <div style={{
@@ -321,15 +341,15 @@ export function EisenhowerMatrix({
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
-                      fontFamily: "'DM Sans', sans-serif",
-                      fontSize: 10,
+                      fontFamily: "'Space Mono', monospace",
+                      fontSize: 9,
                       color: "oklch(0.72 0.014 75)",
                       letterSpacing: "0.04em",
                       fontStyle: "italic",
-                      opacity: isOver ? 0.9 : 0.5,
+                      opacity: isOver ? 0.9 : 0.45,
                       padding: "12px 0",
                     }}>
-                      {isOver ? "Drop here ↓" : "Drag tasks here"}
+                      {isOver ? "drop here" : "drag tasks here"}
                     </div>
                   )}
                   {qTasks.map((task) => (
@@ -337,6 +357,7 @@ export function EisenhowerMatrix({
                       key={task.id}
                       task={task}
                       quadrantColor={q.color}
+                      quadrantBorder={q.border}
                       onDragStart={handleDragStart}
                       onDragEnd={handleDragEnd}
                     />
@@ -350,14 +371,14 @@ export function EisenhowerMatrix({
         {/* X-axis label: Urgency */}
         <div style={{
           textAlign: "center",
-          marginTop: 8,
-          fontFamily: "'DM Sans', sans-serif",
-          fontSize: 9,
-          letterSpacing: "0.12em",
+          marginTop: 10,
+          fontFamily: "'Space Mono', monospace",
+          fontSize: 8,
+          letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: "oklch(0.60 0.018 70)",
+          color: "oklch(0.62 0.018 70)",
         }}>
-          Urgency →
+          urgency →
         </div>
       </div>
     </div>
@@ -368,11 +389,13 @@ export function EisenhowerMatrix({
 function TaskChip({
   task,
   quadrantColor,
+  quadrantBorder,
   onDragStart,
   onDragEnd,
 }: {
   task: Task;
   quadrantColor: string;
+  quadrantBorder: string;
   onDragStart: (e: React.DragEvent, id: string) => void;
   onDragEnd: (e: React.DragEvent) => void;
 }) {
@@ -383,46 +406,52 @@ function TaskChip({
       onDragEnd={onDragEnd}
       title={task.text}
       style={{
-        background: "oklch(1 0 0 / 0.85)",
-        border: `1px solid ${quadrantColor}30`,
+        background: "oklch(1 0 0 / 0.80)",
+        border: `1.5px solid ${quadrantBorder}`,
         borderLeft: `3px solid ${quadrantColor}`,
-        borderRadius: 5,
-        padding: "5px 8px",
+        borderRadius: 2,
+        padding: "4px 8px",
         cursor: "grab",
         display: "flex",
         alignItems: "center",
         gap: 6,
-        transition: "box-shadow 0.12s",
+        transition: "box-shadow 0.10s, transform 0.10s",
         userSelect: "none",
+        boxShadow: `2px 2px 0 ${quadrantColor}22`,
       }}
       onMouseEnter={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = `0 2px 8px ${quadrantColor}22`;
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.boxShadow = `3px 3px 0 ${quadrantColor}40`;
+        el.style.transform = "translate(-1px,-1px)";
       }}
       onMouseLeave={(e) => {
-        (e.currentTarget as HTMLDivElement).style.boxShadow = "none";
+        const el = e.currentTarget as HTMLDivElement;
+        el.style.boxShadow = `2px 2px 0 ${quadrantColor}22`;
+        el.style.transform = "none";
       }}
     >
-      {/* Drag handle dots */}
+      {/* Drag handle — 2×3 dot grid */}
       <div style={{
         display: "grid",
         gridTemplateColumns: "1fr 1fr",
         gap: 2,
         flexShrink: 0,
-        opacity: 0.3,
+        opacity: 0.28,
       }}>
-        {[0,1,2,3].map(i => (
+        {[0,1,2,3,4,5].map(i => (
           <div key={i} style={{
-            width: 2.5,
-            height: 2.5,
+            width: 2,
+            height: 2,
             borderRadius: "50%",
             background: quadrantColor,
           }} />
         ))}
       </div>
+
       <span style={{
         fontFamily: "'DM Sans', sans-serif",
         fontSize: 11,
-        color: "oklch(0.32 0.018 65)",
+        color: "oklch(0.30 0.018 65)",
         lineHeight: 1.35,
         flex: 1,
         overflow: "hidden",
@@ -431,13 +460,14 @@ function TaskChip({
       }}>
         {task.text}
       </span>
+
       {/* Context dot */}
       <div style={{
         width: 5,
         height: 5,
         borderRadius: "50%",
         background: quadrantColor,
-        opacity: 0.45,
+        opacity: 0.50,
         flexShrink: 0,
       }} />
     </div>
