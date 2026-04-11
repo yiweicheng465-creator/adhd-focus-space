@@ -327,9 +327,12 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             {/* Progress dots */}
             {STEP_ORDER.slice(0, -1).map((s, i) => (
               <div key={s} style={{
-                width: 6, height: 6, borderRadius: "50%",
+                width: 8, height: 8, borderRadius: "50%",
                 background: i <= STEP_ORDER.indexOf(step) ? M.accent : "#E8C8DC",
-                transition: "background 0.3s",
+                boxShadow: i <= STEP_ORDER.indexOf(step)
+                  ? `0 1px 0 oklch(0.40 0.18 340), inset 0 1px 1px rgba(255,255,255,0.55)`
+                  : `0 1px 0 rgba(180,120,160,0.3), inset 0 1px 1px rgba(255,255,255,0.40)`,
+                transition: "background 0.3s, box-shadow 0.3s",
               }} />
             ))}
             <div style={{ width: 1, height: 10, background: M.border, margin: "0 4px" }} />
