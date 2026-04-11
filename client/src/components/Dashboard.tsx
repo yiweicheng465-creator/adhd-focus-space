@@ -26,7 +26,7 @@ import { Streamdown } from "streamdown";
 import { toast } from "sonner";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
-const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-retro-windows_4ed99208.png";
+const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-ds-ouija_c3b2a30f.png";
 
 const CHAT_HISTORY_KEY = "adhd-ai-chat-history";
 const MAX_CHAT_HISTORY = 10;
