@@ -502,17 +502,15 @@ export function Dashboard({
         </div>
 
         {/* ── Content ── */}
-        <div className="relative z-10 flex items-stretch" style={{ minHeight: 108 }}>
-          {/* Cat sticker: blue lying cat — bottom-right of hero */}
-          <img src={CAT_BLUE} alt="" aria-hidden="true" style={{ position: "absolute", bottom: -18, right: 10, width: 72, opacity: 0.45, pointerEvents: "none", zIndex: 20, transform: "scaleX(-1)" }} />
-          {/* Left: illustration — fills full square */}
-          <div className="hidden md:flex w-36 shrink-0 overflow-hidden" style={{ borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", opacity: 0.95, display: "block" }} />
+        <div className="relative z-10 flex" style={{ height: 110 }}>
+          {/* Left: illustration — clipped to exact hero height */}
+          <div className="hidden md:block shrink-0 overflow-hidden" style={{ width: 144, height: "100%", borderRight: `1px solid ${BORDER}` }}>
+            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", opacity: 0.95, display: "block" }} />
           </div>
-          {/* Right: greeting + controls */}
-          <div className="flex-1 px-6 py-4 flex flex-col gap-3">
+          {/* Center: greeting + controls */}
+          <div className="flex-1 px-6 py-3 flex flex-col justify-between" style={{ minWidth: 0 }}>
             <div>
-              <p className="editorial-label" style={{ marginBottom: 2, fontSize: 9 }}>
+              <p className="editorial-label" style={{ marginBottom: 1, fontSize: 9 }}>
                 {DAYS[now.getDay()]} · {MONTHS[now.getMonth()]} {now.getDate()}
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -527,9 +525,9 @@ export function Dashboard({
                 )}
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {/* Quick capture */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80 / 0.85)", backdropFilter: "blur(4px)", padding: "5px 12px", flex: "1 1 180px", maxWidth: 300, borderRadius: 8 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80 / 0.85)", padding: "5px 12px", flex: "1 1 160px", maxWidth: 280, borderRadius: 6 }}>
                 <Zap size={11} style={{ color: TC, flexShrink: 0 }} />
                 <input
                   value={quickCapture}
@@ -543,15 +541,22 @@ export function Dashboard({
                     }
                   }}
                   placeholder="What's on your mind?"
-                  style={{ flex: 1, fontSize: 12, background: "transparent", border: "none", outline: "none", color: INK }}
+                  style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
                 <kbd style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED, borderRadius: 3 }}>↵</kbd>
               </div>
               {/* Context switcher */}
-              <div style={{ flex: "1 1 auto" }}>
+              <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                 <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
               </div>
             </div>
+          </div>
+          {/* Right: motivational micro-text + cat sticker */}
+          <div className="hidden lg:flex shrink-0 flex-col items-end justify-between" style={{ width: 120, padding: "10px 14px 10px 0", position: "relative" }}>
+            <img src={CAT_BLUE} alt="" aria-hidden="true" style={{ width: 60, opacity: 0.45, pointerEvents: "none", transform: "scaleX(-1)" }} />
+            <p style={{ fontSize: 8.5, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em", textAlign: "right", lineHeight: 1.6, opacity: 0.75 }}>
+              one step<br/>at a time.
+            </p>
           </div>
         </div>
       </div>
