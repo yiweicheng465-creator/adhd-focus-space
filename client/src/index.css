@@ -524,12 +524,11 @@ input[type="radio"]:not(:disabled) {
   gap: 10px;
   padding: 8px 10px 8px 10px;
   background: oklch(0.978 0.008 76 / 0.55);
-  border: none;
-  border-bottom: 1px solid oklch(0.82 0.018 68 / 0.45);
-  border-radius: 0;
+  border: 1.5px solid oklch(0.82 0.018 68 / 0.6);
+  border-radius: 4px;
   position: relative;
-  transition: background 0.1s, box-shadow 0.08s;
-  margin-bottom: 0;
+  transition: box-shadow 0.08s, transform 0.08s;
+  margin-bottom: 5px;
 }
 .retro-task-row:hover {
   box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
@@ -539,18 +538,18 @@ input[type="radio"]:not(:disabled) {
   opacity: 0.50;
   background: oklch(0.970 0.006 76);
 }
-/* Priority: soft transparent tint — light pastel, no dark colors */
+/* Priority: all same neutral transparent background — no color differentiation */
 .retro-task-row.urgent {
-  background: oklch(0.96 0.04 22 / 0.28);  /* soft rose-red */
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.focus {
-  background: oklch(0.96 0.06 88 / 0.28);  /* soft warm yellow */
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.normal {
-  background: oklch(0.96 0.04 145 / 0.22); /* soft sage green */
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.someday {
-  background: oklch(0.96 0.03 220 / 0.20); /* soft sky blue */
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 /* Hide icon box — no longer used */
 .retro-task-icon-box { display: none; }
