@@ -597,9 +597,8 @@ export function Dashboard({
               </div>
             </div>
           </div>
-          {/* Right: motivational micro-text + cat sticker */}
-          <div className="hidden lg:flex shrink-0 flex-col items-end justify-between" style={{ width: 120, padding: "10px 14px 10px 0", position: "relative" }}>
-            <img src={CAT_BLUE} alt="" aria-hidden="true" style={{ width: 60, opacity: 0.45, pointerEvents: "none", transform: "scaleX(-1)" }} />
+          {/* Right: motivational micro-text */}
+          <div className="hidden lg:flex shrink-0 flex-col items-end justify-end" style={{ width: 80, padding: "10px 14px 10px 0", position: "relative" }}>
             <p style={{ fontSize: 8.5, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.06em", textAlign: "right", lineHeight: 1.6, opacity: 0.75 }}>
               one step<br/>at a time.
             </p>
