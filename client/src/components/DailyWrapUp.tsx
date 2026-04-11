@@ -278,21 +278,21 @@ function WinsRing({ wins }: { wins: Win[] }) {
 }
 
 const M = {
-  coral:    "oklch(0.58 0.18 340)",
-  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
-  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
-  sage:     "oklch(0.52 0.10 168)",
-  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
-  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
-  pink:     "oklch(0.72 0.08 290)",
-  pinkBg:   "oklch(0.72 0.08 290 / 0.08)",
-  pinkBdr:  "oklch(0.72 0.08 290 / 0.28)",
-  slumber:  "oklch(0.52 0.040 330)",
-  ink:      "oklch(0.28 0.040 320)",
-  muted:    "oklch(0.52 0.040 330)",
-  border:   "oklch(0.82 0.050 340)",
-  card:     "oklch(0.975 0.018 355)",
-  bg:       "oklch(0.960 0.030 355)",
+  coral:    "#D45898",
+  coralBg:  "rgba(212,88,152,0.08)",
+  coralBdr: "rgba(212,88,152,0.28)",
+  sage:     "#6ABCA0",
+  sageBg:   "rgba(106,188,160,0.08)",
+  sageBdr:  "rgba(106,188,160,0.28)",
+  pink:     "#B898D8",
+  pinkBg:   "rgba(184,152,216,0.08)",
+  pinkBdr:  "rgba(184,152,216,0.28)",
+  slumber:  "#C070A0",
+  ink:      "#4A1030",
+  muted:    "#C070A0",
+  border:   "#E8B8D0",
+  card:     "#FDF0F6",
+  bg:       "#F9D6E8",
 };
 
 interface DailyWrapUpProps {
@@ -414,7 +414,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: "oklch(0.18 0.01 60 / 0.30)", backdropFilter: "blur(4px)" }}
+      style={{ background: "rgba(180,60,120,0.20)", backdropFilter: "blur(4px)" }}
       onClick={onClose}
     >
       <div
@@ -422,7 +422,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
         style={{
           background: M.card,
           border: `1.5px solid ${M.border}`,
-          boxShadow: "4px 6px 20px oklch(0.30 0.02 60 / 0.18), 0 0 0 1px oklch(0.90 0.018 72 / 0.60)",
+          boxShadow: "4px 6px 20px rgba(212,88,152,0.18), 0 0 0 1px rgba(232,184,208,0.60)",
           position: "relative",
         }}
         onClick={(e) => e.stopPropagation()}
@@ -433,11 +433,11 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
         <div className="relative z-10" style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "5px 10px",
-          background: "oklch(0.940 0.020 70)",
+          background: "#F9D6E8",
           borderBottom: `1.5px solid ${M.border}`,
           fontFamily: "'Space Mono', monospace",
           fontSize: 10,
-          color: "oklch(0.45 0.020 62)",
+          color: "#8A3060",
           flexShrink: 0,
         }}>
           <span>daily_wrapup.exe</span>
@@ -445,8 +445,8 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
             <button
               onClick={onClose}
               style={{ fontSize: 9, padding: "1px 5px", cursor: "pointer",
-                background: "oklch(0.88 0.022 68)", border: `1px solid ${M.border}`,
-                color: "oklch(0.45 0.020 62)", fontFamily: "'Space Mono', monospace",
+                background: "#F0D0E4", border: `1px solid ${M.border}`,
+                color: "#8A3060", fontFamily: "'Space Mono', monospace",
                 lineHeight: 1.4,
               }}
             >✕</button>

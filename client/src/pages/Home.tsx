@@ -399,16 +399,16 @@ export default function Home() {
         <header
           className="sticky top-0 z-30 flex items-center gap-0"
           style={{
-            background: "#F5EDE0",
-            borderBottom: "3px solid #C8603A",
-            boxShadow: "0 3px 0 #C8A87C, 0 5px 12px oklch(0.60 0.04 50 / 0.12)",
+            background: "#F9D6E8",
+            borderBottom: "3px solid #D45898",
+            boxShadow: "0 3px 0 #E8A0C8, 0 5px 12px rgba(212,88,152,0.12)",
             minHeight: 48,
           }}
         >
           {/* Left: logo + page icon + title */}
           <div
             className="flex items-center gap-3 px-6 py-3 flex-1 min-w-0"
-            style={{ borderRight: "1.5px solid #D4C4B0" }}
+            style={{ borderRight: "1.5px solid #E8B8D0" }}
           >
 
             {/* App logo mark — pixel brain with lightning */}
@@ -416,9 +416,9 @@ export default function Home() {
               className="flex items-center justify-center shrink-0"
               style={{
                 width: 30, height: 30,
-                background: "#C8603A",
-                border: "2px solid #A84828",
-                boxShadow: "2px 2px 0 #7A3018, inset 0 1px 0 #E8804A",
+                background: "#D45898",
+                border: "2px solid #B03878",
+                boxShadow: "2px 2px 0 #882858, inset 0 1px 0 #E880B8",
                 position: "relative",
               }}
             >
@@ -436,16 +436,16 @@ export default function Home() {
                 <polygon points="10,2 7,9 9,9 8,16 11,7 9,7" fill="#FFD080" opacity="0.95"/>
               </svg>
             </div>
-            <div style={{ width: 1, height: 20, background: "#D4C4B0", flexShrink: 0 }} />
+            <div style={{ width: 1, height: 20, background: "#E8B8D0", flexShrink: 0 }} />
             {/* Page section icon */}
             <div
               className="flex items-center justify-center w-6 h-6 shrink-0"
-              style={{ opacity: 0.75 }}
+                style={{ opacity: 0.75 }}
             >
               {activeSection === "braindump" ? (
                 <PixelDump size={13} active={true} />
               ) : (
-                <Icon className="w-3.5 h-3.5" style={{ color: "#8A6A4A" }} />
+                <Icon className="w-3.5 h-3.5" style={{ color: "#B03878" }} />
               )}
             </div>
             <h1
@@ -455,7 +455,7 @@ export default function Home() {
                 fontWeight: 700,
                 letterSpacing: "0.18em",
                 textTransform: "uppercase",
-                color: "#2A1F14",
+                color: "#6A1840",
                 margin: 0,
                 lineHeight: 1,
               }}
@@ -467,8 +467,7 @@ export default function Home() {
           {/* Right: stats + mood + wrap-up */}
           <div className="flex items-center shrink-0" style={{ gap: 0 }}>
             {/* Quick-stats — visible on all sections */}
-            <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid #D4C4B0" }}>
-                {[
+            <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid #E8B8D0" }}>                {[
                   { label: "tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section },
                   { label: "wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section },
                   { label: "agents live", value: agents.filter((a) => a.status === "running").length, section: "agents" as Section },
@@ -478,21 +477,21 @@ export default function Home() {
                       onClick={() => setActiveSection(section)}
                       className="flex items-baseline gap-1.5 transition-all cursor-pointer px-4 py-3"
                       style={{ background: "transparent", border: "none" }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.60 0.04 50 / 0.08)"; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,88,152,0.10)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
                     >
-                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#2A1F14", letterSpacing: "0.02em" }}>{value}</span>
-                      <span style={{ fontSize: "0.65rem", fontWeight: 400, fontFamily: "'Space Mono', monospace", color: "#8C7B6B", letterSpacing: "0.10em", textTransform: "uppercase" }}>{label}</span>
+                      <span style={{ fontSize: "0.85rem", fontWeight: 700, fontFamily: "'Space Mono', monospace", color: "#6A1840", letterSpacing: "0.02em" }}>{value}</span>
+                      <span style={{ fontSize: "0.65rem", fontWeight: 400, fontFamily: "'Space Mono', monospace", color: "#C070A0", letterSpacing: "0.10em", textTransform: "uppercase" }}>{label}</span>
                     </button>
                     {i < arr.length - 1 && (
-                      <div style={{ width: 1, height: 20, background: "#D4C4B0" }} />
+                      <div style={{ width: 1, height: 20, background: "#E8B8D0" }} />
                     )}
                   </React.Fragment>
                 ))}
             </div>
 
             {/* Mood pill */}
-            <div className="px-4 py-3" style={{ borderRight: "1.5px solid #D4C4B0" }}>
+            <div className="px-4 py-3" style={{ borderRight: "1.5px solid #E8B8D0" }}>
               <MoodPill mood={mood} onMoodChange={setMood} />
             </div>
 
@@ -501,7 +500,7 @@ export default function Home() {
               onClick={() => setWrapUpOpen(true)}
               className="flex items-center gap-2 transition-all px-5 py-3"
               style={{
-                color: "#8C7B6B",
+                color: "#C070A0",
                 background: "transparent",
                 border: "none",
                 cursor: "pointer",
@@ -510,8 +509,8 @@ export default function Home() {
                 letterSpacing: "0.14em",
                 textTransform: "uppercase",
               }}
-              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.60 0.04 50 / 0.08)"; (e.currentTarget as HTMLButtonElement).style.color = "#2A1F14"; }}
-              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#8C7B6B"; }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "rgba(212,88,152,0.10)"; (e.currentTarget as HTMLButtonElement).style.color = "#6A1840"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.background = "transparent"; (e.currentTarget as HTMLButtonElement).style.color = "#C070A0"; }}
             >
               <Moon className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">Wrap up</span>
@@ -631,17 +630,17 @@ export default function Home() {
                   <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                 </div>
 
-                {/* ── session_tips.txt window — pinned to bottom-right corner of timer, peeking outside ── */}
+                {/* ── session_tips.txt window — below the timer, slightly tilted ── */}
                 <div style={{
                   position: "relative",
                   zIndex: 3,
                   width: 210,
-                  marginTop: -28,
+                  marginTop: 18,
                   marginLeft: "auto",
-                  marginRight: -48,
-                  transform: "rotate(2.5deg)",
-                  transformOrigin: "top right",
-                  boxShadow: "6px 6px 0 oklch(0.28 0.018 55 / 0.18)",
+                  marginRight: "auto",
+                  transform: "rotate(-1.5deg)",
+                  transformOrigin: "top center",
+                  boxShadow: "4px 4px 0 rgba(180,60,120,0.15)",
                 }}>
                   <RetroPageWrapper title="session_tips.txt" sticker="leaf">
                     <div style={{ padding: "10px 14px 12px" }}>

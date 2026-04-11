@@ -289,24 +289,24 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   })();
 
   const M = {
-    ink: "oklch(0.18 0.01 60)",
-    muted: "oklch(0.52 0.015 70)",
-    border: "oklch(0.87 0.014 75)",
-    accent: "oklch(0.52 0.14 35)",
-    bg: "oklch(0.975 0.012 80)",
+    ink: "#4A1030",
+    muted: "#C070A0",
+    border: "#E8B8D0",
+    accent: "#D45898",
+    bg: "#FDF0F6",
   };
 
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-4"
-      style={{ background: "oklch(0.18 0.01 60 / 0.40)", backdropFilter: "blur(6px)" }}
+      style={{ background: "rgba(180,60,120,0.25)", backdropFilter: "blur(6px)" }}
     >
       <div
         className="w-full max-w-lg animate-scale-in overflow-hidden"
         style={{
           background: M.bg,
           border: `1.5px solid ${M.border}`,
-          boxShadow: "4px 6px 20px oklch(0.30 0.02 60 / 0.18), 0 0 0 1px oklch(0.90 0.018 72 / 0.60)",
+          boxShadow: "4px 6px 20px rgba(212,88,152,0.18), 0 0 0 1px rgba(232,184,208,0.60)",
           position: "relative",
         }}
       >
@@ -316,11 +316,11 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         <div className="relative z-10" style={{
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "5px 10px",
-          background: "oklch(0.940 0.020 70)",
+          background: "#F9D6E8",
           borderBottom: `1.5px solid ${M.border}`,
           fontFamily: "'Space Mono', monospace",
           fontSize: 10,
-          color: "oklch(0.45 0.020 62)",
+          color: "#8A3060",
         }}>
           <span>daily_checkin.exe</span>
           <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -328,7 +328,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             {STEP_ORDER.slice(0, -1).map((s, i) => (
               <div key={s} style={{
                 width: 6, height: 6, borderRadius: "50%",
-                background: i <= STEP_ORDER.indexOf(step) ? M.accent : "oklch(0.82 0.022 68)",
+                background: i <= STEP_ORDER.indexOf(step) ? M.accent : "#E8C8DC",
                 transition: "background 0.3s",
               }} />
             ))}
@@ -337,8 +337,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
               onClick={onClose}
               title="Close (will show again today)"
               style={{ fontSize: 9, padding: "1px 5px", cursor: "pointer",
-                background: "oklch(0.88 0.022 68)", border: `1px solid ${M.border}`,
-                color: "oklch(0.45 0.020 62)", fontFamily: "'Space Mono', monospace",
+                background: "#F0D0E4", border: `1px solid ${M.border}`,
+                color: "#8A3060", fontFamily: "'Space Mono', monospace",
                 lineHeight: 1.4,
               }}
             >✕</button>
@@ -346,7 +346,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         </div>
 
         {/* Progress bar */}
-        <div className="relative z-10 h-[2px] w-full" style={{ background: "oklch(0.88 0.012 75)" }}>
+        <div className="relative z-10 h-[2px] w-full" style={{ background: "#E8C8DC" }}>
           <div
             className="h-full transition-all duration-500"
             style={{ width: `${progress}%`, background: M.accent }}
@@ -356,8 +356,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
         {/* Header */}
         <div className="relative z-10 flex items-start justify-between px-8 pt-6 pb-0">
           <div>
-            <p className="text-[10px] tracking-widest uppercase font-medium" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>{today}</p>
-            <h2
+            <p className="text-[10px] tracking-widest uppercase font-medium"          style={{ color: "#C070A0", fontFamily: "'DM Sans', sans-serif" }}>{today}</p>    <h2
               className="text-2xl mt-1 font-bold italic"
               style={{ fontFamily: "'Playfair Display', serif", color: M.ink }}
             >
