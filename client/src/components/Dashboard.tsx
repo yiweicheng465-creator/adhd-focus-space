@@ -467,22 +467,7 @@ export function Dashboard({
             <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.55 0.11 148)" />
           </svg>
         </div>
-        {/* Sticky note — bottom right corner */}
-        <div className="absolute" style={{ bottom: 10, right: 10, opacity: 0.70, transform: "rotate(2deg)", zIndex: 15 }}>
-          <div style={{
-            background: "oklch(0.96 0.030 88)",
-            border: "1px solid oklch(0.82 0.040 80)",
-            padding: "5px 9px",
-            fontSize: 8,
-            fontFamily: "'Space Mono', monospace",
-            color: "oklch(0.42 0.06 55)",
-            boxShadow: "1px 2px 4px oklch(0.60 0.04 60 / 0.18)",
-            lineHeight: 1.5,
-            minWidth: 90,
-          }}>
-            be kind to yourself ✦
-          </div>
-        </div>
+        {/* Sticky note moved under greeting — rendered inline below */}
         {/* Leaf sprig — slightly right of left pane edge, peeking under greeting */}
         <div className="absolute" style={{ top: 38, left: 172, opacity: 0.45, transform: "rotate(-15deg)", zIndex: 12 }}>
           <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
@@ -523,6 +508,37 @@ export function Dashboard({
                     <span style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace" }}>{blockStreak}d streak</span>
                   </div>
                 )}
+              </div>
+              {/* be kind to yourself sticker — sticky note with bottom-right corner curl */}
+              <div style={{ marginTop: 5, display: "inline-block", transform: "rotate(-1.5deg)", opacity: 0.88, position: "relative" }}>
+                <div style={{
+                  background: "oklch(0.96 0.030 88)",
+                  border: "1px solid oklch(0.82 0.040 80)",
+                  padding: "4px 22px 4px 9px",
+                  fontSize: 8,
+                  fontFamily: "'Space Mono', monospace",
+                  color: "oklch(0.42 0.06 55)",
+                  lineHeight: 1.5,
+                  letterSpacing: "0.04em",
+                  position: "relative",
+                  /* clip the bottom-right corner so the curl triangle shows */
+                  clipPath: "polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)",
+                  boxShadow: "1px 2px 4px oklch(0.60 0.04 60 / 0.18), 2px 2px 0 oklch(0.82 0.040 80)",
+                }}>
+                  be kind to yourself ✦
+                </div>
+                {/* Curl triangle — bottom-right corner peel shadow */}
+                <div style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: 0,
+                  height: 0,
+                  borderStyle: "solid",
+                  borderWidth: "10px 10px 0 0",
+                  borderColor: "transparent oklch(0.88 0.030 75) transparent transparent",
+                  filter: "drop-shadow(-1px 1px 1px oklch(0.60 0.04 60 / 0.25))",
+                }} />
               </div>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>

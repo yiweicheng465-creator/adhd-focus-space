@@ -58,52 +58,51 @@ const STRIPS = [
 
 const STRIP_H = 42; // px height of each strip
 
-// ── Generate a jagged path for one horizontal edge ────────────────────────────
-function jaggedPath(
-  width: number,
-  y: number,
+// ── Generate a jagged vertical path (for right-side tear) ────────────────────
+// Returns an SVG path string that zigzags vertically along x = tearX
+function jaggedVerticalPath(
+  tearX: number,
+  height: number,
   seed: number,
-  direction: "up" | "down",
   amplitude = 5
 ): string {
-  const steps = 32;
-  const pts: string[] = [`M 0 ${y}`];
+  const steps = 24;
+  const pts: string[] = [`M ${tearX} 0`];
   for (let i = 0; i <= steps; i++) {
-    const x = (i / steps) * width;
+    const y = (i / steps) * height;
     const jag =
-      Math.sin(seed * 3.7 + i * 2.1) * amplitude +
-      Math.cos(seed * 5.3 + i * 1.4) * (amplitude * 0.6);
-    pts.push(`L ${x} ${y + (direction === "down" ? jag : -jag)}`);
+      Math.sin(seed * 3.7 + i * 2.3) * amplitude +
+      Math.cos(seed * 5.1 + i * 1.7) * (amplitude * 0.5);
+    pts.push(`L ${tearX + jag} ${y}`);
   }
   return pts.join(" ");
 }
 
-// ── Torn paper opening SVG overlay ───────────────────────────────────────────
-// Renders the dark "paper" layer with a torn hole cut out of it,
-// revealing the light content beneath.
+// ── Torn paper overlay — right-side vertical rip ─────────────────────────────
+// The paper covers the RIGHT portion of the strip (from tearX to the right).
+// The jagged vertical edge at tearX is the torn right edge.
+// revealed = 0 → fully covered (tearX = 0, nothing visible)
+// revealed = 1 → fully revealed (tearX = width, all content visible)
 function TornPaperOverlay({
   width,
   height,
   seed,
-  revealed, // 0..1 — how much of the strip is revealed (left to right)
+  revealed,
 }: {
   width: number;
   height: number;
   seed: number;
   revealed: number;
 }) {
-  const tearX = width * (1 - revealed); // right edge of covered area
-  const topY = height * 0.28;
-  const botY = height * 0.72;
-  const tearAmplitude = 4.5;
+  // tearX is how far from the LEFT the paper has been torn away
+  // revealed=0 → tearX=0 (paper covers everything)
+  // revealed=1 → tearX=width (paper fully gone)
+  const tearX = width * revealed;
+  const amp = 5;
 
-  // Top torn edge path (going left to right)
-  const topEdge = jaggedPath(width - tearX, topY, seed, "up", tearAmplitude);
-  // Bottom torn edge path (going left to right)
-  const botEdge = jaggedPath(width - tearX, botY, seed + 7, "down", tearAmplitude);
+  // Jagged vertical path at tearX
+  const jagPath = jaggedVerticalPath(tearX, height, seed, amp);
 
-  // The "paper" covers from tearX to the right
-  // The torn opening is from 0 to tearX
   return (
     <svg
       width={width}
@@ -117,43 +116,27 @@ function TornPaperOverlay({
         zIndex: 3,
       }}
     >
-      {/* Right side: uncovered paper (dark overlay) */}
-      {tearX > 0 && (
-        <rect x={tearX} y={0} width={width - tearX} height={height}
-          fill="oklch(0.978 0.010 74)" />
+      {/* Paper covers from tearX to the right */}
+      {revealed < 1 && (
+        <path
+          d={`${jagPath} L ${width} ${height} L ${width} 0 Z`}
+          fill="oklch(0.978 0.010 74)"
+        />
       )}
-
-      {/* Torn opening area — left of tearX */}
-      {revealed > 0 && (
+      {/* Jagged torn edge highlight — thin warm shadow on the rip */}
+      {revealed > 0 && revealed < 1 && (
         <>
-          {/* Top torn edge — paper above the rip */}
           <path
-            d={`${topEdge} L ${width - tearX} 0 L 0 0 Z`}
-            fill="oklch(0.978 0.010 74)"
-            transform={`translate(0, 0)`}
+            d={jagPath}
+            fill="none"
+            stroke="oklch(0.70 0.025 65)"
+            strokeWidth="1.5"
+            opacity={0.5}
           />
-          {/* Bottom torn edge — paper below the rip */}
+          {/* Curl/shadow strip just to the right of the tear */}
           <path
-            d={`${botEdge} L ${width - tearX} ${height} L 0 ${height} Z`}
-            fill="oklch(0.978 0.010 74)"
-          />
-          {/* Shadow inside the torn opening — top */}
-          <path
-            d={`${topEdge} L ${width - tearX} ${topY + 6} L 0 ${topY + 6} Z`}
-            fill="oklch(0.55 0.018 60 / 0.12)"
-          />
-          {/* Shadow inside the torn opening — bottom */}
-          <path
-            d={`${botEdge} L ${width - tearX} ${botY - 6} L 0 ${botY - 6} Z`}
-            fill="oklch(0.55 0.018 60 / 0.12)"
-          />
-          {/* Paper curl highlight on the right torn edge */}
-          <line
-            x1={width - tearX - 1} y1={topY}
-            x2={width - tearX - 1} y2={botY}
-            stroke="oklch(0.92 0.012 70)"
-            strokeWidth="2"
-            opacity={0.7}
+            d={`${jagPath} L ${tearX + 8} ${height} L ${tearX + 8} 0 Z`}
+            fill="oklch(0.55 0.018 60 / 0.10)"
           />
         </>
       )}
