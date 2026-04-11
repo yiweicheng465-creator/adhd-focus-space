@@ -8,7 +8,7 @@ import { Sidebar } from "@/components/Sidebar";
 
 const M = {
   bg:      "oklch(0.975 0.012 80)",
-  card:    "oklch(0.992 0.005 80)",
+  card:    "oklch(0.975 0.018 75)",
   border:  "oklch(0.88 0.012 75)",
   ink:     "oklch(0.28 0.018 65)",
   muted:   "oklch(0.55 0.018 70)",
@@ -210,9 +210,17 @@ export default function Insight() {
             {CONCEPTS.map(({ icon, title, body }) => (
               <div
                 key={title}
-                className="flex items-start gap-5 p-5"
-                style={{ background: M.card, border: `1px solid ${M.border}` }}
+                style={{ background: M.card, border: `1px solid ${M.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 oklch(0.65 0.04 75)" }}
               >
+                <div style={{ background: "oklch(0.28 0.018 65)", padding: "4px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+                  <div style={{ display: "flex", gap: 4 }}>
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+                  </div>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>insight.txt</span>
+                </div>
+                <div className="flex items-start gap-5 p-5">
                 <div className="shrink-0 mt-0.5">{icon}</div>
                 <div>
                   <p style={{ fontFamily: "'Playfair Display', serif", fontSize: "0.95rem", fontWeight: 700, fontStyle: "italic", color: M.ink, marginBottom: 6 }}>
@@ -222,6 +230,7 @@ export default function Insight() {
                     {body}
                   </p>
                 </div>
+                </div>{/* end inner padding */}
               </div>
             ))}
           </div>

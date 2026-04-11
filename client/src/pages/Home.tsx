@@ -16,6 +16,7 @@ import { BrainDump } from "@/components/BrainDump";
 import { Goals, type Goal } from "@/components/Goals";
 import { AgentTracker, type Agent } from "@/components/AgentTracker";
 import { AIHub } from "@/components/AIHub";
+import { RetroPageWrapper } from "@/components/RetroPageWrapper";
 import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
@@ -501,10 +502,7 @@ export default function Home() {
               <div className="flex flex-col items-center gap-6 py-4 relative">
                 <FocusDecor />
                 {/* Atmospheric sunset panel behind the timer */}
-                <div
-                  className="w-full relative overflow-hidden"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", maxWidth: 680 }}
-                >
+                <RetroPageWrapper title="focus_timer.exe" sticker="moon" className="w-full" style={{ maxWidth: 680 }}>
                   {/* Sunset background */}
                   <div
                     className="absolute inset-0"
@@ -557,13 +555,10 @@ export default function Home() {
                     </div>
                     <FocusTimer onSessionComplete={handleSessionComplete} onBlockComplete={handleBlockComplete} onQuit={() => setTimerQuitCount(q => q + 1)} />
                   </div>
-                </div>
+                </RetroPageWrapper>
 
                 {/* Focus tips — minimal, geometric */}
-                <div
-                  className="w-full max-w-md p-5"
-                  style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-                >
+                <RetroPageWrapper title="session_tips.txt" sticker="leaf" className="w-full max-w-md">
                   <p className="editorial-label mb-3">Session tips</p>
                   <div className="space-y-2">
                     {[
@@ -580,39 +575,35 @@ export default function Home() {
                       </div>
                     ))}
                   </div>
-                </div>
+                </RetroPageWrapper>
               </div>
             )}
 
             {activeSection === "tasks" && (
-              <div
-                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-              >
+              <RetroPageWrapper title="tasks.txt" sticker="star">
+                <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                 <TasksDecor />
                 <div className="relative z-10">
                   <TaskManager tasks={tasks} onTasksChange={handleTasksChange} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} goals={goals} />
                 </div>
-              </div>
+                </div>
+              </RetroPageWrapper>
             )}
 
             {activeSection === "wins" && (
-              <div
-                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-              >
+              <RetroPageWrapper title="wins.log" sticker="sparkle">
+              <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                 <WinsDecor />
                 <div className="relative z-10">
                   <DailyWins wins={wins} onWinsChange={setWins} />
                 </div>
               </div>
+              </RetroPageWrapper>
             )}
 
             {activeSection === "braindump" && (
-              <div
-                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-              >
+              <RetroPageWrapper title="brain_dump.txt" sticker="sparkle">
+              <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                 <BrainDumpDecor />
                 <div className="relative z-10">
                   <BrainDump
@@ -627,22 +618,23 @@ export default function Home() {
                   />
                 </div>
               </div>
+              </RetroPageWrapper>
             )}
 
             {activeSection === "goals" && (
-              <div
-                className="p-8 min-h-[600px] flex flex-col relative overflow-hidden"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-              >
+              <RetroPageWrapper title="goals.md" sticker="leaf">
+              <div className="p-8 min-h-[600px] flex flex-col relative overflow-hidden">
                 <GoalsDecor />
                 <div className="relative z-10">
                   <Goals goals={goals} onGoalsChange={setGoals} allCategories={allCategories} onDeleteCategory={handleDeleteCategory} tasks={tasks} onTasksChange={handleTasksChange} />
                 </div>
               </div>
+              </RetroPageWrapper>
             )}
 
             {activeSection === "agents" && (
-              <div className="relative">
+              <RetroPageWrapper title="agents.app" sticker="star">
+              <div className="p-8 relative">
                 <AgentsDecor />
                 <AgentTracker
                   agents={agents}
@@ -653,15 +645,15 @@ export default function Home() {
                   onPendingTaskConsumed={() => setPendingAgentTask(null)}
                 />
               </div>
+              </RetroPageWrapper>
             )}
 
             {activeSection === "ai" && (
-              <div
-                className="p-8 min-h-[600px] flex flex-col"
-                style={{ border: "1px solid oklch(0.87 0.014 75)", background: "oklch(0.985 0.008 80)" }}
-              >
+              <RetroPageWrapper title="ai_hub.exe" sticker="sparkle">
+              <div className="p-8 min-h-[600px] flex flex-col">
                 <AIHub />
               </div>
+              </RetroPageWrapper>
             )}
           </div>
         </div>

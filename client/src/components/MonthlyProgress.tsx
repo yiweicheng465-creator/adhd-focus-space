@@ -32,7 +32,7 @@ const M = {
   ink:     "oklch(0.28 0.018 65)",
   muted:   "oklch(0.55 0.018 70)",
   border:  "oklch(0.88 0.014 75)",
-  card:    "oklch(0.985 0.007 80)",
+  card:    "oklch(0.975 0.018 75)",
   coral:   "oklch(0.55 0.09 35)",
   coralBg: "oklch(0.55 0.09 35 / 0.08)",
   sage:    "oklch(0.50 0.07 145)",
@@ -322,10 +322,20 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
     <div style={{
       background: M.card,
       border: `1px solid ${M.border}`,
-      borderRadius: 14,
+      borderRadius: 10,
       fontFamily: "'DM Sans', sans-serif",
       overflow: "hidden",
+      boxShadow: "3px 3px 0 oklch(0.65 0.04 75)",
     }}>
+      {/* Retro titlebar */}
+      <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+        </div>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>day_summary.txt</span>
+      </div>
       {/* Header */}
       <div style={{ padding: "14px 18px", borderBottom: `1px solid ${M.border}`, background: M.coralBg, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div>
@@ -584,10 +594,21 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
       <div style={{
         background: M.card,
         border: `1px solid ${M.border}`,
-        borderRadius: 14,
-        padding: "16px",
+        borderRadius: 10,
         marginBottom: 16,
+        overflow: "hidden",
+        boxShadow: "3px 3px 0 oklch(0.65 0.04 75)",
       }}>
+        {/* Retro titlebar */}
+        <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+          <div style={{ display: "flex", gap: 4 }}>
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+            <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+          </div>
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>calendar.exe</span>
+        </div>
+        <div style={{ padding: "16px" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
           <button onClick={prevMonth} style={{ background: "none", border: "none", cursor: "pointer", color: M.muted, padding: 4, borderRadius: 6 }}>
             <ChevronLeft size={18} />
@@ -658,6 +679,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
             <span style={{ fontSize: 10, color: M.muted }}>Mood bar</span>
           </div>
         </div>
+        </div>{/* end padding wrapper */}
       </div>
 
       {/* Day detail */}
@@ -749,11 +771,21 @@ function MonthlyAIReview({
     ink:     "oklch(0.28 0.018 65)",
     muted:   "oklch(0.55 0.018 70)",
     border:  "oklch(0.88 0.014 75)",
-    card:    "oklch(0.985 0.007 80)",
+    card:    "oklch(0.975 0.018 75)",
   };
 
   return (
-    <div style={{ marginTop: 16, padding: "16px", background: M2.card, border: `1px solid ${M2.border}`, borderRadius: 12 }}>
+    <div style={{ marginTop: 16, background: M2.card, border: `1px solid ${M2.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 oklch(0.65 0.04 75)" }}>
+      {/* Retro titlebar */}
+      <div style={{ background: "oklch(0.28 0.018 65)", padding: "5px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ display: "flex", gap: 4 }}>
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+          <div style={{ width: 8, height: 8, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+        </div>
+        <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>ai_review.exe</span>
+      </div>
+      <div style={{ padding: "16px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
         <Sparkles size={15} style={{ color: M2.coral }} />
         <span style={{ fontSize: 13, fontWeight: 600, color: M2.ink, fontFamily: "'DM Sans', sans-serif" }}>AI Monthly Review</span>
@@ -802,6 +834,7 @@ function MonthlyAIReview({
           </button>
         </div>
       )}
+      </div>{/* end padding wrapper */}
     </div>
   );
 }
