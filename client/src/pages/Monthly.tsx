@@ -32,6 +32,13 @@ export default function Monthly() {
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
+            {/* Logo */}
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
+              alt="ADHD Focus Space"
+              style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0, filter: "saturate(0.85) sepia(0.15)" }}
+            />
+            <div style={{ width: 1, height: 18, background: "#C9A87C", flexShrink: 0 }} />
             {/* Calendar icon */}
             <svg width="16" height="16" viewBox="0 0 18 18" fill="none" style={{ color: "oklch(0.52 0.14 35)", flexShrink: 0 }}>
               <rect x="2" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.4"/>

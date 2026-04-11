@@ -172,6 +172,13 @@ export default function Insight() {
             borderBottom: "1px solid #C9A87C",
           }}
         >
+          {/* Logo */}
+          <img
+            src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
+            alt="ADHD Focus Space"
+            style={{ width: 26, height: 26, objectFit: "contain", flexShrink: 0, filter: "saturate(0.85) sepia(0.15)" }}
+          />
+          <div style={{ width: 1, height: 18, background: "#C9A87C", flexShrink: 0 }} />
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
             <circle cx="9" cy="9" r="7" fill="oklch(0.55 0.09 35 / 0.15)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
             <line x1="9" y1="6" x2="9" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" />

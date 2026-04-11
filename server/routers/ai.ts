@@ -149,7 +149,7 @@ export const aiRouter = router({
           { role: "system", content: ADHD_SYSTEM },
           {
             role: "user",
-            content: `Categorise these brain dump entries. For each one, decide the best category:\n- task: a single actionable step (rewrite as clear verb+object)\n- goal: a bigger aspiration or multi-step outcome to work toward over time (rewrite as a clear goal statement)\n- worry: emotional venting or anxiety (action: archive)\n- idea: creative thought worth keeping (action: keep)\n- reminder: time-based or logistical note (action: keep)\n- other: anything else (action: keep)\n\nEntries:\n${entriesList}`,
+            content: `Categorise these brain dump entries. For each one, decide the best category:\n- task: a single, clearly actionable step that needs to be done (rewrite as clear verb+object, action: add_to_tasks)\n- goal: an explicit aspiration or multi-step outcome the user wants to achieve (rewrite as a clear goal statement, action: add_to_goals)\n- worry: emotional venting or anxiety (action: archive)\n- idea: a creative thought, concept, inspiration, or standalone thought that is NOT explicitly actionable right now — keep it as an idea (action: keep). Do NOT convert ideas into tasks or goals.\n- reminder: time-based or logistical note (action: keep)\n- other: anything else (action: keep)\n\nIMPORTANT: When in doubt, prefer 'idea' over 'task' or 'goal'. Only use 'task' if the entry is a clear single action step. Only use 'goal' if the entry explicitly states an aspiration to achieve.\n\nEntries:\n${entriesList}`,
           },
         ],
         response_format: CATEGORY_SCHEMA,

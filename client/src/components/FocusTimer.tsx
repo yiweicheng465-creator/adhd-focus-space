@@ -753,8 +753,30 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
     <div style={{
       fontFamily: "'JetBrains Mono', monospace",
       background: BG,
+      border: `3px solid ${DARK}`,
+      boxShadow: `4px 4px 0 ${DARK}`,
       overflow: "hidden",
     }}>
+      {/* ── Outer title bar: focus_timer.exe ── */}
+      <div style={{
+        background: PANEL,
+        borderBottom: `2px solid ${DARK}`,
+        padding: "0 10px",
+        height: 28,
+        display: "flex",
+        alignItems: "center",
+        userSelect: "none",
+      }}>
+        <span style={{ fontSize: 8, letterSpacing: "0.20em", textTransform: "uppercase", color: DARK, fontWeight: 700, flex: 1 }}>
+          focus_timer.exe
+        </span>
+        <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
+          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>★</span>
+          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>□</span>
+          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>□</span>
+          <span style={{ fontSize: 9, color: BORDER, cursor: "default", opacity: 0.6 }}>×</span>
+        </div>
+      </div>
       {/* ── Top bar: mode tabs + sound/settings + death counter ── */}
       <div style={{ display: "flex", alignItems: "stretch", borderBottom: `2px solid ${DARK}`, background: PANEL }}>
         {/* Mode tabs */}
@@ -1002,33 +1024,37 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             ))}
           </div>
 
-          {/* Idle: strip editor */}
-          {phase === "idle" && (
-            <StripEditor strips={strips} onChange={(next) => setCustomStrips(next)} />
-          )}
+          {/* Large timer display (Lab style) */}
+          <div style={{ textAlign: "center", padding: "6px 0 4px" }}>
+            <span style={{
+              fontFamily: "'JetBrains Mono', monospace",
+              fontSize: 38, fontWeight: 700,
+              letterSpacing: "0.06em",
+              color: phase === "paused" ? `${DARK}88` : DARK,
+              lineHeight: 1,
+            }}>{mm}:{ss}</span>
+          </div>
 
-          {/* Running/paused: strip list */}
-          {phase !== "idle" && (
-            <div style={{ background: BG, borderTop: `1px solid ${BORDER}30` }}>
-              {strips.map((text: string, i: number) => {
-                const baseState = stripStates[i] ?? "attached";
-                const effectiveState: StripState =
-                  i === 0 && baseState === "attached" && tornCount === 0 ? "tearing" : baseState;
-                return (
-                  <TearStrip
-                    key={i}
-                    text={text}
-                    seed={i + 1}
-                    state={effectiveState}
-                    isNext={i === nextStripIdx && (phase === "running" || phase === "paused")}
-                  />
-                );
-              })}
-              {tornCount === strips.length && phase === "running" && (
-                <div style={{ padding: "12px", textAlign: "center", fontFamily: "'JetBrains Mono', monospace", color: BORDER, fontSize: 7, letterSpacing: "0.14em" }}>
-                  ALL CLEARED ✓
-                </div>
-              )}
+          {/* Preset duration buttons (idle only) */}
+          {phase === "idle" && (
+            <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "0 12px 8px" }}>
+              {PRESETS[mode].map((p) => (
+                <button
+                  key={p}
+                  onClick={() => applyDuration(mode, p)}
+                  style={{
+                    padding: "3px 10px",
+                    fontSize: 8,
+                    letterSpacing: "0.12em",
+                    background: durations[mode] === p ? ACCENT : BTN_BG,
+                    color: durations[mode] === p ? "#fff" : DARK,
+                    border: `1.5px solid ${BORDER}`,
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    boxShadow: durations[mode] === p ? `1px 1px 0 ${DARK}` : "none",
+                  }}
+                >{p} MIN</button>
+              ))}
             </div>
           )}
 

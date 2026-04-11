@@ -405,11 +405,18 @@ export default function Home() {
             minHeight: 48,
           }}
         >
-          {/* Left: page icon + title */}
+          {/* Left: logo + page icon + title */}
           <div
             className="flex items-center gap-3 px-6 py-3 flex-1 min-w-0"
             style={{ borderRight: "1.5px solid #D4C4B0" }}
           >
+            {/* Logo */}
+            <img
+              src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/logo-focus-transparent-7auUnrhQ46WmQP8YJF5StA.webp"
+              alt="ADHD Focus Space"
+              style={{ width: 28, height: 28, objectFit: "contain", flexShrink: 0, filter: "saturate(0.85) sepia(0.15)" }}
+            />
+            <div style={{ width: 1, height: 20, background: "#D4C4B0", flexShrink: 0 }} />
             <div
               className="flex items-center justify-center w-7 h-7 shrink-0"
               style={{
@@ -442,9 +449,8 @@ export default function Home() {
 
           {/* Right: stats + mood + wrap-up */}
           <div className="flex items-center shrink-0" style={{ gap: 0 }}>
-            {/* Dashboard quick-stats */}
-            {activeSection === "dashboard" && (
-              <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid #D4C4B0" }}>
+            {/* Quick-stats — visible on all sections */}
+            <div className="hidden sm:flex items-center" style={{ borderRight: "1.5px solid #D4C4B0" }}>
                 {[
                   { label: "tasks", value: tasks.filter((t) => !t.done).length, section: "tasks" as Section },
                   { label: "wins",  value: wins.filter((w) => new Date(w.createdAt).toDateString() === new Date().toDateString()).length, section: "wins" as Section },
@@ -466,8 +472,7 @@ export default function Home() {
                     )}
                   </React.Fragment>
                 ))}
-              </div>
-            )}
+            </div>
 
             {/* Mood pill */}
             <div className="px-4 py-3" style={{ borderRight: "1.5px solid #D4C4B0" }}>
