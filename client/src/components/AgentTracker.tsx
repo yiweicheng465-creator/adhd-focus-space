@@ -640,7 +640,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 <Textarea
                   value={popupBrief + (popupFirstStep ? `\n\nFirst step: ${popupFirstStep}` : "")}
                   onChange={(e) => { setPopupBrief(e.target.value); setPopupFirstStep(""); }}
-                  placeholder={`e.g. Review the PR at [link], check for:\n- Code quality issues\n- Missing tests\n- Security concerns\nThen summarize what needs fixing before merge.`}
+                  placeholder={`e.g. Help me review the PR at [link]. Check for code quality issues, missing tests, and security concerns. Summarize what needs to be fixed before it can be merged, and flag anything that looks risky.`}
                   rows={5}
                   style={{ fontFamily: "'DM Sans', sans-serif", resize: "none" }}
                 />

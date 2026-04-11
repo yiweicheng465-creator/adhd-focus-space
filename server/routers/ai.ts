@@ -283,12 +283,12 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
           { role: "system", content: ADHD_SYSTEM },
           {
             role: "user",
-            content: `Generate a concise AI agent name and brief for this task: "${input.taskText}" (context: ${input.context}).
+            content: `Generate a concise AI agent name and a ready-to-paste prompt for this task: "${input.taskText}" (context: ${input.context}).
 
 Return JSON with:
 - name: short agent name (3-5 words, action-oriented, e.g. "API Review Checker")
-- brief: 1-2 sentence description of what the agent should do
-- firstStep: the very first concrete action the agent should take`,
+- brief: a first-person prompt the user will paste directly into an AI agent. Start with "Help me..." and be specific and actionable (2-4 sentences). Include what to check, what to produce, and any key constraints.
+- firstStep: leave this as an empty string ""`,
           },
         ],
         response_format: {
