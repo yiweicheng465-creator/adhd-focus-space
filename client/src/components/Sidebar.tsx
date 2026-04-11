@@ -196,7 +196,7 @@ function LiveTime() {
   }, []);
   return (
     <span
-      style={{ fontSize: 8, letterSpacing: "0.08em", color: "oklch(0.60 0.015 68)", fontFamily: "'Space Mono', monospace" }}
+      style={{ fontSize: 8, letterSpacing: "0.08em", color: "oklch(0.52 0.060 330)", fontFamily: "'Space Mono', monospace" }}
     >
       {t}
     </span>
@@ -207,18 +207,18 @@ function LiveTime() {
 function MonthlyLink() {
   const [location, navigate] = useLocation();
   const active = location === "/monthly";
-  const color = active ? "oklch(0.52 0.10 32)" : "oklch(0.62 0.018 68)";
+  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
   return (
     <button
       onClick={() => navigate("/monthly")}
       title="Monthly Progress"
       className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.52 0.10 32 / 0.08)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.52 0.10 32 / 0.04)"; }}
+      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
       onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
     >
       {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.52 0.10 32)" }} />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
       )}
       <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
         <rect x="2" y="4" width="14" height="12" rx="1.5" stroke={color} strokeWidth="1.4"/>
@@ -240,18 +240,18 @@ function MonthlyLink() {
 function InsightLink() {
   const [location, navigate] = useLocation();
   const active = location === "/insight";
-  const color = active ? "oklch(0.52 0.10 32)" : "oklch(0.62 0.018 68)";
+  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
   return (
     <button
       onClick={() => navigate("/insight")}
       title="Insight"
       className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.52 0.10 32 / 0.08)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.52 0.10 32 / 0.04)"; }}
+      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
       onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
     >
       {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.52 0.10 32)" }} />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
       )}
       <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
         <circle cx="9" cy="9" r="7" stroke={color} strokeWidth="1.4"/>
@@ -267,18 +267,18 @@ function InsightLink() {
 function PrototypesLink() {
   const [location, navigate] = useLocation();
   const active = location === "/timer-prototypes";
-  const color = active ? "oklch(0.52 0.10 32)" : "oklch(0.62 0.018 68)";
+  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
   return (
     <button
       onClick={() => navigate("/timer-prototypes")}
       title="Timer Prototypes"
       className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.52 0.10 32 / 0.08)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.52 0.10 32 / 0.04)"; }}
+      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
       onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
     >
       {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.52 0.10 32)" }} />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
       )}
       <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
         <path d="M6 2v6L2 14a1 1 0 00.9 1.5h12.2A1 1 0 0016 14l-4-6V2" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
@@ -303,9 +303,9 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
     <aside
       className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-4"
       style={{
-        background: "oklch(0.950 0.018 70)",
-        borderRight: "1.5px solid oklch(0.84 0.022 68)",
-        boxShadow: "2px 0 8px oklch(0.60 0.020 60 / 0.06)",
+        background: "oklch(0.930 0.045 355)",
+        borderRight: "1.5px solid oklch(0.80 0.060 340)",
+        boxShadow: "2px 0 8px oklch(0.58 0.18 340 / 0.08)",
       }}
     >
       {/* Live time at top */}
@@ -314,13 +314,13 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       </div>
 
       {/* Divider */}
-      <div style={{ width: "70%", height: "1px", background: "oklch(0.84 0.022 68)", marginBottom: 6 }} />
+      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", marginBottom: 6 }} />
 
       {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-1.5">
         {NAV.map(({ id, short, Icon, title }) => {
           const active = activeSection === id;
-          const color = active ? "oklch(0.52 0.10 32)" : "oklch(0.58 0.018 68)";
+          const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
           return (
             <button
               key={id}
@@ -328,12 +328,12 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
               title={title}
               className="relative w-full flex flex-col items-center justify-center py-2 transition-all duration-150"
               style={{
-                background: active ? "oklch(0.52 0.10 32 / 0.10)" : "transparent",
+                background: active ? "oklch(0.58 0.18 340 / 0.12)" : "transparent",
                 borderRadius: 3,
-                border: active ? "1px solid oklch(0.52 0.10 32 / 0.20)" : "1px solid transparent",
+                border: active ? "1px solid oklch(0.58 0.18 340 / 0.25)" : "1px solid transparent",
               }}
               onMouseEnter={(e) => {
-                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.52 0.10 32 / 0.05)";
+                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.06)";
               }}
               onMouseLeave={(e) => {
                 if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
@@ -342,7 +342,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
               {active && (
                 <div
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5"
-                  style={{ background: "oklch(0.52 0.10 32)", borderRadius: "0 2px 2px 0" }}
+                  style={{ background: "oklch(0.58 0.18 340)", borderRadius: "0 2px 2px 0" }}
                 />
               )}
               <Icon color={color} />
@@ -369,7 +369,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       </div>
 
       {/* Divider */}
-      <div style={{ width: "70%", height: "1px", background: "oklch(0.84 0.022 68)", marginBottom: 4 }} />
+      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", marginBottom: 4 }} />
 
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">

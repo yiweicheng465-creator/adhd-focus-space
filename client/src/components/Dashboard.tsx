@@ -104,19 +104,19 @@ function getGreeting() {
   return "Good evening";
 }
 
-/* ── Retro Lo-Fi Palette (aligned with index.css CSS vars) ── */
-const TC        = "oklch(0.52 0.10 32)";   // terracotta accent
-const CREAM     = "oklch(0.975 0.010 75)"; // parchment card bg
-const BORDER    = "oklch(0.82 0.022 68)";  // pencil-stroke border
-const INK       = "oklch(0.30 0.020 60)";  // near-black ink
-const MUTED     = "oklch(0.54 0.018 68)";  // warm muted text
-// AI panel: same parchment as other panels
-const AI_BG     = "oklch(0.975 0.010 75)";  // parchment
-const AI_BORDER = "oklch(0.82 0.022 68)";   // pencil border
-const AI_MSG_BG = "oklch(0.960 0.014 72)";  // slightly deeper sand for AI messages
-const AI_ACCENT = "oklch(0.52 0.10 32)";    // terracotta for AI header/icons
-const TITLEBAR  = "oklch(0.940 0.020 70)";  // retro title bar bg
-const TITLEBAR_TEXT = "oklch(0.45 0.020 62)"; // title bar text
+/* ── Dreamy SukiSketch Palette (aligned with index.css CSS vars) ── */
+const TC        = "oklch(0.58 0.18 340)";   // hot pink accent
+const CREAM     = "oklch(0.970 0.022 355)"; // soft pink card bg
+const BORDER    = "oklch(0.78 0.060 340)";  // mauve border
+const INK       = "oklch(0.28 0.040 320)";  // dark plum ink
+const MUTED     = "oklch(0.52 0.040 330)";  // muted mauve text
+// AI panel: soft lavender
+const AI_BG     = "oklch(0.960 0.030 290)";  // soft lavender
+const AI_BORDER = "oklch(0.78 0.060 290)";   // lavender border
+const AI_MSG_BG = "oklch(0.940 0.040 355)";  // bubblegum pink for AI messages
+const AI_ACCENT = "oklch(0.58 0.18 340)";    // hot pink for AI header/icons
+const TITLEBAR  = "oklch(0.88 0.060 340)";   // pink title bar bg
+const TITLEBAR_TEXT = "oklch(0.30 0.060 320)"; // title bar text
 
 function CornerMark() {
   return (
@@ -131,10 +131,10 @@ function CornerMark() {
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, focus: 1, normal: 2, someday: 3 };
 const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string; labelBg: string }> = {
   // Muted ink-stamp palette — desaturated, dusty, lo-fi
-  urgent:  { color: "#8B4A3A", bg: "oklch(0.97 0.025 18)",  label: "urgent",  labelBg: "rgba(139, 74, 58, 0.10)" },
-  focus:   { color: "#7A5C3A", bg: "oklch(0.97 0.018 35)",  label: "focus",   labelBg: "rgba(122, 92, 58, 0.10)" },
-  normal:  { color: "#4A6B4A", bg: "oklch(0.97 0.014 145)", label: "normal",  labelBg: "rgba(74, 107, 74, 0.08)" },
-  someday: { color: "#5A6070", bg: "oklch(0.97 0.010 240)", label: "someday", labelBg: "rgba(90, 96, 112, 0.08)" },
+  urgent:  { color: "#C0306A", bg: "oklch(0.95 0.040 355)",  label: "urgent",  labelBg: "rgba(192, 48, 106, 0.10)" },
+  focus:   { color: "#7A50A0", bg: "oklch(0.95 0.030 290)",  label: "focus",   labelBg: "rgba(122, 80, 160, 0.10)" },
+  normal:  { color: "#3A8A7A", bg: "oklch(0.95 0.030 168)",  label: "normal",  labelBg: "rgba(58, 138, 122, 0.08)" },
+  someday: { color: "#6070A0", bg: "oklch(0.95 0.020 240)",  label: "someday", labelBg: "rgba(96, 112, 160, 0.08)" },
 };
 
 type ChatMessage = { role: "user" | "assistant"; content: string };

@@ -278,21 +278,21 @@ function WinsRing({ wins }: { wins: Win[] }) {
 }
 
 const M = {
-  coral:    "oklch(0.55 0.09 35)",
-  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
-  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
-  sage:     "oklch(0.52 0.07 145)",
-  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
-  sageBdr:  "oklch(0.52 0.07 145 / 0.28)",
-  pink:     "oklch(0.62 0.06 20)",
-  pinkBg:   "oklch(0.62 0.06 20 / 0.08)",
-  pinkBdr:  "oklch(0.62 0.06 20 / 0.28)",
-  slumber:  "oklch(0.55 0.018 70)",
-  ink:      "oklch(0.28 0.018 65)",
-  muted:    "oklch(0.55 0.018 70)",
-  border:   "oklch(0.88 0.014 75)",
-  card:     "oklch(0.975 0.012 80)",
-  bg:       "oklch(0.972 0.010 78)",
+  coral:    "oklch(0.58 0.18 340)",
+  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
+  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
+  sage:     "oklch(0.52 0.10 168)",
+  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
+  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
+  pink:     "oklch(0.72 0.08 290)",
+  pinkBg:   "oklch(0.72 0.08 290 / 0.08)",
+  pinkBdr:  "oklch(0.72 0.08 290 / 0.28)",
+  slumber:  "oklch(0.52 0.040 330)",
+  ink:      "oklch(0.28 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  border:   "oklch(0.82 0.050 340)",
+  card:     "oklch(0.975 0.018 355)",
+  bg:       "oklch(0.960 0.030 355)",
 };
 
 interface DailyWrapUpProps {

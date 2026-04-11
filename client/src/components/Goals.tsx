@@ -32,16 +32,16 @@ export interface Goal {
 }
 
 const M = {
-  coral:    "oklch(0.55 0.09 35)",
-  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
-  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
-  sage:     "oklch(0.52 0.07 145)",
-  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
-  sageBdr:  "oklch(0.52 0.07 145 / 0.28)",
-  ink:      "oklch(0.28 0.018 65)",
-  muted:    "oklch(0.55 0.018 70)",
-  border:   "oklch(0.88 0.014 75)",
-  card:     "oklch(0.985 0.007 80)",
+  coral:    "oklch(0.58 0.18 340)",
+  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
+  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
+  sage:     "oklch(0.52 0.10 168)",
+  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
+  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
+  ink:      "oklch(0.28 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  border:   "oklch(0.82 0.050 340)",
+  card:     "oklch(0.975 0.018 355)",
 };
 
 const LABEL: React.CSSProperties = {

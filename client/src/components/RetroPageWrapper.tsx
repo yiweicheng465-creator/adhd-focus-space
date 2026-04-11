@@ -8,10 +8,10 @@
 
 import React from "react";
 
-const BORDER = "oklch(0.86 0.016 72)";
-const TITLEBAR_BG = "oklch(0.940 0.020 70)";
-const TITLEBAR_TEXT = "oklch(0.45 0.020 62)";
-const GRID_COLOR = "oklch(0.78 0.022 68 / 0.14)";
+const BORDER = "oklch(0.78 0.060 340)";
+const TITLEBAR_BG = "oklch(0.88 0.060 340)";
+const TITLEBAR_TEXT = "oklch(0.30 0.060 320)";
+const GRID_COLOR = "oklch(0.72 0.060 340 / 0.14)";
 
 /* Small sticker SVGs for title bars */
 const STICKERS: Record<string, React.ReactNode> = {
@@ -81,9 +81,9 @@ export function RetroPageWrapper({ title, sticker = "star", children, className 
         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
           {STICKERS[sticker]}
           <div style={{ display: "flex", alignItems: "center", gap: 3, marginLeft: 4 }}>
-            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.88 0.022 68)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>_</span>
-            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.88 0.022 68)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>□</span>
-            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.88 0.022 68)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>✕</span>
+            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.92 0.040 355)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>_</span>
+            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.92 0.040 355)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>□</span>
+            <span style={{ fontSize: 9, padding: "1px 5px", background: "oklch(0.92 0.040 355)", border: `1px solid ${BORDER}`, color: TITLEBAR_TEXT, fontFamily: "'Space Mono', monospace", lineHeight: 1.4, cursor: "default" }}>✕</span>
           </div>
         </div>
       </div>

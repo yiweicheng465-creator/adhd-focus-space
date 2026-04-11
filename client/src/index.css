@@ -1,11 +1,11 @@
 /* ============================================================
    ADHD FOCUS SPACE — Retro Lo-Fi Desktop Design System v4.0
 
-   Aesthetic: Soft retro-desktop / lo-fi corkboard
-   - Background: warm beige grid paper texture
-   - Cards: vintage OS window panels (cream/parchment, pencil borders)
+   Aesthetic: Dreamy SukiSketch — bubblegum pink / lavender / mint / sky-blue
+   - Background: soft pink grid paper texture
+   - Cards: pastel OS window panels (pink/lavender, mauve borders)
    - Typography: Space Mono for labels, Playfair for headings, DM Sans body
-   - Palette: dusty rose, warm sand, muted sage, faded terracotta
+   - Palette: bubblegum pink, soft lavender, mint seafoam, sky blue, hot pink
    - Buttons: retro OS style — flat, bordered, uppercase tiny labels
    ============================================================ */
 
@@ -56,118 +56,118 @@
 :root {
   --radius: 0.25rem; /* slightly rounded — soft retro feel */
 
-  /* ── Retro Lo-Fi Palette ── */
-  /* Light warm sand — lo-fi grid paper base */
-  --background:          oklch(0.955 0.018 72);
-  --foreground:          oklch(0.30 0.020 60);
+  /* ── Dreamy SukiSketch Palette ── */
+  /* Bubblegum pink — dreamy page base */
+  --background:          oklch(0.940 0.040 355);
+  --foreground:          oklch(0.28 0.040 320);
 
-  /* Parchment card / window panel */
-  --card:                oklch(0.975 0.010 75);
-  --card-foreground:     oklch(0.30 0.020 60);
-  --popover:             oklch(0.975 0.010 75);
-  --popover-foreground:  oklch(0.30 0.020 60);
+  /* Soft pink card / window panel */
+  --card:                oklch(0.970 0.022 355);
+  --card-foreground:     oklch(0.28 0.040 320);
+  --popover:             oklch(0.970 0.022 355);
+  --popover-foreground:  oklch(0.28 0.040 320);
 
-  /* Dusty terracotta — primary CTA */
-  --primary:             oklch(0.52 0.10 32);
-  --primary-foreground:  oklch(0.97 0.005 75);
+  /* Hot pink — primary CTA */
+  --primary:             oklch(0.58 0.18 340);
+  --primary-foreground:  oklch(0.98 0.005 355);
 
-  /* Warm sand — secondary */
-  --secondary:           oklch(0.92 0.018 72);
-  --secondary-foreground: oklch(0.38 0.018 62);
+  /* Soft lavender — secondary */
+  --secondary:           oklch(0.90 0.040 290);
+  --secondary-foreground: oklch(0.38 0.060 290);
 
-  /* Muted */
-  --muted:               oklch(0.92 0.014 74);
-  --muted-foreground:    oklch(0.54 0.018 68);
+  /* Muted pink */
+  --muted:               oklch(0.92 0.025 355);
+  --muted-foreground:    oklch(0.52 0.040 330);
 
-  /* Sage green — accent */
-  --accent:              oklch(0.88 0.030 138);
-  --accent-foreground:   oklch(0.32 0.055 138);
+  /* Mint seafoam — accent */
+  --accent:              oklch(0.84 0.060 168);
+  --accent-foreground:   oklch(0.28 0.080 168);
 
-  /* Dusty rose — destructive */
-  --destructive:         oklch(0.58 0.12 18);
-  --destructive-foreground: oklch(0.97 0.005 75);
+  /* Vivid hot pink — destructive */
+  --destructive:         oklch(0.55 0.20 10);
+  --destructive-foreground: oklch(0.98 0.005 355);
 
-  /* Pencil-stroke borders */
-  --border:              oklch(0.86 0.018 72);
-  --input:               oklch(0.86 0.018 72);
-  --ring:                oklch(0.52 0.10 32 / 0.30);
+  /* Mauve/pink borders */
+  --border:              oklch(0.82 0.050 340);
+  --input:               oklch(0.82 0.050 340);
+  --ring:                oklch(0.58 0.18 340 / 0.30);
 
-  /* Charts — all muted retro tones */
-  --chart-1:             oklch(0.52 0.10 32);    /* terracotta */
-  --chart-2:             oklch(0.62 0.07 138);   /* sage */
-  --chart-3:             oklch(0.68 0.06 72);    /* sand */
-  --chart-4:             oklch(0.68 0.06 295);   /* dusty lavender */
-  --chart-5:             oklch(0.58 0.08 200);   /* dusty blue */
+  /* Charts — dreamy pastel tones */
+  --chart-1:             oklch(0.58 0.18 340);   /* hot pink */
+  --chart-2:             oklch(0.72 0.10 168);   /* mint */
+  --chart-3:             oklch(0.72 0.08 220);   /* sky blue */
+  --chart-4:             oklch(0.72 0.08 290);   /* lavender */
+  --chart-5:             oklch(0.78 0.10 60);    /* soft yellow */
 
-  /* Sidebar — slightly darker parchment */
-  --sidebar:             oklch(0.950 0.018 70);
-  --sidebar-foreground:  oklch(0.30 0.020 60);
-  --sidebar-primary:     oklch(0.52 0.10 32);
-  --sidebar-primary-foreground: oklch(0.97 0.005 75);
-  --sidebar-accent:      oklch(0.92 0.018 72);
-  --sidebar-accent-foreground: oklch(0.30 0.020 60);
-  --sidebar-border:      oklch(0.85 0.018 70);
-  --sidebar-ring:        oklch(0.52 0.10 32 / 0.30);
+  /* Sidebar — slightly deeper pink */
+  --sidebar:             oklch(0.930 0.045 355);
+  --sidebar-foreground:  oklch(0.28 0.040 320);
+  --sidebar-primary:     oklch(0.58 0.18 340);
+  --sidebar-primary-foreground: oklch(0.98 0.005 355);
+  --sidebar-accent:      oklch(0.90 0.040 290);
+  --sidebar-accent-foreground: oklch(0.28 0.040 320);
+  --sidebar-border:      oklch(0.80 0.050 340);
+  --sidebar-ring:        oklch(0.58 0.18 340 / 0.30);
 }
 
 /* ── Semantic color tokens ── */
 :root {
-  /* Terracotta */
-  --r-terra:         oklch(0.52 0.10 32);
-  --r-terra-light:   oklch(0.52 0.10 32 / 0.10);
-  --r-terra-border:  oklch(0.52 0.10 32 / 0.28);
+  /* Hot pink */
+  --r-terra:         oklch(0.58 0.18 340);
+  --r-terra-light:   oklch(0.58 0.18 340 / 0.12);
+  --r-terra-border:  oklch(0.58 0.18 340 / 0.30);
 
-  /* Dusty rose */
-  --r-rose:          oklch(0.72 0.06 18);
-  --r-rose-light:    oklch(0.72 0.06 18 / 0.12);
-  --r-rose-border:   oklch(0.72 0.06 18 / 0.30);
+  /* Bubblegum pink */
+  --r-rose:          oklch(0.82 0.10 355);
+  --r-rose-light:    oklch(0.82 0.10 355 / 0.15);
+  --r-rose-border:   oklch(0.82 0.10 355 / 0.35);
 
-  /* Sage */
-  --r-sage:          oklch(0.60 0.07 138);
-  --r-sage-light:    oklch(0.60 0.07 138 / 0.10);
-  --r-sage-border:   oklch(0.60 0.07 138 / 0.28);
+  /* Mint seafoam */
+  --r-sage:          oklch(0.72 0.10 168);
+  --r-sage-light:    oklch(0.72 0.10 168 / 0.12);
+  --r-sage-border:   oklch(0.72 0.10 168 / 0.30);
 
-  /* Dusty blue */
-  --r-blue:          oklch(0.58 0.08 220);
-  --r-blue-light:    oklch(0.58 0.08 220 / 0.10);
-  --r-blue-border:   oklch(0.58 0.08 220 / 0.28);
+  /* Sky blue */
+  --r-blue:          oklch(0.72 0.08 220);
+  --r-blue-light:    oklch(0.72 0.08 220 / 0.12);
+  --r-blue-border:   oklch(0.72 0.08 220 / 0.30);
 
-  /* Lavender */
-  --r-lavender:      oklch(0.68 0.06 290);
-  --r-lavender-light: oklch(0.68 0.06 290 / 0.10);
-  --r-lavender-border: oklch(0.68 0.06 290 / 0.28);
+  /* Soft lavender */
+  --r-lavender:      oklch(0.72 0.08 290);
+  --r-lavender-light: oklch(0.72 0.08 290 / 0.12);
+  --r-lavender-border: oklch(0.72 0.08 290 / 0.30);
 
-  /* Sand / parchment */
-  --r-sand:          oklch(0.92 0.018 72);
-  --r-ink:           oklch(0.30 0.020 60);
-  --r-muted:         oklch(0.54 0.018 68);
-  --r-border:        oklch(0.86 0.018 72);
-  --r-bg:            oklch(0.960 0.014 72);
-  --r-card:          oklch(0.975 0.010 75);
+  /* Dreamy pink base */
+  --r-sand:          oklch(0.92 0.030 355);
+  --r-ink:           oklch(0.28 0.040 320);
+  --r-muted:         oklch(0.52 0.040 330);
+  --r-border:        oklch(0.82 0.050 340);
+  --r-bg:            oklch(0.940 0.040 355);
+  --r-card:          oklch(0.970 0.022 355);
 
-  /* Aliases for backward compat */
-  --m-coral:         oklch(0.52 0.10 32);
-  --m-coral-light:   oklch(0.52 0.10 32 / 0.10);
-  --m-coral-border:  oklch(0.52 0.10 32 / 0.28);
-  --m-sage:          oklch(0.60 0.07 138);
-  --m-sage-light:    oklch(0.60 0.07 138 / 0.10);
-  --m-sage-border:   oklch(0.60 0.07 138 / 0.28);
-  --m-slumber:       oklch(0.72 0.018 72);
-  --m-slumber-light: oklch(0.72 0.018 72 / 0.15);
-  --m-pink:          oklch(0.72 0.06 18);
-  --m-pink-light:    oklch(0.72 0.06 18 / 0.12);
-  --m-pink-border:   oklch(0.72 0.06 18 / 0.30);
-  --m-lavender:      oklch(0.68 0.06 290);
-  --m-lavender-light: oklch(0.68 0.06 290 / 0.10);
-  --m-lavender-border: oklch(0.68 0.06 290 / 0.28);
-  --m-indigo:        oklch(0.50 0.06 138);
-  --m-indigo-light:  oklch(0.50 0.06 138 / 0.08);
-  --m-indigo-border: oklch(0.50 0.06 138 / 0.25);
-  --m-ink:           oklch(0.30 0.020 60);
-  --m-muted:         oklch(0.54 0.018 68);
-  --m-border:        oklch(0.86 0.018 72);
-  --m-bg:            oklch(0.960 0.014 72);
-  --m-card:          oklch(0.975 0.010 75);
+  /* Aliases for backward compat — mapped to dreamy palette */
+  --m-coral:         oklch(0.58 0.18 340);
+  --m-coral-light:   oklch(0.58 0.18 340 / 0.12);
+  --m-coral-border:  oklch(0.58 0.18 340 / 0.30);
+  --m-sage:          oklch(0.72 0.10 168);
+  --m-sage-light:    oklch(0.72 0.10 168 / 0.12);
+  --m-sage-border:   oklch(0.72 0.10 168 / 0.30);
+  --m-slumber:       oklch(0.82 0.040 290);
+  --m-slumber-light: oklch(0.82 0.040 290 / 0.18);
+  --m-pink:          oklch(0.82 0.10 355);
+  --m-pink-light:    oklch(0.82 0.10 355 / 0.15);
+  --m-pink-border:   oklch(0.82 0.10 355 / 0.35);
+  --m-lavender:      oklch(0.72 0.08 290);
+  --m-lavender-light: oklch(0.72 0.08 290 / 0.12);
+  --m-lavender-border: oklch(0.72 0.08 290 / 0.30);
+  --m-indigo:        oklch(0.60 0.10 290);
+  --m-indigo-light:  oklch(0.60 0.10 290 / 0.10);
+  --m-indigo-border: oklch(0.60 0.10 290 / 0.28);
+  --m-ink:           oklch(0.28 0.040 320);
+  --m-muted:         oklch(0.52 0.040 330);
+  --m-border:        oklch(0.82 0.050 340);
+  --m-bg:            oklch(0.940 0.040 355);
+  --m-card:          oklch(0.970 0.022 355);
 }
 
 @layer base {
@@ -179,13 +179,13 @@
     @apply bg-background text-foreground;
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
-    /* Lo-fi grid paper — soft warm caramel lines on light sand bg */
-    background-color: #F5EAD8;
+    /* Dreamy pink grid paper — soft mauve lines on bubblegum pink bg */
+    background-color: #F9D6E8;
     background-image:
-      linear-gradient(rgba(180, 130, 75, 0.22) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(180, 130, 75, 0.22) 1px, transparent 1px),
-      linear-gradient(rgba(180, 130, 75, 0.08) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(180, 130, 75, 0.08) 1px, transparent 1px);
+      linear-gradient(rgba(200, 122, 170, 0.20) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 122, 170, 0.20) 1px, transparent 1px),
+      linear-gradient(rgba(200, 122, 170, 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(200, 122, 170, 0.08) 1px, transparent 1px);
     background-size: 128px 128px, 128px 128px, 32px 32px, 32px 32px;
     background-attachment: fixed;
   }
@@ -231,12 +231,12 @@
      Mimics the vintage desktop window aesthetic from the reference image:
      cream/parchment fill, thin pencil-stroke border, subtle shadow */
   .retro-window {
-    background: oklch(0.975 0.010 75);
-    border: 1.5px solid oklch(0.82 0.022 68);
+    background: oklch(0.970 0.022 355);
+    border: 1.5px solid oklch(0.78 0.060 340);
     border-radius: 4px;
     box-shadow:
-      2px 3px 0px oklch(0.82 0.022 68 / 0.50),
-      0 1px 8px oklch(0.60 0.020 60 / 0.06);
+      2px 3px 0px oklch(0.78 0.060 340 / 0.50),
+      0 1px 8px oklch(0.58 0.18 340 / 0.08);
     position: relative;
     overflow: hidden;
   }
@@ -247,12 +247,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    background: oklch(0.940 0.020 70);
-    border-bottom: 1px solid oklch(0.82 0.022 68);
+    background: oklch(0.88 0.060 340);
+    border-bottom: 1px solid oklch(0.78 0.060 340);
     font-family: 'Space Mono', monospace;
     font-size: 0.60rem;
     letter-spacing: 0.08em;
-    color: oklch(0.45 0.020 62);
+    color: oklch(0.30 0.060 320);
     user-select: none;
   }
 
@@ -265,21 +265,21 @@
   .retro-titlebar-btn {
     width: 10px;
     height: 10px;
-    border: 1px solid oklch(0.72 0.025 65);
-    background: oklch(0.960 0.014 72);
+    border: 1px solid oklch(0.72 0.060 340);
+    background: oklch(0.970 0.022 355);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 7px;
-    color: oklch(0.55 0.020 62);
+    color: oklch(0.45 0.060 330);
     cursor: default;
     border-radius: 1px;
   }
 
   /* Morandi card base (backward compat) */
   .m-card {
-    background: oklch(0.975 0.010 75);
-    border: 1.5px solid oklch(0.82 0.022 68);
+    background: oklch(0.970 0.022 355);
+    border: 1.5px solid oklch(0.78 0.060 340);
     border-radius: 4px;
   }
 
@@ -295,7 +295,7 @@
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: oklch(0.54 0.018 68);
+    color: oklch(0.50 0.060 330);
   }
 
   /* Small caps editorial label (kept for compat) */
@@ -305,18 +305,18 @@
     font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.54 0.018 68);
+    color: oklch(0.50 0.060 330);
   }
 
   /* ── Retro Button System ──
      Thick-border 3D offset style — vintage OS dialog / lo-fi zine aesthetic
      Inspired by: retro OK button, pixel game UI, job board Apply Now */
 
-  /* Primary: terracotta fill — the main CTA button */
+  /* Primary: hot pink fill — the main CTA button */
   .m-btn-primary {
-    background: oklch(0.52 0.10 32);
-    color: oklch(0.97 0.005 75);
-    border: 2.5px solid oklch(0.26 0.06 32);
+    background: oklch(0.58 0.18 340);
+    color: oklch(0.98 0.005 355);
+    border: 2.5px solid oklch(0.38 0.14 330);
     border-radius: 3px;
     padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
@@ -325,7 +325,7 @@
     letter-spacing: 0.10em;
     text-transform: uppercase;
     /* 3D offset shadow — the key retro effect */
-    box-shadow: 3px 3px 0px oklch(0.26 0.06 32);
+    box-shadow: 3px 3px 0px oklch(0.38 0.14 330);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -333,12 +333,12 @@
     cursor: pointer;
   }
   .m-btn-primary:hover {
-    background: oklch(0.48 0.10 32);
-    box-shadow: 4px 4px 0px oklch(0.22 0.06 32);
+    background: oklch(0.52 0.20 340);
+    box-shadow: 4px 4px 0px oklch(0.32 0.14 330);
     transform: translate(-1px, -1px);
   }
   .m-btn-primary:active {
-    box-shadow: 1px 1px 0px oklch(0.26 0.06 32);
+    box-shadow: 1px 1px 0px oklch(0.38 0.14 330);
     transform: translate(2px, 2px);
   }
 
@@ -371,11 +371,11 @@
     transform: translate(2px, 2px);
   }
 
-  /* Ghost: cream fill, dark pencil border — secondary action */
+  /* Ghost: soft pink fill, mauve border — secondary action */
   .m-btn-ghost {
-    background: oklch(0.975 0.010 75);
-    border: 2.5px solid oklch(0.40 0.018 62);
-    color: oklch(0.38 0.020 62);
+    background: oklch(0.970 0.022 355);
+    border: 2.5px solid oklch(0.68 0.080 340);
+    color: oklch(0.42 0.080 330);
     border-radius: 3px;
     padding: 0.40rem 1.0rem;
     font-family: 'Space Mono', monospace;
@@ -383,7 +383,7 @@
     font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0px oklch(0.40 0.018 62);
+    box-shadow: 3px 3px 0px oklch(0.68 0.080 340);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -391,13 +391,13 @@
     cursor: pointer;
   }
   .m-btn-ghost:hover {
-    border-color: oklch(0.52 0.10 32);
-    color: oklch(0.52 0.10 32);
-    box-shadow: 4px 4px 0px oklch(0.52 0.10 32 / 0.70);
+    border-color: oklch(0.58 0.18 340);
+    color: oklch(0.58 0.18 340);
+    box-shadow: 4px 4px 0px oklch(0.58 0.18 340 / 0.70);
     transform: translate(-1px, -1px);
   }
   .m-btn-ghost:active {
-    box-shadow: 1px 1px 0px oklch(0.40 0.018 62);
+    box-shadow: 1px 1px 0px oklch(0.68 0.080 340);
     transform: translate(2px, 2px);
   }
 
@@ -428,8 +428,8 @@
 
   /* Chip/tag */
   .m-chip {
-    background: oklch(0.975 0.010 75);
-    border: 1.5px solid oklch(0.80 0.018 70);
+    background: oklch(0.970 0.022 355);
+    border: 1.5px solid oklch(0.78 0.060 340);
     border-radius: 2px;
     padding: 0.22rem 0.60rem;
     font-family: 'Space Mono', monospace;
@@ -437,23 +437,23 @@
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: oklch(0.50 0.018 68);
+    color: oklch(0.48 0.060 330);
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    box-shadow: 1px 1px 0px oklch(0.80 0.018 70 / 0.50);
+    box-shadow: 1px 1px 0px oklch(0.78 0.060 340 / 0.50);
   }
   .m-chip:hover, .m-chip.active {
-    background: oklch(0.52 0.10 32);
-    border-color: oklch(0.44 0.10 32);
-    color: oklch(0.97 0.005 75);
-    box-shadow: 1px 1px 0px oklch(0.44 0.10 32 / 0.50);
+    background: oklch(0.58 0.18 340);
+    border-color: oklch(0.48 0.16 330);
+    color: oklch(0.98 0.005 355);
+    box-shadow: 1px 1px 0px oklch(0.48 0.16 330 / 0.50);
   }
   .m-chip.active-sage {
-    background: oklch(0.60 0.07 138);
-    border-color: oklch(0.50 0.07 138);
-    color: oklch(0.97 0.005 75);
+    background: oklch(0.72 0.10 168);
+    border-color: oklch(0.60 0.10 168);
+    color: oklch(0.98 0.005 355);
   }
 }
 
@@ -487,12 +487,12 @@
 
 /* ── Retro scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: oklch(0.92 0.014 72); }
+::-webkit-scrollbar-track { background: oklch(0.92 0.030 355); }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.78 0.022 68);
+  background: oklch(0.78 0.080 340);
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.65 0.025 65); }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.65 0.12 340); }
 
 /* ── Pixel-art hand cursor ──
    A classic pointing hand for all interactive elements */
