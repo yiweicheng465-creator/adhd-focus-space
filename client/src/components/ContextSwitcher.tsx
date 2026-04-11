@@ -171,16 +171,21 @@ export function ContextBadge({ context }: { context: string }) {
   const Icon = cfg.icon;
   return (
     <span
-      className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 font-medium shrink-0"
+      className="inline-flex items-center gap-1 shrink-0"
       style={{
-        background:  cfg.bg,
-        color:       cfg.color,
-        border:      `1px solid ${cfg.border}`,
-        fontFamily:  "'DM Sans', sans-serif",
-        letterSpacing: "0.05em",
+        background:    cfg.bg,
+        color:         cfg.color,
+        border:        `1.5px solid ${cfg.border}`,
+        borderRadius:  2,
+        padding:       "2px 6px",
+        fontFamily:    "'Space Mono', monospace",
+        fontSize:      "0.6rem",
+        fontWeight:    700,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase" as const,
       }}
     >
-      <Icon className="w-2.5 h-2.5" />
+      <Icon style={{ width: 9, height: 9 }} />
       {cfg.label}
     </span>
   );
