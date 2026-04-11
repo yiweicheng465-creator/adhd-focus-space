@@ -83,6 +83,40 @@ function PetDead() {
   );
 }
 
+// Paused pet — worried/sad face (sweat drop, wavy mouth)
+function PetPaused() {
+  return (
+    <svg viewBox="0 0 32 32" width="96" height="96" style={{ imageRendering: "pixelated" }}>
+      {/* Body */}
+      <rect x="8" y="10" width="16" height="14" fill="#B8A8D8" />
+      <rect x="6" y="12" width="2" height="10" fill="#B8A8D8" />
+      <rect x="24" y="12" width="2" height="10" fill="#B8A8D8" />
+      <rect x="10" y="8" width="12" height="2" fill="#B8A8D8" />
+      <rect x="8" y="24" width="4" height="2" fill="#B8A8D8" />
+      <rect x="20" y="24" width="4" height="2" fill="#B8A8D8" />
+      {/* Worried eyes — angled inward (sad brows) */}
+      <rect x="11" y="12" width="1" height="1" fill="#3D2E5E" />
+      <rect x="14" y="11" width="1" height="1" fill="#3D2E5E" />
+      <rect x="17" y="11" width="1" height="1" fill="#3D2E5E" />
+      <rect x="20" y="12" width="1" height="1" fill="#3D2E5E" />
+      {/* Eyes — wide open worried */}
+      <rect x="11" y="13" width="4" height="4" fill="#3D2E5E" />
+      <rect x="17" y="13" width="4" height="4" fill="#3D2E5E" />
+      <rect x="12" y="14" width="1" height="1" fill="#fff" />
+      <rect x="18" y="14" width="1" height="1" fill="#fff" />
+      {/* Wavy / sad mouth */}
+      <rect x="13" y="21" width="2" height="1" fill="#3D2E5E" />
+      <rect x="15" y="20" width="2" height="1" fill="#3D2E5E" />
+      <rect x="17" y="21" width="2" height="1" fill="#3D2E5E" />
+      {/* Sweat drop */}
+      <rect x="23" y="10" width="1" height="2" fill="#88B4D8" />
+      <rect x="22" y="11" width="1" height="1" fill="#88B4D8" />
+      {/* Tiny tail */}
+      <rect x="4" y="15" width="2" height="2" fill="#B8A8D8" />
+    </svg>
+  );
+}
+
 // Idle pet — sleepy eyes
 function PetIdle() {
   return (
@@ -206,14 +240,18 @@ export function CyberPetTimer({ durationMinutes = 25 }: CyberPetTimerProps) {
   /* ── Heart bubbles ── */
   const spawnHeart = useCallback(() => {
     const id = heartIdRef.current++;
+    // Spawn hearts from pet center area (40–60% x), starting at mid-height (45–55% y)
+    // Give them a horizontal drift (vx) so they float left or right as they rise
+    const side = Math.random() < 0.5 ? -1 : 1; // left or right drift
     const newHeart: HeartBubble = {
       id,
-      x: 30 + Math.random() * 40,
-      y: 20,
+      x: 42 + Math.random() * 16,   // near pet center horizontally
+      y: 42 + Math.random() * 12,   // near pet center vertically (as % from bottom)
       size: 8 + Math.random() * 8,
       opacity: 0.9,
-      vy: 0.8 + Math.random() * 0.5,
-    };
+      vy: 1.0 + Math.random() * 0.6, // float upward
+      vx: side * (0.3 + Math.random() * 0.5), // drift left or right
+    } as HeartBubble & { vx: number };
     setHearts((prev) => [...prev.slice(-12), newHeart]);
   }, []);
 
@@ -226,14 +264,22 @@ export function CyberPetTimer({ durationMinutes = 25 }: CyberPetTimerProps) {
     return () => { if (heartRef.current) clearInterval(heartRef.current); };
   }, [phase, spawnHeart]);
 
-  // Animate hearts upward
+  // Animate hearts upward with sideways drift
   useEffect(() => {
     if (hearts.length === 0) return;
     const id = requestAnimationFrame(() => {
       setHearts((prev) =>
         prev
-          .map((h) => ({ ...h, y: h.y - h.vy, opacity: h.opacity - 0.012 }))
-          .filter((h) => h.opacity > 0.05)
+          .map((h) => {
+            const hAny = h as HeartBubble & { vx?: number };
+            return {
+              ...h,
+              y: h.y + h.vy,           // increase y% = move up (bottom-anchored)
+              x: h.x + (hAny.vx ?? 0), // drift sideways
+              opacity: h.opacity - 0.010,
+            };
+          })
+          .filter((h) => h.opacity > 0.05 && h.y < 95)
       );
     });
     return () => cancelAnimationFrame(id);
@@ -371,6 +417,7 @@ export function CyberPetTimer({ durationMinutes = 25 }: CyberPetTimerProps) {
         }}>
           {phase === "dead" || showDeathScreen ? <PetDead /> :
            phase === "idle" ? <PetIdle /> :
+           phase === "paused" ? <PetPaused /> :
            <PetAlive blink={blink} />}
         </div>
 
