@@ -28,12 +28,17 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
       80%     { transform: translateX(2px); }
     }
     @keyframes curlPulse {
-      0%,100% { transform: scale(1); }
-      50%     { transform: scale(1.18); }
+      0%,100% { transform: scale(1) rotate(0deg); }
+      50%     { transform: scale(1.22) rotate(-4deg); }
+    }
+    @keyframes peelEdgePulse {
+      0%,100% { opacity: 0.7; }
+      50%     { opacity: 1; }
     }
     .strip-tearing { animation: stripTearAway 0.65s cubic-bezier(0.4,0,1,1) forwards; }
     .strip-shake   { animation: stripShake 0.25s ease-in-out; }
-    .curl-pulse    { animation: curlPulse 2.8s ease-in-out infinite; }
+    .curl-pulse    { animation: curlPulse 3.2s ease-in-out infinite; }
+    .peel-edge-pulse { animation: peelEdgePulse 2.4s ease-in-out infinite; }
   `;
   document.head.appendChild(s);
 }
@@ -145,16 +150,33 @@ function TearStrip({
           transform: "translateY(-50%)",
         }} />
 
-        {/* Progress fill for active strip */}
-        {isActive && progress > 0 && (
+        {/* Peel-away effect: right side fades as strip is torn from right to left */}
+        {isActive && (
           <div style={{
             position: "absolute",
-            left: 0,
             top: 0,
             bottom: 0,
+            right: 0,
+            // The "torn away" portion grows from right to left as progress increases
             width: `${progress * 100}%`,
-            background: "oklch(0.88 0.022 68 / 0.35)",
+            background: `linear-gradient(to left,
+              oklch(0.94 0.018 70 / 0.85) 0%,
+              oklch(0.90 0.016 70 / 0.50) 40%,
+              transparent 100%
+            )`,
             transition: "width 1s linear",
+            pointerEvents: "none",
+          }} />
+        )}
+        {/* Jagged tear edge line — vertical line at the peel boundary */}
+        {isActive && progress > 0.01 && (
+          <div style={{
+            position: "absolute",
+            top: 0,
+            bottom: 0,
+            right: `${progress * 100}%`,
+            width: 2,
+            background: "linear-gradient(to bottom, transparent 0%, oklch(0.72 0.022 65 / 0.6) 30%, oklch(0.72 0.022 65 / 0.6) 70%, transparent 100%)",
             pointerEvents: "none",
           }} />
         )}
@@ -211,37 +233,37 @@ function TearStrip({
         </span>
       </div>
 
-      {/* ── Corner peel on active strip ── */}
+      {/* ── Corner peel on active strip (top-right) ── */}
       {isActive && (
         <div
           className="curl-pulse"
           style={{
             position: "absolute",
-            bottom: 0,
+            top: 0,
             right: 0,
             zIndex: 10,
             pointerEvents: "none",
-            transformOrigin: "bottom right",
+            transformOrigin: "top right",
           }}
         >
-          {/* The peeled corner triangle */}
-          <svg width={28} height={28} viewBox="0 0 28 28" style={{ display: "block" }}>
+          {/* The peeled corner triangle at top-right */}
+          <svg width={32} height={32} viewBox="0 0 32 32" style={{ display: "block" }}>
             <defs>
-              <linearGradient id="peelGrad" x1="1" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="oklch(0.78 0.022 68)" stopOpacity="1" />
-                <stop offset="100%" stopColor="oklch(0.62 0.018 60)" stopOpacity="1" />
+              <linearGradient id="peelGradTR" x1="0" y1="1" x2="1" y2="0">
+                <stop offset="0%" stopColor="oklch(0.76 0.022 68)" stopOpacity="1" />
+                <stop offset="100%" stopColor="oklch(0.60 0.018 58)" stopOpacity="1" />
               </linearGradient>
-              <linearGradient id="peelShadow" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0.30" />
-                <stop offset="100%" stopColor="oklch(0.30 0.018 55)" stopOpacity="0" />
+              <linearGradient id="peelShadowTR" x1="1" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="oklch(0.28 0.018 55)" stopOpacity="0.35" />
+                <stop offset="100%" stopColor="oklch(0.28 0.018 55)" stopOpacity="0" />
               </linearGradient>
             </defs>
-            {/* Shadow cast by the peeled corner onto the page */}
-            <polygon points="4,28 28,4 28,28" fill="url(#peelShadow)" />
-            {/* The peeled corner itself (lighter, curled-up paper) */}
-            <polygon points="10,28 28,10 28,28" fill="url(#peelGrad)" />
-            {/* Subtle highlight on the fold edge */}
-            <line x1="10" y1="28" x2="28" y2="10" stroke="oklch(0.92 0.012 68)" strokeWidth="0.8" opacity="0.7" />
+            {/* Shadow cast by the peeled corner */}
+            <polygon points="0,0 32,0 32,28" fill="url(#peelShadowTR)" />
+            {/* The peeled corner itself */}
+            <polygon points="10,0 32,0 32,22" fill="url(#peelGradTR)" />
+            {/* Fold edge highlight */}
+            <line x1="10" y1="0" x2="32" y2="22" stroke="oklch(0.93 0.012 68)" strokeWidth="0.9" opacity="0.8" />
           </svg>
         </div>
       )}
