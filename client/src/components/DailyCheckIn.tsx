@@ -379,9 +379,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "greeting" && (
             <div className="flex gap-6 items-start">
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp"
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-retro-windows_4ed99208.png"
                 alt="illustration"
-                className="w-28 opacity-80 shrink-0"
+                className="w-28 opacity-90 shrink-0 rounded-lg"
               />
               <div className="pt-2">
                 <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>
