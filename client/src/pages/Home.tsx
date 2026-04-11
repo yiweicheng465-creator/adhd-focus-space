@@ -623,16 +623,16 @@ export default function Home() {
                   </RetroPageWrapper>
                 </div>
 
-                {/* ── session_tips.txt window — overlaps bottom-right, rotated ── */}
+                {/* ── session_tips.txt window — top-right corner, doesn't block timer ── */}
                 <div style={{
                   position: "absolute",
-                  bottom: 0,
-                  right: 0,
+                  top: -12,
+                  right: -16,
                   zIndex: 5,
-                  width: 260,
-                  transform: "rotate(2.5deg)",
-                  transformOrigin: "bottom right",
-                  boxShadow: "6px 6px 0 oklch(0.28 0.018 55 / 0.18)",
+                  width: 220,
+                  transform: "rotate(2deg)",
+                  transformOrigin: "top right",
+                  boxShadow: "5px 5px 0 oklch(0.28 0.018 55 / 0.18)",
                 }}>
                   <RetroPageWrapper title="session_tips.txt" sticker="leaf">
                     <div style={{ padding: "10px 14px 12px" }}>

@@ -16,6 +16,10 @@ if (typeof document !== "undefined" && !document.getElementById(STYLE_ID)) {
   const s = document.createElement("style");
   s.id = STYLE_ID;
   s.textContent = `
+    @keyframes cornerPeelPulse {
+      0%,100% { transform: scale(1) rotate(0deg); }
+      50%     { transform: scale(1.15) rotate(-3deg); }
+    }
     @keyframes tearRipRight {
       0%   { transform: translateX(0) rotate(0deg) scaleY(1); opacity: 1; }
       20%  { transform: translateX(10px) rotate(2deg) scaleY(0.98); opacity: 0.95; }
@@ -325,6 +329,25 @@ function TearStrip({
           {text}
         </span>
       </div>
+
+      {/* Corner peel on top-right of active strip */}
+      {isActive && (
+        <div style={{
+          position: "absolute",
+          top: 0,
+          right: 0,
+          width: 0,
+          height: 0,
+          borderStyle: "solid",
+          borderWidth: "0 18px 18px 0",
+          borderColor: `transparent oklch(0.88 0.022 68) transparent transparent`,
+          zIndex: 10,
+          filter: "drop-shadow(-2px 2px 2px oklch(0.40 0.018 60 / 0.25))",
+          animation: "cornerPeelPulse 3s ease-in-out infinite",
+          transformOrigin: "top right",
+          cursor: "default",
+        }} />
+      )}
 
       {/* Torn paper overlay — covers the strip, revealing content through the rip */}
       <TornPaperOverlay
