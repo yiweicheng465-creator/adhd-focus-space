@@ -1,12 +1,17 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Editorial Dashboard v5.0
+   ADHD FOCUS SPACE — Editorial Dashboard v6.0
    Layout:
      [TOP]    hero bar: illustration left + greeting/quick-capture/context right
-     [MIDDLE] 3-col grid: Focus Timer | Next Up (cute cards + checkboxes) | AI Command Center
+     [MIDDLE] 3-col grid: Focus Timer | Next Up (MIT + cute cards) | AI Command Center
      [BOTTOM] Today's wins/focus strip
+   Changes v6:
+     - MIT "What should I focus on?" button in task panel
+     - Glowing highlight on the MIT task
+     - Persistent AI chat history (last 10 msgs) in localStorage
+     - Softer, warmer UI palette — no harsh blues/dark boxes
    ============================================================ */
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { trpc } from "@/lib/trpc";
 import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
@@ -14,13 +19,16 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Goal } from "./Goals";
 import type { Agent } from "./AgentTracker";
-import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check, CheckCircle2 } from "lucide-react";
+import { Clock, Sparkles, Zap, Send, Bot, Loader2, Check, Star } from "lucide-react";
 import { PixelTrophy } from "@/components/PixelIcons";
 import { Streamdown } from "streamdown";
 import { toast } from "sonner";
 
 const SUNSET_BLOB = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-sunset-blob_5606b6c8.png";
 const PERSON_IMG  = "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-person-Bt8k6YePvnPHSwcK8XtieV.webp";
+
+const CHAT_HISTORY_KEY = "adhd-ai-chat-history";
+const MAX_CHAT_HISTORY = 10;
 
 interface DashboardProps {
   tasks: Task[];
@@ -53,13 +61,17 @@ function getGreeting() {
   return "Good evening";
 }
 
-const TC        = "oklch(0.52 0.14 35)";
-const CREAM     = "oklch(0.985 0.008 80)";
-const BORDER    = "oklch(0.87 0.014 75)";
-const INK       = "oklch(0.18 0.01 60)";
-const MUTED     = "oklch(0.52 0.015 70)";
-const AI_BG     = "oklch(0.975 0.010 260 / 0.45)";
-const AI_BORDER = "oklch(0.72 0.06 260 / 0.35)";
+/* ── Warm editorial palette ── */
+const TC        = "oklch(0.52 0.14 35)";   // terracotta accent
+const CREAM     = "oklch(0.985 0.008 80)"; // warm cream background
+const BORDER    = "oklch(0.87 0.014 75)";  // soft warm border
+const INK       = "oklch(0.22 0.01 60)";   // near-black ink
+const MUTED     = "oklch(0.55 0.015 70)";  // warm muted text
+// AI panel: warm sand tones instead of cold blue
+const AI_BG     = "oklch(0.978 0.010 75 / 0.70)";  // warm sand
+const AI_BORDER = "oklch(0.82 0.020 70 / 0.60)";   // warm sand border
+const AI_MSG_BG = "oklch(0.965 0.012 75 / 0.80)";  // slightly deeper sand for AI messages
+const AI_ACCENT = "oklch(0.48 0.12 35)";            // terracotta for AI header/icons
 
 function CornerMark() {
   return (
@@ -71,10 +83,10 @@ function CornerMark() {
 }
 
 /* Priority dot config */
-const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string }> = {
-  urgent: { color: "oklch(0.55 0.16 20)",  bg: "oklch(0.55 0.16 20 / 0.10)",  label: "!" },
-  focus:  { color: "oklch(0.52 0.14 35)",  bg: "oklch(0.52 0.14 35 / 0.10)",  label: "★" },
-  normal: { color: "oklch(0.60 0.08 145)", bg: "oklch(0.60 0.08 145 / 0.10)", label: "·" },
+const PRIORITY_DOTS: Record<string, { color: string; bg: string; glow: string }> = {
+  urgent: { color: "oklch(0.55 0.16 20)",  bg: "oklch(0.55 0.16 20 / 0.08)",  glow: "oklch(0.55 0.16 20 / 0.35)" },
+  focus:  { color: "oklch(0.52 0.14 35)",  bg: "oklch(0.52 0.14 35 / 0.08)",  glow: "oklch(0.52 0.14 35 / 0.35)" },
+  normal: { color: "oklch(0.60 0.08 145)", bg: "oklch(0.60 0.08 145 / 0.06)", glow: "oklch(0.60 0.08 145 / 0.30)" },
 };
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -92,8 +104,29 @@ function AICommandPanel({
   onAgentCreate?: (a: Agent) => void;
   onWinCreate?: (w: Win) => void;
 }) {
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  // Load persisted history from localStorage
+  const [messages, setMessages] = useState<ChatMessage[]>(() => {
+    try {
+      const saved = localStorage.getItem(CHAT_HISTORY_KEY);
+      if (saved) return JSON.parse(saved) as ChatMessage[];
+    } catch { /* ignore */ }
+    return [];
+  });
   const [input, setInput] = useState("");
+  const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Persist last MAX_CHAT_HISTORY messages
+  useEffect(() => {
+    try {
+      const toSave = messages.slice(-MAX_CHAT_HISTORY);
+      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(toSave));
+    } catch { /* ignore */ }
+  }, [messages]);
+
+  // Auto-scroll to bottom on new messages
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const commandMutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
@@ -171,10 +204,10 @@ function AICommandPanel({
     }
   };
 
-  const send = () => {
-    const text = input.trim();
-    if (!text || commandMutation.isPending) return;
-    const newMessages: ChatMessage[] = [...messages, { role: "user", content: text }];
+  const sendMessage = (text?: string) => {
+    const content = (text ?? input).trim();
+    if (!content || commandMutation.isPending) return;
+    const newMessages: ChatMessage[] = [...messages, { role: "user", content }];
     setMessages(newMessages);
     setInput("");
     commandMutation.mutate({
@@ -190,52 +223,55 @@ function AICommandPanel({
   const COMMANDS = [
     "Add task: review the PR, urgent",
     "Log a win: shipped the feature",
-    "Create a goal: finish the project",
+    "Set a goal: finish the project",
     "How should I prioritise today?",
   ];
+
+  const hasMessages = messages.length > 0;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100%", minHeight: 0 }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexShrink: 0 }}>
-        <Bot size={13} style={{ color: "oklch(0.48 0.12 260)" }} />
-        <p className="editorial-label" style={{ color: "oklch(0.38 0.08 260)" }}>AI Assistant</p>
-        <span style={{ fontSize: 9, color: MUTED, marginLeft: "auto", fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>
-          TASKS · GOALS · AGENTS · WINS
-        </span>
+        <Bot size={13} style={{ color: AI_ACCENT }} />
+        <p className="editorial-label" style={{ color: AI_ACCENT }}>AI Assistant</p>
+        {hasMessages && (
+          <button
+            onClick={() => {
+              setMessages([]);
+              localStorage.removeItem(CHAT_HISTORY_KEY);
+            }}
+            style={{ marginLeft: "auto", fontSize: 9, color: MUTED, background: "none", border: "none", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "'DM Mono', monospace" }}
+          >
+            CLEAR
+          </button>
+        )}
+        {!hasMessages && (
+          <span style={{ fontSize: 9, color: MUTED, marginLeft: "auto", fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>
+            TASKS · GOALS · AGENTS · WINS
+          </span>
+        )}
       </div>
 
       {/* Messages */}
-      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 8, minHeight: 0, paddingRight: 2 }}>
-        {messages.length === 0 ? (
+      <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 7, minHeight: 0, paddingRight: 2 }}>
+        {!hasMessages ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.5, marginBottom: 4 }}>
+            <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginBottom: 4 }}>
               Tell me what you need — I can create tasks, set goals, launch agents, log wins, or just help you think.
             </p>
             {COMMANDS.map((c) => (
               <button
                 key={c}
-                onClick={() => {
-                  setInput(c);
-                  setTimeout(() => {
-                    const newMessages: ChatMessage[] = [{ role: "user", content: c }];
-                    setMessages(newMessages);
-                    setInput("");
-                    commandMutation.mutate({
-                      messages: newMessages,
-                      tasks: tasks.map(t => ({ id: t.id, text: t.text, priority: t.priority, context: t.context, done: t.done })),
-                      goals: goals.map(g => ({ id: g.id, text: g.text, progress: g.progress, context: g.context })),
-                      agents: agents.map(a => ({ id: a.id, name: a.name, task: a.task, status: a.status, context: a.context })),
-                      focusSessions, mood,
-                    });
-                  }, 0);
-                }}
+                onClick={() => sendMessage(c)}
                 style={{
                   textAlign: "left", fontSize: 11,
-                  color: "oklch(0.40 0.09 260)",
-                  background: "oklch(0.975 0.010 260 / 0.45)",
+                  color: "oklch(0.40 0.08 55)",
+                  background: "oklch(0.965 0.012 75 / 0.70)",
                   border: `1px solid ${AI_BORDER}`,
-                  padding: "5px 10px", cursor: "pointer", lineHeight: 1.4,
+                  borderRadius: 6,
+                  padding: "6px 11px", cursor: "pointer", lineHeight: 1.4,
+                  transition: "background 0.15s",
                 }}
               >
                 {c}
@@ -247,10 +283,14 @@ function AICommandPanel({
             <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: m.role === "user" ? "flex-end" : "flex-start" }}>
               <div
                 style={{
-                  maxWidth: "92%", padding: "6px 10px", fontSize: 12, lineHeight: 1.5,
+                  maxWidth: "92%", padding: "7px 11px", fontSize: 12, lineHeight: 1.55,
                   color: m.role === "user" ? CREAM : INK,
-                  background: m.role === "user" ? TC : "oklch(0.975 0.010 260 / 0.55)",
+                  background: m.role === "user"
+                    ? "oklch(0.50 0.13 35)"   // warm terracotta for user
+                    : AI_MSG_BG,              // warm sand for AI
                   border: m.role === "user" ? "none" : `1px solid ${AI_BORDER}`,
+                  borderRadius: m.role === "user" ? "12px 12px 3px 12px" : "3px 12px 12px 12px",
+                  boxShadow: m.role === "user" ? "none" : "0 1px 3px oklch(0 0 0 / 0.04)",
                 }}
               >
                 {m.role === "assistant" ? <Streamdown>{m.content}</Streamdown> : m.content}
@@ -260,36 +300,41 @@ function AICommandPanel({
         )}
         {commandMutation.isPending && (
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-            <Loader2 size={11} style={{ color: "oklch(0.48 0.12 260)", animation: "spin 1s linear infinite" }} />
+            <Loader2 size={11} style={{ color: AI_ACCENT, animation: "spin 1s linear infinite" }} />
             <span style={{ fontSize: 11, color: MUTED }}>Working on it…</span>
           </div>
         )}
+        <div ref={bottomRef} />
       </div>
 
       {/* Input */}
       <div
         style={{
           display: "flex", alignItems: "center", gap: 6, marginTop: 8,
-          border: `1px solid ${AI_BORDER}`, background: AI_BG,
-          padding: "5px 8px", flexShrink: 0,
+          border: `1px solid ${AI_BORDER}`,
+          background: "oklch(0.975 0.010 75 / 0.85)",
+          borderRadius: 8,
+          padding: "6px 10px", flexShrink: 0,
         }}
       >
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
           placeholder="Add task, set goal, log win…"
           style={{ flex: 1, fontSize: 12, background: "transparent", border: "none", outline: "none", color: INK }}
         />
         <button
-          onClick={send}
+          onClick={() => sendMessage()}
           disabled={!input.trim() || commandMutation.isPending}
           style={{
-            background: input.trim() ? "oklch(0.48 0.12 260)" : "transparent",
+            background: input.trim() ? "oklch(0.50 0.13 35)" : "transparent",
             border: `1px solid ${input.trim() ? "transparent" : AI_BORDER}`,
             color: input.trim() ? CREAM : MUTED,
-            padding: "4px 7px", cursor: input.trim() ? "pointer" : "default",
+            padding: "4px 8px", cursor: input.trim() ? "pointer" : "default",
             display: "flex", alignItems: "center",
+            borderRadius: 6,
+            transition: "all 0.15s",
           }}
         >
           <Send size={11} />
@@ -307,6 +352,8 @@ export function Dashboard({
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const [completing, setCompleting] = useState<string | null>(null);
+  const [mitTaskId, setMitTaskId] = useState<string | null>(null);
+  const [mitLoading, setMitLoading] = useState(false);
   const now = new Date();
 
   const contextTasks = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
@@ -321,10 +368,54 @@ export function Dashboard({
 
   const handleCheck = (taskId: string) => {
     setCompleting(taskId);
+    if (taskId === mitTaskId) setMitTaskId(null);
     setTimeout(() => {
       onTaskToggle?.(taskId);
       setCompleting(null);
     }, 350);
+  };
+
+  const mitMutation = trpc.ai.command.useMutation({
+    onSuccess: (data) => {
+      setMitLoading(false);
+      // Try to find the MIT task by matching text in the reply
+      const reply = data.reply.toLowerCase();
+      const found = activeTasks.find(t =>
+        reply.includes(t.text.toLowerCase().slice(0, 20))
+      );
+      if (found) {
+        setMitTaskId(found.id);
+        toast.success("MIT highlighted!", { duration: 2000 });
+      } else if (activeTasks.length > 0) {
+        // Fallback: highlight the first urgent/focus task, or just the first
+        const priority = activeTasks.find(t => t.priority === "urgent") ??
+                         activeTasks.find(t => t.priority === "focus") ??
+                         activeTasks[0];
+        setMitTaskId(priority.id);
+        toast.success("Most important task highlighted!", { duration: 2000 });
+      }
+    },
+    onError: () => {
+      setMitLoading(false);
+      toast.error("Couldn't determine MIT. Try again.");
+    },
+  });
+
+  const handleMIT = () => {
+    if (activeTasks.length === 0) return;
+    setMitLoading(true);
+    setMitTaskId(null);
+    mitMutation.mutate({
+      messages: [{
+        role: "user",
+        content: `Given my current tasks, what is the single most important task I should focus on right now? My tasks: ${activeTasks.map(t => `"${t.text}" (${t.priority}, ${t.context})`).join(", ")}. Reply with a short sentence naming the task.`,
+      }],
+      tasks: activeTasks.map(t => ({ id: t.id, text: t.text, priority: t.priority, context: t.context, done: t.done })),
+      goals: goals.map(g => ({ id: g.id, text: g.text, progress: g.progress, context: g.context })),
+      agents: [],
+      focusSessions,
+      mood,
+    });
   };
 
   return (
@@ -357,7 +448,7 @@ export function Dashboard({
                   {getGreeting()}
                 </h1>
                 {blockStreak > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: "oklch(0.55 0.13 35 / 0.10)", border: "1px solid oklch(0.55 0.13 35 / 0.30)", padding: "2px 8px" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: "oklch(0.55 0.13 35 / 0.10)", border: "1px solid oklch(0.55 0.13 35 / 0.30)", padding: "2px 8px", borderRadius: 20 }}>
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill="oklch(0.55 0.13 35)" opacity="0.9" /></svg>
                     <span style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.10 35)", fontFamily: "'JetBrains Mono', monospace" }}>{blockStreak}d streak</span>
                   </div>
@@ -366,7 +457,7 @@ export function Dashboard({
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
               {/* Quick capture */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80 / 0.85)", backdropFilter: "blur(4px)", padding: "5px 12px", flex: "1 1 180px", maxWidth: 300 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.012 80 / 0.85)", backdropFilter: "blur(4px)", padding: "5px 12px", flex: "1 1 180px", maxWidth: 300, borderRadius: 8 }}>
                 <Zap size={11} style={{ color: TC, flexShrink: 0 }} />
                 <input
                   value={quickCapture}
@@ -382,7 +473,7 @@ export function Dashboard({
                   placeholder="What's on your mind?"
                   style={{ flex: 1, fontSize: 12, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
-                <kbd style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED }}>↵</kbd>
+                <kbd style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED, borderRadius: 3 }}>↵</kbd>
               </div>
               {/* Context switcher */}
               <div style={{ flex: "1 1 auto" }}>
@@ -397,7 +488,7 @@ export function Dashboard({
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, minHeight: 0 }}>
 
         {/* Col 1: Focus Timer */}
-        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10, flexShrink: 0 }}>
             <Clock size={12} style={{ color: TC }} />
             <p className="editorial-label">Focus Timer</p>
@@ -407,15 +498,40 @@ export function Dashboard({
           </div>
         </div>
 
-        {/* Col 2: Next Up — cute cards with checkboxes */}
-        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10, flexShrink: 0 }}>
+        {/* Col 2: Next Up — cute cards with checkboxes + MIT button */}
+        <div style={{ border: `1px solid ${BORDER}`, background: CREAM, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8, flexShrink: 0 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <Zap size={12} style={{ color: TC }} />
               <p className="editorial-label">Next Up</p>
             </div>
             <button className="m-btn-link" onClick={() => onNavigate("tasks")}>All tasks</button>
           </div>
+
+          {/* MIT button */}
+          {activeTasks.length > 0 && (
+            <button
+              onClick={handleMIT}
+              disabled={mitLoading}
+              style={{
+                display: "flex", alignItems: "center", gap: 6, marginBottom: 8,
+                padding: "5px 10px", cursor: mitLoading ? "default" : "pointer",
+                background: mitTaskId ? "oklch(0.52 0.14 35 / 0.10)" : "oklch(0.965 0.012 75 / 0.70)",
+                border: `1px solid ${mitTaskId ? "oklch(0.52 0.14 35 / 0.40)" : BORDER}`,
+                borderRadius: 20, transition: "all 0.2s", flexShrink: 0,
+                width: "100%",
+              }}
+            >
+              {mitLoading ? (
+                <Loader2 size={11} style={{ color: TC, animation: "spin 1s linear infinite", flexShrink: 0 }} />
+              ) : (
+                <Star size={11} style={{ color: TC, flexShrink: 0 }} />
+              )}
+              <span style={{ fontSize: 11, color: mitTaskId ? TC : MUTED, fontFamily: "'DM Sans', sans-serif" }}>
+                {mitLoading ? "Finding your MIT…" : mitTaskId ? "MIT highlighted ✓" : "What should I focus on?"}
+              </span>
+            </button>
+          )}
 
           <div style={{ flex: 1, overflowY: "auto", minHeight: 0, display: "flex", flexDirection: "column", gap: 5 }}>
             {activeTasks.length === 0 ? (
@@ -433,6 +549,7 @@ export function Dashboard({
                 const pd = PRIORITY_DOTS[t.priority] ?? PRIORITY_DOTS.normal;
                 const ctxColor = getContextConfig(t.context).color;
                 const isCompleting = completing === t.id;
+                const isMIT = mitTaskId === t.id;
                 const cleanText = t.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || t.text;
                 return (
                   <div
@@ -440,11 +557,18 @@ export function Dashboard({
                     style={{
                       display: "flex", alignItems: "center", gap: 8,
                       padding: "7px 10px",
-                      background: isCompleting ? "oklch(0.60 0.08 145 / 0.08)" : pd.bg,
-                      border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : pd.color + "30"}`,
-                      borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
+                      background: isCompleting
+                        ? "oklch(0.60 0.08 145 / 0.08)"
+                        : isMIT
+                          ? "oklch(0.52 0.14 35 / 0.07)"
+                          : pd.bg,
+                      border: `1px solid ${isCompleting ? "oklch(0.60 0.08 145 / 0.30)" : isMIT ? "oklch(0.52 0.14 35 / 0.40)" : pd.color + "30"}`,
+                      borderLeft: `3px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
+                      borderRadius: 6,
                       opacity: isCompleting ? 0.6 : 1,
                       transition: "all 0.3s ease",
+                      // Glowing border for MIT
+                      boxShadow: isMIT ? `0 0 0 2px oklch(0.52 0.14 35 / 0.18), 0 2px 8px oklch(0.52 0.14 35 / 0.12)` : "none",
                     }}
                   >
                     {/* Checkbox */}
@@ -453,7 +577,7 @@ export function Dashboard({
                       title="Mark done"
                       style={{
                         width: 18, height: 18, flexShrink: 0, borderRadius: "50%",
-                        border: `1.5px solid ${isCompleting ? "oklch(0.60 0.08 145)" : pd.color}`,
+                        border: `1.5px solid ${isCompleting ? "oklch(0.60 0.08 145)" : isMIT ? TC : pd.color}`,
                         background: isCompleting ? "oklch(0.60 0.08 145 / 0.15)" : "transparent",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         cursor: "pointer", transition: "all 0.2s",
@@ -463,12 +587,17 @@ export function Dashboard({
                     </button>
 
                     {/* Task text */}
-                    <p style={{ fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", color: INK, textDecoration: isCompleting ? "line-through" : "none" }}>
+                    <p style={{
+                      fontSize: 12, flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                      color: INK, textDecoration: isCompleting ? "line-through" : "none",
+                      fontWeight: isMIT ? 600 : 400,
+                    }}>
+                      {isMIT && <Star size={9} style={{ color: TC, marginRight: 4, display: "inline", verticalAlign: "middle" }} />}
                       {cleanText}
                     </p>
 
                     {/* Context badge */}
-                    <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em" }}>
+                    <span style={{ fontSize: 9, padding: "1px 5px", flexShrink: 0, color: ctxColor, background: ctxColor + "18", border: `1px solid ${ctxColor}30`, fontFamily: "'DM Sans', sans-serif", letterSpacing: "0.05em", borderRadius: 4 }}>
                       {t.context}
                     </span>
                   </div>
@@ -486,8 +615,8 @@ export function Dashboard({
           </div>
         </div>
 
-        {/* Col 3: AI Command Center */}
-        <div style={{ border: `1px solid ${AI_BORDER}`, background: AI_BG, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
+        {/* Col 3: AI Command Center — warm sand palette */}
+        <div style={{ border: `1px solid ${AI_BORDER}`, background: AI_BG, padding: "14px 16px", display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", borderRadius: 8 }}>
           <AICommandPanel
             tasks={tasks}
             goals={goals}
@@ -505,7 +634,7 @@ export function Dashboard({
 
       {/* ── BOTTOM: Today's wins + focus strip ── */}
       {(todayWins.length > 0 || focusSessions > 0) && (
-        <div style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+        <div style={{ border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: "oklch(0.65 0.12 75 / 0.04)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderRadius: 8 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
             <Sparkles size={11} style={{ color: "oklch(0.55 0.12 75)" }} />
             <p className="editorial-label" style={{ fontSize: 9 }}>Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}</p>
@@ -516,7 +645,7 @@ export function Dashboard({
             </div>
           )}
           {todayWins.map((w) => (
-            <div key={w.id} style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 9px", border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: CREAM, color: INK, fontSize: 11 }}>
+            <div key={w.id} style={{ display: "flex", alignItems: "center", gap: 5, padding: "3px 9px", border: `1px solid oklch(0.65 0.12 75 / 0.3)`, background: CREAM, color: INK, fontSize: 11, borderRadius: 6 }}>
               <PixelTrophy size={10} color="oklch(0.55 0.12 75)" />
               <span>{w.text}</span>
             </div>

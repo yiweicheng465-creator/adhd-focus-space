@@ -37,3 +37,6 @@
 - [x] Redesign dashboard task list cards to look cuter and more polished
 - [x] Add quick-complete checkboxes on dashboard Next Up task rows
 - [x] Upgrade dashboard AI chat to full command center (create tasks, agents, goals, wins via natural language)
+- [x] Add MIT "What should I focus on?" button in task panel with glowing border on top task
+- [x] Persist AI chat history (last 10 messages) to localStorage
+- [x] Refine dashboard UI: softer chat panel colors, muted action buttons, warmer overall palette
