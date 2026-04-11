@@ -530,6 +530,16 @@ input[type="radio"]:not(:disabled) {
   transition: box-shadow 0.08s, transform 0.08s;
   margin-bottom: 5px;
 }
+/* Dotted vertical connector line between rows */
+.retro-task-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 18px;
+  bottom: -6px;
+  width: 1px;
+  height: 6px;
+  border-left: 1px dashed oklch(0.72 0.018 68 / 0.55);
+}
 .retro-task-row:hover {
   box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
   transform: translate(-1px, -1px);
