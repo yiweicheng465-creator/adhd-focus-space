@@ -62,3 +62,8 @@
 - [x] Remove MIT highlight feature from dashboard (button, glow, "Start 25 min focus" button, mitTaskId state)
 - [x] Sort dashboard task list by urgency: urgent > focus > normal > someday
 - [x] Color-code task cards by priority (distinct colors per level, clearly visible)
+
+## Hero Restyle + Stickers
+- [x] Restyle hero banner: grid paper bg, retro window chrome, warmer palette
+- [x] Add decorative SVG stickers to hero (plant, moon, star, leaf, cloud)
+- [x] Add subtle sticker accents to dashboard panels

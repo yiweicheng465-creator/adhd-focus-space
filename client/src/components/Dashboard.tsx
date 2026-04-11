@@ -416,21 +416,101 @@ export function Dashboard({
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
 
-      {/* ── HERO: illustration left + greeting/controls right ── */}
-      <div className="relative overflow-hidden" style={{ border: `1px solid ${BORDER}`, minHeight: 140 }}>
-        {/* Sunset background */}
-        <div className="absolute inset-0" style={{ backgroundImage: `url(${SUNSET_BLOB})`, backgroundSize: "cover", backgroundPosition: "center 40%", opacity: 0.18 }} />
-        <div className="absolute inset-0" style={{ background: `linear-gradient(to right, oklch(0.985 0.008 80 / 0.94) 40%, oklch(0.985 0.008 80 / 0.65) 100%)` }} />
-        {/* Corner marks */}
-        <div className="absolute top-2 left-2"><CornerMark /></div>
-        <div className="absolute top-2 right-2" style={{ transform: "rotate(90deg)" }}><CornerMark /></div>
-        <div className="absolute bottom-2 left-2" style={{ transform: "rotate(-90deg)" }}><CornerMark /></div>
-        <div className="absolute bottom-2 right-2" style={{ transform: "rotate(180deg)" }}><CornerMark /></div>
+      {/* ── HERO: Retro Lo-Fi Desktop Window ── */}
+      <div className="retro-window relative overflow-hidden" style={{ minHeight: 148 }}>
+        {/* Grid paper background */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: `
+            linear-gradient(oklch(0.78 0.022 68 / 0.18) 1px, transparent 1px),
+            linear-gradient(90deg, oklch(0.78 0.022 68 / 0.18) 1px, transparent 1px)
+          `,
+          backgroundSize: "20px 20px",
+          backgroundPosition: "0 0",
+        }} />
+        {/* Warm parchment overlay */}
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, oklch(0.985 0.010 78 / 0.92) 0%, oklch(0.978 0.014 72 / 0.85) 100%)" }} />
 
-        <div className="relative flex items-stretch">
+        {/* ── Retro title bar ── */}
+        <div className="retro-titlebar relative z-10">
+          <span>dashboard.exe</span>
+          <div className="retro-titlebar-buttons">
+            <span className="retro-titlebar-btn">_</span>
+            <span className="retro-titlebar-btn">□</span>
+            <span className="retro-titlebar-btn">✕</span>
+          </div>
+        </div>
+
+        {/* ── Decorative SVG Stickers ── */}
+        {/* Crescent moon — top right */}
+        <div className="absolute" style={{ top: 28, right: 18, opacity: 0.55, transform: "rotate(12deg)" }}>
+          <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
+            <path d="M28 20c0 8.837-7.163 16-16 16a16.07 16.07 0 0 1-4-.504C11.84 37.1 15.78 38 20 38c9.941 0 18-8.059 18-18S29.941 2 20 2c-4.22 0-8.16.9-11 2.504A16.07 16.07 0 0 1 13 4c8.837 0 15 7.163 15 16z" fill="oklch(0.68 0.08 55)" />
+            <circle cx="22" cy="9" r="1.2" fill="oklch(0.78 0.06 60)" />
+            <circle cx="30" cy="14" r="0.8" fill="oklch(0.78 0.06 60)" />
+            <circle cx="26" cy="5" r="0.6" fill="oklch(0.78 0.06 60)" />
+          </svg>
+        </div>
+        {/* Small stars cluster — top right area */}
+        <div className="absolute" style={{ top: 32, right: 62, opacity: 0.45 }}>
+          <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
+            <path d="M4 2 L4.6 3.8 L6.5 3.8 L5 4.9 L5.6 6.7 L4 5.6 L2.4 6.7 L3 4.9 L1.5 3.8 L3.4 3.8 Z" fill="oklch(0.62 0.10 50)" />
+            <path d="M14 8 L14.4 9.2 L15.7 9.2 L14.7 10 L15.1 11.2 L14 10.4 L12.9 11.2 L13.3 10 L12.3 9.2 L13.6 9.2 Z" fill="oklch(0.62 0.10 50)" />
+            <path d="M23 2 L23.3 3 L24.3 3 L23.5 3.6 L23.8 4.6 L23 4 L22.2 4.6 L22.5 3.6 L21.7 3 L22.7 3 Z" fill="oklch(0.62 0.10 50)" />
+          </svg>
+        </div>
+        {/* Potted plant — bottom right */}
+        <div className="absolute" style={{ bottom: 6, right: 22, opacity: 0.50 }}>
+          <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
+            {/* pot */}
+            <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="oklch(0.62 0.10 35)" />
+            <rect x="8" y="28" width="20" height="4" rx="2" fill="oklch(0.55 0.12 32)" />
+            {/* stem */}
+            <line x1="18" y1="28" x2="18" y2="14" stroke="oklch(0.48 0.10 145)" strokeWidth="1.5" strokeLinecap="round" />
+            {/* leaves */}
+            <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="oklch(0.52 0.12 145)" />
+            <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="oklch(0.48 0.10 145)" />
+            <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.55 0.11 148)" />
+          </svg>
+        </div>
+        {/* Sticky note — bottom left area */}
+        <div className="absolute" style={{ bottom: 10, left: 148, opacity: 0.70, transform: "rotate(-3deg)" }}>
+          <div style={{
+            background: "oklch(0.96 0.030 88)",
+            border: "1px solid oklch(0.82 0.040 80)",
+            padding: "5px 9px",
+            fontSize: 8,
+            fontFamily: "'Space Mono', monospace",
+            color: "oklch(0.42 0.06 55)",
+            boxShadow: "1px 2px 4px oklch(0.60 0.04 60 / 0.18)",
+            lineHeight: 1.5,
+            minWidth: 90,
+          }}>
+            be kind to yourself ✦
+          </div>
+        </div>
+        {/* Leaf sprig — left edge */}
+        <div className="absolute" style={{ top: 38, left: 148, opacity: 0.35, transform: "rotate(-15deg)" }}>
+          <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
+            <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.50 0.10 145)" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.54 0.11 145)" />
+            <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="oklch(0.50 0.10 145)" />
+          </svg>
+        </div>
+        {/* Cloud puff — far right, mid height */}
+        <div className="absolute" style={{ top: 70, right: 8, opacity: 0.22 }}>
+          <svg width="44" height="22" viewBox="0 0 44 22" fill="none">
+            <ellipse cx="22" cy="14" rx="18" ry="8" fill="oklch(0.70 0.06 55)" />
+            <ellipse cx="14" cy="12" rx="10" ry="7" fill="oklch(0.72 0.05 58)" />
+            <ellipse cx="30" cy="11" rx="9" ry="6" fill="oklch(0.72 0.05 58)" />
+            <ellipse cx="22" cy="9" rx="8" ry="6" fill="oklch(0.74 0.04 60)" />
+          </svg>
+        </div>
+
+        {/* ── Content ── */}
+        <div className="relative z-10 flex items-stretch" style={{ minHeight: 108 }}>
           {/* Left: illustration */}
           <div className="hidden md:flex w-36 shrink-0 items-end justify-center pb-0 pt-3" style={{ borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" className="object-contain w-full" style={{ maxHeight: 140, opacity: 0.72 }} />
+            <img src={PERSON_IMG} alt="thinking person" className="object-contain w-full" style={{ maxHeight: 130, opacity: 0.72 }} />
           </div>
           {/* Right: greeting + controls */}
           <div className="flex-1 px-6 py-4 flex flex-col gap-3">
@@ -486,6 +566,12 @@ export function Dashboard({
         <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
           <div className="retro-titlebar">
             <span>focus_timer.exe</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
+              {/* star sticker */}
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.55 }}>
+                <path d="M6 1 L7 4.2 L10.5 4.2 L7.8 6.3 L8.8 9.5 L6 7.4 L3.2 9.5 L4.2 6.3 L1.5 4.2 L5 4.2 Z" fill="oklch(0.62 0.10 50)" />
+              </svg>
+            </div>
             <div className="retro-titlebar-buttons">
               <span className="retro-titlebar-btn">_</span>
               <span className="retro-titlebar-btn">□</span>
@@ -501,6 +587,14 @@ export function Dashboard({
         <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
           <div className="retro-titlebar">
             <span>next_up.txt</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
+              {/* leaf sticker */}
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ opacity: 0.55 }}>
+                <line x1="5" y1="11" x2="5" y2="2" stroke="oklch(0.48 0.10 145)" strokeWidth="1" strokeLinecap="round" />
+                <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="oklch(0.52 0.12 145)" />
+                <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="oklch(0.48 0.10 145)" />
+              </svg>
+            </div>
             <div className="retro-titlebar-buttons">
               <span className="retro-titlebar-btn">_</span>
               <span className="retro-titlebar-btn">□</span>
@@ -609,6 +703,12 @@ export function Dashboard({
         <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
           <div className="retro-titlebar">
             <span>ai_assistant.app</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
+              {/* sparkle sticker */}
+              <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.55 }}>
+                <path d="M6 0 L6.5 5 L12 6 L6.5 7 L6 12 L5.5 7 L0 6 L5.5 5 Z" fill="oklch(0.62 0.10 50)" />
+              </svg>
+            </div>
             <div className="retro-titlebar-buttons">
               <span className="retro-titlebar-btn">_</span>
               <span className="retro-titlebar-btn">□</span>
