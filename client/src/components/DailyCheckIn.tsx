@@ -378,9 +378,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
           {step === "greeting" && (
             <div className="flex gap-6 items-start">
               <img
-                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/lofi-ds-ouija_c3b2a30f.png"
-                alt="illustration"
-                className="w-28 opacity-90 shrink-0" style={{ borderRadius: 16 }}
+                src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/stamp-mewtwo_2f86b4c1.png"
+                alt="Kanto stamp — Mewtwo"
+                className="w-32 shrink-0" style={{ borderRadius: 0, display: "block" }}
               />
               <div className="pt-2">
                 <p className="text-base leading-relaxed" style={{ color: "oklch(0.35 0.01 60)" }}>
@@ -644,9 +644,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
             <>
               <div className="flex gap-6 items-start">
                 <img
-                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/adhd-editorial-brain-AsWVT7JWa9jdswJaKeJWzj.webp"
-                  alt="illustration"
-                  className="w-20 opacity-80 shrink-0"
+                  src="https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/stamp-mew_8d91d86b.png"
+                  alt="Kanto stamp — Mew"
+                  className="w-28 shrink-0" style={{ borderRadius: 0, display: "block" }}
                 />
                 <div className="pt-1 space-y-1.5 text-sm" style={{ color: "oklch(0.35 0.01 60)" }}>
                   {mood && <p>Mood: <span className="font-medium">{MOODS.find((m) => m.value === mood)?.label}</span></p>}
