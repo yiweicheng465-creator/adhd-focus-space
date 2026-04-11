@@ -467,8 +467,8 @@ export function Dashboard({
             <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.55 0.11 148)" />
           </svg>
         </div>
-        {/* Sticky note — bottom left area */}
-        <div className="absolute" style={{ bottom: 10, left: 148, opacity: 0.70, transform: "rotate(-3deg)" }}>
+        {/* Sticky note — bottom right corner */}
+        <div className="absolute" style={{ bottom: 10, right: 10, opacity: 0.70, transform: "rotate(2deg)", zIndex: 15 }}>
           <div style={{
             background: "oklch(0.96 0.030 88)",
             border: "1px solid oklch(0.82 0.040 80)",
@@ -505,9 +505,9 @@ export function Dashboard({
         <div className="relative z-10 flex items-stretch" style={{ minHeight: 108 }}>
           {/* Cat sticker: blue lying cat — bottom-right of hero */}
           <img src={CAT_BLUE} alt="" aria-hidden="true" style={{ position: "absolute", bottom: -18, right: 10, width: 72, opacity: 0.45, pointerEvents: "none", zIndex: 20, transform: "scaleX(-1)" }} />
-          {/* Left: illustration */}
-          <div className="hidden md:flex w-36 shrink-0 items-end justify-center pb-0 pt-3" style={{ borderRight: `1px solid ${BORDER}` }}>
-            <img src={PERSON_IMG} alt="thinking person" className="object-cover w-full" style={{ maxHeight: 120, opacity: 0.92, borderRadius: 16 }} />
+          {/* Left: illustration — fills full square */}
+          <div className="hidden md:flex w-36 shrink-0 overflow-hidden" style={{ borderRight: `1px solid ${BORDER}` }}>
+            <img src={PERSON_IMG} alt="thinking person" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", opacity: 0.95, display: "block" }} />
           </div>
           {/* Right: greeting + controls */}
           <div className="flex-1 px-6 py-4 flex flex-col gap-3">
