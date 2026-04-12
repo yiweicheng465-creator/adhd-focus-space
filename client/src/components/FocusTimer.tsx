@@ -555,9 +555,10 @@ interface FocusTimerProps {
   onSessionComplete?: () => void;
   onBlockComplete?: () => void;
   onQuit?: () => void;
+  fillHeight?: boolean;
 }
 
-export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: FocusTimerProps) {
+export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHeight }: FocusTimerProps) {
   const {
     mode, phase, running, remaining, sessions, quitCount,
     durations, strips, stripStates,
@@ -578,6 +579,30 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
     window.addEventListener("adhd-start-mit-focus", handler);
     return () => window.removeEventListener("adhd-start-mit-focus", handler);
   }, []);
+
+  // ── Pet growth counter (all-time sessions, animates up) ──────────────────────
+  const getTotalSessions = () => {
+    try {
+      const raw = localStorage.getItem("adhd-focus-session-list");
+      if (!raw) return sessions; // fall back to current block sessions
+      const list = JSON.parse(raw) as unknown[];
+      return Array.isArray(list) ? list.length : sessions;
+    } catch { return sessions; }
+  };
+  const targetGrowth = Math.min(getTotalSessions(), 100);
+  const [displayedGrowth, setDisplayedGrowth] = useState(targetGrowth);
+  // Animate counter up whenever targetGrowth increases
+  useEffect(() => {
+    if (displayedGrowth >= targetGrowth) return;
+    const step = () => {
+      setDisplayedGrowth((prev) => {
+        if (prev >= targetGrowth) return prev;
+        return prev + 1;
+      });
+    };
+    const id = setInterval(step, 40);
+    return () => clearInterval(id);
+  }, [targetGrowth]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Register callbacks
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -758,6 +783,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
       border: `3px solid ${DARK}`,
       boxShadow: `4px 4px 0 ${DARK}`,
       overflow: "hidden",
+      ...(fillHeight ? { display: "flex", flexDirection: "column", height: "100%" } : {}),
     }}>
 
       {/* ── Inner window title bar: CYBER_PET.EXE ── */}
@@ -958,7 +984,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
 
       {/* ── Main timer scene (idle / running / paused) ── */}
       {showMainScene && (
-        <>
+        <div style={{ display: "flex", flexDirection: "column", ...(fillHeight ? { flex: 1, minHeight: 0 } : {}) }}>
           {/* Pet screen */}
           <div style={{
             background: SCREEN_BG,
@@ -1013,6 +1039,24 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
                 overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
               }}>★ {mitLabel}</div>
             )}
+            {/* Growth % counter — bottom-right */}
+            <div style={{
+              position: "absolute", bottom: 5, right: 6,
+              display: "flex", flexDirection: "column", alignItems: "flex-end",
+            }}>
+              <span style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 9, fontWeight: 700,
+                color: displayedGrowth >= 100 ? ACCENT : DARK,
+                letterSpacing: "0.04em",
+                lineHeight: 1,
+              }}>{displayedGrowth}%</span>
+              <span style={{
+                fontFamily: "'JetBrains Mono', monospace",
+                fontSize: 5, letterSpacing: "0.12em",
+                color: BORDER, textTransform: "uppercase", marginTop: 1,
+              }}>grown</span>
+            </div>
           </div>
 
           {/* Progress bar */}
@@ -1056,13 +1100,13 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
             </div>
           )}
 
-          {/* Care log (while running or paused) */}
+          {/* Care log — latest 2 visible, scroll for history */}
           {careLog.length > 0 && (
-            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL }}>
-              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                {careLog.slice(0, 4).map((entry, i) => (
-                  <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : Math.max(0.2, 0.7 - i * 0.15) }}>
+            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, ...(fillHeight ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
+              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>care log</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", ...(fillHeight ? { flex: 1, minHeight: 0 } : { maxHeight: 56 }) }}>
+                {careLog.map((entry, i) => (
+                  <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.4 }}>
                     <span style={{ fontSize: 9 }}>{entry.emoji}</span>
                     <span style={{ fontSize: 7, color: DARK, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>{entry.text}</span>
                   </div>
@@ -1075,6 +1119,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           <div style={{
             display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
             background: PANEL, borderTop: `2px solid ${DARK}`,
+            ...(fillHeight && careLog.length === 0 ? { marginTop: "auto" } : {}),
+            flexShrink: 0,
           }}>
             {/* Quit */}
             {(running || phase === "paused") && (
@@ -1122,7 +1168,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
           </div>
 
 
-        </>
+        </div>
       )}
     </div>
   );

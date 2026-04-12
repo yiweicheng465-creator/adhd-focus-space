@@ -108,6 +108,8 @@
 
 ## Active Bugs
 - [x] Fix GAINS % in CYBER_PET.EXE focus timer — removed growth % display entirely
+- [x] Add animated growth % counter back to FocusTimer pet (counts up 1→2→...→100 gradually based on sessions)
+- [x] Make FocusTimer widget same height as next_up panel; scrollable care log showing latest 2 + history
 - [x] Migrate tasks/goals/wins/brain-dump/agents/focus-sessions from localStorage to MySQL database (tRPC procedures + DB tables created)
 - [ ] Apply retro lo-fi button style to Daily Check-in "Start my day" button
 - [x] Restyle category filter tabs (All/Work/Personal/Video) on main page with retro lo-fi button styling
