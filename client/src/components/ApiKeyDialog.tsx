@@ -1,72 +1,40 @@
 /* ============================================================
-   ApiKeyDialog — centered modal that appears when an AI feature
-   is triggered without an API key set.
-   Supports both OpenAI and Manus API keys.
+   ApiKeyDialog — centered modal that appears when AI credits
+   are exhausted and the user needs to add their own OpenAI key.
+   Built-in AI works by default — this is the fallback path.
    ============================================================ */
 
 import { useState, useEffect, useCallback } from "react";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
-import { X, Key, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { X, Key, Loader2, AlertCircle } from "lucide-react";
 
 const DARK   = "oklch(0.28 0.040 320)";
 const ACCENT = "oklch(0.58 0.18 340)";
 const BORDER = "oklch(0.78 0.060 340)";
 const BG     = "oklch(0.970 0.022 355)";
 const MUTED  = "oklch(0.55 0.06 340)";
-const GREEN  = "oklch(0.48 0.16 168)";
 const RED    = "oklch(0.52 0.20 25)";
-const TAB_ACTIVE_BG = ACCENT;
-const TAB_INACTIVE_BG = "oklch(0.90 0.030 340)";
-
-type KeyType = "openai" | "manus";
-
-const KEY_INFO: Record<KeyType, {
-  label: string;
-  placeholder: string;
-  link: string;
-  linkLabel: string;
-  paymentNote: string;
-  howToGet: string;
-}> = {
-  openai: {
-    label: "OpenAI API Key",
-    placeholder: "sk-...",
-    link: "https://platform.openai.com/api-keys",
-    linkLabel: "platform.openai.com/api-keys",
-    paymentNote: "⚠ Requires a paid OpenAI account with credits added. A ChatGPT Plus subscription does NOT include API access — you need a separate billing account at platform.openai.com.",
-    howToGet: "Sign up at platform.openai.com → Billing → Add payment → API Keys",
-  },
-  manus: {
-    label: "Manus API Key",
-    placeholder: "sk-An...",
-    link: "https://manus.im",
-    linkLabel: "manus.im → Settings → Integrations",
-    paymentNote: "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new.",
-    howToGet: "manus.im → Profile icon → Settings → Integrations → API keys → Create new",
-  },
-};
 
 export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
-  const [keyType, setKeyType] = useState<KeyType>("manus");
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [keyError, setKeyError] = useState<string | null>(null);
-  const [keySaved, setKeySaved] = useState(false);
 
   const utils = trpc.useUtils();
 
   const updateApiKey = trpc.profile.updateApiKey.useMutation({
     onSuccess: () => {
-      setKeySaved(true);
       utils.profile.getApiKey.invalidate();
-      toast.success(`${keyType === "openai" ? "OpenAI" : "Manus"} key saved! AI features are now unlocked.`, { duration: 3500 });
+      // Restore green signal dot
+      window.dispatchEvent(new CustomEvent("aiKeyRestored"));
+      localStorage.setItem("adhd-ai-available", "true");
+      toast.success("OpenAI key saved! AI is back online.", { duration: 3500 });
       setTimeout(() => {
         setOpen(false);
-        setKeySaved(false);
         setApiKeyInput("");
-      }, 1500);
+      }, 1200);
     },
     onError: () => {
       toast.error("Failed to save API key. Please try again.");
@@ -75,7 +43,7 @@ export function ApiKeyDialog() {
 
   const validateApiKey = trpc.profile.validateApiKey.useMutation({
     onSuccess: () => {
-      updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType });
+      updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType: "openai" });
     },
     onError: (err) => {
       if (err.message === "INVALID_API_KEY") {
@@ -84,7 +52,7 @@ export function ApiKeyDialog() {
       } else {
         // Network/timeout — save anyway
         setKeyError(null);
-        updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType });
+        updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType: "openai" });
         toast("Couldn't verify key (network issue) — saved anyway.", { duration: 3000 });
       }
     },
@@ -96,32 +64,21 @@ export function ApiKeyDialog() {
     const key = apiKeyInput.trim();
     if (!key || isSaving) return;
     setKeyError(null);
-    validateApiKey.mutate({ apiKey: key, keyType });
-  }, [apiKeyInput, isSaving, keyType, validateApiKey]);
+    validateApiKey.mutate({ apiKey: key, keyType: "openai" });
+  }, [apiKeyInput, isSaving, validateApiKey]);
 
   // Listen for openApiKeyDialog event — auto-opens this centered modal
   useEffect(() => {
     function onOpen() {
       setOpen(true);
-      setKeyType("manus");
       setApiKeyInput("");
       setKeyError(null);
-      setKeySaved(false);
     }
     window.addEventListener("openApiKeyDialog", onOpen);
     return () => window.removeEventListener("openApiKeyDialog", onOpen);
   }, []);
 
-  // Reset input when switching key type
-  const handleKeyTypeChange = (type: KeyType) => {
-    setKeyType(type);
-    setApiKeyInput("");
-    setKeyError(null);
-  };
-
   if (!open) return null;
-
-  const info = KEY_INFO[keyType];
 
   return (
     /* Backdrop */
@@ -171,38 +128,11 @@ export function ApiKeyDialog() {
           {/* Heading */}
           <div>
             <p style={{ fontSize: 13, fontWeight: 700, color: DARK, margin: 0, letterSpacing: "0.02em" }}>
-              AI features need an API key
+              Built-in AI credits exhausted
             </p>
             <p style={{ fontSize: 9, color: MUTED, margin: "5px 0 0", letterSpacing: "0.04em", lineHeight: 1.6 }}>
-              Choose your provider and enter your key to unlock Brain Dump AI, Focus Reflections, Daily Summaries, and all other AI features.
+              Add your own OpenAI key to keep using Brain Dump AI, Focus Reflections, Daily Summaries, and all other AI features.
             </p>
-          </div>
-
-          {/* Key type tabs */}
-          <div style={{ display: "flex", gap: 0, border: `2px solid ${DARK}` }}>
-            {(["openai", "manus"] as KeyType[]).map((type) => (
-              <button
-                key={type}
-                onClick={() => handleKeyTypeChange(type)}
-                style={{
-                  flex: 1,
-                  background: keyType === type ? TAB_ACTIVE_BG : TAB_INACTIVE_BG,
-                  border: "none",
-                  borderRight: type === "openai" ? `2px solid ${DARK}` : "none",
-                  color: keyType === type ? "#FAF6F1" : MUTED,
-                  padding: "7px 0",
-                  fontSize: 8,
-                  cursor: "pointer",
-                  fontFamily: "'JetBrains Mono', monospace",
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  fontWeight: keyType === type ? 700 : 400,
-                  transition: "background 0.15s, color 0.15s",
-                }}
-              >
-                {type === "openai" ? "OpenAI" : "Manus"}
-              </button>
-            ))}
           </div>
 
           {/* Payment warning */}
@@ -215,19 +145,13 @@ export function ApiKeyDialog() {
             letterSpacing: "0.04em",
             lineHeight: 1.65,
           }}>
-            {info.paymentNote}
-          </div>
-
-          {/* How to get key */}
-          <div style={{ fontSize: 8, color: MUTED, letterSpacing: "0.04em", lineHeight: 1.6 }}>
-            <span style={{ color: DARK, fontWeight: 700 }}>How to get it: </span>
-            {info.howToGet}
+            ⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access — separate billing at platform.openai.com.
           </div>
 
           {/* API key input */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ fontSize: 7, letterSpacing: "0.16em", color: BORDER, textTransform: "uppercase" }}>
-              {info.label}
+              OpenAI API Key
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -235,7 +159,7 @@ export function ApiKeyDialog() {
                 value={apiKeyInput}
                 onChange={(e) => { setApiKeyInput(e.target.value); setKeyError(null); }}
                 onKeyDown={(e) => { if (e.key === "Enter") handleSave(); if (e.key === "Escape") setOpen(false); }}
-                placeholder={info.placeholder}
+                placeholder="sk-..."
                 autoFocus
                 maxLength={512}
                 style={{
@@ -271,7 +195,7 @@ export function ApiKeyDialog() {
               </div>
             )}
             <a
-              href={info.link}
+              href="https://platform.openai.com/api-keys"
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -279,7 +203,7 @@ export function ApiKeyDialog() {
                 fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
               }}
             >
-              → {info.linkLabel}
+              → platform.openai.com/api-keys
             </a>
           </div>
 
@@ -302,14 +226,14 @@ export function ApiKeyDialog() {
             </button>
             <button
               onClick={handleSave}
-              disabled={!apiKeyInput.trim() || isSaving || keySaved}
+              disabled={!apiKeyInput.trim() || isSaving}
               style={{
-                background: keySaved ? GREEN : keyError ? RED : apiKeyInput.trim() ? ACCENT : BORDER,
+                background: keyError ? RED : apiKeyInput.trim() ? ACCENT : BORDER,
                 border: "none",
                 color: "#FAF6F1",
                 padding: "7px 18px",
                 fontSize: 8,
-                cursor: apiKeyInput.trim() && !isSaving && !keySaved ? "pointer" : "not-allowed",
+                cursor: apiKeyInput.trim() && !isSaving ? "pointer" : "not-allowed",
                 fontFamily: "'JetBrains Mono', monospace",
                 letterSpacing: "0.12em",
                 boxShadow: apiKeyInput.trim() ? `2px 2px 0 ${DARK}` : "none",
@@ -317,9 +241,7 @@ export function ApiKeyDialog() {
                 display: "flex", alignItems: "center", gap: 5,
               }}
             >
-              {keySaved ? (
-                <><CheckCircle2 size={10} /> saved ✦</>
-              ) : isSaving ? (
+              {isSaving ? (
                 <><Loader2 size={10} className="animate-spin" /> {validateApiKey.isPending ? "verifying..." : "saving..."}</>
               ) : (
                 "save key ✦"

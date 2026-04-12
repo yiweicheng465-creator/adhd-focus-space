@@ -13,20 +13,29 @@ export function isNoApiKeyError(err: any): boolean {
 
 /**
  * Detects a quota exceeded / billing error from the LLM provider.
+ * Fires when built-in Manus credits are exhausted OR user's OpenAI quota runs out.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isQuotaError(err: any): boolean {
   const msg: string = err?.message ?? "";
-  return msg.includes("insufficient_quota") || msg.includes("quota") || msg.includes("429") || msg.includes("billing");
+  return (
+    msg.includes("insufficient_quota") ||
+    msg.includes("quota") ||
+    msg.includes("429") ||
+    msg.includes("billing") ||
+    msg.includes("RESOURCE_EXHAUSTED")
+  );
 }
 
 /**
  * Handles an AI error with specific messages for common failure modes.
- * - NO_API_KEY: opens the centered ApiKeyDialog modal for seamless key entry
- * - Quota errors: opens the SET panel so the user can switch provider
  *
- * @param err - The tRPC error object
- * @param fallbackMessage - Optional custom message for unrecognised errors
+ * New flow (built-in AI by default):
+ * - Quota/credits exhausted: dispatch `aiCreditsExhausted` event (turns signal dot red),
+ *   open SET panel so user can add their own OpenAI key as fallback.
+ * - NO_API_KEY (no built-in key AND no user key): open ApiKeyDialog.
+ * - Other errors: show a generic toast.
+ *
  * @returns true if it was a NO_API_KEY error
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,15 +44,19 @@ export function handleAiError(
   fallbackMessage = "AI feature unavailable. Try again."
 ): boolean {
   if (isNoApiKeyError(err)) {
-    // Open the centered ApiKeyDialog modal for a seamless key-entry experience
     window.dispatchEvent(new CustomEvent("openApiKeyDialog"));
-    toast("No API key set — add your Manus key to unlock AI features.", { duration: 4000 });
+    toast("AI unavailable — add an OpenAI key as backup.", { duration: 4000 });
     return true;
   }
   if (isQuotaError(err)) {
-    // Quota errors open the SET panel so the user can switch provider
+    // Signal that AI credits are exhausted → turns dot red in EffectsPanel
+    window.dispatchEvent(new CustomEvent("aiCreditsExhausted"));
+    // Open SET panel so user can add their own OpenAI key
     window.dispatchEvent(new CustomEvent("openFxPanel"));
-    toast.error("API quota exceeded — opening Settings so you can switch to a Manus key.", { duration: 6000 });
+    toast.error(
+      "Built-in AI credits exhausted — add your own OpenAI key in Settings to continue.",
+      { duration: 7000 }
+    );
     return false;
   }
   toast.error(fallbackMessage, { duration: 3000 });

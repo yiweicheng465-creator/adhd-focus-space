@@ -281,12 +281,13 @@ export default function Home() {
       return () => clearTimeout(t);
     }
   }, []);
-  const handleNameSave = (name: string, apiKey?: string, keyType?: "openai" | "manus") => {
+  const handleNameSave = (name: string) => {
     setDisplayName(name);
     localStorage.setItem("adhd-display-name", name);
     setShowNamePrompt(false);
     if (isAuthenticated) {
-      setupProfileMut.mutate({ name, ...(apiKey ? { apiKey, keyType: keyType ?? "openai" } : {}) });
+      // Save name only — AI works via built-in credits, no key needed on first run
+      setupProfileMut.mutate({ name });
     }
     toast.success(`Got it! I'll call you ${name} from now on ✦`, { duration: 3000 });
   };

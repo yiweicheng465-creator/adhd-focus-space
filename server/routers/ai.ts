@@ -10,32 +10,40 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
+import { ENV } from "../_core/env";
 
-/** Fetch the user's personal API key + routing config from the DB.
- * For Manus mode, uses the user's own Manus key against the Manus forge endpoint.
- * For OpenAI mode, uses the user's own OpenAI key. */
-async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUrl: string; model: string }> {
+/**
+ * AI config resolution — two-tier approach:
+ * 1. PRIMARY: Use the built-in forge key (server's Manus credits) — free for all users, no key needed.
+ * 2. FALLBACK: If the user has saved their own OpenAI key, use that instead.
+ *    This lets users bring their own key if the built-in credits run out.
+ */
+async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUrl: string; model: string; usingBuiltIn: boolean }> {
+  // Check if user has their own OpenAI key saved
   const db = await getDb();
-  if (!db) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
-  const rows = await db
-    .select({ apiKey: users.apiKey, keyType: users.keyType })
-    .from(users)
-    .where(eq(users.openId, openId))
-    .limit(1);
-  const keyType = rows[0]?.keyType ?? "openai";
-  const key = rows[0]?.apiKey?.trim();
-
-  if (keyType === "manus") {
-    // Manus mode: user provides their own Manus API key from manus.im → Settings → API Keys
-    // IMPORTANT: User Manus keys go to forge.manus.im (public API), NOT ENV.forgeApiUrl
-    // ENV.forgeApiUrl = forge.manus.ai is the INTERNAL server endpoint for the built-in server key only.
-    if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
-    return { apiKey: key, apiUrl: "https://forge.manus.im/v1/chat/completions", model: "gemini-2.5-flash" };
+  if (db) {
+    const rows = await db
+      .select({ apiKey: users.apiKey, keyType: users.keyType })
+      .from(users)
+      .where(eq(users.openId, openId))
+      .limit(1);
+    const key = rows[0]?.apiKey?.trim();
+    const keyType = rows[0]?.keyType ?? "openai";
+    // If user has their own OpenAI key saved, use it (ignoring manus keyType — that's deprecated)
+    if (key && keyType === "openai") {
+      return { apiKey: key, apiUrl: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini", usingBuiltIn: false };
+    }
   }
-
-  // OpenAI mode: require user's own OpenAI key
-  if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
-  return { apiKey: key, apiUrl: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" };
+  // Default: use the built-in forge key (server's Manus credits)
+  const builtInKey = ENV.forgeApiKey;
+  const builtInUrl = ENV.forgeApiUrl
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://forge.manus.ai/v1/chat/completions";
+  if (!builtInKey) {
+    // No built-in key and no user key — prompt user to add their own OpenAI key
+    throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+  }
+  return { apiKey: builtInKey, apiUrl: builtInUrl, model: "gemini-2.5-flash", usingBuiltIn: true };
 }
 
 /* ── Shared ADHD-aware system prompt ── */
@@ -548,4 +556,28 @@ Only include the ACTION line when performing an action. For pure conversation, o
       }
       return { reply, action };
     }),
+
+  /* ── AI Status Check ──
+   * Returns whether AI is currently available.
+   * green = built-in credits working OR user has a valid OpenAI key
+   * red   = built-in credits exhausted AND no user key saved
+   */
+  checkStatus: protectedProcedure.query(async ({ ctx }) => {
+    try {
+      const config = await getUserApiConfig(ctx.user.openId);
+      // Quick ping: ask for a 1-word response to minimise token usage
+      await invokeLLM({
+        apiKey: config.apiKey,
+        apiUrl: config.apiUrl,
+        model: config.model,
+        messages: [{ role: "user", content: "Reply with the single word: ok" }],
+      });
+      return { available: true, usingBuiltIn: config.usingBuiltIn };
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      // 429 = quota exhausted, 401 = invalid key
+      const creditsOut = msg.includes("429") || msg.includes("quota") || msg.includes("RESOURCE_EXHAUSTED");
+      return { available: false, usingBuiltIn: true, reason: creditsOut ? "credits_exhausted" : "error" };
+    }
+  }),
 });

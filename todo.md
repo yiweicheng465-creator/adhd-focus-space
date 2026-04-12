@@ -161,3 +161,9 @@
 - [x] Fix ApiKeyDialog auto-open: dispatch openApiKeyDialog event from all AI error handlers when NO_API_KEY
 - [x] Add Test Connection button in SET panel (ping forge with saved key, show inline green/red result)
 - [x] Implement 7-day backup reminder toast (check lastBackupDate in localStorage, nudge if overdue)
+- [ ] Rework AI key system: use built-in forge key by default, OpenAI key as fallback, remove Manus tab
+- [ ] Update server getUserApiConfig to use built-in forge key first, fall back to user OpenAI key
+- [x] Remove Manus tab from EffectsPanel, NamePrompt, ApiKeyDialog
+- [ ] Show clear "AI credits exhausted" message with prompt to add OpenAI key
+- [x] Fix signal dot: green=AI working (built-in or OpenAI key), red=credits exhausted+no key
+- [ ] Remove green SAVED button state - keep pink/terracotta retro style
