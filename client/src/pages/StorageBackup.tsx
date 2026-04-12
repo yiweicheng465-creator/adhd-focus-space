@@ -24,7 +24,7 @@ const M = {
   border: "oklch(0.82 0.050 340)",
   card:   "oklch(0.975 0.018 355)",
   coral:  "oklch(0.58 0.18 340)",
-  sage:   "oklch(0.52 0.10 168)",
+  sage:   "oklch(0.50 0.16 340)",
   warn:   "oklch(0.60 0.15 60)",
   warnBg: "oklch(0.97 0.025 60)",
   warnBdr:"oklch(0.82 0.07 60)",
@@ -309,8 +309,8 @@ export default function StorageBackup() {
         {/* Last backed up badge — always visible */}
         <div style={{
           display: "flex", gap: 8, alignItems: "center",
-          background: lastBackupRelative ? "oklch(0.95 0.025 168)" : "oklch(0.97 0.025 60)",
-          border: `1px solid ${lastBackupRelative ? "oklch(0.80 0.06 168)" : M.warnBdr}`,
+          background: lastBackupRelative ? "oklch(0.97 0.018 340)" : "oklch(0.97 0.025 60)",
+          border: `1px solid ${lastBackupRelative ? "oklch(0.82 0.08 340)" : M.warnBdr}`,
           padding: "10px 14px", marginTop: 12, borderRadius: 2,
         }}>
           {lastBackupRelative
@@ -416,8 +416,8 @@ export default function StorageBackup() {
         {gdMessage && (
           <div style={{
             marginTop: 10, padding: "8px 12px",
-            background: gdStatus === "error" ? "oklch(0.97 0.025 355)" : gdStatus === "success" ? "oklch(0.95 0.025 168)" : "oklch(0.96 0.015 340)",
-            border: `1px solid ${gdStatus === "error" ? "oklch(0.80 0.08 355)" : gdStatus === "success" ? "oklch(0.80 0.06 168)" : M.border}`,
+            background: gdStatus === "error" ? "oklch(0.97 0.025 355)" : gdStatus === "success" ? "oklch(0.97 0.018 340)" : "oklch(0.96 0.015 340)",
+            border: `1px solid ${gdStatus === "error" ? "oklch(0.80 0.08 355)" : gdStatus === "success" ? "oklch(0.82 0.08 340)" : M.border}`,
             display: "flex", alignItems: "center", gap: 8,
           }}>
             {gdStatus === "success" && <CheckCircle2 size={12} style={{ color: M.sage, flexShrink: 0 }} />}

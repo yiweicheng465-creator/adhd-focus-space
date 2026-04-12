@@ -323,7 +323,7 @@ export function EffectsPanel() {
                   padding: "4px 0",
                   borderRadius: 3,
                   border: "1.5px solid oklch(0.55 0.18 340)",
-                  background: apiKeySaved ? "oklch(0.55 0.14 145)" : "oklch(0.55 0.18 340)",
+                  background: apiKeySaved ? "oklch(0.48 0.16 340)" : "oklch(0.55 0.18 340)",
                   color: "white",
                   cursor: apiKeyInput.trim() ? "pointer" : "not-allowed",
                   opacity: apiKeyInput.trim() ? 1 : 0.5,
@@ -332,6 +332,23 @@ export function EffectsPanel() {
               >
                 {apiKeySaved ? "✓ SAVED" : updateApiKey.isPending ? "SAVING..." : "SAVE KEY"}
               </button>
+              <a
+                href="https://platform.openai.com/api-keys"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "block",
+                  marginTop: 5,
+                  fontSize: "0.42rem",
+                  fontFamily: "'Space Mono', monospace",
+                  color: "oklch(0.55 0.14 340)",
+                  textDecoration: "underline",
+                  textAlign: "center",
+                  letterSpacing: "0.04em",
+                }}
+              >
+                → get your key at platform.openai.com
+              </a>
             </div>
 
             {/* Divider */}
