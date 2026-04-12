@@ -612,20 +612,16 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
   }, []);
   // Also update when sessions (current block) changes
   useEffect(() => { setTotalSessions(getTotalSessions()); }, [sessions]); // eslint-disable-line react-hooks/exhaustive-deps
-  const targetGrowth = Math.min(totalSessions, 100);
-  const [displayedGrowth, setDisplayedGrowth] = useState(targetGrowth);
-  // Animate counter up whenever targetGrowth increases
+  // Growth % = current session progress (0→100%) while running, 0 when idle
+  const sessionGrowth = phase === "idle" || phase === "quit" || phase === "block_complete"
+    ? 0
+    : Math.round(progress * 100);
+  const targetGrowth = sessionGrowth;
+  const [displayedGrowth, setDisplayedGrowth] = useState(0);
+  // Smoothly animate counter to match session progress
   useEffect(() => {
-    if (displayedGrowth >= targetGrowth) return;
-    const step = () => {
-      setDisplayedGrowth((prev) => {
-        if (prev >= targetGrowth) return prev;
-        return prev + 1;
-      });
-    };
-    const id = setInterval(step, 40);
-    return () => clearInterval(id);
-  }, [targetGrowth]); // eslint-disable-line react-hooks/exhaustive-deps
+    setDisplayedGrowth(targetGrowth);
+  }, [targetGrowth]);
 
   // Register callbacks
   // eslint-disable-next-line react-hooks/exhaustive-deps
