@@ -203,8 +203,9 @@ function AICommandPanel({
     },
     onError: (err) => {
       const isNoKey = err.message === "NO_API_KEY";
+      if (isNoKey) window.dispatchEvent(new Event("openFxPanel"));
       const errMsg = isNoKey
-        ? "To use AI features, please add your OpenAI API key in the **hello.exe** setup (refresh the page to see it again)."
+        ? "No API key set — opening FX settings for you."
         : "Sorry, something went wrong. Try again?";
       appendMutation.mutate({ role: "assistant", content: errMsg });
     },

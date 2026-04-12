@@ -241,6 +241,46 @@ export default function Home() {
       localStorage.setItem("adhd-display-name", profileQuery.data.name);
     }
   }, [profileQuery.data]);
+  // Listen for navigateTo events (e.g. from backup reminder toast)
+  React.useEffect(() => {
+    function onNavigateTo(e: Event) {
+      const section = (e as CustomEvent).detail as Section;
+      if (section) setActiveSection(section);
+    }
+    window.addEventListener("navigateTo", onNavigateTo);
+    return () => window.removeEventListener("navigateTo", onNavigateTo);
+  }, []);
+
+  // ── 7-day backup reminder ───────────────────────────────
+  React.useEffect(() => {
+    const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+    const lastBackup = Number(localStorage.getItem("adhd-last-backup") ?? 0);
+    const lastReminder = Number(localStorage.getItem("adhd-backup-reminder-shown") ?? 0);
+    const now = Date.now();
+    // Only show if: never backed up (or >7 days ago) AND reminder not shown today
+    const needsReminder = (now - lastBackup) > SEVEN_DAYS;
+    const shownToday = (now - lastReminder) < 24 * 60 * 60 * 1000;
+    if (needsReminder && !shownToday) {
+      const t = setTimeout(() => {
+        localStorage.setItem("adhd-backup-reminder-shown", String(now));
+        toast(
+          "You haven't backed up in a while — want to download a backup?",
+          {
+            duration: 12000,
+            action: {
+              label: "Backup now",
+              onClick: () => {
+                // Navigate to STORE section
+                window.dispatchEvent(new CustomEvent("navigateTo", { detail: "store" }));
+              },
+            },
+          }
+        );
+      }, 4000);
+      return () => clearTimeout(t);
+    }
+  }, []);
+
   const handleNameSave = (name: string, apiKey?: string) => {
     setDisplayName(name);
     localStorage.setItem("adhd-display-name", name);

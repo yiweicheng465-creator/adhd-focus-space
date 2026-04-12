@@ -134,3 +134,7 @@
 - [x] Create central app storage utility (localStorage, export/import JSON)
 - [x] Build Storage & Backup settings page with Google Drive OAuth
 - [x] Implement Google Drive backup and restore (client-side only)
+- [x] Add "Update API key" input to EffectsPanel/FX settings
+- [x] Add 7-day backup reminder toast in Home.tsx
+- [x] Auto-open FX panel when AI feature used without API key
+- [ ] 7-day backup reminder toast

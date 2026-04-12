@@ -10,6 +10,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useFilmGrain } from "@/components/FilmGrain";
 import { useWorkMode } from "@/components/WorkModeToggle";
+import { trpc } from "@/lib/trpc";
+import { toast } from "sonner";
 
 /* ─── Horizontal range slider ─────────────────────────────── */
 function HSlider({
@@ -98,10 +100,39 @@ export function EffectsPanel() {
   const { intensity, setIntensity, speed, setSpeed } = useFilmGrain();
   const { enabled: workMode, toggle: toggleWorkMode } = useWorkMode();
 
+  // API key state
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [showApiKey, setShowApiKey] = useState(false);
+  const [apiKeySaved, setApiKeySaved] = useState(false);
+  const utils = trpc.useUtils();
+  const updateApiKey = trpc.profile.updateApiKey.useMutation({
+    onSuccess: () => {
+      setApiKeySaved(true);
+      setTimeout(() => setApiKeySaved(false), 2000);
+      utils.profile.getApiKey.invalidate();
+      toast.success("API key updated!");
+    },
+    onError: () => toast.error("Failed to save API key."),
+  });
+
   const grainOn = intensity > 0;
   const iconColor = (open || grainOn || workMode)
     ? "oklch(0.48 0.18 340)"
     : "oklch(0.60 0.060 330)";
+
+  // Listen for global openFxPanel event (fired when AI used without key)
+  useEffect(() => {
+    function onOpenFx() {
+      setOpen(true);
+      // Scroll the API key input into view after a short delay
+      setTimeout(() => {
+        const input = panelRef.current?.querySelector('input[placeholder="sk-..."]') as HTMLInputElement | null;
+        input?.focus();
+      }, 120);
+    }
+    window.addEventListener("openFxPanel", onOpenFx);
+    return () => window.removeEventListener("openFxPanel", onOpenFx);
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -241,6 +272,66 @@ export function EffectsPanel() {
                 </div>
                 <HSlider value={speed} onChange={setSpeed} accentColor="oklch(0.55 0.14 295)" disabled={!grainOn} />
               </div>
+            </div>
+
+            {/* Divider */}
+            <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
+
+            {/* ── API Key section ── */}
+            <div>
+              <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block", marginBottom: 6 }}>
+                ⬡ OpenAI API Key
+              </span>
+              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                <input
+                  type={showApiKey ? "text" : "password"}
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder="sk-..."
+                  style={{
+                    flex: 1,
+                    fontSize: "0.50rem",
+                    fontFamily: "'Space Mono', monospace",
+                    padding: "4px 6px",
+                    borderRadius: 3,
+                    border: "1px solid oklch(0.80 0.06 340)",
+                    background: "oklch(0.97 0.010 340)",
+                    color: "oklch(0.35 0.10 340)",
+                    outline: "none",
+                    minWidth: 0,
+                  }}
+                />
+                <button
+                  onClick={() => setShowApiKey(v => !v)}
+                  style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
+                >
+                  {showApiKey ? "hide" : "show"}
+                </button>
+              </div>
+              <button
+                onClick={() => {
+                  if (!apiKeyInput.trim()) return;
+                  updateApiKey.mutate({ apiKey: apiKeyInput.trim() });
+                }}
+                disabled={!apiKeyInput.trim() || updateApiKey.isPending}
+                style={{
+                  marginTop: 6,
+                  width: "100%",
+                  fontSize: "0.50rem",
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: "0.08em",
+                  padding: "4px 0",
+                  borderRadius: 3,
+                  border: "1.5px solid oklch(0.55 0.18 340)",
+                  background: apiKeySaved ? "oklch(0.55 0.14 145)" : "oklch(0.55 0.18 340)",
+                  color: "white",
+                  cursor: apiKeyInput.trim() ? "pointer" : "not-allowed",
+                  opacity: apiKeyInput.trim() ? 1 : 0.5,
+                  transition: "background 0.2s",
+                }}
+              >
+                {apiKeySaved ? "✓ SAVED" : updateApiKey.isPending ? "SAVING..." : "SAVE KEY"}
+              </button>
             </div>
 
             {/* Divider */}
