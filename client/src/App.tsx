@@ -41,7 +41,7 @@ function App() {
 
           {/* Main app */}
           <div style={{ position: "relative", zIndex: 1 }}>
-            <Toaster />
+            <Toaster position="bottom-right" closeButton />
             <Router />
           </div>
         </TooltipProvider>

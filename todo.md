@@ -142,3 +142,5 @@
 - [x] Add API key validation (test call to LLM endpoint) before saving in FX settings
 - [x] Add ApiKeyDialog centered modal popup when AI feature used without API key
 - [x] Add Space bar shortcut to start/pause focus timer from anywhere on focus page
+- [x] Remove Space bar shortcut from FocusTimer (it shortens the running timer)
+- [x] Restyle all Sonner toasts to match retro lo-fi aesthetic (Space Mono font, pink palette, retro border)

@@ -665,28 +665,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
     prevTransitionRef.current = transitionCountdown;
   }, [transitionCountdown, phase, sound]);
 
-  // ── Space bar shortcut: start/pause timer from anywhere on the focus page ──
-  useEffect(() => {
-    function onKeyDown(e: KeyboardEvent) {
-      // Only fire when no input/textarea/contenteditable is focused
-      const tag = (e.target as HTMLElement)?.tagName;
-      const isEditable = tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement)?.isContentEditable;
-      if (isEditable) return;
-      if (e.code === "Space" || e.key === " ") {
-        e.preventDefault();
-        // Start a new session if idle, otherwise toggle pause
-        if (phase === "idle") {
-          handleNewSession();
-        } else {
-          handleStartPause();
-        }
-      }
-    }
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [phase, handleStartPause, handleNewSession]);
-
-    const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
+  const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
   const segments = Array.from({ length: 20 }, (_, i) => i / 20 < progress);
 
