@@ -179,8 +179,12 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       setAiDismissed(false);
       toast.success("AI sorted your thoughts!", { duration: 2500 });
     },
-    onError: () => {
-      toast.error("AI couldn't categorise right now. Try again.", { duration: 3000 });
+    onError: (err) => {
+      if (err.message === "NO_API_KEY") {
+        toast.error("Add your Manus API key in the hello.exe setup to use AI features.", { duration: 5000 });
+      } else {
+        toast.error("AI couldn't categorise right now. Try again.", { duration: 3000 });
+      }
     },
   });
 

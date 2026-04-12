@@ -203,6 +203,12 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
     onSuccess: (data) => {
       setMitSuggestion(data.mit ?? "");
     },
+    onError: (err) => {
+      if (err.message !== "NO_API_KEY") {
+        setMitSuggestion("Couldn't load AI suggestion right now.");
+      }
+      // silently skip if no API key — user just won't see a suggestion
+    },
   });
 
   const goNext = () => {

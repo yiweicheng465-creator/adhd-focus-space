@@ -426,6 +426,11 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
       const m = data.message;
       setReflection(typeof m === "string" ? m : "");
     },
+    onError: (err) => {
+      if (err.message === "NO_API_KEY") {
+        setReflection("Add your Manus API key in the hello.exe setup to use AI features.");
+      }
+    },
   });
 
   const handleReflect = () => {

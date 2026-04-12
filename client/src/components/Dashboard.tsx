@@ -194,8 +194,17 @@ function AICommandPanel({
         executeAction(data.action.type, data.action.payload);
       }
     },
-    onError: () => {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Sorry, something went wrong. Try again?" }]);
+    onError: (err) => {
+      const isNoKey = err.message === "NO_API_KEY";
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: isNoKey
+            ? "To use AI features, please add your Manus API key in the **hello.exe** setup (refresh the page to see it again, or contact the app owner)."
+            : "Sorry, something went wrong. Try again?",
+        },
+      ]);
     },
   });
 

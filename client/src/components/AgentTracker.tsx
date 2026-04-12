@@ -140,7 +140,13 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       setPopupBrief(data.brief);
       setPopupFirstStep(data.firstStep);
     },
-    onError: () => toast.error("AI couldn't generate a brief. You can fill it in manually."),
+    onError: (err) => {
+      if (err.message === "NO_API_KEY") {
+        toast.error("Add your Manus API key in the hello.exe setup to use AI features.", { duration: 5000 });
+      } else {
+        toast.error("AI couldn't generate a brief. You can fill it in manually.");
+      }
+    },
   });
 
   const openCreatePopup = (task: Task) => {

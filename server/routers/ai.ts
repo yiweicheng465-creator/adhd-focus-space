@@ -5,21 +5,25 @@
 
 import { z } from "zod";
 import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 
-/** Fetch the user's personal API key from the DB (returns undefined if not set) */
-async function getUserApiKey(openId: string): Promise<string | undefined> {
+/** Fetch the user's personal API key from the DB.
+ * Throws a TRPCError if the user has not set one — never falls back to the server key. */
+async function getUserApiKey(openId: string): Promise<string> {
   const db = await getDb();
-  if (!db) return undefined;
+  if (!db) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
   const rows = await db
     .select({ apiKey: users.apiKey })
     .from(users)
     .where(eq(users.openId, openId))
     .limit(1);
-  return rows[0]?.apiKey ?? undefined;
+  const key = rows[0]?.apiKey?.trim();
+  if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+  return key;
 }
 
 /* ── Shared ADHD-aware system prompt ── */

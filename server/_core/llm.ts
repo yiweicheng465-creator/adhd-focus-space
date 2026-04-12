@@ -268,9 +268,10 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  const resolvedApiKey = params.apiKey?.trim() || ENV.forgeApiKey;
+  // Never fall back to the server key — each user must supply their own.
+  const resolvedApiKey = params.apiKey?.trim();
   if (!resolvedApiKey) {
-    throw new Error("No API key available — please add your API key in settings");
+    throw new Error("NO_API_KEY");
   }
 
   const {
