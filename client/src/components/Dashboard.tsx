@@ -611,19 +611,19 @@ export function Dashboard({
       </div>
 
       {/* ── MIDDLE: 3-column grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, alignItems: "stretch", gridAutoRows: "480px" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, alignItems: "start" }}>
 
         {/* Col 1: Focus Timer — FocusTimer has its own CYBER_PET.EXE chrome, no outer title bar */}
-        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", position: "relative", height: "100%" }}>
-          <div style={{ position: "relative", display: "flex", flexDirection: "column", height: "100%" }}>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+          <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
             {/* Cat sticker: pink standing cat — top-right of focus timer */}
             <img src={CAT_PINK} alt="" aria-hidden="true" style={{ position: "absolute", top: -8, right: -8, width: 56, opacity: 0.40, pointerEvents: "none", zIndex: 5 }} />
-            <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} fillHeight />
+            <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
           </div>
         </div>
 
         {/* Col 2: Next Up — cute cards with checkboxes + MIT button */}
-        <div className="retro-window" style={{ display: "flex", flexDirection: "column", overflow: "hidden", height: "100%" }}>
+        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
           <div className="retro-titlebar">
             <span>next_up.txt</span>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
@@ -742,7 +742,7 @@ export function Dashboard({
         </div>{/* /retro-window Col 2 */}
 
         {/* Col 3: AI Command Center */}
-        <div className="retro-window" style={{ display: "flex", flexDirection: "column", overflow: "hidden", height: "100%" }}>
+        <div className="retro-window" style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden" }}>
           <div className="retro-titlebar">
             <span>ai_assistant.app</span>
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
