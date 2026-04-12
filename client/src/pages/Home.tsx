@@ -281,12 +281,12 @@ export default function Home() {
     }
   }, []);
 
-  const handleNameSave = (name: string, apiKey?: string) => {
+  const handleNameSave = (name: string) => {
     setDisplayName(name);
     localStorage.setItem("adhd-display-name", name);
     setShowNamePrompt(false);
     if (isAuthenticated) {
-      setupProfileMut.mutate({ name, ...(apiKey ? { apiKey } : {}) });
+      setupProfileMut.mutate({ name });
     }
     toast.success(`Got it! I'll call you ${name} from now on ✦`, { duration: 3000 });
   };

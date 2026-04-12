@@ -43,7 +43,6 @@ if (typeof document !== "undefined" && !document.getElementById(STICKER_STYLE_ID
   document.head.appendChild(s);
 }
 import { trpc } from "@/lib/trpc";
-import { isNoApiKeyError } from "@/lib/aiErrorHandler";
 import { FocusTimer } from "./FocusTimer";
 import { ContextSwitcher, getContextConfig, type ActiveContext } from "./ContextSwitcher";
 import type { Task } from "./TaskManager";
@@ -203,12 +202,8 @@ function AICommandPanel({
       }
     },
     onError: (err) => {
-      const isNoKey = isNoApiKeyError(err);
-      if (isNoKey) window.dispatchEvent(new CustomEvent("openFxPanel"));
-      const errMsg = isNoKey
-        ? "No API key set — opening FX settings for you."
-        : "Sorry, something went wrong. Try again?";
-      appendMutation.mutate({ role: "assistant", content: errMsg });
+      console.error("[AI Command Error]", err?.message);
+      appendMutation.mutate({ role: "assistant", content: "Sorry, something went wrong. Try again?" });
     },
   });
 

@@ -144,3 +144,12 @@
 - [x] Add Space bar shortcut to start/pause focus timer from anywhere on focus page
 - [x] Remove Space bar shortcut from FocusTimer (it shortens the running timer)
 - [x] Restyle all Sonner toasts to match retro lo-fi aesthetic (Space Mono font, pink palette, retro border)
+- [ ] Remove OpenAI API key requirement — use built-in Manus LLM for all AI calls
+- [ ] Remove API key UI from hello.exe setup modal
+- [ ] Remove API key UI from FX settings panel
+- [ ] Remove ApiKeyDialog and NO_API_KEY blocking logic from all components
+- [x] Remove OpenAI API key requirement — use built-in Manus LLM for all AI calls
+- [x] Remove API key field from hello.exe setup prompt
+- [x] Remove API key section from FX settings panel
+- [x] Remove ApiKeyDialog popup component
+- [x] Remove NO_API_KEY blocking logic from all AI components
