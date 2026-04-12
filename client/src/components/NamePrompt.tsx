@@ -36,7 +36,7 @@ const KEY_INFO: Record<KeyType, {
     placeholder: "manus-...",
     link: "https://manus.im/settings/api",
     linkLabel: "manus.im/settings/api",
-    paymentNote: "⚠ Requires a paid Manus subscription ($20/month minimum). Free accounts cannot generate API keys.",
+    paymentNote: "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys.",
   },
 };
 

@@ -3,13 +3,6 @@ import { toast } from "sonner";
 /**
  * Detects a NO_API_KEY error from tRPC and dispatches the openFxPanel event.
  * Returns true if the error was a NO_API_KEY error, false otherwise.
- *
- * The error can come from two sources:
- * 1. getUserApiKey() throws TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" })
- * 2. invokeLLM() throws new Error("NO_API_KEY") which tRPC wraps as INTERNAL_SERVER_ERROR
- *
- * In both cases, err.message === "NO_API_KEY" on the client.
- * We also check err.data?.code as a fallback.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isNoApiKeyError(err: any): boolean {
@@ -19,11 +12,19 @@ export function isNoApiKeyError(err: any): boolean {
 }
 
 /**
- * Handles an AI error: if it's a NO_API_KEY error, opens the FX panel and shows a toast.
- * Otherwise shows a generic error toast.
+ * Detects a quota exceeded / billing error from the LLM provider.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function isQuotaError(err: any): boolean {
+  const msg: string = err?.message ?? "";
+  return msg.includes("insufficient_quota") || msg.includes("quota") || msg.includes("429") || msg.includes("billing");
+}
+
+/**
+ * Handles an AI error with specific messages for common failure modes.
  *
  * @param err - The tRPC error object
- * @param fallbackMessage - Optional custom message for non-NO_API_KEY errors
+ * @param fallbackMessage - Optional custom message for unrecognised errors
  * @returns true if it was a NO_API_KEY error
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -35,6 +36,10 @@ export function handleAiError(
     window.dispatchEvent(new CustomEvent("openFxPanel"));
     toast("No API key set — opening FX settings for you.", { duration: 4000 });
     return true;
+  }
+  if (isQuotaError(err)) {
+    toast.error("API quota exceeded — add credits to your account or switch to a Manus key in FX settings.", { duration: 6000 });
+    return false;
   }
   toast.error(fallbackMessage, { duration: 3000 });
   return false;

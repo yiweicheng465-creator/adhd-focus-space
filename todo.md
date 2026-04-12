@@ -150,3 +150,5 @@
 - [x] Update server-side AI router to route to correct LLM endpoint based on key type
 - [x] Change all black/dark buttons to pink retro style (Sonner toast action buttons + any other dark buttons)
 - [x] Fix timer starting 2 seconds short (shows 24:58 instead of 25:00 on Start click)
+- [ ] Remove "($20/mo+)" from Manus API key tab text
+- [ ] Fix ApiKeyDialog not auto-opening when AI feature used without a key

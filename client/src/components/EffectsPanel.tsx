@@ -353,7 +353,7 @@ export function EffectsPanel() {
               }}>
                 {keyType === "openai"
                   ? "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access."
-                  : "⚠ Requires a paid Manus subscription ($20/mo+). Free accounts cannot generate API keys."}
+                  : "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys."}
               </div>
 
               {/* Input row */}
