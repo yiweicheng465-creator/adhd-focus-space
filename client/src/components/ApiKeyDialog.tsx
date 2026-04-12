@@ -49,7 +49,7 @@ const KEY_INFO: Record<KeyType, {
 
 export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
-  const [keyType, setKeyType] = useState<KeyType>("openai");
+  const [keyType, setKeyType] = useState<KeyType>("manus");
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showKey, setShowKey] = useState(false);
   const [keyError, setKeyError] = useState<string | null>(null);

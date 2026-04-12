@@ -306,9 +306,12 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.tool_choice = normalizedToolChoice;
   }
 
-  payload.max_tokens = 32768
-  payload.thinking = {
-    "budget_tokens": 128
+  // Only add Manus forge-specific params when NOT using OpenAI's API
+  const resolvedApiUrl = params.apiUrl ?? resolveApiUrl();
+  const isOpenAI = resolvedApiUrl.includes("openai.com");
+  if (!isOpenAI) {
+    payload.max_tokens = 32768;
+    payload.thinking = { budget_tokens: 128 };
   }
 
   const normalizedResponseFormat = normalizeResponseFormat({
@@ -322,7 +325,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(params.apiUrl ?? resolveApiUrl(), {
+  const response = await fetch(resolvedApiUrl, {
     method: "POST",
     headers: {
       "content-type": "application/json",

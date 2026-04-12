@@ -13,7 +13,7 @@ import { users } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
 
 /** Fetch the user's personal API key + routing config from the DB.
- * For Manus mode, uses the built-in server key (user's Manus API key is not a forge credential).
+ * For Manus mode, uses the user's own Manus key against the Manus forge endpoint.
  * For OpenAI mode, uses the user's own OpenAI key. */
 async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUrl: string; model: string }> {
   const db = await getDb();
@@ -24,19 +24,20 @@ async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUr
     .where(eq(users.openId, openId))
     .limit(1);
   const keyType = rows[0]?.keyType ?? "openai";
+  const key = rows[0]?.apiKey?.trim();
 
   if (keyType === "manus") {
-    // Manus mode: use the built-in server forge key — user's Manus API key is for the Manus agent API, not forge
-    const builtInKey = ENV.forgeApiKey;
-    if (!builtInKey) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+    // Manus mode: user provides their own Manus API key from manus.im → Settings → Integrations
+    // Route to the Manus forge endpoint using ENV.forgeApiUrl (the built-in forge URL from the platform)
+    if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
     const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
       ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-      : "https://forge.manus.ai/v1/chat/completions";
-    return { apiKey: builtInKey, apiUrl, model: "gpt-4o-mini" };
+      : "https://forge.manus.im/v1/chat/completions";
+    // Use gemini-2.5-flash for Manus forge endpoint (OpenAI models not available there)
+    return { apiKey: key, apiUrl, model: "gemini-2.5-flash" };
   }
 
-  // OpenAI mode: require user's own key
-  const key = rows[0]?.apiKey?.trim();
+  // OpenAI mode: require user's own OpenAI key
   if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
   return { apiKey: key, apiUrl: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" };
 }

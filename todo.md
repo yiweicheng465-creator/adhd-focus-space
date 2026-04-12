@@ -150,5 +150,11 @@
 - [x] Update server-side AI router to route to correct LLM endpoint based on key type
 - [x] Change all black/dark buttons to pink retro style (Sonner toast action buttons + any other dark buttons)
 - [x] Fix timer starting 2 seconds short (shows 24:58 instead of 25:00 on Start click)
-- [ ] Remove "($20/mo+)" from Manus API key tab text
+- [x] Remove "($20/mo+)" from Manus API key tab text
 - [ ] Fix ApiKeyDialog not auto-opening when AI feature used without a key
+- [x] Fix EffectsPanel: fetch existing keyType + masked key from DB on load (currently always defaults to openai)
+- [x] Auto-select Manus tab in EffectsPanel when settings opens and no key is configured yet
+- [x] Add key status dot (green/red) next to SET icon in Sidebar
+- [x] Update NamePrompt to default to Manus tab instead of OpenAI
+- [x] Fix Manus API routing: use ENV.forgeApiUrl with user's own Manus key as Bearer token
+- [x] Test Manus key end-to-end with the provided key

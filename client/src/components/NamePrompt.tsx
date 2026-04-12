@@ -35,15 +35,15 @@ const KEY_INFO: Record<KeyType, {
   manus: {
     placeholder: "sk-An...",
     link: "https://manus.im",
-    linkLabel: "manus.im → Settings → Integrations",
-    paymentNote: "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new.",
+    linkLabel: "manus.im → profile icon → Settings → Integrations → API keys",
+    paymentNote: "Get your Manus key: go to manus.im, click your profile icon (top-right), then Settings → Integrations → API keys → Create new. Paste the sk-An... key below.",
   },
 };
 
 export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
   const [name, setName]       = useState("");
   const [apiKey, setApiKey]   = useState("");
-  const [keyType, setKeyType] = useState<KeyType>("openai");
+  const [keyType, setKeyType] = useState<KeyType>("manus");
   const [showKey, setShowKey] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 

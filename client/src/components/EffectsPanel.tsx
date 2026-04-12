@@ -106,7 +106,22 @@ export function EffectsPanel() {
   const [apiKeyValidating, setApiKeyValidating] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [keyType, setKeyType] = useState<"openai" | "manus">("openai");
+  const [dbSynced, setDbSynced] = useState(false);
   const utils = trpc.useUtils();
+
+  // Fetch existing key info from DB on mount to sync keyType + show masked key
+  const { data: savedKeyData } = trpc.profile.getApiKey.useQuery(undefined, {
+    staleTime: 30_000,
+  });
+
+  // Sync keyType from DB once on first load
+  useEffect(() => {
+    if (savedKeyData && !dbSynced) {
+      setDbSynced(true);
+      setKeyType(savedKeyData.keyType as "openai" | "manus");
+      // Show masked key as placeholder hint (don't put it in the input)
+    }
+  }, [savedKeyData, dbSynced]);
 
   const updateApiKey = trpc.profile.updateApiKey.useMutation({
     onSuccess: () => {
@@ -137,14 +152,14 @@ export function EffectsPanel() {
   });
 
   const handleSaveApiKey = useCallback(() => {
-    if (keyType === "manus") {
-      // Manus mode: no user key needed — just save the keyType selection
-      updateApiKey.mutate({ apiKey: "", keyType: "manus" });
-      return;
-    }
     const key = apiKeyInput.trim();
     if (!key) return;
     setApiKeyError(null);
+    if (keyType === "manus") {
+      // Manus mode: skip validation (Manus keys can't be tested via a simple ping), save directly
+      updateApiKey.mutate({ apiKey: key, keyType: "manus" });
+      return;
+    }
     setApiKeyValidating(true);
     validateApiKey.mutate({ apiKey: key, keyType });
   }, [apiKeyInput, keyType, validateApiKey, updateApiKey]);
@@ -160,6 +175,10 @@ export function EffectsPanel() {
     function onOpenFx() {
       setOpen(true);
       setActiveTab("apikey");
+      // If no key is saved yet, default to Manus tab (easiest onboarding path)
+      if (!savedKeyData?.hasKey) {
+        setKeyType("manus");
+      }
       // Focus the API key input after panel opens
       setTimeout(() => {
         apiKeyInputRef.current?.focus();
@@ -167,7 +186,7 @@ export function EffectsPanel() {
     }
     window.addEventListener("openFxPanel", onOpenFx);
     return () => window.removeEventListener("openFxPanel", onOpenFx);
-  }, []);
+  }, [savedKeyData?.hasKey]);
 
   // Close on outside click
   useEffect(() => {
@@ -199,8 +218,25 @@ export function EffectsPanel() {
           border: "none",
           cursor: "pointer",
           transition: "background 0.15s",
+          position: "relative",
         }}
       >
+        {/* Key status dot — green if key saved, red if not */}
+        {savedKeyData !== undefined && (
+          <div style={{
+            position: "absolute",
+            top: 5,
+            right: 8,
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: savedKeyData.hasKey ? "oklch(0.60 0.18 145)" : "oklch(0.60 0.22 25)",
+            boxShadow: savedKeyData.hasKey
+              ? "0 0 4px oklch(0.60 0.18 145 / 0.6)"
+              : "0 0 4px oklch(0.60 0.22 25 / 0.6)",
+            flexShrink: 0,
+          }} />
+        )}
         {/* Gear icon */}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
@@ -422,21 +458,73 @@ export function EffectsPanel() {
                 </div>
 
                 {keyType === "manus" ? (
-                  /* Manus mode: no key needed — uses built-in server key */
-                  <div style={{
-                    background: "oklch(0.94 0.040 168)",
-                    border: "1px solid oklch(0.65 0.14 168)",
-                    padding: "10px 10px",
-                    fontSize: "0.42rem",
-                    color: "oklch(0.30 0.10 168)",
-                    letterSpacing: "0.03em",
-                    lineHeight: 1.8,
-                    fontFamily: "'Space Mono', monospace",
-                    textAlign: "center",
-                  }}>
-                    ✓ No key needed — AI features are powered by the built-in Manus key.
-                    <br />Just select Manus and save to activate.
-                  </div>
+                  /* Manus mode: user enters their own Manus API key */
+                  <>
+                    <div style={{
+                      background: "oklch(0.96 0.030 60)",
+                      border: "1px solid oklch(0.75 0.12 60)",
+                      padding: "5px 7px",
+                      fontSize: "0.40rem",
+                      color: "oklch(0.38 0.10 60)",
+                      letterSpacing: "0.03em",
+                      lineHeight: 1.6,
+                      fontFamily: "'Space Mono', monospace",
+                    }}>
+                      ℹ Get your key: manus.im → profile icon → Settings → Integrations → API keys → Create new. Paste the sk-An... key below.
+                    </div>
+
+                    {/* Input row */}
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <input
+                        ref={apiKeyInputRef}
+                        type={showApiKey ? "text" : "password"}
+                        value={apiKeyInput}
+                        onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
+                        placeholder="sk-An..."
+                        style={{
+                          flex: 1,
+                          fontSize: "0.50rem",
+                          fontFamily: "'Space Mono', monospace",
+                          padding: "4px 6px",
+                          borderRadius: 3,
+                          border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
+                          background: "oklch(0.97 0.010 340)",
+                          color: "oklch(0.35 0.10 340)",
+                          outline: "none",
+                          minWidth: 0,
+                        }}
+                      />
+                      <button
+                        onClick={() => setShowApiKey(v => !v)}
+                        style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
+                      >
+                        {showApiKey ? "hide" : "show"}
+                      </button>
+                    </div>
+
+                    {apiKeyError && (
+                      <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
+                        ⚠ {apiKeyError}
+                      </p>
+                    )}
+
+                    <a
+                      href="https://manus.im"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "block",
+                        fontSize: "0.42rem",
+                        fontFamily: "'Space Mono', monospace",
+                        color: "oklch(0.55 0.14 340)",
+                        textDecoration: "underline",
+                        textAlign: "center",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      → manus.im → Settings → Integrations → API keys
+                    </a>
+                  </>
                 ) : (
                   <>
                     {/* Payment warning for OpenAI */}
@@ -507,10 +595,24 @@ export function EffectsPanel() {
                   </>
                 )}
 
+                {/* Saved key indicator */}
+                {savedKeyData?.hasKey && !apiKeyInput.trim() && (
+                  <div style={{
+                    fontSize: "0.42rem",
+                    fontFamily: "'Space Mono', monospace",
+                    color: "oklch(0.45 0.16 168)",
+                    letterSpacing: "0.04em",
+                    textAlign: "center",
+                    padding: "3px 0",
+                  }}>
+                    ✓ Key saved: {savedKeyData.maskedKey} — enter new key to update
+                  </div>
+                )}
+
                 {/* Save button — always shown, saves keyType selection */}
                 <button
                   onClick={handleSaveApiKey}
-                  disabled={(keyType === "openai" && !apiKeyInput.trim()) || isSaving}
+                  disabled={!apiKeyInput.trim() || isSaving}
                   style={{
                     width: "100%",
                     fontSize: "0.50rem",
@@ -521,8 +623,8 @@ export function EffectsPanel() {
                     border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
                     background: apiKeySaved ? "oklch(0.48 0.16 168)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
                     color: "white",
-                    cursor: ((keyType === "manus" || apiKeyInput.trim()) && !isSaving) ? "pointer" : "not-allowed",
-                    opacity: ((keyType === "manus" || apiKeyInput.trim()) && !isSaving) ? 1 : 0.5,
+                    cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
+                    opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
                     transition: "background 0.2s, border-color 0.2s",
                   }}
                 >
