@@ -118,8 +118,8 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
           {/* API key input */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ fontSize: 7, letterSpacing: "0.16em", color: BORDER, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}>
-              Manus API key
-              <span style={{ fontSize: 7, color: MUTED, fontWeight: 400, letterSpacing: "0.04em", textTransform: "none" }}>(optional — for AI features)</span>
+              OpenAI API key
+              <span style={{ fontSize: 7, color: MUTED, fontWeight: 400, letterSpacing: "0.04em", textTransform: "none" }}>(optional)</span>
             </label>
             <div style={{ position: "relative" }}>
               <input
@@ -127,7 +127,7 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="sk-... or your Manus key"
+                placeholder="sk-..."
                 maxLength={512}
                 style={{
                   border: `2px solid ${apiKey.trim() ? ACCENT : BORDER}`,
@@ -156,8 +156,7 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
               </button>
             </div>
             <p style={{ fontSize: 8, color: MUTED, margin: 0, lineHeight: 1.5, letterSpacing: "0.04em" }}>
-              Each user uses their own key — AI costs are yours, not the app's.
-              You can add or change this later in settings.
+              Needed for AI features — each user pays for their own usage.
             </p>
           </div>
 
