@@ -1134,40 +1134,6 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             </div>
           )}
 
-          {/* Idle care actions — fills empty space, lets user interact with pet */}
-          {phase === "idle" && (
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 12, padding: "10px 16px" }}>
-              <div style={{ fontSize: 6.5, color: BORDER, letterSpacing: "0.12em", fontFamily: "'JetBrains Mono', monospace", textAlign: "center" }}>
-                take care of your pet ♡
-              </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, justifyContent: "center" }}>
-                {CARE_ACTIONS.map(({ emoji, text }) => (
-                  <button
-                    key={text}
-                    onClick={() => setCareLog(prev => [{ id: Date.now(), emoji, text, ts: Date.now() }, ...prev.slice(0, 19)])}
-                    style={{
-                      padding: "3px 8px",
-                      fontSize: 7,
-                      letterSpacing: "0.08em",
-                      background: BTN_BG,
-                      color: DARK,
-                      border: `1.5px solid ${BORDER}`,
-                      cursor: "pointer",
-                      fontFamily: "'JetBrains Mono', monospace",
-                      display: "flex", alignItems: "center", gap: 4,
-                      boxShadow: `1px 1px 0 ${BORDER}`,
-                    }}
-                  >
-                    <span style={{ fontSize: 10 }}>{emoji}</span> {text.split(" ")[0].toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              <div style={{ fontSize: 6, color: `${BORDER}99`, letterSpacing: "0.1em", fontFamily: "'JetBrains Mono', monospace", textAlign: "center", lineHeight: 1.7 }}>
-                press start when ready to focus
-              </div>
-            </div>
-          )}
-
           {/* Care log — fixed height scrollable, never grows the widget */}
           {careLog.length > 0 && (
             <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0 }}>
