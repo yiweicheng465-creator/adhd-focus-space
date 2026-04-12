@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `keyType` enum('openai','manus') DEFAULT 'openai';

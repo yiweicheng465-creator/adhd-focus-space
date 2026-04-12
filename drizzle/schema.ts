@@ -23,6 +23,7 @@ export const users = mysqlTable("users", {
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   apiKey: text("apiKey"),
+  keyType: mysqlEnum("keyType", ["openai", "manus"]).default("openai"),
 });
 
 export type User = typeof users.$inferSelect;

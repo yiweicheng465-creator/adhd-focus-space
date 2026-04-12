@@ -6,6 +6,25 @@ import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
 
+const KEY_TYPE_SCHEMA = z.enum(["openai", "manus"]).default("openai");
+
+/** Resolve the correct validation URL based on key type */
+function resolveValidationUrl(keyType: "openai" | "manus"): string {
+  if (keyType === "openai") {
+    return "https://api.openai.com/v1/chat/completions";
+  }
+  // Manus API uses the same forge endpoint
+  return ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+    : "https://forge.manus.im/v1/chat/completions";
+}
+
+/** Resolve the correct model for validation based on key type */
+function resolveValidationModel(keyType: "openai" | "manus"): string {
+  if (keyType === "openai") return "gpt-4o-mini";
+  return "claude-3-5-haiku-20241022";
+}
+
 export const profileRouter = router({
   // Get current user's display name
   getName: protectedProcedure.query(async ({ ctx }) => {
@@ -32,29 +51,33 @@ export const profileRouter = router({
       return { success: true, name: input.name };
     }),
 
-  // Get current user's API key (masked for display)
+  // Get current user's API key (masked for display) + keyType
   getApiKey: protectedProcedure.query(async ({ ctx }) => {
     const db = await getDb();
-    if (!db) return { hasKey: false, maskedKey: null };
+    if (!db) return { hasKey: false, maskedKey: null, keyType: "openai" as const };
     const rows = await db
-      .select({ apiKey: users.apiKey })
+      .select({ apiKey: users.apiKey, keyType: users.keyType })
       .from(users)
       .where(eq(users.openId, ctx.user.openId))
       .limit(1);
     const key = rows[0]?.apiKey ?? null;
+    const keyType = (rows[0]?.keyType ?? "openai") as "openai" | "manus";
     return {
       hasKey: !!key,
       maskedKey: key ? `${key.slice(0, 8)}...${key.slice(-4)}` : null,
+      keyType,
     };
   }),
 
-  // Validate an API key by making a minimal test call to the LLM endpoint
+  // Validate an API key by making a minimal test call to the correct LLM endpoint
   validateApiKey: protectedProcedure
-    .input(z.object({ apiKey: z.string().min(1).max(512).trim() }))
+    .input(z.object({
+      apiKey: z.string().min(1).max(512).trim(),
+      keyType: KEY_TYPE_SCHEMA,
+    }))
     .mutation(async ({ input }) => {
-      const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-        ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-        : "https://forge.manus.im/v1/chat/completions";
+      const apiUrl = resolveValidationUrl(input.keyType);
+      const model = resolveValidationModel(input.keyType);
       try {
         const response = await fetch(apiUrl, {
           method: "POST",
@@ -63,7 +86,7 @@ export const profileRouter = router({
             authorization: `Bearer ${input.apiKey}`,
           },
           body: JSON.stringify({
-            model: "claude-3-5-haiku-20241022",
+            model,
             messages: [{ role: "user", content: "hi" }],
             max_tokens: 5,
           }),
@@ -84,15 +107,18 @@ export const profileRouter = router({
       }
     }),
 
-  // Save / update user's personal API key
+  // Save / update user's personal API key + keyType
   updateApiKey: protectedProcedure
-    .input(z.object({ apiKey: z.string().min(1).max(512).trim() }))
+    .input(z.object({
+      apiKey: z.string().min(1).max(512).trim(),
+      keyType: KEY_TYPE_SCHEMA,
+    }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
       if (!db) throw new Error("Database unavailable");
       await db
         .update(users)
-        .set({ apiKey: input.apiKey })
+        .set({ apiKey: input.apiKey, keyType: input.keyType })
         .where(eq(users.openId, ctx.user.openId));
       return { success: true };
     }),
@@ -102,6 +128,7 @@ export const profileRouter = router({
     .input(z.object({
       name: z.string().min(1).max(50).trim(),
       apiKey: z.string().min(1).max(512).trim().optional(),
+      keyType: KEY_TYPE_SCHEMA.optional(),
     }))
     .mutation(async ({ ctx, input }) => {
       const db = await getDb();
@@ -110,7 +137,7 @@ export const profileRouter = router({
         .update(users)
         .set({
           name: input.name,
-          ...(input.apiKey ? { apiKey: input.apiKey } : {}),
+          ...(input.apiKey ? { apiKey: input.apiKey, keyType: input.keyType ?? "openai" } : {}),
         })
         .where(eq(users.openId, ctx.user.openId));
       return { success: true, name: input.name };

@@ -1,13 +1,15 @@
 /* ============================================================
    NamePrompt — one-time retro-styled name + API key input modal
    Shows on first visit (when no name is saved).
-   Saves name + optional API key to localStorage and DB.
+   Supports both OpenAI and Manus API keys.
    ============================================================ */
 
 import { useState, useRef, useEffect } from "react";
 
+type KeyType = "openai" | "manus";
+
 interface NamePromptProps {
-  onSave: (name: string, apiKey?: string) => void;
+  onSave: (name: string, apiKey?: string, keyType?: KeyType) => void;
   onSkip: () => void;
 }
 
@@ -18,9 +20,30 @@ const BG     = "oklch(0.970 0.022 355)";
 const PANEL  = "oklch(0.960 0.018 350)";
 const MUTED  = "oklch(0.55 0.06 340)";
 
+const KEY_INFO: Record<KeyType, {
+  placeholder: string;
+  link: string;
+  linkLabel: string;
+  paymentNote: string;
+}> = {
+  openai: {
+    placeholder: "sk-...",
+    link: "https://platform.openai.com/api-keys",
+    linkLabel: "platform.openai.com/api-keys",
+    paymentNote: "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access — separate billing needed at platform.openai.com.",
+  },
+  manus: {
+    placeholder: "manus-...",
+    link: "https://manus.im/settings/api",
+    linkLabel: "manus.im/settings/api",
+    paymentNote: "⚠ Requires a paid Manus subscription ($20/month minimum). Free accounts cannot generate API keys.",
+  },
+};
+
 export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
   const [name, setName]       = useState("");
   const [apiKey, setApiKey]   = useState("");
+  const [keyType, setKeyType] = useState<KeyType>("openai");
   const [showKey, setShowKey] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -31,13 +54,15 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
   const handleSave = () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
-    onSave(trimmedName, apiKey.trim() || undefined);
+    onSave(trimmedName, apiKey.trim() || undefined, apiKey.trim() ? keyType : undefined);
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSave();
     if (e.key === "Escape") onSkip();
   };
+
+  const info = KEY_INFO[keyType];
 
   return (
     /* Backdrop */
@@ -52,7 +77,8 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
         background: BG,
         border: `3px solid ${DARK}`,
         boxShadow: `5px 5px 0 ${DARK}`,
-        width: 360,
+        width: 400,
+        maxWidth: "92vw",
         fontFamily: "'JetBrains Mono', monospace",
         animation: "ft-fadeIn 0.3s ease forwards",
       }}>
@@ -115,19 +141,62 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
             />
           </div>
 
-          {/* API key input */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          {/* API key section */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <label style={{ fontSize: 7, letterSpacing: "0.16em", color: BORDER, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}>
-              OpenAI API key
-              <span style={{ fontSize: 7, color: MUTED, fontWeight: 400, letterSpacing: "0.04em", textTransform: "none" }}>(optional)</span>
+              AI API key
+              <span style={{ fontSize: 7, color: MUTED, fontWeight: 400, letterSpacing: "0.04em", textTransform: "none" }}>(optional — can add later)</span>
             </label>
+
+            {/* Key type tabs */}
+            <div style={{ display: "flex", border: `2px solid ${DARK}`, overflow: "hidden" }}>
+              {(["openai", "manus"] as KeyType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => { setKeyType(type); setApiKey(""); }}
+                  style={{
+                    flex: 1,
+                    background: keyType === type ? ACCENT : "oklch(0.93 0.020 340)",
+                    border: "none",
+                    borderRight: type === "openai" ? `2px solid ${DARK}` : "none",
+                    color: keyType === type ? "#FAF6F1" : MUTED,
+                    padding: "6px 0",
+                    fontSize: 8,
+                    cursor: "pointer",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                    fontWeight: keyType === type ? 700 : 400,
+                    transition: "background 0.15s",
+                  }}
+                >
+                  {type === "openai" ? "OpenAI" : "Manus"}
+                </button>
+              ))}
+            </div>
+
+            {/* Payment warning */}
+            <div style={{
+              background: "oklch(0.96 0.030 60)",
+              border: "1.5px solid oklch(0.75 0.12 60)",
+              padding: "7px 9px",
+              fontSize: 8,
+              color: "oklch(0.38 0.10 60)",
+              letterSpacing: "0.03em",
+              lineHeight: 1.65,
+              fontFamily: "'JetBrains Mono', monospace",
+            }}>
+              {info.paymentNote}
+            </div>
+
+            {/* Key input */}
             <div style={{ position: "relative" }}>
               <input
                 type={showKey ? "text" : "password"}
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="sk-..."
+                placeholder={info.placeholder}
                 maxLength={512}
                 style={{
                   border: `2px solid ${apiKey.trim() ? ACCENT : BORDER}`,
@@ -155,9 +224,17 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
                 {showKey ? "hide" : "show"}
               </button>
             </div>
-            <p style={{ fontSize: 8, color: MUTED, margin: 0, lineHeight: 1.5, letterSpacing: "0.04em" }}>
-              Your OpenAI key — used for AI features.
-            </p>
+            <a
+              href={info.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: 8, color: ACCENT, textDecoration: "underline",
+                fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.04em",
+              }}
+            >
+              → {info.linkLabel}
+            </a>
           </div>
 
           {/* Buttons */}

@@ -68,6 +68,10 @@ export type InvokeParams = {
   response_format?: ResponseFormat;
   /** Optional per-user API key — overrides the server-level BUILT_IN_FORGE_API_KEY */
   apiKey?: string;
+  /** Optional API URL override — routes to OpenAI vs Manus endpoint based on key type */
+  apiUrl?: string;
+  /** Optional model override — e.g. gpt-4o-mini for OpenAI, gemini-2.5-flash for Manus */
+  model?: string;
 };
 
 export type ToolCall = {
@@ -286,7 +290,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
   } = params;
 
   const payload: Record<string, unknown> = {
-    model: "gemini-2.5-flash",
+    model: params.model ?? "gemini-2.5-flash",
     messages: messages.map(normalizeMessage),
   };
 
@@ -318,7 +322,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     payload.response_format = normalizedResponseFormat;
   }
 
-  const response = await fetch(resolveApiUrl(), {
+  const response = await fetch(params.apiUrl ?? resolveApiUrl(), {
     method: "POST",
     headers: {
       "content-type": "application/json",
