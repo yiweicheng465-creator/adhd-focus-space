@@ -1025,7 +1025,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             margin: "8px 8px 0",
             border: `2px solid ${DARK}`,
             position: "relative",
-            ...(fillHeight ? { flex: 1, minHeight: 100 } : { height: 130 }),
+            height: 130,
             display: "flex", alignItems: "center", justifyContent: "center",
             overflow: "hidden",
           }}>
@@ -1168,6 +1168,9 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               </>
             )}
           </div>
+
+          {/* Spacer — absorbs extra height so pet screen stays fixed */}
+          {fillHeight && <div style={{ flex: 1 }} />}
 
           {/* Controls row */}
           <div style={{
