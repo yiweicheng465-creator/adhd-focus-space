@@ -112,7 +112,8 @@ export const profileRouter = router({
   // Save / update user's personal API key + keyType
   updateApiKey: protectedProcedure
     .input(z.object({
-      apiKey: z.string().min(1).max(512).trim(),
+      // Manus mode doesn't require a user key, so allow empty string
+      apiKey: z.string().max(512).trim(),
       keyType: KEY_TYPE_SCHEMA,
     }))
     .mutation(async ({ ctx, input }) => {

@@ -137,12 +137,17 @@ export function EffectsPanel() {
   });
 
   const handleSaveApiKey = useCallback(() => {
+    if (keyType === "manus") {
+      // Manus mode: no user key needed — just save the keyType selection
+      updateApiKey.mutate({ apiKey: "", keyType: "manus" });
+      return;
+    }
     const key = apiKeyInput.trim();
     if (!key) return;
     setApiKeyError(null);
     setApiKeyValidating(true);
     validateApiKey.mutate({ apiKey: key, keyType });
-  }, [apiKeyInput, validateApiKey]);
+  }, [apiKeyInput, keyType, validateApiKey, updateApiKey]);
 
   const isSaving = apiKeyValidating || validateApiKey.isPending || updateApiKey.isPending;
   const grainOn = intensity > 0;
@@ -416,60 +421,96 @@ export function EffectsPanel() {
                   ))}
                 </div>
 
-                {/* Payment warning */}
-                <div style={{
-                  background: "oklch(0.96 0.030 60)",
-                  border: "1px solid oklch(0.75 0.12 60)",
-                  padding: "5px 7px",
-                  fontSize: "0.40rem",
-                  color: "oklch(0.38 0.10 60)",
-                  letterSpacing: "0.03em",
-                  lineHeight: 1.6,
-                  fontFamily: "'Space Mono', monospace",
-                }}>
-                  {keyType === "openai"
-                    ? "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access."
-                    : "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new."}
-                </div>
-
-                {/* Input row */}
-                <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                  <input
-                    ref={apiKeyInputRef}
-                    type={showApiKey ? "text" : "password"}
-                    value={apiKeyInput}
-                    onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
-                    placeholder={keyType === "openai" ? "sk-..." : "sk-An..."}
-                    style={{
-                      flex: 1,
-                      fontSize: "0.50rem",
+                {keyType === "manus" ? (
+                  /* Manus mode: no key needed — uses built-in server key */
+                  <div style={{
+                    background: "oklch(0.94 0.040 168)",
+                    border: "1px solid oklch(0.65 0.14 168)",
+                    padding: "10px 10px",
+                    fontSize: "0.42rem",
+                    color: "oklch(0.30 0.10 168)",
+                    letterSpacing: "0.03em",
+                    lineHeight: 1.8,
+                    fontFamily: "'Space Mono', monospace",
+                    textAlign: "center",
+                  }}>
+                    ✓ No key needed — AI features are powered by the built-in Manus key.
+                    <br />Just select Manus and save to activate.
+                  </div>
+                ) : (
+                  <>
+                    {/* Payment warning for OpenAI */}
+                    <div style={{
+                      background: "oklch(0.96 0.030 60)",
+                      border: "1px solid oklch(0.75 0.12 60)",
+                      padding: "5px 7px",
+                      fontSize: "0.40rem",
+                      color: "oklch(0.38 0.10 60)",
+                      letterSpacing: "0.03em",
+                      lineHeight: 1.6,
                       fontFamily: "'Space Mono', monospace",
-                      padding: "4px 6px",
-                      borderRadius: 3,
-                      border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
-                      background: "oklch(0.97 0.010 340)",
-                      color: "oklch(0.35 0.10 340)",
-                      outline: "none",
-                      minWidth: 0,
-                    }}
-                  />
-                  <button
-                    onClick={() => setShowApiKey(v => !v)}
-                    style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
-                  >
-                    {showApiKey ? "hide" : "show"}
-                  </button>
-                </div>
+                    }}>
+                      ⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access.
+                    </div>
 
-                {apiKeyError && (
-                  <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
-                    ⚠ {apiKeyError}
-                  </p>
+                    {/* Input row */}
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <input
+                        ref={apiKeyInputRef}
+                        type={showApiKey ? "text" : "password"}
+                        value={apiKeyInput}
+                        onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
+                        placeholder="sk-..."
+                        style={{
+                          flex: 1,
+                          fontSize: "0.50rem",
+                          fontFamily: "'Space Mono', monospace",
+                          padding: "4px 6px",
+                          borderRadius: 3,
+                          border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
+                          background: "oklch(0.97 0.010 340)",
+                          color: "oklch(0.35 0.10 340)",
+                          outline: "none",
+                          minWidth: 0,
+                        }}
+                      />
+                      <button
+                        onClick={() => setShowApiKey(v => !v)}
+                        style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
+                      >
+                        {showApiKey ? "hide" : "show"}
+                      </button>
+                    </div>
+
+                    {apiKeyError && (
+                      <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
+                        ⚠ {apiKeyError}
+                      </p>
+                    )}
+
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "block",
+                        fontSize: "0.42rem",
+                        fontFamily: "'Space Mono', monospace",
+                        color: "oklch(0.55 0.14 340)",
+                        textDecoration: "underline",
+                        textAlign: "center",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      → platform.openai.com/api-keys
+                    </a>
+                  </>
                 )}
 
+                {/* Save button — always shown, saves keyType selection */}
                 <button
                   onClick={handleSaveApiKey}
-                  disabled={!apiKeyInput.trim() || isSaving}
+                  disabled={(keyType === "openai" && !apiKeyInput.trim()) || isSaving}
                   style={{
                     width: "100%",
                     fontSize: "0.50rem",
@@ -480,30 +521,13 @@ export function EffectsPanel() {
                     border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
                     background: apiKeySaved ? "oklch(0.48 0.16 168)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
                     color: "white",
-                    cursor: apiKeyInput.trim() && !isSaving ? "pointer" : "not-allowed",
-                    opacity: apiKeyInput.trim() && !isSaving ? 1 : 0.5,
+                    cursor: ((keyType === "manus" || apiKeyInput.trim()) && !isSaving) ? "pointer" : "not-allowed",
+                    opacity: ((keyType === "manus" || apiKeyInput.trim()) && !isSaving) ? 1 : 0.5,
                     transition: "background 0.2s, border-color 0.2s",
                   }}
                 >
-                  {apiKeySaved ? "✓ SAVED" : isSaving ? (validateApiKey.isPending ? "VERIFYING..." : "SAVING...") : "SAVE KEY"}
+                  {apiKeySaved ? "✓ SAVED" : isSaving ? "SAVING..." : "SAVE"}
                 </button>
-
-                <a
-                  href={keyType === "openai" ? "https://platform.openai.com/api-keys" : "https://manus.im"}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "block",
-                    fontSize: "0.42rem",
-                    fontFamily: "'Space Mono', monospace",
-                    color: "oklch(0.55 0.14 340)",
-                    textDecoration: "underline",
-                    textAlign: "center",
-                    letterSpacing: "0.04em",
-                  }}
-                >
-                  {keyType === "openai" ? "→ platform.openai.com/api-keys" : "→ manus.im → Settings → Integrations"}
-                </a>
               </div>
             )}
 

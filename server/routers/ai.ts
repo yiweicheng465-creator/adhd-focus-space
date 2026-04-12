@@ -13,7 +13,8 @@ import { users } from "../../drizzle/schema";
 import { ENV } from "../_core/env";
 
 /** Fetch the user's personal API key + routing config from the DB.
- * Throws a TRPCError if the user has not set one — never falls back to the server key. */
+ * For Manus mode, uses the built-in server key (user's Manus API key is not a forge credential).
+ * For OpenAI mode, uses the user's own OpenAI key. */
 async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUrl: string; model: string }> {
   const db = await getDb();
   if (!db) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
@@ -22,17 +23,22 @@ async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUr
     .from(users)
     .where(eq(users.openId, openId))
     .limit(1);
+  const keyType = rows[0]?.keyType ?? "openai";
+
+  if (keyType === "manus") {
+    // Manus mode: use the built-in server forge key — user's Manus API key is for the Manus agent API, not forge
+    const builtInKey = ENV.forgeApiKey;
+    if (!builtInKey) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+    const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
+      ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
+      : "https://forge.manus.ai/v1/chat/completions";
+    return { apiKey: builtInKey, apiUrl, model: "gpt-4o-mini" };
+  }
+
+  // OpenAI mode: require user's own key
   const key = rows[0]?.apiKey?.trim();
   if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
-  const keyType = rows[0]?.keyType ?? "openai";
-  if (keyType === "openai") {
-    return { apiKey: key, apiUrl: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" };
-  }
-  // Manus key — use forge endpoint
-  const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
-  return { apiKey: key, apiUrl, model: "gemini-2.5-flash" };
+  return { apiKey: key, apiUrl: "https://api.openai.com/v1/chat/completions", model: "gpt-4o-mini" };
 }
 
 /* ── Shared ADHD-aware system prompt ── */
