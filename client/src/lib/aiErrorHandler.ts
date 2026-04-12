@@ -22,6 +22,7 @@ export function isQuotaError(err: any): boolean {
 
 /**
  * Handles an AI error with specific messages for common failure modes.
+ * Both NO_API_KEY and quota errors open the Settings panel on the API Key tab.
  *
  * @param err - The tRPC error object
  * @param fallbackMessage - Optional custom message for unrecognised errors
@@ -38,7 +39,8 @@ export function handleAiError(
     return true;
   }
   if (isQuotaError(err)) {
-    toast.error("API quota exceeded — add credits to your account or switch to a Manus key in Settings.", { duration: 6000 });
+    window.dispatchEvent(new CustomEvent("openFxPanel"));
+    toast.error("API quota exceeded — opening Settings so you can switch to a Manus key.", { duration: 6000 });
     return false;
   }
   toast.error(fallbackMessage, { duration: 3000 });

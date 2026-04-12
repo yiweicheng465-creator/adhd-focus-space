@@ -205,11 +205,11 @@ function AICommandPanel({
     onError: (err) => {
       const isNoKey = isNoApiKeyError(err);
       const isQuota = isQuotaError(err);
-      if (isNoKey) window.dispatchEvent(new CustomEvent("openFxPanel"));
+      if (isNoKey || isQuota) window.dispatchEvent(new CustomEvent("openFxPanel"));
       const errMsg = isNoKey
         ? "No API key set — opening Settings for you."
         : isQuota
-        ? "API quota exceeded — add credits to your account or switch to a Manus key in Settings."
+        ? "API quota exceeded — opening Settings so you can switch to a Manus key."
         : "Sorry, something went wrong. Try again?";
       appendMutation.mutate({ role: "assistant", content: errMsg });
     },
