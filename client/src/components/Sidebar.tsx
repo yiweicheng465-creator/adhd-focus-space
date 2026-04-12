@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useTimer } from "@/contexts/TimerContext";
 import { EffectsPanel } from "@/components/EffectsPanel";
+import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 
 interface SidebarProps {
   activeSection: string;
@@ -355,6 +356,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Effects panel (grain + work mode) */}
       <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
       <EffectsPanel />
+      <ApiKeyDialog />
     </aside>
   );
 }

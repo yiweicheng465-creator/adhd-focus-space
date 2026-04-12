@@ -6,7 +6,7 @@
 import { useState } from "react";
 import { Loader2, Sparkles, Brain, Clock, CalendarDays, Target, Bot, Wand2, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { handleAiError } from "@/lib/aiErrorHandler";
+import { handleAiError, isNoApiKeyError } from "@/lib/aiErrorHandler";
 
 /* ── Retro lo-fi button style ── */
 const retroBtn: React.CSSProperties = {
@@ -198,7 +198,7 @@ function DailySummaryDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setResult(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => { handleAiError(err, "AI error. Try again."); setResult("AI error. Try again."); },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   const runDemo = () => {
@@ -248,7 +248,7 @@ function FocusReflectionDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => setResult(typeof data.message === "string" ? data.message : ""),
-    onError: (err) => { handleAiError(err, "AI error. Try again."); setResult("AI error. Try again."); },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   return (
@@ -357,7 +357,7 @@ function MITDemo() {
   const [result, setResult] = useState<{ mit: string; reason: string; warmup: string; encouragement: string } | null>(null);
   const mutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => { handleAiError(err, "AI suggestion failed. Try again."); },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "No API key set — opening FX settings for you.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
   });
 
   const runDemo = () => {
@@ -430,8 +430,10 @@ function AICommandDemo() {
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
     },
     onError: (err) => {
-      handleAiError(err, "AI error. Try again.");
-      setMessages((prev) => [...prev, { role: "assistant", content: "AI error. Try again." }]);
+      const isNoKey = isNoApiKeyError(err);
+      if (isNoKey) window.dispatchEvent(new CustomEvent("openFxPanel"));
+      const errMsg = isNoKey ? "No API key set — opening FX settings for you." : "AI error. Try again.";
+      setMessages((prev) => [...prev, { role: "assistant", content: errMsg }]);
     },
   });
 

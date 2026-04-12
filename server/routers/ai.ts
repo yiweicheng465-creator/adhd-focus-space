@@ -4,11 +4,27 @@
    ============================================================ */
 
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
-import { ENV } from "../_core/env";
+import { getDb } from "../db";
+import { users } from "../../drizzle/schema";
 
-
+/** Fetch the user's personal API key from the DB.
+ * Throws a TRPCError if the user has not set one — never falls back to the server key. */
+async function getUserApiKey(openId: string): Promise<string> {
+  const db = await getDb();
+  if (!db) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+  const rows = await db
+    .select({ apiKey: users.apiKey })
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
+  const key = rows[0]?.apiKey?.trim();
+  if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+  return key;
+}
 
 /* ── Shared ADHD-aware system prompt ── */
 const ADHD_SYSTEM = `You are a warm, non-judgmental ADHD coach embedded in a focus app.
@@ -146,9 +162,10 @@ export const aiRouter = router({
   categorizeDump: protectedProcedure
     .input(brainDumpCategoriseInput)
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const entriesList = input.entries.map((e, i) => `${i + 1}. ${e}`).join("\n");
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           {
@@ -176,6 +193,7 @@ export const aiRouter = router({
   dailySummary: protectedProcedure
     .input(dailySummaryInput)
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const moodStr = input.mood ? moodLabels[input.mood - 1] : "not recorded";
       const prompt = `Generate a warm, personal end-of-day summary for an ADHD user.
@@ -198,7 +216,7 @@ Write 3-4 sentences that:
 Keep it under 80 words. Warm, human, not corporate.`;
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -212,6 +230,7 @@ Keep it under 80 words. Warm, human, not corporate.`;
   focusReflection: protectedProcedure
     .input(focusReflectionInput)
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       let prompt = "";
       if (input.phase === "before") {
         prompt = `An ADHD user is about to start focus session #${input.sessionNumber}. 
@@ -227,7 +246,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
       }
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -241,6 +260,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
   monthlyReview: protectedProcedure
     .input(monthlyReviewInput)
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const avgMoodStr = input.avgMood
         ? `${moodLabels[Math.round(input.avgMood) - 1]} (${input.avgMood.toFixed(1)}/5)`
@@ -268,7 +288,7 @@ Write a 4-5 sentence review that:
 Keep it under 120 words. Sound like a coach who actually read the data, not a template.`;
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -285,8 +305,9 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
       context: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
-            const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+      const apiKey = await getUserApiKey(ctx.user.openId);
+      const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           {
@@ -336,6 +357,7 @@ Return JSON with:
       mood: z.number().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const contextNote = [
         input.taskCount != null ? `Active tasks: ${input.taskCount}` : "",
@@ -346,7 +368,7 @@ Return JSON with:
       const systemPrompt = `${ADHD_SYSTEM}${contextNote ? `\n\nUser context: ${contextNote}` : ""}`;
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: systemPrompt },
           ...input.messages,
@@ -361,6 +383,7 @@ Return JSON with:
   mitSuggestion: protectedProcedure
     .input(mitSuggestionInput)
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const taskList = input.pendingTasks
         .slice(0, 15)
         .map((t, i) => `${i + 1}. [${t.priority}] ${t.text} (${t.context})`)
@@ -386,7 +409,7 @@ ${goalList || "No goals set"}
 Pick the single most important task they should focus on today. Consider urgency, goal alignment, and their current mood/energy. Return structured JSON.`;
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -435,6 +458,7 @@ Pick the single most important task they should focus on today. Consider urgency
       mood: z.number().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const taskSummary = (input.tasks ?? []).filter(t => !t.done).slice(0, 10)
         .map(t => `- [${t.priority}] ${t.text} (${t.context})`).join("\n");
@@ -478,7 +502,7 @@ Supported action types and payloads:
 Only include the ACTION line when performing an action. For pure conversation, omit it entirely.`;
 
       const result = await invokeLLM({
-        apiKey: ENV.forgeApiKey,
+        apiKey,
         messages: [
           { role: "system", content: systemPrompt },
           ...input.messages,

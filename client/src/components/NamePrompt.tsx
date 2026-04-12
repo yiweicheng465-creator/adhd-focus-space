@@ -1,13 +1,13 @@
 /* ============================================================
-   NamePrompt — one-time retro-styled name input modal
+   NamePrompt — one-time retro-styled name + API key input modal
    Shows on first visit (when no name is saved).
-   Saves name to localStorage and DB.
+   Saves name + optional API key to localStorage and DB.
    ============================================================ */
 
 import { useState, useRef, useEffect } from "react";
 
 interface NamePromptProps {
-  onSave: (name: string) => void;
+  onSave: (name: string, apiKey?: string) => void;
   onSkip: () => void;
 }
 
@@ -19,7 +19,9 @@ const PANEL  = "oklch(0.960 0.018 350)";
 const MUTED  = "oklch(0.55 0.06 340)";
 
 export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
-  const [name, setName] = useState("");
+  const [name, setName]       = useState("");
+  const [apiKey, setApiKey]   = useState("");
+  const [showKey, setShowKey] = useState(false);
   const nameRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
   const handleSave = () => {
     const trimmedName = name.trim();
     if (!trimmedName) return;
-    onSave(trimmedName);
+    onSave(trimmedName, apiKey.trim() || undefined);
   };
 
   const handleKey = (e: React.KeyboardEvent) => {
@@ -113,10 +115,50 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
             />
           </div>
 
-          {/* AI note */}
-          <p style={{ fontSize: 8, color: MUTED, margin: 0, lineHeight: 1.6, letterSpacing: "0.04em", textAlign: "center" }}>
-            ✦ AI features are ready to use — no API key needed.
-          </p>
+          {/* API key input */}
+          <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <label style={{ fontSize: 7, letterSpacing: "0.16em", color: BORDER, textTransform: "uppercase", display: "flex", alignItems: "center", gap: 6 }}>
+              OpenAI API key
+              <span style={{ fontSize: 7, color: MUTED, fontWeight: 400, letterSpacing: "0.04em", textTransform: "none" }}>(optional)</span>
+            </label>
+            <div style={{ position: "relative" }}>
+              <input
+                type={showKey ? "text" : "password"}
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                onKeyDown={handleKey}
+                placeholder="sk-..."
+                maxLength={512}
+                style={{
+                  border: `2px solid ${apiKey.trim() ? ACCENT : BORDER}`,
+                  background: PANEL,
+                  padding: "8px 36px 8px 10px",
+                  fontSize: 11,
+                  fontFamily: "'JetBrains Mono', monospace",
+                  color: DARK,
+                  outline: "none",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  transition: "border-color 0.15s",
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => setShowKey(v => !v)}
+                style={{
+                  position: "absolute", right: 8, top: "50%", transform: "translateY(-50%)",
+                  background: "transparent", border: "none", cursor: "pointer",
+                  fontSize: 10, color: MUTED, padding: 2,
+                  fontFamily: "'JetBrains Mono', monospace",
+                }}
+              >
+                {showKey ? "hide" : "show"}
+              </button>
+            </div>
+            <p style={{ fontSize: 8, color: MUTED, margin: 0, lineHeight: 1.5, letterSpacing: "0.04em" }}>
+              Your OpenAI key — used for AI features.
+            </p>
+          </div>
 
           {/* Buttons */}
           <div style={{ display: "flex", gap: 8, justifyContent: "flex-end", marginTop: 4 }}>

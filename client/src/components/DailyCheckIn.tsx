@@ -206,8 +206,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
       setMitSuggestion(data.mit ?? "");
     },
     onError: (err) => {
-      handleAiError(err, "Couldn't load AI suggestion right now.");
-      setMitSuggestion("Couldn't load AI suggestion right now.");
+      const wasNoKey = handleAiError(err, "Couldn't load AI suggestion right now.");
+      if (!wasNoKey) setMitSuggestion("Couldn't load AI suggestion right now.");
     },
   });
 
