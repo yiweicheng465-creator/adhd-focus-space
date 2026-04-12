@@ -1138,8 +1138,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             ))}
           </div>
 
-          {/* Care log — always fixed height so window never resizes */}
-          <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0, minHeight: 72 }}>
+          {/* Care log — always fixed height (3 lines) so window never resizes */}
+          <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0, height: 72, overflow: "hidden" }}>
             {careLog.length === 0 ? (
               // Idle placeholder
               <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
@@ -1161,7 +1161,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               // Active care log entries
               <>
                 <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
-                <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", maxHeight: 80 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, overflow: "hidden", maxHeight: 52 }}>
                   {careLog.map((entry, i) => (
                     <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.4 }}>
                       <span style={{ fontSize: 9 }}>{entry.emoji}</span>
