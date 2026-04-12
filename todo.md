@@ -118,6 +118,7 @@
 - [x] Fix growth % counter — not incrementing and color too dark
 - [x] Migrate tasks/goals/wins/brain-dump/agents/focus-sessions from localStorage to MySQL database (tRPC procedures + DB tables created)
 - [ ] Apply retro lo-fi button style to Daily Check-in "Start my day" button
+- [x] Fill empty space in FocusTimer idle state with care action buttons and tip text
 - [x] Restyle category filter tabs (All/Work/Personal/Video) on main page with retro lo-fi button styling
 - [x] Add toggleable animated film grain overlay effect to the whole app (sidebar toggle button, persisted to localStorage)
 - [x] Add "Work Mode" toggle — switches entire app from pink/lavender to clean black/white/grey professional palette, persisted to localStorage
