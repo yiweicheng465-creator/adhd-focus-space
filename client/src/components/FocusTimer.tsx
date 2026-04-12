@@ -1114,31 +1114,32 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             }}>{mm}:{ss}</span>
           </div>
 
-          {/* Preset duration buttons (idle only) */}
-          {phase === "idle" && (
-            <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "0 12px 8px" }}>
-              {PRESETS[mode].map((p) => (
-                <button
-                  key={p}
-                  onClick={() => applyDuration(mode, p)}
-                  style={{
-                    padding: "3px 10px",
-                    fontSize: 8,
-                    letterSpacing: "0.12em",
-                    background: durations[mode] === p ? ACCENT : BTN_BG,
-                    color: durations[mode] === p ? "#fff" : DARK,
-                    border: `1.5px solid ${BORDER}`,
-                    cursor: "pointer",
-                    fontFamily: "'JetBrains Mono', monospace",
-                    boxShadow: durations[mode] === p ? `1px 1px 0 ${DARK}` : "none",
-                  }}
-                >{p} MIN</button>
-              ))}
-            </div>
-          )}
+          {/* Preset duration buttons — always rendered to keep fixed height; disabled while running */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 6, padding: "0 12px 8px", minHeight: 28 }}>
+            {PRESETS[mode].map((p) => (
+              <button
+                key={p}
+                onClick={() => { if (phase === "idle") applyDuration(mode, p); }}
+                disabled={phase !== "idle"}
+                style={{
+                  padding: "3px 10px",
+                  fontSize: 8,
+                  letterSpacing: "0.12em",
+                  background: durations[mode] === p ? ACCENT : BTN_BG,
+                  color: durations[mode] === p ? "#fff" : DARK,
+                  border: `1.5px solid ${BORDER}`,
+                  cursor: phase === "idle" ? "pointer" : "default",
+                  fontFamily: "'JetBrains Mono', monospace",
+                  boxShadow: durations[mode] === p ? `1px 1px 0 ${DARK}` : "none",
+                  opacity: phase === "idle" ? 1 : 0.35,
+                  transition: "opacity 0.2s",
+                }}
+              >{p} MIN</button>
+            ))}
+          </div>
 
-          {/* Care log — idle placeholder OR rolling entries */}
-          <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0 }}>
+          {/* Care log — always fixed height so window never resizes */}
+          <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0, minHeight: 72 }}>
             {careLog.length === 0 ? (
               // Idle placeholder
               <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
