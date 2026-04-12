@@ -218,6 +218,7 @@ export default function Home() {
   const addFocusSession = trpc.logs.addFocusSession.useMutation({ onSuccess: () => utils.logs.getFocusSessions.invalidate() });
   const upsertDailyLog  = trpc.logs.upsertDailyLog.useMutation();
   const updateNameMut = trpc.profile.updateName.useMutation({ onSuccess: (data) => { setDisplayName(data.name); localStorage.setItem("adhd-display-name", data.name); } });
+  const setupProfileMut = trpc.profile.setupProfile.useMutation();
   // ── Name / personalisation ──
   const [displayName, setDisplayName] = React.useState<string>(() => localStorage.getItem("adhd-display-name") ?? "");
   const [showNamePrompt, setShowNamePrompt] = React.useState(false);
@@ -238,11 +239,13 @@ export default function Home() {
       localStorage.setItem("adhd-display-name", profileQuery.data.name);
     }
   }, [profileQuery.data]);
-  const handleNameSave = (name: string) => {
+  const handleNameSave = (name: string, apiKey?: string) => {
     setDisplayName(name);
     localStorage.setItem("adhd-display-name", name);
     setShowNamePrompt(false);
-    if (isAuthenticated) updateNameMut.mutate({ name });
+    if (isAuthenticated) {
+      setupProfileMut.mutate({ name, ...(apiKey ? { apiKey } : {}) });
+    }
     toast.success(`Got it! I'll call you ${name} from now on ✦`, { duration: 3000 });
   };
   const handleNameSkip = () => {

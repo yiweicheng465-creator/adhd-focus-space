@@ -66,6 +66,8 @@ export type InvokeParams = {
   output_schema?: OutputSchema;
   responseFormat?: ResponseFormat;
   response_format?: ResponseFormat;
+  /** Optional per-user API key — overrides the server-level BUILT_IN_FORGE_API_KEY */
+  apiKey?: string;
 };
 
 export type ToolCall = {
@@ -266,7 +268,10 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  assertApiKey();
+  const resolvedApiKey = params.apiKey?.trim() || ENV.forgeApiKey;
+  if (!resolvedApiKey) {
+    throw new Error("No API key available — please add your API key in settings");
+  }
 
   const {
     messages,
@@ -316,7 +321,7 @@ export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${ENV.forgeApiKey}`,
+      authorization: `Bearer ${resolvedApiKey}`,
     },
     body: JSON.stringify(payload),
   });

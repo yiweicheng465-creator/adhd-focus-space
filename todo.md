@@ -125,3 +125,4 @@
 - [x] Care log idle placeholder: soft faded text when timer not started, replaced by rolling entries when running
 - [x] All 3 dashboard columns fixed at 480px height — no growing when content is added; FocusTimer pet screen expands to fill extra space
 - [x] Remove all height stretching from FocusTimer — widget sits at natural compact height, no fillHeight, no spacer
+- [x] Add API key input to name setup modal (hello.exe) and save per-user; use user's own key for AI calls

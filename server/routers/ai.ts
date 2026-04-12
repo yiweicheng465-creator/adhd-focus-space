@@ -4,8 +4,23 @@
    ============================================================ */
 
 import { z } from "zod";
-import { publicProcedure, router } from "../_core/trpc";
+import { eq } from "drizzle-orm";
+import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
+import { getDb } from "../db";
+import { users } from "../../drizzle/schema";
+
+/** Fetch the user's personal API key from the DB (returns undefined if not set) */
+async function getUserApiKey(openId: string): Promise<string | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+  const rows = await db
+    .select({ apiKey: users.apiKey })
+    .from(users)
+    .where(eq(users.openId, openId))
+    .limit(1);
+  return rows[0]?.apiKey ?? undefined;
+}
 
 /* ── Shared ADHD-aware system prompt ── */
 const ADHD_SYSTEM = `You are a warm, non-judgmental ADHD coach embedded in a focus app.
@@ -140,11 +155,13 @@ const MIT_SCHEMA = {
 export const aiRouter = router({
 
   /* ── 1. Brain Dump Categorise ── */
-  categorizeDump: publicProcedure
+  categorizeDump: protectedProcedure
     .input(brainDumpCategoriseInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const entriesList = input.entries.map((e, i) => `${i + 1}. ${e}`).join("\n");
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           {
@@ -169,9 +186,10 @@ export const aiRouter = router({
     }),
 
   /* ── 2. Daily Summary ── */
-  dailySummary: publicProcedure
+  dailySummary: protectedProcedure
     .input(dailySummaryInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const moodStr = input.mood ? moodLabels[input.mood - 1] : "not recorded";
       const prompt = `Generate a warm, personal end-of-day summary for an ADHD user.
@@ -194,6 +212,7 @@ Write 3-4 sentences that:
 Keep it under 80 words. Warm, human, not corporate.`;
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -204,9 +223,10 @@ Keep it under 80 words. Warm, human, not corporate.`;
     }),
 
   /* ── 3. Focus Micro-Reflection ── */
-  focusReflection: publicProcedure
+  focusReflection: protectedProcedure
     .input(focusReflectionInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       let prompt = "";
       if (input.phase === "before") {
         prompt = `An ADHD user is about to start focus session #${input.sessionNumber}. 
@@ -222,6 +242,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
       }
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -232,9 +253,10 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
     }),
 
   /* ── 4. Monthly Review ── */
-  monthlyReview: publicProcedure
+  monthlyReview: protectedProcedure
     .input(monthlyReviewInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const avgMoodStr = input.avgMood
         ? `${moodLabels[Math.round(input.avgMood) - 1]} (${input.avgMood.toFixed(1)}/5)`
@@ -262,6 +284,7 @@ Write a 4-5 sentence review that:
 Keep it under 120 words. Sound like a coach who actually read the data, not a template.`;
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -272,13 +295,15 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
     }),
 
   /* ── 6. Create Agent Brief ── */
-  createAgentBrief: publicProcedure
+  createAgentBrief: protectedProcedure
     .input(z.object({
       taskText: z.string(),
       context: z.string(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           {
@@ -316,7 +341,7 @@ Return JSON with:
     }),
 
   /* ── 6. Dashboard Chat ── */
-  chat: publicProcedure
+  chat: protectedProcedure
     .input(z.object({
       messages: z.array(z.object({
         role: z.enum(["user", "assistant"]),
@@ -327,7 +352,8 @@ Return JSON with:
       focusSessions: z.number().optional(),
       mood: z.number().nullable().optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const contextNote = [
         input.taskCount != null ? `Active tasks: ${input.taskCount}` : "",
@@ -338,6 +364,7 @@ Return JSON with:
       const systemPrompt = `${ADHD_SYSTEM}${contextNote ? `\n\nUser context: ${contextNote}` : ""}`;
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: systemPrompt },
           ...input.messages,
@@ -349,9 +376,10 @@ Return JSON with:
     }),
 
   /* ── 5. MIT Morning Suggestion ── */
-  mitSuggestion: publicProcedure
+  mitSuggestion: protectedProcedure
     .input(mitSuggestionInput)
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const taskList = input.pendingTasks
         .slice(0, 15)
         .map((t, i) => `${i + 1}. [${t.priority}] ${t.text} (${t.context})`)
@@ -377,6 +405,7 @@ ${goalList || "No goals set"}
 Pick the single most important task they should focus on today. Consider urgency, goal alignment, and their current mood/energy. Return structured JSON.`;
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: ADHD_SYSTEM },
           { role: "user", content: prompt },
@@ -395,7 +424,7 @@ Pick the single most important task they should focus on today. Consider urgency
     }),
 
   /* ── 7. AI Command Center ── */
-  command: publicProcedure
+  command: protectedProcedure
     .input(z.object({
       messages: z.array(z.object({
         role: z.enum(["user", "assistant"]),
@@ -424,7 +453,8 @@ Pick the single most important task they should focus on today. Consider urgency
       focusSessions: z.number().optional(),
       mood: z.number().nullable().optional(),
     }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ ctx, input }) => {
+      const apiKey = await getUserApiKey(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const taskSummary = (input.tasks ?? []).filter(t => !t.done).slice(0, 10)
         .map(t => `- [${t.priority}] ${t.text} (${t.context})`).join("\n");
@@ -468,6 +498,7 @@ Supported action types and payloads:
 Only include the ACTION line when performing an action. For pure conversation, omit it entirely.`;
 
       const result = await invokeLLM({
+        apiKey,
         messages: [
           { role: "system", content: systemPrompt },
           ...input.messages,
