@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /* ============================================================
    ADHD FOCUS SPACE — Focus Timer (Cyber Pet Edition)
    Design: Tamagotchi-style pixel pet + retro OS window chrome
@@ -428,7 +429,8 @@ function CompleteWrapUp({ sessions, mode, onNewSession }: {
     },
     onError: (err) => {
       if (err.message === "NO_API_KEY") {
-        setReflection("Add your Manus API key in the hello.exe setup to use AI features.");
+        window.dispatchEvent(new Event("openFxPanel"));
+        toast("No API key set — opening FX settings for you.", { duration: 4000 });
       }
     },
   });

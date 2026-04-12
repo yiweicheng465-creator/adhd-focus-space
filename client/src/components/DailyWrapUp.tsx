@@ -311,7 +311,8 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
     onSuccess: (data) => setAiSummary(typeof data.summary === "string" ? data.summary : ""),
     onError: (err) => {
       if (err.message === "NO_API_KEY") {
-        toast.error("Add your Manus API key in the hello.exe setup to use AI features.", { duration: 5000 });
+        window.dispatchEvent(new Event("openFxPanel"));
+        toast("No API key set — opening FX settings for you.", { duration: 4000 });
       } else {
         toast.error("AI summary failed. Try again.", { duration: 3000 });
       }

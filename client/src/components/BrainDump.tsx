@@ -190,7 +190,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
     },
     onError: (err) => {
       if (err.message === "NO_API_KEY") {
-        toast.error("Add your OpenAI API key in the hello.exe setup to use AI features.", { duration: 5000 });
+        window.dispatchEvent(new Event("openFxPanel"));
+        toast("No API key set — opening FX settings for you.", { duration: 4000 });
       } else {
         toast.error("AI couldn't categorise right now. Try again.", { duration: 3000 });
       }

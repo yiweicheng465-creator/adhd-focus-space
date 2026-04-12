@@ -142,7 +142,8 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
     },
     onError: (err) => {
       if (err.message === "NO_API_KEY") {
-        toast.error("Add your Manus API key in the hello.exe setup to use AI features.", { duration: 5000 });
+        window.dispatchEvent(new Event("openFxPanel"));
+        toast("No API key set — opening FX settings for you.", { duration: 4000 });
       } else {
         toast.error("AI couldn't generate a brief. You can fill it in manually.");
       }

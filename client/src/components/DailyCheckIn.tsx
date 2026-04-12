@@ -1,3 +1,4 @@
+import { toast } from "sonner";
 /* ============================================================
    ADHD FOCUS SPACE — Daily Check-In v3.0
    Fixes:
@@ -207,7 +208,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
       if (err.message !== "NO_API_KEY") {
         setMitSuggestion("Couldn't load AI suggestion right now.");
       }
-      // silently skip if no API key — user just won't see a suggestion
+      window.dispatchEvent(new Event("openFxPanel"));
+      toast("No API key set — opening FX settings for you.", { duration: 4000 });
     },
   });
 

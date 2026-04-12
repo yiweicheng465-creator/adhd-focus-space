@@ -196,7 +196,7 @@ function DailySummaryDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setResult(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => setResult(err.message === "NO_API_KEY" ? "Add your Manus API key in the hello.exe setup to use AI features." : "AI error. Try again."),
+    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   const runDemo = () => {
@@ -246,7 +246,7 @@ function FocusReflectionDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => setResult(typeof data.message === "string" ? data.message : ""),
-    onError: (err) => setResult(err.message === "NO_API_KEY" ? "Add your Manus API key in the hello.exe setup to use AI features." : "AI error. Try again."),
+    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   return (
@@ -354,7 +354,7 @@ function MITDemo() {
   const [result, setResult] = useState<{ mit: string; reason: string; warmup: string; encouragement: string } | null>(null);
   const mutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => { if (err.message === "NO_API_KEY") setResult({ mit: "Add your Manus API key in the hello.exe setup to use AI features.", reason: "", warmup: "", encouragement: "" }); },
+    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult({ mit: "No API key set — opening FX settings for you.", reason: "", warmup: "", encouragement: "" }); } },
   });
 
   const runDemo = () => {

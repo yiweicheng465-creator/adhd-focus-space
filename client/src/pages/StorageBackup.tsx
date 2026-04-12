@@ -141,6 +141,31 @@ export default function StorageBackup() {
   const [gdStatus, setGdStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [gdMessage, setGdMessage] = useState("");
   const [lastBackupInfo, setLastBackupInfo] = useState<string | null>(() => localStorage.getItem("adhd-last-backup-info"));
+  const [lastBackupTs, setLastBackupTs] = useState<number | null>(() => {
+    const ts = localStorage.getItem("adhd-last-backup");
+    return ts ? parseInt(ts, 10) : null;
+  });
+
+  // Compute relative time from the last backup timestamp
+  const lastBackupRelative = (() => {
+    if (!lastBackupTs) return null;
+    const ms = Date.now() - lastBackupTs;
+    const mins = Math.floor(ms / 60_000);
+    const hours = Math.floor(ms / 3_600_000);
+    const days = Math.floor(ms / 86_400_000);
+    if (mins < 2) return "just now";
+    if (mins < 60) return `${mins} minute${mins !== 1 ? "s" : ""} ago`;
+    if (hours < 24) return `${hours} hour${hours !== 1 ? "s" : ""} ago`;
+    if (days === 1) return "yesterday";
+    return `${days} day${days !== 1 ? "s" : ""} ago`;
+  })();
+
+  /** Helper: record a successful backup timestamp */
+  const recordBackupTime = () => {
+    const now = Date.now();
+    localStorage.setItem("adhd-last-backup", String(now));
+    setLastBackupTs(now);
+  };
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const saveClientId = (id: string) => {
@@ -156,6 +181,7 @@ export default function StorageBackup() {
       const info = getBackupSummary(backup);
       localStorage.setItem("adhd-last-backup-info", info);
       setLastBackupInfo(info);
+      recordBackupTime();
       toast.success("Backup downloaded to your device.", { duration: 3000 });
     } catch (e) {
       toast.error("Backup failed: " + (e as Error).message, { duration: 4000 });
@@ -201,6 +227,7 @@ export default function StorageBackup() {
       const info = getBackupSummary(backup);
       localStorage.setItem("adhd-last-backup-info", info);
       setLastBackupInfo(info);
+      recordBackupTime();
       setGdStatus("success");
       setGdMessage(`Backed up to Google Drive · ${info}`);
       toast.success("Backup saved to Google Drive!", { duration: 3000 });
@@ -279,18 +306,27 @@ export default function StorageBackup() {
           </p>
         </div>
 
-        {lastBackupInfo && (
-          <div style={{
-            display: "flex", gap: 8, alignItems: "center",
-            background: "oklch(0.95 0.025 168)", border: `1px solid oklch(0.80 0.06 168)`,
-            padding: "8px 12px", marginTop: 8,
-          }}>
-            <CheckCircle2 size={13} style={{ color: M.sage, flexShrink: 0 }} />
-            <p style={{ fontSize: 11, color: M.sage, fontFamily: "'DM Sans', sans-serif" }}>
-              Last backup: {lastBackupInfo}
+        {/* Last backed up badge — always visible */}
+        <div style={{
+          display: "flex", gap: 8, alignItems: "center",
+          background: lastBackupRelative ? "oklch(0.95 0.025 168)" : "oklch(0.97 0.025 60)",
+          border: `1px solid ${lastBackupRelative ? "oklch(0.80 0.06 168)" : M.warnBdr}`,
+          padding: "10px 14px", marginTop: 12, borderRadius: 2,
+        }}>
+          {lastBackupRelative
+            ? <CheckCircle2 size={14} style={{ color: M.sage, flexShrink: 0 }} />
+            : <AlertTriangle size={14} style={{ color: M.warn, flexShrink: 0 }} />}
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 600, color: lastBackupRelative ? M.sage : M.warn, fontFamily: "'DM Sans', sans-serif" }}>
+              {lastBackupRelative ? `Last backed up: ${lastBackupRelative}` : "Never backed up"}
             </p>
+            {lastBackupInfo && (
+              <p style={{ fontSize: 10, color: M.muted, fontFamily: "'DM Sans', sans-serif", marginTop: 1 }}>
+                {lastBackupInfo}
+              </p>
+            )}
           </div>
-        )}
+        </div>
       </Section>
 
       {/* Local file backup */}
