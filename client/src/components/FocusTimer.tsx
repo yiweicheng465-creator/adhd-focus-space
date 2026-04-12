@@ -1018,14 +1018,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
 
       {/* ── Main timer scene (idle / running / paused) ── */}
       {showMainScene && (
-        <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ display: "flex", flexDirection: "column", ...(fillHeight ? { flex: 1, minHeight: 0 } : {}) }}>
           {/* Pet screen */}
           <div style={{
             background: SCREEN_BG,
             margin: "8px 8px 0",
             border: `2px solid ${DARK}`,
             position: "relative",
-            height: 130,
+            ...(fillHeight ? { flex: 1, minHeight: 100 } : { height: 130 }),
             display: "flex", alignItems: "center", justifyContent: "center",
             overflow: "hidden",
           }}>
@@ -1134,20 +1134,40 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             </div>
           )}
 
-          {/* Care log — fixed height scrollable, never grows the widget */}
-          {careLog.length > 0 && (
-            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0 }}>
-              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", maxHeight: 80 }}>
-                {careLog.map((entry, i) => (
-                  <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.4 }}>
-                    <span style={{ fontSize: 9 }}>{entry.emoji}</span>
-                    <span style={{ fontSize: 7, color: DARK, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>{entry.text}</span>
-                  </div>
-                ))}
+          {/* Care log — idle placeholder OR rolling entries */}
+          <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0 }}>
+            {careLog.length === 0 ? (
+              // Idle placeholder
+              <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                  {[
+                    { emoji: "🌸", text: "taking care of your pet..." },
+                    { emoji: "✦", text: phase === "idle" ? "press START when you're ready" : "session in progress" },
+                    { emoji: "💤", text: "pet is resting..." },
+                  ].map((line, i) => (
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 0.55 : i === 1 ? 0.40 : 0.25 }}>
+                      <span style={{ fontSize: 9 }}>{line.emoji}</span>
+                      <span style={{ fontSize: 7, color: DARK, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace", fontStyle: "italic" }}>{line.text}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            ) : (
+              // Active care log entries
+              <>
+                <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", maxHeight: 80 }}>
+                  {careLog.map((entry, i) => (
+                    <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.4 }}>
+                      <span style={{ fontSize: 9 }}>{entry.emoji}</span>
+                      <span style={{ fontSize: 7, color: DARK, letterSpacing: "0.06em", fontFamily: "'JetBrains Mono', monospace" }}>{entry.text}</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Controls row */}
           <div style={{

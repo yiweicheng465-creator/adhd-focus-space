@@ -122,3 +122,5 @@
 - [x] Add toggleable animated film grain overlay effect to the whole app (sidebar toggle button, persisted to localStorage)
 - [x] Add "Work Mode" toggle — switches entire app from pink/lavender to clean black/white/grey professional palette, persisted to localStorage
 - [x] Revert care action buttons, set FocusTimer to compact natural height matching reference screenshot
+- [x] Care log idle placeholder: soft faded text when timer not started, replaced by rolling entries when running
+- [x] All 3 dashboard columns fixed at 480px height — no growing when content is added; FocusTimer pet screen expands to fill extra space
