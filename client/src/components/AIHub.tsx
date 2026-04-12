@@ -25,6 +25,15 @@ const retroBtn: React.CSSProperties = {
   userSelect: "none" as const,
 };
 
+/* Inactive toggle variant — light cream background, deep pink text */
+const retroBtnInactive: React.CSSProperties = {
+  ...retroBtn,
+  background: "oklch(0.975 0.018 355)",
+  color: "oklch(0.48 0.16 340)",
+  border: "1.5px solid oklch(0.82 0.050 340)",
+  boxShadow: "2px 2px 0px oklch(0.82 0.050 340)",
+};
+
 const retroBtnActive: React.CSSProperties = {
   ...retroBtn,
   background: "oklch(0.58 0.18 340)",
@@ -244,7 +253,7 @@ function FocusReflectionDemo() {
           <button
             key={p}
             onClick={() => { setPhase(p); setResult(null); }}
-            style={phase === p ? retroBtnActive : retroBtn}
+            style={phase === p ? retroBtnActive : retroBtnInactive}
           >
             {p === "before" ? "Before session" : "After session"}
           </button>

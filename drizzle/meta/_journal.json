@@ -8,6 +8,13 @@
       "when": 1775823577392,
       "tag": "0000_lumpy_shape",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1775949726112,
+      "tag": "0001_stiff_mac_gargan",
+      "breakpoints": true
     }
   ]
 }

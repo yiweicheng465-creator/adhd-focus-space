@@ -1004,32 +1004,6 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit }: Focus
               fontFamily: "'JetBrains Mono', monospace",
             }}>{petStatus()}</div>
 
-            {/* Pet growth — plain pixel text, bottom-right */}
-            <div style={{
-              position: "absolute", bottom: 6, right: 7,
-              display: "flex", flexDirection: "column", alignItems: "flex-end",
-              pointerEvents: "none",
-            }}>
-              <span style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 9,
-                fontWeight: 700,
-                color: `${DARK}99`,
-                lineHeight: 1,
-                letterSpacing: "0.04em",
-              }}>{Math.min(sessions * 10, 100)}%</span>
-              <span style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                fontSize: 6,
-                fontWeight: 400,
-                color: `${DARK}66`,
-                letterSpacing: "0.10em",
-                textTransform: "uppercase" as const,
-                lineHeight: 1,
-                marginTop: 1,
-              }}>grown</span>
-            </div>
-
             {/* MIT label top-right */}
             {mitLabel && (
               <div style={{
