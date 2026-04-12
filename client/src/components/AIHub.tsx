@@ -198,7 +198,7 @@ function DailySummaryDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setResult(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else if (isQuotaError(err)) { setResult("API quota exceeded — add credits or switch to a Manus key in FX settings."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening Settings for you."); } else if (isQuotaError(err)) { setResult("API quota exceeded — add credits or switch to a Manus key in Settings."); } else { setResult("AI error. Try again."); } },
   });
 
   const runDemo = () => {
@@ -248,7 +248,7 @@ function FocusReflectionDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => setResult(typeof data.message === "string" ? data.message : ""),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else if (isQuotaError(err)) { setResult("API quota exceeded — add credits or switch to a Manus key in FX settings."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening Settings for you."); } else if (isQuotaError(err)) { setResult("API quota exceeded — add credits or switch to a Manus key in Settings."); } else { setResult("AI error. Try again."); } },
   });
 
   return (
@@ -357,7 +357,7 @@ function MITDemo() {
   const [result, setResult] = useState<{ mit: string; reason: string; warmup: string; encouragement: string } | null>(null);
   const mutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "No API key set — opening FX settings for you.", reason: "", warmup: "", encouragement: "" }); } else if (isQuotaError(err)) { setResult({ mit: "API quota exceeded — add credits or switch to a Manus key in FX settings.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "No API key set — opening Settings for you.", reason: "", warmup: "", encouragement: "" }); } else if (isQuotaError(err)) { setResult({ mit: "API quota exceeded — add credits or switch to a Manus key in Settings.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
   });
 
   const runDemo = () => {
@@ -433,7 +433,7 @@ function AICommandDemo() {
       const isNoKey = isNoApiKeyError(err);
       const isQuota = isQuotaError(err);
       if (isNoKey) window.dispatchEvent(new CustomEvent("openFxPanel"));
-      const errMsg = isNoKey ? "No API key set — opening FX settings for you." : isQuota ? "API quota exceeded — add credits or switch to a Manus key in FX settings." : "AI error. Try again.";
+      const errMsg = isNoKey ? "No API key set — opening Settings for you." : isQuota ? "API quota exceeded — add credits or switch to a Manus key in Settings." : "AI error. Try again.";
       setMessages((prev) => [...prev, { role: "assistant", content: errMsg }]);
     },
   });

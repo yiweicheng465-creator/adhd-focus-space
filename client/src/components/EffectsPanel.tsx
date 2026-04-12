@@ -1,10 +1,8 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Effects Panel v1.0
-   A single "EFFECTS" sidebar button that opens a retro
-   lo-fi settings popup window with:
-     • Film Grain intensity slider
-     • Film Grain speed slider
-     • Work Mode toggle
+   ADHD FOCUS SPACE — Settings Panel v2.0
+   Renamed from "effects.exe" → "settings.exe"
+   Two tabs: EFFECTS (film grain + work mode) | API KEY
+   openFxPanel event auto-opens on the API KEY tab
    ============================================================ */
 
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -12,6 +10,8 @@ import { useFilmGrain } from "@/components/FilmGrain";
 import { useWorkMode } from "@/components/WorkModeToggle";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
+
+type Tab = "effects" | "apikey";
 
 /* ─── Horizontal range slider ─────────────────────────────── */
 function HSlider({
@@ -27,7 +27,6 @@ function HSlider({
 }) {
   return (
     <div style={{ position: "relative", width: "100%", height: 16, display: "flex", alignItems: "center" }}>
-      {/* Track */}
       <div style={{
         position: "absolute", left: 0, right: 0, height: 4,
         background: disabled ? "oklch(0.88 0.015 330)" : "oklch(0.88 0.06 340)",
@@ -42,7 +41,6 @@ function HSlider({
           transition: "width 0.05s linear, background 0.2s",
         }} />
       </div>
-      {/* Native range for interaction */}
       <input
         type="range"
         min={0}
@@ -56,7 +54,6 @@ function HSlider({
           height: 16, margin: 0, padding: 0,
         }}
       />
-      {/* Thumb */}
       <div style={{
         position: "absolute",
         left: `calc(${value}% - 6px)`,
@@ -72,7 +69,7 @@ function HSlider({
   );
 }
 
-/* ─── 3D glossy traffic-light dots (matches other title bars) ─ */
+/* ─── 3D glossy traffic-light dots ─────────────────────────── */
 function TitleDots() {
   const dots = [
     { base: "oklch(0.72 0.18 25)",  hi: "oklch(0.88 0.12 25)",  sh: "oklch(0.52 0.20 25)" },
@@ -93,10 +90,12 @@ function TitleDots() {
   );
 }
 
-/* ─── Main EffectsPanel ───────────────────────────────────── */
+/* ─── Main SettingsPanel ─────────────────────────────────────── */
 export function EffectsPanel() {
   const [open, setOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState<Tab>("effects");
   const panelRef = useRef<HTMLDivElement>(null);
+  const apiKeyInputRef = useRef<HTMLInputElement>(null);
   const { intensity, setIntensity, speed, setSpeed } = useFilmGrain();
   const { enabled: workMode, toggle: toggleWorkMode } = useWorkMode();
 
@@ -108,6 +107,7 @@ export function EffectsPanel() {
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [keyType, setKeyType] = useState<"openai" | "manus">("openai");
   const utils = trpc.useUtils();
+
   const updateApiKey = trpc.profile.updateApiKey.useMutation({
     onSuccess: () => {
       setApiKeySaved(true);
@@ -118,9 +118,9 @@ export function EffectsPanel() {
     },
     onError: () => toast.error("Failed to save API key."),
   });
+
   const validateApiKey = trpc.profile.validateApiKey.useMutation({
     onSuccess: () => {
-      // Key is valid — now save it
       updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType });
     },
     onError: (err) => {
@@ -129,13 +129,13 @@ export function EffectsPanel() {
         setApiKeyError("Invalid API key — please check and try again.");
         toast.error("Invalid API key. Please check it and try again.", { duration: 4000 });
       } else {
-        // Network/timeout issues — save anyway but warn
         setApiKeyError(null);
         updateApiKey.mutate({ apiKey: apiKeyInput.trim(), keyType });
         toast("Couldn't verify key (network issue) — saved anyway.", { duration: 3000 });
       }
     },
   });
+
   const handleSaveApiKey = useCallback(() => {
     const key = apiKeyInput.trim();
     if (!key) return;
@@ -143,22 +143,22 @@ export function EffectsPanel() {
     setApiKeyValidating(true);
     validateApiKey.mutate({ apiKey: key, keyType });
   }, [apiKeyInput, validateApiKey]);
-  const isSaving = apiKeyValidating || validateApiKey.isPending || updateApiKey.isPending;
 
+  const isSaving = apiKeyValidating || validateApiKey.isPending || updateApiKey.isPending;
   const grainOn = intensity > 0;
   const iconColor = (open || grainOn || workMode)
     ? "oklch(0.48 0.18 340)"
     : "oklch(0.60 0.060 330)";
 
-  // Listen for global openFxPanel event (fired when AI used without key)
+  // Listen for global openFxPanel event — auto-open on API KEY tab
   useEffect(() => {
     function onOpenFx() {
       setOpen(true);
-      // Scroll the API key input into view after a short delay
+      setActiveTab("apikey");
+      // Focus the API key input after panel opens
       setTimeout(() => {
-        const input = panelRef.current?.querySelector('input[placeholder="sk-..."]') as HTMLInputElement | null;
-        input?.focus();
-      }, 120);
+        apiKeyInputRef.current?.focus();
+      }, 150);
     }
     window.addEventListener("openFxPanel", onOpenFx);
     return () => window.removeEventListener("openFxPanel", onOpenFx);
@@ -181,7 +181,7 @@ export function EffectsPanel() {
       {/* ── Sidebar button ── */}
       <button
         onClick={() => setOpen((v) => !v)}
-        title="Effects settings"
+        title="Settings"
         style={{
           width: "100%",
           display: "flex",
@@ -196,7 +196,7 @@ export function EffectsPanel() {
           transition: "background 0.15s",
         }}
       >
-        {/* Gear / settings icon */}
+        {/* Gear icon */}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
           <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
@@ -209,7 +209,7 @@ export function EffectsPanel() {
           color: iconColor,
           lineHeight: 1,
         }}>
-          FX
+          SET
         </span>
       </button>
 
@@ -219,7 +219,7 @@ export function EffectsPanel() {
           position: "fixed",
           left: 56,
           bottom: 80,
-          width: 220,
+          width: 240,
           zIndex: 10000,
           fontFamily: "'Space Mono', monospace",
           filter: "drop-shadow(3px 3px 0 oklch(0.55 0.12 340 / 0.35))",
@@ -238,13 +238,49 @@ export function EffectsPanel() {
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <TitleDots />
               <span style={{ fontSize: "0.60rem", color: "oklch(0.38 0.10 340)", letterSpacing: "0.10em", textTransform: "lowercase" }}>
-                effects.exe
+                settings.exe
               </span>
             </div>
             <button
               onClick={() => setOpen(false)}
               style={{ background: "none", border: "none", cursor: "pointer", color: "oklch(0.50 0.10 340)", fontSize: "0.75rem", lineHeight: 1, padding: "0 2px" }}
             >×</button>
+          </div>
+
+          {/* Tab bar */}
+          <div style={{
+            display: "flex",
+            background: "oklch(0.96 0.020 340)",
+            border: "1.5px solid oklch(0.82 0.08 340)",
+            borderTop: "none",
+            borderBottom: "none",
+          }}>
+            {(["effects", "apikey"] as Tab[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                style={{
+                  flex: 1,
+                  padding: "5px 0",
+                  fontSize: "0.44rem",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  fontFamily: "'Space Mono', monospace",
+                  border: "none",
+                  borderBottom: activeTab === tab
+                    ? "2px solid oklch(0.55 0.18 340)"
+                    : "2px solid transparent",
+                  borderRight: tab === "effects" ? "1px solid oklch(0.88 0.06 340)" : "none",
+                  background: activeTab === tab ? "oklch(0.98 0.015 340)" : "transparent",
+                  color: activeTab === tab ? "oklch(0.45 0.14 340)" : "oklch(0.62 0.060 330)",
+                  cursor: "pointer",
+                  fontWeight: activeTab === tab ? 700 : 400,
+                  transition: "all 0.12s",
+                }}
+              >
+                {tab === "effects" ? "Effects" : "API Key"}
+              </button>
+            ))}
           </div>
 
           {/* Body */}
@@ -259,213 +295,217 @@ export function EffectsPanel() {
             gap: 14,
           }}>
 
-            {/* ── Film Grain section ── */}
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
-                  ▣ Film Grain
+            {/* ── EFFECTS TAB ── */}
+            {activeTab === "effects" && (
+              <>
+                {/* Film Grain section */}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                      ▣ Film Grain
+                    </span>
+                    <button
+                      onClick={() => setIntensity(grainOn ? 0 : 40)}
+                      style={{
+                        fontSize: "0.44rem",
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.08em",
+                        padding: "2px 6px",
+                        borderRadius: 10,
+                        border: `1px solid ${grainOn ? "oklch(0.55 0.18 340)" : "oklch(0.72 0.040 330)"}`,
+                        background: grainOn ? "oklch(0.55 0.18 340)" : "transparent",
+                        color: grainOn ? "white" : "oklch(0.60 0.040 330)",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      {grainOn ? "ON" : "OFF"}
+                    </button>
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>INTENSITY</span>
+                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.14 340)", letterSpacing: "0.06em" }}>{intensity === 0 ? "OFF" : `${intensity}%`}</span>
+                    </div>
+                    <HSlider value={intensity} onChange={setIntensity} accentColor="oklch(0.55 0.18 340)" />
+                  </div>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>SPEED</span>
+                      <span style={{ fontSize: "0.48rem", color: "oklch(0.50 0.14 295)", letterSpacing: "0.06em" }}>{speed === 0 ? "FROZEN" : `${speed}%`}</span>
+                    </div>
+                    <HSlider value={speed} onChange={setSpeed} accentColor="oklch(0.55 0.14 295)" disabled={!grainOn} />
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
+
+                {/* Work Mode section */}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div>
+                      <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
+                        ▤ Work Mode
+                      </span>
+                      <span style={{ fontSize: "0.44rem", color: "oklch(0.62 0.060 330)", letterSpacing: "0.04em", marginTop: 2, display: "block" }}>
+                        strips all colour → greyscale
+                      </span>
+                    </div>
+                    <button
+                      onClick={toggleWorkMode}
+                      style={{
+                        width: 36, height: 20,
+                        borderRadius: 10,
+                        border: `1.5px solid ${workMode ? "oklch(0.30 0 0)" : "oklch(0.72 0.040 330)"}`,
+                        background: workMode ? "oklch(0.25 0 0)" : "oklch(0.92 0.015 330)",
+                        cursor: "pointer",
+                        position: "relative",
+                        transition: "background 0.2s, border-color 0.2s",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <div style={{
+                        position: "absolute",
+                        top: 2, left: workMode ? 16 : 2,
+                        width: 14, height: 14,
+                        borderRadius: "50%",
+                        background: workMode ? "white" : "oklch(0.72 0.040 330)",
+                        transition: "left 0.2s, background 0.2s",
+                        boxShadow: "0 1px 2px rgba(0,0,0,0.25)",
+                      }} />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* ── API KEY TAB ── */}
+            {activeTab === "apikey" && (
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
+                  ⬡ AI API Key
                 </span>
-                {/* On/off pill */}
-                <button
-                  onClick={() => setIntensity(grainOn ? 0 : 40)}
-                  style={{
-                    fontSize: "0.45rem",
-                    fontFamily: "'Space Mono', monospace",
-                    letterSpacing: "0.08em",
-                    padding: "2px 6px",
-                    borderRadius: 10,
-                    border: `1px solid ${grainOn ? "oklch(0.55 0.18 340)" : "oklch(0.72 0.040 330)"}`,
-                    background: grainOn ? "oklch(0.55 0.18 340)" : "transparent",
-                    color: grainOn ? "white" : "oklch(0.60 0.040 330)",
-                    cursor: "pointer",
-                    transition: "all 0.15s",
-                  }}
-                >
-                  {grainOn ? "ON" : "OFF"}
-                </button>
-              </div>
 
-              {/* Intensity */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>INTENSITY</span>
-                  <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.14 340)", letterSpacing: "0.06em" }}>{intensity === 0 ? "OFF" : `${intensity}%`}</span>
+                {/* Key type tabs */}
+                <div style={{ display: "flex", border: "1.5px solid oklch(0.45 0.12 340)", overflow: "hidden" }}>
+                  {(["openai", "manus"] as const).map((type) => (
+                    <button
+                      key={type}
+                      onClick={() => { setKeyType(type); setApiKeyInput(""); setApiKeyError(null); }}
+                      style={{
+                        flex: 1,
+                        background: keyType === type ? "oklch(0.55 0.18 340)" : "oklch(0.93 0.020 340)",
+                        border: "none",
+                        borderRight: type === "openai" ? "1.5px solid oklch(0.45 0.12 340)" : "none",
+                        color: keyType === type ? "white" : "oklch(0.55 0.08 340)",
+                        padding: "4px 0",
+                        fontSize: "0.44rem",
+                        cursor: "pointer",
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.10em",
+                        textTransform: "uppercase",
+                        fontWeight: keyType === type ? 700 : 400,
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      {type === "openai" ? "OpenAI" : "Manus"}
+                    </button>
+                  ))}
                 </div>
-                <HSlider value={intensity} onChange={setIntensity} accentColor="oklch(0.55 0.18 340)" />
-              </div>
 
-              {/* Speed */}
-              <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-                <div style={{ display: "flex", justifyContent: "space-between" }}>
-                  <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>SPEED</span>
-                  <span style={{ fontSize: "0.48rem", color: "oklch(0.50 0.14 295)", letterSpacing: "0.06em" }}>{speed === 0 ? "FROZEN" : `${speed}%`}</span>
+                {/* Payment warning */}
+                <div style={{
+                  background: "oklch(0.96 0.030 60)",
+                  border: "1px solid oklch(0.75 0.12 60)",
+                  padding: "5px 7px",
+                  fontSize: "0.40rem",
+                  color: "oklch(0.38 0.10 60)",
+                  letterSpacing: "0.03em",
+                  lineHeight: 1.6,
+                  fontFamily: "'Space Mono', monospace",
+                }}>
+                  {keyType === "openai"
+                    ? "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access."
+                    : "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys."}
                 </div>
-                <HSlider value={speed} onChange={setSpeed} accentColor="oklch(0.55 0.14 295)" disabled={!grainOn} />
-              </div>
-            </div>
 
-            {/* Divider */}
-            <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
-
-            {/* ── API Key section ── */}
-            <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-              <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
-                ⬡ AI API Key
-              </span>
-
-              {/* Key type tabs */}
-              <div style={{ display: "flex", border: "1.5px solid oklch(0.45 0.12 340)", overflow: "hidden" }}>
-                {(["openai", "manus"] as const).map((type) => (
-                  <button
-                    key={type}
-                    onClick={() => { setKeyType(type); setApiKeyInput(""); setApiKeyError(null); }}
+                {/* Input row */}
+                <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                  <input
+                    ref={apiKeyInputRef}
+                    type={showApiKey ? "text" : "password"}
+                    value={apiKeyInput}
+                    onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
+                    placeholder={keyType === "openai" ? "sk-..." : "manus-..."}
                     style={{
                       flex: 1,
-                      background: keyType === type ? "oklch(0.55 0.18 340)" : "oklch(0.93 0.020 340)",
-                      border: "none",
-                      borderRight: type === "openai" ? "1.5px solid oklch(0.45 0.12 340)" : "none",
-                      color: keyType === type ? "white" : "oklch(0.55 0.08 340)",
-                      padding: "4px 0",
-                      fontSize: "0.44rem",
-                      cursor: "pointer",
+                      fontSize: "0.50rem",
                       fontFamily: "'Space Mono', monospace",
-                      letterSpacing: "0.10em",
-                      textTransform: "uppercase",
-                      fontWeight: keyType === type ? 700 : 400,
-                      transition: "background 0.15s",
+                      padding: "4px 6px",
+                      borderRadius: 3,
+                      border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
+                      background: "oklch(0.97 0.010 340)",
+                      color: "oklch(0.35 0.10 340)",
+                      outline: "none",
+                      minWidth: 0,
                     }}
+                  />
+                  <button
+                    onClick={() => setShowApiKey(v => !v)}
+                    style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
                   >
-                    {type === "openai" ? "OpenAI" : "Manus"}
+                    {showApiKey ? "hide" : "show"}
                   </button>
-                ))}
-              </div>
+                </div>
 
-              {/* Payment warning */}
-              <div style={{
-                background: "oklch(0.96 0.030 60)",
-                border: "1px solid oklch(0.75 0.12 60)",
-                padding: "5px 7px",
-                fontSize: "0.40rem",
-                color: "oklch(0.38 0.10 60)",
-                letterSpacing: "0.03em",
-                lineHeight: 1.6,
-                fontFamily: "'Space Mono', monospace",
-              }}>
-                {keyType === "openai"
-                  ? "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access."
-                  : "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys."}
-              </div>
+                {apiKeyError && (
+                  <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
+                    ⚠ {apiKeyError}
+                  </p>
+                )}
 
-              {/* Input row */}
-              <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
-                <input
-                  type={showApiKey ? "text" : "password"}
-                  value={apiKeyInput}
-                  onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
-                  placeholder={keyType === "openai" ? "sk-..." : "manus-..."}
+                <button
+                  onClick={handleSaveApiKey}
+                  disabled={!apiKeyInput.trim() || isSaving}
                   style={{
-                    flex: 1,
+                    width: "100%",
                     fontSize: "0.50rem",
                     fontFamily: "'Space Mono', monospace",
-                    padding: "4px 6px",
+                    letterSpacing: "0.08em",
+                    padding: "5px 0",
                     borderRadius: 3,
-                    border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
-                    background: "oklch(0.97 0.010 340)",
-                    color: "oklch(0.35 0.10 340)",
-                    outline: "none",
-                    minWidth: 0,
-                  }}
-                />
-                <button
-                  onClick={() => setShowApiKey(v => !v)}
-                  style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
-                >
-                  {showApiKey ? "hide" : "show"}
-                </button>
-              </div>
-              {apiKeyError && (
-                <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
-                  ⚠ {apiKeyError}
-                </p>
-              )}
-              <button
-                onClick={handleSaveApiKey}
-                disabled={!apiKeyInput.trim() || isSaving}
-                style={{
-                  width: "100%",
-                  fontSize: "0.50rem",
-                  fontFamily: "'Space Mono', monospace",
-                  letterSpacing: "0.08em",
-                  padding: "4px 0",
-                  borderRadius: 3,
-                  border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
-                  background: apiKeySaved ? "oklch(0.48 0.16 168)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
-                  color: "white",
-                  cursor: apiKeyInput.trim() && !isSaving ? "pointer" : "not-allowed",
-                  opacity: apiKeyInput.trim() && !isSaving ? 1 : 0.5,
-                  transition: "background 0.2s, border-color 0.2s",
-                }}
-              >
-                {apiKeySaved ? "✓ SAVED" : isSaving ? (validateApiKey.isPending ? "VERIFYING..." : "SAVING...") : "SAVE KEY"}
-              </button>
-              <a
-                href={keyType === "openai" ? "https://platform.openai.com/api-keys" : "https://manus.im/settings/api"}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "block",
-                  fontSize: "0.42rem",
-                  fontFamily: "'Space Mono', monospace",
-                  color: "oklch(0.55 0.14 340)",
-                  textDecoration: "underline",
-                  textAlign: "center",
-                  letterSpacing: "0.04em",
-                }}
-              >
-                {keyType === "openai" ? "→ platform.openai.com/api-keys" : "→ manus.im/settings/api"}
-              </a>
-            </div>
-
-            {/* Divider */}
-            <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
-
-            {/* ── Work Mode section ── */}
-            <div>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <div>
-                  <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
-                    ▤ Work Mode
-                  </span>
-                  <span style={{ fontSize: "0.44rem", color: "oklch(0.62 0.060 330)", letterSpacing: "0.04em", marginTop: 2, display: "block" }}>
-                    strips all colour → greyscale
-                  </span>
-                </div>
-                {/* Toggle switch */}
-                <button
-                  onClick={toggleWorkMode}
-                  style={{
-                    width: 36, height: 20,
-                    borderRadius: 10,
-                    border: `1.5px solid ${workMode ? "oklch(0.30 0 0)" : "oklch(0.72 0.040 330)"}`,
-                    background: workMode ? "oklch(0.25 0 0)" : "oklch(0.92 0.015 330)",
-                    cursor: "pointer",
-                    position: "relative",
+                    border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
+                    background: apiKeySaved ? "oklch(0.48 0.16 168)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
+                    color: "white",
+                    cursor: apiKeyInput.trim() && !isSaving ? "pointer" : "not-allowed",
+                    opacity: apiKeyInput.trim() && !isSaving ? 1 : 0.5,
                     transition: "background 0.2s, border-color 0.2s",
-                    flexShrink: 0,
                   }}
                 >
-                  <div style={{
-                    position: "absolute",
-                    top: 2, left: workMode ? 16 : 2,
-                    width: 14, height: 14,
-                    borderRadius: "50%",
-                    background: workMode ? "white" : "oklch(0.72 0.040 330)",
-                    transition: "left 0.2s, background 0.2s",
-                    boxShadow: "0 1px 2px rgba(0,0,0,0.25)",
-                  }} />
+                  {apiKeySaved ? "✓ SAVED" : isSaving ? (validateApiKey.isPending ? "VERIFYING..." : "SAVING...") : "SAVE KEY"}
                 </button>
+
+                <a
+                  href={keyType === "openai" ? "https://platform.openai.com/api-keys" : "https://manus.im/settings/api"}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "block",
+                    fontSize: "0.42rem",
+                    fontFamily: "'Space Mono', monospace",
+                    color: "oklch(0.55 0.14 340)",
+                    textDecoration: "underline",
+                    textAlign: "center",
+                    letterSpacing: "0.04em",
+                  }}
+                >
+                  {keyType === "openai" ? "→ platform.openai.com/api-keys" : "→ manus.im/settings/api"}
+                </a>
               </div>
-            </div>
+            )}
 
           </div>
         </div>

@@ -34,11 +34,11 @@ export function handleAiError(
 ): boolean {
   if (isNoApiKeyError(err)) {
     window.dispatchEvent(new CustomEvent("openFxPanel"));
-    toast("No API key set — opening FX settings for you.", { duration: 4000 });
+    toast("No API key set — opening Settings for you.", { duration: 4000 });
     return true;
   }
   if (isQuotaError(err)) {
-    toast.error("API quota exceeded — add credits to your account or switch to a Manus key in FX settings.", { duration: 6000 });
+    toast.error("API quota exceeded — add credits to your account or switch to a Manus key in Settings.", { duration: 6000 });
     return false;
   }
   toast.error(fallbackMessage, { duration: 3000 });
