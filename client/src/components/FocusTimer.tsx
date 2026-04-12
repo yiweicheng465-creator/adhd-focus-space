@@ -660,7 +660,12 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
   const [blink, setBlink] = useState(false);
   const [bounce, setBounce] = useState(false);
   const [hearts, setHearts] = useState<HeartBubble[]>([]);
-  const [careLog, setCareLog] = useState<CareEntry[]>([]);
+  const [careLog, setCareLog] = useState<CareEntry[]>(() => {
+    try {
+      const raw = localStorage.getItem("adhd-care-log");
+      return raw ? (JSON.parse(raw) as CareEntry[]) : [];
+    } catch { return []; }
+  });
   const heartIdRef = useRef(0);
   const careIdRef = useRef(0);
   const heartRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -734,6 +739,11 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
     return () => cancelAnimationFrame(id);
   }, [hearts]);
 
+  // Persist care log to localStorage
+  useEffect(() => {
+    try { localStorage.setItem("adhd-care-log", JSON.stringify(careLog)); } catch { /* ignore */ }
+  }, [careLog]);
+
   // Care log while running
   const addCareEntry = useCallback(() => {
     const action = CARE_ACTIONS[Math.floor(Math.random() * CARE_ACTIONS.length)];
@@ -748,9 +758,13 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
     return () => { if (careRef.current) clearInterval(careRef.current); };
   }, [isRunning, addCareEntry]);
 
-  // Clear hearts/care on idle
+  // Clear hearts/care on idle (and clear persisted log too)
   useEffect(() => {
-    if (phase === "idle") { setHearts([]); setCareLog([]); }
+    if (phase === "idle") {
+      setHearts([]);
+      setCareLog([]);
+      try { localStorage.removeItem("adhd-care-log"); } catch { /* ignore */ }
+    }
   }, [phase]);
 
   const resetDeaths = () => setDeaths(0);
