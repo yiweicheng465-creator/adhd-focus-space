@@ -153,32 +153,39 @@ function AICommandPanel({
   onAgentCreate?: (a: Agent) => void;
   onWinCreate?: (w: Win) => void;
 }) {
-  // Load persisted history from localStorage
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    try {
-      const saved = localStorage.getItem(CHAT_HISTORY_KEY);
-      if (saved) return JSON.parse(saved) as ChatMessage[];
-    } catch { /* ignore */ }
-    return [];
+  // Load persisted history from DB
+  const { data: dbMessages = [] } = trpc.aiChat.list.useQuery({ limit: 100 }, { staleTime: 60_000 });
+  const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
+  const utils = trpc.useUtils();
+
+  // Merge DB messages with any locally-added ones not yet confirmed
+  const messages: ChatMessage[] = dbMessages.length > 0
+    ? dbMessages.map(m => ({ role: m.role as "user" | "assistant", content: m.content }))
+    : localMessages;
+
+  const setMessages = (updater: ChatMessage[] | ((prev: ChatMessage[]) => ChatMessage[])) => {
+    setLocalMessages(typeof updater === "function" ? updater(localMessages) : updater);
+  };
+
+  const appendMutation = trpc.aiChat.append.useMutation({
+    onSuccess: () => utils.aiChat.list.invalidate(),
   });
+  const clearChatMutation = trpc.aiChat.clear.useMutation({
+    onSuccess: () => { utils.aiChat.list.invalidate(); setLocalMessages([]); },
+  });
+
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const greetedRef = useRef(false);
-  const aiInputRef = useRef<HTMLInputElement>(null);
-
-  // Expose aiInputRef globally so the / shortcut can focus it
+  const aiInputRef = useRef<HTMLInputElement | null>(null);  // Expose aiInputRef globally so the / shortcut can focus it
   useEffect(() => {
     (window as Window & { __adhd_ai_input?: HTMLInputElement | null }).__adhd_ai_input = aiInputRef.current;
     return () => { (window as Window & { __adhd_ai_input?: HTMLInputElement | null }).__adhd_ai_input = null; };
   });
 
-  // Persist last MAX_CHAT_HISTORY messages
-  useEffect(() => {
-    try {
-      const toSave = messages.slice(-MAX_CHAT_HISTORY);
-      localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(toSave));
-    } catch { /* ignore */ }
-  }, [messages]);
+  // Sync local messages to DB when they change
+  // (We only persist when localMessages has items not yet in DB)
+  // This is handled inline in sendMessage and onSuccess/onError
 
   // Auto-scroll to bottom on new messages
   useEffect(() => {
@@ -189,22 +196,17 @@ function AICommandPanel({
 
   const commandMutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
-      setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+      appendMutation.mutate({ role: "assistant", content: data.reply });
       if (data.action && data.action.type !== "none") {
         executeAction(data.action.type, data.action.payload);
       }
     },
     onError: (err) => {
       const isNoKey = err.message === "NO_API_KEY";
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: isNoKey
-            ? "To use AI features, please add your Manus API key in the **hello.exe** setup (refresh the page to see it again, or contact the app owner)."
-            : "Sorry, something went wrong. Try again?",
-        },
-      ]);
+      const errMsg = isNoKey
+        ? "To use AI features, please add your OpenAI API key in the **hello.exe** setup (refresh the page to see it again)."
+        : "Sorry, something went wrong. Try again?";
+      appendMutation.mutate({ role: "assistant", content: errMsg });
     },
   });
 
@@ -275,8 +277,9 @@ function AICommandPanel({
   const sendMessage = (text?: string) => {
     const content = (text ?? input).trim();
     if (!content || commandMutation.isPending) return;
+    appendMutation.mutate({ role: "user", content });
     const newMessages: ChatMessage[] = [...messages, { role: "user", content }];
-    setMessages(newMessages);
+    setLocalMessages(newMessages);
     setInput("");
     commandMutation.mutate({
       messages: newMessages,
@@ -307,10 +310,7 @@ function AICommandPanel({
         <p className="editorial-label" style={{ color: AI_ACCENT }}>AI Assistant</p>
         {hasMessages && (
           <button
-            onClick={() => {
-              setMessages([]);
-              localStorage.removeItem(CHAT_HISTORY_KEY);
-            }}
+            onClick={() => clearChatMutation.mutate()}
             style={{ marginLeft: "auto", fontSize: 9, color: MUTED, background: "none", border: "none", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "'DM Mono', monospace" }}
           >
             CLEAR

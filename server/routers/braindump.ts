@@ -63,4 +63,13 @@ export const brainDumpRouter = router({
         .where(and(eq(brainDumpEntries.id, input.id), eq(brainDumpEntries.userId, ctx.user.id)));
       return { success: true };
     }),
+
+  deleteAll: protectedProcedure
+    .mutation(async ({ ctx }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+      await db.delete(brainDumpEntries)
+        .where(eq(brainDumpEntries.userId, ctx.user.id));
+      return { success: true };
+    }),
 });

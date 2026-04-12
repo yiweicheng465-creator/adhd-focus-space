@@ -10,6 +10,7 @@ import { agentsRouter } from "./routers/agents";
 import { brainDumpRouter } from "./routers/braindump";
 import { logsRouter } from "./routers/logs";
 import { profileRouter } from "./routers/profile";
+import { aiChatRouter } from "./routers/aichat";
 
 export const appRouter = router({
   system: systemRouter,
@@ -30,6 +31,7 @@ export const appRouter = router({
   brainDump: brainDumpRouter,
   logs: logsRouter,
   profile: profileRouter,
+  aiChat: aiChatRouter,
 });
 
 export type AppRouter = typeof appRouter;

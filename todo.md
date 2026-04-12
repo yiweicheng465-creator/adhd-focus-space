@@ -127,3 +127,7 @@
 - [x] Remove all height stretching from FocusTimer — widget sits at natural compact height, no fillHeight, no spacer
 - [x] Add API key input to name setup modal (hello.exe) and save per-user; use user's own key for AI calls
 - [x] Block AI calls for users with no API key (no fallback to server key)
+- [ ] Update hello.exe hint text to "Your OpenAI key — used for AI features."
+- [ ] Migrate Brain Dump entries from localStorage to database
+- [x] Migrate BrainDump entries from localStorage to database
+- [x] Persist AI chat messages to database

@@ -120,6 +120,18 @@ export const dailyLogs = mysqlTable("daily_logs", {
 export type DailyLog = typeof dailyLogs.$inferSelect;
 export type InsertDailyLog = typeof dailyLogs.$inferInsert;
 
+// ── AI Chat Messages ─────────────────────────────────────────────────────────
+export const aiMessages = mysqlTable("ai_messages", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["user", "assistant"]).notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AiMessage = typeof aiMessages.$inferSelect;
+export type InsertAiMessage = typeof aiMessages.$inferInsert;
+
 // ── Focus Sessions ────────────────────────────────────────────────────────────
 export const focusSessions = mysqlTable("focus_sessions", {
   id: int("id").autoincrement().primaryKey(),

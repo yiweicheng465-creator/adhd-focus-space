@@ -156,7 +156,7 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
               </button>
             </div>
             <p style={{ fontSize: 8, color: MUTED, margin: 0, lineHeight: 1.5, letterSpacing: "0.04em" }}>
-              Needed for AI features — each user pays for their own usage.
+              Your OpenAI key — used for AI features.
             </p>
           </div>
 
