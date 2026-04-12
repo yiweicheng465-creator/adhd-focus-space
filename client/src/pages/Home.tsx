@@ -42,6 +42,7 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
+import { NamePrompt } from "@/components/NamePrompt";
 
 
 /* ── Compact mood pill SVG faces (same as MoodCheckIn) ── */
@@ -200,8 +201,8 @@ export default function Home() {
   const agentsQuery = trpc.agents.list.useQuery(undefined, { enabled: isAuthenticated });
   const moodQuery   = trpc.logs.getMood.useQuery({ dateKey: today }, { enabled: isAuthenticated });
   const focusSessionsQuery = trpc.logs.getFocusSessions.useQuery(undefined, { enabled: isAuthenticated });
-
-  // ── tRPC mutations ──
+  const profileQuery = trpc.profile.getName.useQuery(undefined, { enabled: isAuthenticated });
+  // ── tRPC mutations ───
   const createTask   = trpc.tasks.create.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
   const updateTask   = trpc.tasks.update.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
   const deleteTask   = trpc.tasks.delete.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
@@ -216,8 +217,39 @@ export default function Home() {
   const setMoodMut   = trpc.logs.setMood.useMutation({ onSuccess: () => utils.logs.getMood.invalidate() });
   const addFocusSession = trpc.logs.addFocusSession.useMutation({ onSuccess: () => utils.logs.getFocusSessions.invalidate() });
   const upsertDailyLog  = trpc.logs.upsertDailyLog.useMutation();
-
-  // ── localStorage fallback (for unauthenticated users) ──
+  const updateNameMut = trpc.profile.updateName.useMutation({ onSuccess: (data) => { setDisplayName(data.name); localStorage.setItem("adhd-display-name", data.name); } });
+  // ── Name / personalisation ──
+  const [displayName, setDisplayName] = React.useState<string>(() => localStorage.getItem("adhd-display-name") ?? "");
+  const [showNamePrompt, setShowNamePrompt] = React.useState(false);
+  // Show name prompt on first visit (no name saved anywhere)
+  React.useEffect(() => {
+    const stored = localStorage.getItem("adhd-display-name");
+    const skipped = localStorage.getItem("adhd-name-skipped");
+    if (!stored && !skipped) {
+      // Small delay so the check-in modal doesn't fight for attention
+      const t = setTimeout(() => setShowNamePrompt(true), 1200);
+      return () => clearTimeout(t);
+    }
+  }, []);
+  // Sync name from DB when authenticated
+  React.useEffect(() => {
+    if (profileQuery.data?.name && !localStorage.getItem("adhd-display-name")) {
+      setDisplayName(profileQuery.data.name);
+      localStorage.setItem("adhd-display-name", profileQuery.data.name);
+    }
+  }, [profileQuery.data]);
+  const handleNameSave = (name: string) => {
+    setDisplayName(name);
+    localStorage.setItem("adhd-display-name", name);
+    setShowNamePrompt(false);
+    if (isAuthenticated) updateNameMut.mutate({ name });
+    toast.success(`Got it! I'll call you ${name} from now on ✦`, { duration: 3000 });
+  };
+  const handleNameSkip = () => {
+    localStorage.setItem("adhd-name-skipped", "1");
+    setShowNamePrompt(false);
+  };
+  // ── localStorage fallback (for unauthenticated users) ───
   const [localTasks,  setLocalTasks]  = useLocalStorage<Task[]>("adhd-tasks",  INITIAL_TASKS);
   const [localWins,   setLocalWins]   = useLocalStorage<Win[]>("adhd-wins",   []);
   const [localGoals,  setLocalGoals]  = useLocalStorage<Goal[]>("adhd-goals",  INITIAL_GOALS);
@@ -597,6 +629,7 @@ export default function Home() {
                 goals={goals}
                 agents={agents}
                 mood={mood}
+                displayName={displayName || undefined}
                 blockStreak={blockStreak}
                 blockHistory={blockHistory}
                 onNavigate={(s) => setActiveSection(s as Section)}
@@ -873,6 +906,13 @@ export default function Home() {
           onComplete={handleCheckInComplete}
           onSkip={() => dismissCheckIn(true)}
           onClose={() => dismissCheckIn(false)}
+          displayName={displayName || undefined}
+        />
+      )}
+      {showNamePrompt && (
+        <NamePrompt
+          onSave={handleNameSave}
+          onSkip={handleNameSkip}
         />
       )}
     </div>

@@ -22,7 +22,7 @@
   - Monthly day detail panel shows focus sessions as a dedicated Focus Tracker section
 
 ## Pending (User Suggestions)
-- [ ] Name personalisation — one-time name input, greet user as "Good morning, [Name]"
+- [x] Name personalisation — one-time name input, greet user as "Good morning, [Name]"
 - [ ] Space bar shortcut on Focus page to start/pause timer
 - [ ] Agent → Win auto-log when Agent marked as Done
 - [ ] AI reflection button inside day detail card for past days

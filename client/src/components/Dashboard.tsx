@@ -92,6 +92,7 @@ interface DashboardProps {
   blockHistory?: Record<string, number>;
   focusSessions?: number;
   allCategories?: string[];
+  displayName?: string;
 }
 
 const DAYS   = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -409,6 +410,7 @@ export function Dashboard({
   tasks, wins, goals, agents, mood, blockStreak = 0, focusSessions = 0,
   onNavigate, onSessionComplete, onBlockComplete, allCategories, onQuickDump,
   onTaskToggle, onTaskCreate, onGoalCreate, onAgentCreate, onWinCreate,
+  displayName,
 }: DashboardProps) {
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
@@ -532,7 +534,7 @@ export function Dashboard({
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <h1 className="text-2xl font-bold italic" style={{ fontFamily: "'Playfair Display', serif", color: INK }}>
-                  {getGreeting()}
+                  {getGreeting()}{displayName ? `, ${displayName}` : ""}
                 </h1>
                 {blockStreak > 0 && (
                   <div style={{ display: "flex", alignItems: "center", gap: 5, background: "oklch(0.58 0.18 340 / 0.10)", border: "1px solid oklch(0.58 0.18 340 / 0.30)", padding: "2px 8px", borderRadius: 20 }}>

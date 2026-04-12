@@ -54,6 +54,7 @@ interface DailyCheckInProps {
   onComplete: (data: CheckInResult) => void;
   onSkip: () => void;
   onClose: () => void; // X button — temporary dismiss
+  displayName?: string;
 }
 
 export interface CheckInResult {
@@ -119,7 +120,7 @@ function FaceGlowing({ active }: { active: boolean }) {
 const FACE_COMPONENTS = [FaceDrained, FaceLow, FaceOkay, FaceGood, FaceGlowing];
 
 /* ── Main component ── */
-export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps) {
+export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: DailyCheckInProps) {
   const [step, setStep] = useState<Step>("greeting");
   const [mitSuggestion, setMitSuggestion] = useState<string | null>(null);
   const [mood, setMood] = useState<number | null>(null);
@@ -282,10 +283,11 @@ export function DailyCheckIn({ onComplete, onSkip, onClose }: DailyCheckInProps)
   const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
   const greeting = (() => {
     const h = new Date().getHours();
-    if (h < 12) return "Good morning,";
-    if (h < 17) return "Good afternoon,";
-    if (h < 21) return "Good evening,";
-    return "Good night,";
+    const suffix = displayName ? ` ${displayName}` : "";
+    if (h < 12) return `Good morning${suffix},`;
+    if (h < 17) return `Good afternoon${suffix},`;
+    if (h < 21) return `Good evening${suffix},`;
+    return `Good night${suffix},`;
   })();
 
   const M = {

@@ -9,6 +9,7 @@ import { goalsRouter } from "./routers/goals";
 import { agentsRouter } from "./routers/agents";
 import { brainDumpRouter } from "./routers/braindump";
 import { logsRouter } from "./routers/logs";
+import { profileRouter } from "./routers/profile";
 
 export const appRouter = router({
   system: systemRouter,
@@ -28,6 +29,7 @@ export const appRouter = router({
   agents: agentsRouter,
   brainDump: brainDumpRouter,
   logs: logsRouter,
+  profile: profileRouter,
 });
 
 export type AppRouter = typeof appRouter;
