@@ -100,6 +100,16 @@ function IconAgents({ color }: { color: string }) {
   );
 }
 
+function IconStorage({ color }: { color: string }) {
+  return (
+    <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
+      {/* Cloud with up arrow */}
+      <path d="M5.5 13.5A3.5 3.5 0 015 6.5a4 4 0 017.9-.5A3 3 0 0115 12.5" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+      <path d="M10 10v6M8 14l2 2 2-2" stroke={color} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  );
+}
+
 function IconAI({ color }: { color: string }) {
   return (
     <svg width="17" height="17" viewBox="0 0 20 20" fill="none">
@@ -127,6 +137,7 @@ const NAV: Array<{
   { id: "goals",     short: "GOALS",  Icon: IconGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", Icon: IconAgents, title: "AI Agents"    },
   { id: "ai",        short: "AI",     Icon: IconAI,     title: "AI Features"  },
+  { id: "storage",   short: "STORE",  Icon: IconStorage, title: "Storage & Backup" },
 ];
 
 /* ── Floating timer pill ── */

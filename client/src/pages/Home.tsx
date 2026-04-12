@@ -43,6 +43,7 @@ import { toast } from "sonner";
 import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide-react";
 import { PixelDump } from "@/components/PixelIcons";
 import { NamePrompt } from "@/components/NamePrompt";
+import StorageBackup from "@/pages/StorageBackup";
 
 
 /* ── Compact mood pill SVG faces (same as MoodCheckIn) ── */
@@ -161,7 +162,7 @@ function GoalFlagIcon({ className, style }: { className?: string; style?: React.
   );
 }
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "dump" | "goals" | "agents" | "ai";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "dump" | "goals" | "agents" | "ai" | "storage";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
@@ -172,6 +173,7 @@ const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> 
   goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
   ai:         { title: "AI Features",  icon: Sparkles        },
+  storage:    { title: "Storage & Backup", icon: Star            },
 };
 
 const INITIAL_TASKS: Task[] = [
@@ -875,6 +877,12 @@ export default function Home() {
               <div className="p-8 min-h-[600px] flex flex-col">
                 <AIHub />
               </div>
+              </RetroPageWrapper>
+            )}
+
+            {activeSection === "storage" && (
+              <RetroPageWrapper title="storage.exe" sticker="star">
+                <StorageBackup />
               </RetroPageWrapper>
             )}
           </div>

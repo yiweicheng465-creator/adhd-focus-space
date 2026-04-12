@@ -131,3 +131,6 @@
 - [ ] Migrate Brain Dump entries from localStorage to database
 - [x] Migrate BrainDump entries from localStorage to database
 - [x] Persist AI chat messages to database
+- [x] Create central app storage utility (localStorage, export/import JSON)
+- [x] Build Storage & Backup settings page with Google Drive OAuth
+- [x] Implement Google Drive backup and restore (client-side only)
