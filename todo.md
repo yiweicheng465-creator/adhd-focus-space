@@ -138,3 +138,7 @@
 - [x] Add 7-day backup reminder toast in Home.tsx
 - [x] Auto-open FX panel when AI feature used without API key
 - [ ] 7-day backup reminder toast
+- [x] Fix NO_API_KEY error detection in all AI components (use isNoApiKeyError utility)
+- [x] Add API key validation (test call to LLM endpoint) before saving in FX settings
+- [x] Add ApiKeyDialog centered modal popup when AI feature used without API key
+- [x] Add Space bar shortcut to start/pause focus timer from anywhere on focus page

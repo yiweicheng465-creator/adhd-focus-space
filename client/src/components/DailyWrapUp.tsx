@@ -12,6 +12,7 @@ import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
 import { trpc } from "@/lib/trpc";
+import { handleAiError } from "@/lib/aiErrorHandler";
 import { Streamdown } from "streamdown";
 
 // ── Win category colours (must match DailyWins WIN_ICONS order) ──
@@ -309,14 +310,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
 
   const summaryMutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setAiSummary(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => {
-      if (err.message === "NO_API_KEY") {
-        window.dispatchEvent(new Event("openFxPanel"));
-        toast("No API key set — opening FX settings for you.", { duration: 4000 });
-      } else {
-        toast.error("AI summary failed. Try again.", { duration: 3000 });
-      }
-    },
+    onError: (err) => { handleAiError(err, "AI summary failed. Try again."); },
   });
 
   const handleGenerateSummary = () => {

@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import { trpc } from "@/lib/trpc";
+import { handleAiError } from "@/lib/aiErrorHandler";
 
 interface BrainDumpEntry {
   id: string;
@@ -188,14 +189,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       setAiDismissed(false);
       toast.success("AI sorted your thoughts!", { duration: 2500 });
     },
-    onError: (err) => {
-      if (err.message === "NO_API_KEY") {
-        window.dispatchEvent(new Event("openFxPanel"));
-        toast("No API key set — opening FX settings for you.", { duration: 4000 });
-      } else {
-        toast.error("AI couldn't categorise right now. Try again.", { duration: 3000 });
-      }
-    },
+    onError: (err) => { handleAiError(err, "AI couldn't categorise right now. Try again."); },
   });
 
   const handleAiCategorise = () => {

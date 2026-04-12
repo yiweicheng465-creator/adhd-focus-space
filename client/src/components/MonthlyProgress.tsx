@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight, Sparkles, Brain, CheckCircle2, Flame, Loader2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { handleAiError } from "@/lib/aiErrorHandler";
 import { Streamdown } from "streamdown";
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import type { Win } from "./DailyWins";
@@ -720,7 +721,7 @@ function MonthlyAIReview({
 
   const reviewMutation = trpc.ai.monthlyReview.useMutation({
     onSuccess: (data) => setReview(typeof data.review === "string" ? data.review : ""),
-    onError: () => {},
+    onError: (err) => { handleAiError(err, "AI review failed. Try again."); },
   });
 
   const handleGenerate = () => {

@@ -19,6 +19,7 @@ import type { Win } from "./DailyWins";
 import type { Agent } from "./AgentTracker";
 import type { Goal } from "./Goals";
 import { trpc } from "@/lib/trpc";
+import { handleAiError } from "@/lib/aiErrorHandler";
 
 /* ── localStorage keys ── */
 function getTodayKey() {
@@ -205,11 +206,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
       setMitSuggestion(data.mit ?? "");
     },
     onError: (err) => {
-      if (err.message !== "NO_API_KEY") {
-        setMitSuggestion("Couldn't load AI suggestion right now.");
-      }
-      window.dispatchEvent(new Event("openFxPanel"));
-      toast("No API key set — opening FX settings for you.", { duration: 4000 });
+      const wasNoKey = handleAiError(err, "Couldn't load AI suggestion right now.");
+      if (!wasNoKey) setMitSuggestion("Couldn't load AI suggestion right now.");
     },
   });
 

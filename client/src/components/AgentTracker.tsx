@@ -24,6 +24,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import { trpc } from "@/lib/trpc";
+import { handleAiError } from "@/lib/aiErrorHandler";
 
 /* ── URL-aware task text renderer ── */
 const URL_RE = /(https?:\/\/[^\s]+)/g;
@@ -140,14 +141,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       setPopupBrief(data.brief);
       setPopupFirstStep(data.firstStep);
     },
-    onError: (err) => {
-      if (err.message === "NO_API_KEY") {
-        window.dispatchEvent(new Event("openFxPanel"));
-        toast("No API key set — opening FX settings for you.", { duration: 4000 });
-      } else {
-        toast.error("AI couldn't generate a brief. You can fill it in manually.");
-      }
-    },
+    onError: (err) => { handleAiError(err, "AI couldn't generate a brief. You can fill it in manually."); },
   });
 
   const openCreatePopup = (task: Task) => {

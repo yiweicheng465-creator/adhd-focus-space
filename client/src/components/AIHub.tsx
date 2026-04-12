@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { Loader2, Sparkles, Brain, Clock, CalendarDays, Target, Bot, Wand2, ChevronRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+import { handleAiError, isNoApiKeyError } from "@/lib/aiErrorHandler";
 
 /* ── Retro lo-fi button style ── */
 const retroBtn: React.CSSProperties = {
@@ -125,6 +126,7 @@ function BrainDumpDemo() {
   const [result, setResult] = useState<Array<{ original: string; category: string; action: string; rewritten: string; emoji: string }> | null>(null);
   const mutation = trpc.ai.categorizeDump.useMutation({
     onSuccess: (data) => setResult(data.items),
+    onError: (err) => { handleAiError(err, "AI categorisation failed. Try again."); },
   });
 
   const CATEGORY_COLORS: Record<string, string> = {
@@ -196,7 +198,7 @@ function DailySummaryDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setResult(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   const runDemo = () => {
@@ -246,7 +248,7 @@ function FocusReflectionDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => setResult(typeof data.message === "string" ? data.message : ""),
-    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening FX settings for you."); } else { setResult("AI error. Try again."); } },
   });
 
   return (
@@ -305,6 +307,7 @@ function MonthlyReviewDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.monthlyReview.useMutation({
     onSuccess: (data) => setResult(typeof data.review === "string" ? data.review : ""),
+    onError: (err) => { handleAiError(err, "AI review failed. Try again."); },
   });
 
   const runDemo = () => {
@@ -354,7 +357,7 @@ function MITDemo() {
   const [result, setResult] = useState<{ mit: string; reason: string; warmup: string; encouragement: string } | null>(null);
   const mutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => { if (err.message === "NO_API_KEY") { window.dispatchEvent(new Event("openFxPanel")); setResult({ mit: "No API key set — opening FX settings for you.", reason: "", warmup: "", encouragement: "" }); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "No API key set — opening FX settings for you.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
   });
 
   const runDemo = () => {
@@ -425,6 +428,12 @@ function AICommandDemo() {
   const mutation = trpc.ai.command.useMutation({
     onSuccess: (data) => {
       setMessages((prev) => [...prev, { role: "assistant", content: data.reply }]);
+    },
+    onError: (err) => {
+      const isNoKey = isNoApiKeyError(err);
+      if (isNoKey) window.dispatchEvent(new CustomEvent("openFxPanel"));
+      const errMsg = isNoKey ? "No API key set — opening FX settings for you." : "AI error. Try again.";
+      setMessages((prev) => [...prev, { role: "assistant", content: errMsg }]);
     },
   });
 
@@ -521,6 +530,7 @@ function AgentBriefDemo() {
   const [result, setResult] = useState<{ name: string; brief: string } | null>(null);
   const mutation = trpc.ai.createAgentBrief.useMutation({
     onSuccess: (data) => setResult(data),
+    onError: (err) => { handleAiError(err, "AI brief generation failed. Try again."); },
   });
 
   return (

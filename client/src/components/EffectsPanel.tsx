@@ -104,16 +104,45 @@ export function EffectsPanel() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
+  const [apiKeyValidating, setApiKeyValidating] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const utils = trpc.useUtils();
   const updateApiKey = trpc.profile.updateApiKey.useMutation({
     onSuccess: () => {
       setApiKeySaved(true);
+      setApiKeyError(null);
       setTimeout(() => setApiKeySaved(false), 2000);
       utils.profile.getApiKey.invalidate();
-      toast.success("API key updated!");
+      toast.success("API key saved and verified!");
     },
     onError: () => toast.error("Failed to save API key."),
   });
+  const validateApiKey = trpc.profile.validateApiKey.useMutation({
+    onSuccess: () => {
+      // Key is valid — now save it
+      updateApiKey.mutate({ apiKey: apiKeyInput.trim() });
+    },
+    onError: (err) => {
+      setApiKeyValidating(false);
+      if (err.message === "INVALID_API_KEY") {
+        setApiKeyError("Invalid API key — please check and try again.");
+        toast.error("Invalid API key. Please check it and try again.", { duration: 4000 });
+      } else {
+        // Network/timeout issues — save anyway but warn
+        setApiKeyError(null);
+        updateApiKey.mutate({ apiKey: apiKeyInput.trim() });
+        toast("Couldn't verify key (network issue) — saved anyway.", { duration: 3000 });
+      }
+    },
+  });
+  const handleSaveApiKey = useCallback(() => {
+    const key = apiKeyInput.trim();
+    if (!key) return;
+    setApiKeyError(null);
+    setApiKeyValidating(true);
+    validateApiKey.mutate({ apiKey: key });
+  }, [apiKeyInput, validateApiKey]);
+  const isSaving = apiKeyValidating || validateApiKey.isPending || updateApiKey.isPending;
 
   const grainOn = intensity > 0;
   const iconColor = (open || grainOn || workMode)
@@ -308,12 +337,14 @@ export function EffectsPanel() {
                   {showApiKey ? "hide" : "show"}
                 </button>
               </div>
+              {apiKeyError && (
+                <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", marginTop: 4, lineHeight: 1.4 }}>
+                  ⚠ {apiKeyError}
+                </p>
+              )}
               <button
-                onClick={() => {
-                  if (!apiKeyInput.trim()) return;
-                  updateApiKey.mutate({ apiKey: apiKeyInput.trim() });
-                }}
-                disabled={!apiKeyInput.trim() || updateApiKey.isPending}
+                onClick={handleSaveApiKey}
+                disabled={!apiKeyInput.trim() || isSaving}
                 style={{
                   marginTop: 6,
                   width: "100%",
@@ -322,15 +353,15 @@ export function EffectsPanel() {
                   letterSpacing: "0.08em",
                   padding: "4px 0",
                   borderRadius: 3,
-                  border: "1.5px solid oklch(0.55 0.18 340)",
-                  background: apiKeySaved ? "oklch(0.48 0.16 340)" : "oklch(0.55 0.18 340)",
+                  border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
+                  background: apiKeySaved ? "oklch(0.48 0.16 340)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
                   color: "white",
-                  cursor: apiKeyInput.trim() ? "pointer" : "not-allowed",
-                  opacity: apiKeyInput.trim() ? 1 : 0.5,
-                  transition: "background 0.2s",
+                  cursor: apiKeyInput.trim() && !isSaving ? "pointer" : "not-allowed",
+                  opacity: apiKeyInput.trim() && !isSaving ? 1 : 0.5,
+                  transition: "background 0.2s, border-color 0.2s",
                 }}
               >
-                {apiKeySaved ? "✓ SAVED" : updateApiKey.isPending ? "SAVING..." : "SAVE KEY"}
+                {apiKeySaved ? "✓ SAVED" : isSaving ? (validateApiKey.isPending ? "VERIFYING..." : "SAVING...") : "SAVE KEY"}
               </button>
               <a
                 href="https://platform.openai.com/api-keys"
