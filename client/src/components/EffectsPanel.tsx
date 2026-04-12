@@ -429,7 +429,7 @@ export function EffectsPanel() {
                 }}>
                   {keyType === "openai"
                     ? "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access."
-                    : "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys."}
+                    : "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new."}
                 </div>
 
                 {/* Input row */}
@@ -439,7 +439,7 @@ export function EffectsPanel() {
                     type={showApiKey ? "text" : "password"}
                     value={apiKeyInput}
                     onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
-                    placeholder={keyType === "openai" ? "sk-..." : "manus-..."}
+                    placeholder={keyType === "openai" ? "sk-..." : "sk-An..."}
                     style={{
                       flex: 1,
                       fontSize: "0.50rem",
@@ -489,7 +489,7 @@ export function EffectsPanel() {
                 </button>
 
                 <a
-                  href={keyType === "openai" ? "https://platform.openai.com/api-keys" : "https://manus.im/settings/api"}
+                  href={keyType === "openai" ? "https://platform.openai.com/api-keys" : "https://manus.im"}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -502,7 +502,7 @@ export function EffectsPanel() {
                     letterSpacing: "0.04em",
                   }}
                 >
-                  {keyType === "openai" ? "→ platform.openai.com/api-keys" : "→ manus.im/settings/api"}
+                  {keyType === "openai" ? "→ platform.openai.com/api-keys" : "→ manus.im → Settings → Integrations"}
                 </a>
               </div>
             )}

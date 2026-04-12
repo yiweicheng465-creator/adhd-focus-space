@@ -39,11 +39,11 @@ const KEY_INFO: Record<KeyType, {
   },
   manus: {
     label: "Manus API Key",
-    placeholder: "manus-...",
-    link: "https://manus.im/settings/api",
-    linkLabel: "manus.im/settings/api",
-    paymentNote: "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys.",
-    howToGet: "Go to manus.im → Settings → API Integration → Generate Key",
+    placeholder: "sk-An...",
+    link: "https://manus.im",
+    linkLabel: "manus.im → Settings → Integrations",
+    paymentNote: "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new.",
+    howToGet: "manus.im → Profile icon → Settings → Integrations → API keys → Create new",
   },
 };
 
@@ -99,16 +99,8 @@ export function ApiKeyDialog() {
     validateApiKey.mutate({ apiKey: key, keyType });
   }, [apiKeyInput, isSaving, keyType, validateApiKey]);
 
-  // Listen for openFxPanel event
-  useEffect(() => {
-    function onOpen() {
-      setOpen(true);
-      setKeyError(null);
-      setKeySaved(false);
-    }
-    window.addEventListener("openFxPanel", onOpen);
-    return () => window.removeEventListener("openFxPanel", onOpen);
-  }, []);
+  // Note: openFxPanel is now handled by EffectsPanel (settings.exe sidebar window)
+  // ApiKeyDialog is kept as a standalone component but no longer auto-opens on that event
 
   // Reset input when switching key type
   const handleKeyTypeChange = (type: KeyType) => {

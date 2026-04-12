@@ -33,10 +33,10 @@ const KEY_INFO: Record<KeyType, {
     paymentNote: "⚠ Requires a paid OpenAI account with credits. ChatGPT Plus does NOT include API access — separate billing needed at platform.openai.com.",
   },
   manus: {
-    placeholder: "manus-...",
-    link: "https://manus.im/settings/api",
-    linkLabel: "manus.im/settings/api",
-    paymentNote: "⚠ Requires a paid Manus subscription. Free accounts cannot generate API keys.",
+    placeholder: "sk-An...",
+    link: "https://manus.im",
+    linkLabel: "manus.im → Settings → Integrations",
+    paymentNote: "Get your key: manus.im → click your profile icon → Settings → Integrations → API keys → Create new.",
   },
 };
 

@@ -76,6 +76,8 @@ export const profileRouter = router({
       keyType: KEY_TYPE_SCHEMA,
     }))
     .mutation(async ({ input }) => {
+      // Manus keys cannot be validated via a simple test call — skip validation and trust the user
+      if (input.keyType === "manus") return { valid: true };
       const apiUrl = resolveValidationUrl(input.keyType);
       const model = resolveValidationModel(input.keyType);
       try {
