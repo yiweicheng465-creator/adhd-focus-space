@@ -68,6 +68,38 @@ const Toaster = ({ ...props }: ToasterProps) => {
           border-radius: 2px !important;
           color: oklch(0.30 0.030 320) !important;
         }
+        /* Action button (e.g. "Backup now") — override the default black */
+        [data-sonner-toast] [data-button] {
+          background: oklch(0.58 0.18 340) !important;
+          border: 2px solid oklch(0.30 0.030 320) !important;
+          box-shadow: 2px 2px 0px oklch(0.30 0.030 320) !important;
+          border-radius: 3px !important;
+          color: #FAF6F1 !important;
+          font-family: 'Space Mono', monospace !important;
+          font-size: 9px !important;
+          font-weight: 700 !important;
+          letter-spacing: 0.10em !important;
+          text-transform: uppercase !important;
+          padding: 4px 10px !important;
+          cursor: pointer !important;
+          transition: background 0.15s !important;
+        }
+        [data-sonner-toast] [data-button]:hover {
+          background: oklch(0.50 0.18 340) !important;
+        }
+        /* Cancel button in toasts */
+        [data-sonner-toast] [data-cancel] {
+          background: transparent !important;
+          border: 1.5px solid oklch(0.72 0.060 340) !important;
+          border-radius: 3px !important;
+          color: oklch(0.55 0.06 340) !important;
+          font-family: 'Space Mono', monospace !important;
+          font-size: 9px !important;
+          letter-spacing: 0.08em !important;
+          text-transform: uppercase !important;
+          padding: 4px 10px !important;
+          cursor: pointer !important;
+        }
         /* Icon */
         [data-sonner-toast] [data-icon] {
           font-size: 13px !important;

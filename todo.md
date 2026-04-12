@@ -148,3 +148,4 @@
 - [ ] Add accurate payment requirement messaging for each key type
 - [ ] Add keyType field to users DB schema and migrate
 - [ ] Update server-side AI router to route to correct LLM endpoint based on key type
+- [x] Change all black/dark buttons to pink retro style (Sonner toast action buttons + any other dark buttons)
