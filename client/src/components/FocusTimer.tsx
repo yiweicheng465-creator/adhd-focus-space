@@ -584,12 +584,32 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
   const getTotalSessions = () => {
     try {
       const raw = localStorage.getItem("adhd-focus-session-list");
-      if (!raw) return sessions; // fall back to current block sessions
-      const list = JSON.parse(raw) as unknown[];
-      return Array.isArray(list) ? list.length : sessions;
+      if (!raw) return sessions;
+      const data = JSON.parse(raw);
+      // data is { dateKey: entry[] } — sum all entries across all days
+      if (data && typeof data === "object" && !Array.isArray(data)) {
+        return Object.values(data).reduce((sum: number, arr) => sum + (Array.isArray(arr) ? arr.length : 0), 0);
+      }
+      // fallback: plain array
+      if (Array.isArray(data)) return data.length;
+      return sessions;
     } catch { return sessions; }
   };
-  const targetGrowth = Math.min(getTotalSessions(), 100);
+  const [totalSessions, setTotalSessions] = useState(() => getTotalSessions());
+  // Re-read total sessions whenever a focus session is recorded
+  useEffect(() => {
+    const onStorage = () => setTotalSessions(getTotalSessions());
+    window.addEventListener("adhd-storage-update", onStorage);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("adhd-storage-update", onStorage);
+      window.removeEventListener("storage", onStorage);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // Also update when sessions (current block) changes
+  useEffect(() => { setTotalSessions(getTotalSessions()); }, [sessions]); // eslint-disable-line react-hooks/exhaustive-deps
+  const targetGrowth = Math.min(totalSessions, 100);
   const [displayedGrowth, setDisplayedGrowth] = useState(targetGrowth);
   // Animate counter up whenever targetGrowth increases
   useEffect(() => {
@@ -1061,14 +1081,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 9, fontWeight: 700,
-                color: displayedGrowth >= 100 ? ACCENT : DARK,
+                color: displayedGrowth >= 100 ? ACCENT : "oklch(0.72 0.12 350)",
                 letterSpacing: "0.04em",
                 lineHeight: 1,
               }}>{displayedGrowth}%</span>
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 5, letterSpacing: "0.12em",
-                color: BORDER, textTransform: "uppercase", marginTop: 1,
+                color: "oklch(0.72 0.10 350)", textTransform: "uppercase", marginTop: 1,
               }}>grown</span>
             </div>
           </div>
@@ -1114,11 +1134,11 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             </div>
           )}
 
-          {/* Care log — latest 2 visible, scroll for history */}
+          {/* Care log — fixed height scrollable, never grows the widget */}
           {careLog.length > 0 && (
-            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, ...(fillHeight ? { flex: 1, minHeight: 0, display: "flex", flexDirection: "column" } : {}) }}>
-              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace", flexShrink: 0 }}>care log</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", ...(fillHeight ? { flex: 1, minHeight: 0 } : { maxHeight: 56 }) }}>
+            <div style={{ borderTop: `1px solid ${BORDER}30`, padding: "5px 10px 7px", background: PANEL, flexShrink: 0 }}>
+              <div style={{ fontSize: 6, letterSpacing: "0.14em", color: BORDER, marginBottom: 3, textTransform: "uppercase", fontFamily: "'JetBrains Mono', monospace" }}>care log</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 2, overflowY: "auto", maxHeight: 80 }}>
                 {careLog.map((entry, i) => (
                   <div key={entry.id} style={{ display: "flex", alignItems: "center", gap: 5, opacity: i === 0 ? 1 : i === 1 ? 0.75 : 0.4 }}>
                     <span style={{ fontSize: 9 }}>{entry.emoji}</span>
@@ -1133,7 +1153,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
           <div style={{
             display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
             background: PANEL, borderTop: `2px solid ${DARK}`,
-            ...(fillHeight && careLog.length === 0 ? { marginTop: "auto" } : {}),
+            marginTop: "auto",
             flexShrink: 0,
           }}>
             {/* Quit */}

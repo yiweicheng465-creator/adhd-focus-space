@@ -23,6 +23,7 @@ const retroBtn: React.CSSProperties = {
   gap: "5px",
   transition: "box-shadow 0.1s, transform 0.1s",
   userSelect: "none" as const,
+  alignSelf: "flex-start",
 };
 
 /* Inactive toggle variant — light cream background, deep pink text */
@@ -635,15 +636,6 @@ export function AIHub() {
         badge="CHECK-IN"
       >
         <MITDemo />
-      </FeatureCard>
-
-      <FeatureCard
-        icon={Clock}
-        title="Focus Micro-Reflection"
-        description="Before each session, AI asks one simple intention question. After, it gives a 1-2 sentence reflection on what happened — even if you went off-track."
-        badge="FOCUS TIMER"
-      >
-        <FocusReflectionDemo />
       </FeatureCard>
 
       <FeatureCard

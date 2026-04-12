@@ -611,7 +611,7 @@ export function Dashboard({
       </div>
 
       {/* ── MIDDLE: 3-column grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, height: 520, minHeight: 0 }}>
 
         {/* Col 1: Focus Timer — FocusTimer has its own CYBER_PET.EXE chrome, no outer title bar */}
         <div style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", position: "relative" }}>
