@@ -113,6 +113,7 @@
 - [x] Persist care log to localStorage so it survives section navigation
 - [x] Fix FocusTimer AND AI chat box to fixed height — neither should grow with content
 - [x] Remove Focus Micro-Reflection card from AI tab page
+- [x] Lighten and shrink placeholder text in task and goal input fields
 - [x] Shorten full-width buttons in AI tab page to auto-width
 - [x] Fix growth % counter — not incrementing and color too dark
 - [x] Migrate tasks/goals/wins/brain-dump/agents/focus-sessions from localStorage to MySQL database (tRPC procedures + DB tables created)

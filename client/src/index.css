@@ -203,10 +203,11 @@
     cursor: var(--cursor-hand, pointer);
   }
 
-  input::placeholder {
+  input::placeholder,
+  textarea::placeholder {
     font-weight: 300;
-    font-size: 0.8rem;
-    color: oklch(0.68 0.012 68);
+    font-size: 0.72rem;
+    color: oklch(0.80 0.018 340);
     letter-spacing: 0.01em;
   }
 }
