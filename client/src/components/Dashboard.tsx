@@ -611,14 +611,14 @@ export function Dashboard({
       </div>
 
       {/* ── MIDDLE: 3-column grid ── */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, height: 520, minHeight: 0 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, alignItems: "start", minHeight: 0 }}>
 
         {/* Col 1: Focus Timer — FocusTimer has its own CYBER_PET.EXE chrome, no outer title bar */}
-        <div style={{ display: "flex", flexDirection: "column", minHeight: 0, overflow: "hidden", position: "relative" }}>
-          <div style={{ position: "relative", display: "flex", flexDirection: "column", flex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", overflow: "hidden", position: "relative" }}>
+          <div style={{ position: "relative", display: "flex", flexDirection: "column" }}>
             {/* Cat sticker: pink standing cat — top-right of focus timer */}
             <img src={CAT_PINK} alt="" aria-hidden="true" style={{ position: "absolute", top: -8, right: -8, width: 56, opacity: 0.40, pointerEvents: "none", zIndex: 5 }} />
-            <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} fillHeight />
+            <FocusTimer onSessionComplete={onSessionComplete} onBlockComplete={onBlockComplete} />
           </div>
         </div>
 

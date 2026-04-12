@@ -1018,7 +1018,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
 
       {/* ── Main timer scene (idle / running / paused) ── */}
       {showMainScene && (
-        <div style={{ display: "flex", flexDirection: "column", ...(fillHeight ? { flex: 1, minHeight: 0 } : {}) }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
           {/* Pet screen */}
           <div style={{
             background: SCREEN_BG,
@@ -1153,7 +1153,6 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
           <div style={{
             display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
             background: PANEL, borderTop: `2px solid ${DARK}`,
-            marginTop: "auto",
             flexShrink: 0,
           }}>
             {/* Quit */}
