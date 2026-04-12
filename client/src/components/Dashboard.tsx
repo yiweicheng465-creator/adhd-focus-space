@@ -205,9 +205,10 @@ function AICommandPanel({
     onError: (err) => {
       const isNoKey = isNoApiKeyError(err);
       const isQuota = isQuotaError(err);
-      if (isNoKey || isQuota) window.dispatchEvent(new CustomEvent("openFxPanel"));
+      if (isNoKey) window.dispatchEvent(new CustomEvent("openApiKeyDialog"));
+      else if (isQuota) window.dispatchEvent(new CustomEvent("openFxPanel"));
       const errMsg = isNoKey
-        ? "No API key set — opening Settings for you."
+        ? "No API key set — add your Manus key to unlock AI features."
         : isQuota
         ? "API quota exceeded — opening Settings so you can switch to a Manus key."
         : "Sorry, something went wrong. Try again?";

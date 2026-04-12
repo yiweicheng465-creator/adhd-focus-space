@@ -156,5 +156,8 @@
 - [x] Auto-select Manus tab in EffectsPanel when settings opens and no key is configured yet
 - [x] Add key status dot (green/red) next to SET icon in Sidebar
 - [x] Update NamePrompt to default to Manus tab instead of OpenAI
-- [x] Fix Manus API routing: use ENV.forgeApiUrl with user's own Manus key as Bearer token
+- [x] Fix Manus API routing: use forge.manus.im (public API) for user keys, not forge.manus.ai (internal server endpoint)
 - [x] Test Manus key end-to-end with the provided key
+- [x] Fix ApiKeyDialog auto-open: dispatch openApiKeyDialog event from all AI error handlers when NO_API_KEY
+- [x] Add Test Connection button in SET panel (ping forge with saved key, show inline green/red result)
+- [x] Implement 7-day backup reminder toast (check lastBackupDate in localStorage, nudge if overdue)

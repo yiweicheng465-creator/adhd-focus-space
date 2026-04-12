@@ -165,6 +165,23 @@ export function EffectsPanel() {
   }, [apiKeyInput, keyType, validateApiKey, updateApiKey]);
 
   const isSaving = apiKeyValidating || validateApiKey.isPending || updateApiKey.isPending;
+
+  // Test connection state
+  const [testResult, setTestResult] = useState<{ ok: boolean; latencyMs?: number; note?: string } | null>(null);
+  const [testError, setTestError] = useState<string | null>(null);
+  const testConnection = trpc.profile.testConnection.useMutation({
+    onSuccess: (data) => {
+      setTestResult({ ok: true, latencyMs: data.latencyMs, note: data.note });
+      setTestError(null);
+    },
+    onError: (err) => {
+      setTestResult(null);
+      if (err.message === "NO_API_KEY") setTestError("No key saved yet — save a key first.");
+      else if (err.message === "INVALID_API_KEY") setTestError("Key rejected (401) — check your key.");
+      else if (err.message === "CONNECTION_FAILED") setTestError("Connection failed — check network.");
+      else setTestError(`Error: ${err.message}`);
+    },
+  });
   const grainOn = intensity > 0;
   const iconColor = (open || grainOn || workMode)
     ? "oklch(0.48 0.18 340)"
@@ -606,6 +623,40 @@ export function EffectsPanel() {
                     padding: "3px 0",
                   }}>
                     ✓ Key saved: {savedKeyData.maskedKey} — enter new key to update
+                  </div>
+                )}
+                {/* Test Connection button — only shown when a key is saved and no new key is being entered */}
+                {savedKeyData?.hasKey && !apiKeyInput.trim() && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 3 }}>
+                    <button
+                      onClick={() => { setTestResult(null); setTestError(null); testConnection.mutate(); }}
+                      disabled={testConnection.isPending}
+                      style={{
+                        width: "100%",
+                        fontSize: "0.45rem",
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.06em",
+                        padding: "4px 0",
+                        borderRadius: 3,
+                        border: "1.5px solid oklch(0.70 0.08 240)",
+                        background: testConnection.isPending ? "oklch(0.92 0.03 240)" : "oklch(0.96 0.02 240)",
+                        color: "oklch(0.38 0.10 240)",
+                        cursor: testConnection.isPending ? "not-allowed" : "pointer",
+                        transition: "background 0.15s",
+                      }}
+                    >
+                      {testConnection.isPending ? "⏳ TESTING..." : "⚡ TEST CONNECTION"}
+                    </button>
+                    {testResult && (
+                      <div style={{ fontSize: "0.40rem", fontFamily: "'Space Mono', monospace", color: "oklch(0.40 0.16 168)", textAlign: "center", letterSpacing: "0.04em" }}>
+                        ✓ {testResult.note}{testResult.latencyMs ? ` (${testResult.latencyMs}ms)` : ""}
+                      </div>
+                    )}
+                    {testError && (
+                      <div style={{ fontSize: "0.40rem", fontFamily: "'Space Mono', monospace", color: "oklch(0.52 0.20 25)", textAlign: "center", letterSpacing: "0.04em" }}>
+                        ⚠ {testError}
+                      </div>
+                    )}
                   </div>
                 )}
 

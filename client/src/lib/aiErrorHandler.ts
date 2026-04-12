@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 /**
- * Detects a NO_API_KEY error from tRPC and dispatches the openFxPanel event.
+ * Detects a NO_API_KEY error from tRPC.
  * Returns true if the error was a NO_API_KEY error, false otherwise.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,7 +22,8 @@ export function isQuotaError(err: any): boolean {
 
 /**
  * Handles an AI error with specific messages for common failure modes.
- * Both NO_API_KEY and quota errors open the Settings panel on the API Key tab.
+ * - NO_API_KEY: opens the centered ApiKeyDialog modal for seamless key entry
+ * - Quota errors: opens the SET panel so the user can switch provider
  *
  * @param err - The tRPC error object
  * @param fallbackMessage - Optional custom message for unrecognised errors
@@ -34,11 +35,13 @@ export function handleAiError(
   fallbackMessage = "AI feature unavailable. Try again."
 ): boolean {
   if (isNoApiKeyError(err)) {
-    window.dispatchEvent(new CustomEvent("openFxPanel"));
-    toast("No API key set — opening Settings for you.", { duration: 4000 });
+    // Open the centered ApiKeyDialog modal for a seamless key-entry experience
+    window.dispatchEvent(new CustomEvent("openApiKeyDialog"));
+    toast("No API key set — add your Manus key to unlock AI features.", { duration: 4000 });
     return true;
   }
   if (isQuotaError(err)) {
+    // Quota errors open the SET panel so the user can switch provider
     window.dispatchEvent(new CustomEvent("openFxPanel"));
     toast.error("API quota exceeded — opening Settings so you can switch to a Manus key.", { duration: 6000 });
     return false;

@@ -99,8 +99,18 @@ export function ApiKeyDialog() {
     validateApiKey.mutate({ apiKey: key, keyType });
   }, [apiKeyInput, isSaving, keyType, validateApiKey]);
 
-  // Note: openFxPanel is now handled by EffectsPanel (settings.exe sidebar window)
-  // ApiKeyDialog is kept as a standalone component but no longer auto-opens on that event
+  // Listen for openApiKeyDialog event — auto-opens this centered modal
+  useEffect(() => {
+    function onOpen() {
+      setOpen(true);
+      setKeyType("manus");
+      setApiKeyInput("");
+      setKeyError(null);
+      setKeySaved(false);
+    }
+    window.addEventListener("openApiKeyDialog", onOpen);
+    return () => window.removeEventListener("openApiKeyDialog", onOpen);
+  }, []);
 
   // Reset input when switching key type
   const handleKeyTypeChange = (type: KeyType) => {

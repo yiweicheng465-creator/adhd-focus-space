@@ -10,7 +10,6 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
 import { getDb } from "../db";
 import { users } from "../../drizzle/schema";
-import { ENV } from "../_core/env";
 
 /** Fetch the user's personal API key + routing config from the DB.
  * For Manus mode, uses the user's own Manus key against the Manus forge endpoint.
@@ -27,14 +26,11 @@ async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUr
   const key = rows[0]?.apiKey?.trim();
 
   if (keyType === "manus") {
-    // Manus mode: user provides their own Manus API key from manus.im → Settings → Integrations
-    // Route to the Manus forge endpoint using ENV.forgeApiUrl (the built-in forge URL from the platform)
+    // Manus mode: user provides their own Manus API key from manus.im → Settings → API Keys
+    // IMPORTANT: User Manus keys go to forge.manus.im (public API), NOT ENV.forgeApiUrl
+    // ENV.forgeApiUrl = forge.manus.ai is the INTERNAL server endpoint for the built-in server key only.
     if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
-    const apiUrl = ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-      ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-      : "https://forge.manus.im/v1/chat/completions";
-    // Use gemini-2.5-flash for Manus forge endpoint (OpenAI models not available there)
-    return { apiKey: key, apiUrl, model: "gemini-2.5-flash" };
+    return { apiKey: key, apiUrl: "https://forge.manus.im/v1/chat/completions", model: "gemini-2.5-flash" };
   }
 
   // OpenAI mode: require user's own OpenAI key

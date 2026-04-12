@@ -198,7 +198,7 @@ function DailySummaryDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.dailySummary.useMutation({
     onSuccess: (data) => setResult(typeof data.summary === "string" ? data.summary : ""),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening Settings for you."); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("API quota exceeded — opening Settings so you can switch to a Manus key."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openApiKeyDialog")); setResult("No API key set — add your Manus key to unlock AI features."); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("API quota exceeded — opening Settings so you can switch to a Manus key."); } else { setResult("AI error. Try again."); } },
   });
 
   const runDemo = () => {
@@ -248,7 +248,7 @@ function FocusReflectionDemo() {
   const [result, setResult] = useState<string | null>(null);
   const mutation = trpc.ai.focusReflection.useMutation({
     onSuccess: (data) => setResult(typeof data.message === "string" ? data.message : ""),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("No API key set — opening Settings for you."); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("API quota exceeded — opening Settings so you can switch to a Manus key."); } else { setResult("AI error. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openApiKeyDialog")); setResult("No API key set — add your Manus key to unlock AI features."); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult("API quota exceeded — opening Settings so you can switch to a Manus key."); } else { setResult("AI error. Try again."); } },
   });
 
   return (
@@ -357,7 +357,7 @@ function MITDemo() {
   const [result, setResult] = useState<{ mit: string; reason: string; warmup: string; encouragement: string } | null>(null);
   const mutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => setResult(data),
-    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "No API key set — opening Settings for you.", reason: "", warmup: "", encouragement: "" }); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "API quota exceeded — opening Settings so you can switch to a Manus key.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
+    onError: (err) => { if (isNoApiKeyError(err)) { window.dispatchEvent(new CustomEvent("openApiKeyDialog")); setResult({ mit: "No API key set — add your Manus key to unlock AI features.", reason: "", warmup: "", encouragement: "" }); } else if (isQuotaError(err)) { window.dispatchEvent(new CustomEvent("openFxPanel")); setResult({ mit: "API quota exceeded — opening Settings so you can switch to a Manus key.", reason: "", warmup: "", encouragement: "" }); } else { handleAiError(err, "AI suggestion failed. Try again."); } },
   });
 
   const runDemo = () => {
@@ -432,8 +432,9 @@ function AICommandDemo() {
     onError: (err) => {
       const isNoKey = isNoApiKeyError(err);
       const isQuota = isQuotaError(err);
-      if (isNoKey || isQuota) window.dispatchEvent(new CustomEvent("openFxPanel"));
-      const errMsg = isNoKey ? "No API key set — opening Settings for you." : isQuota ? "API quota exceeded — opening Settings so you can switch to a Manus key." : "AI error. Try again.";
+      if (isNoKey) window.dispatchEvent(new CustomEvent("openApiKeyDialog"));
+      else if (isQuota) window.dispatchEvent(new CustomEvent("openFxPanel"));
+      const errMsg = isNoKey ? "No API key set — add your Manus key to unlock AI features." : isQuota ? "API quota exceeded — opening Settings so you can switch to a Manus key." : "AI error. Try again.";
       setMessages((prev) => [...prev, { role: "assistant", content: errMsg }]);
     },
   });

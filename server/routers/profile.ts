@@ -13,16 +13,15 @@ function resolveValidationUrl(keyType: "openai" | "manus"): string {
   if (keyType === "openai") {
     return "https://api.openai.com/v1/chat/completions";
   }
-  // Manus API uses the same forge endpoint
-  return ENV.forgeApiUrl && ENV.forgeApiUrl.trim().length > 0
-    ? `${ENV.forgeApiUrl.replace(/\/$/, "")}/v1/chat/completions`
-    : "https://forge.manus.im/v1/chat/completions";
+  // User Manus keys go to forge.manus.im (the public API), NOT ENV.forgeApiUrl
+  // ENV.forgeApiUrl = forge.manus.ai is the internal server endpoint for the built-in key only
+  return "https://forge.manus.im/v1/chat/completions";
 }
 
 /** Resolve the correct model for validation based on key type */
 function resolveValidationModel(keyType: "openai" | "manus"): string {
   if (keyType === "openai") return "gpt-4o-mini";
-  return "claude-3-5-haiku-20241022";
+  return "gemini-2.5-flash";
 }
 
 export const profileRouter = router({
@@ -125,6 +124,41 @@ export const profileRouter = router({
         .where(eq(users.openId, ctx.user.openId));
       return { success: true };
     }),
+
+  // Test the currently saved API key by making a minimal LLM call
+  testConnection: protectedProcedure.mutation(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
+    const rows = await db
+      .select({ apiKey: users.apiKey, keyType: users.keyType })
+      .from(users)
+      .where(eq(users.openId, ctx.user.openId))
+      .limit(1);
+    const key = rows[0]?.apiKey?.trim();
+    const keyType = (rows[0]?.keyType ?? "openai") as "openai" | "manus";
+    if (!key) throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
+    const apiUrl = resolveValidationUrl(keyType);
+    const model = resolveValidationModel(keyType);
+    const startMs = Date.now();
+    try {
+      const res = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+        body: JSON.stringify({ model, messages: [{ role: "user", content: "hi" }], max_tokens: 5 }),
+        signal: AbortSignal.timeout(12_000),
+      });
+      const latencyMs = Date.now() - startMs;
+      if (res.status === 401 || res.status === 403) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "INVALID_API_KEY" });
+      }
+      if (res.status === 429) return { ok: true, latencyMs, note: "Rate limited but key is valid" };
+      if (!res.ok) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: `API_ERROR:${res.status}` });
+      return { ok: true, latencyMs, note: "Connection successful" };
+    } catch (err) {
+      if (err instanceof TRPCError) throw err;
+      throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "CONNECTION_FAILED" });
+    }
+  }),
 
   // Save name + API key together (used by the hello.exe setup modal)
   setupProfile: protectedProcedure

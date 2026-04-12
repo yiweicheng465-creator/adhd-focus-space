@@ -249,38 +249,38 @@ export default function Home() {
     }
     window.addEventListener("navigateTo", onNavigateTo);
     return () => window.removeEventListener("navigateTo", onNavigateTo);
-  }, []);
-
-  // ── 7-day backup reminder ───────────────────────────────
+  }, [])  // ── 7-day backup reminder ───────────────────────────────────────────
   React.useEffect(() => {
     const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
     const lastBackup = Number(localStorage.getItem("adhd-last-backup") ?? 0);
     const lastReminder = Number(localStorage.getItem("adhd-backup-reminder-shown") ?? 0);
     const now = Date.now();
-    // Only show if: never backed up (or >7 days ago) AND reminder not shown today
-    const needsReminder = (now - lastBackup) > SEVEN_DAYS;
-    const shownToday = (now - lastReminder) < 24 * 60 * 60 * 1000;
-    if (needsReminder && !shownToday) {
+    // Only show if: never backed up (or >7 days ago) AND reminder not shown in the last 24h
+    const neverBacked = lastBackup === 0;
+    const overdueBackup = !neverBacked && (now - lastBackup) > SEVEN_DAYS;
+    const needsReminder = neverBacked || overdueBackup;
+    const shownRecently = (now - lastReminder) < 24 * 60 * 60 * 1000;
+    if (needsReminder && !shownRecently) {
+      // Delay: 6s for first-time nudge, 4s for overdue
+      const delay = neverBacked ? 6000 : 4000;
+      const msg = neverBacked
+        ? "💾 No backup yet — your tasks & wins live in your browser. Download a backup to keep them safe."
+        : `⏰ Last backup was ${Math.floor((now - lastBackup) / 86_400_000)} days ago — time for a fresh one?`;
       const t = setTimeout(() => {
         localStorage.setItem("adhd-backup-reminder-shown", String(now));
-        toast(
-          "You haven't backed up in a while — want to download a backup?",
-          {
-            duration: 12000,
-            action: {
-              label: "Backup now",
-              onClick: () => {
-                // Navigate to STORE section
-                window.dispatchEvent(new CustomEvent("navigateTo", { detail: "store" }));
-              },
+        toast(msg, {
+          duration: 14000,
+          action: {
+            label: "Backup now →",
+            onClick: () => {
+              window.dispatchEvent(new CustomEvent("navigateTo", { detail: "storage" }));
             },
-          }
-        );
-      }, 4000);
+          },
+        });
+      }, delay);
       return () => clearTimeout(t);
     }
   }, []);
-
   const handleNameSave = (name: string, apiKey?: string, keyType?: "openai" | "manus") => {
     setDisplayName(name);
     localStorage.setItem("adhd-display-name", name);
