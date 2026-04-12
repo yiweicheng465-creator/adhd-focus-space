@@ -159,9 +159,15 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
   const completedRef = useRef(false);
   const startedAtRef = useRef<number | null>(null);
   const remainingAtStartRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
+  // Always mirrors the latest `remaining` state so the countdown useEffect
+  // can read the true current value without a stale closure.
+  const remainingRef = useRef<number>(DEFAULT_DURATIONS.focus * 60);
   const onSessionCompleteRef = useRef<(() => void) | null>(null);
   const onBlockCompleteRef = useRef<(() => void) | null>(null);
   const onQuitRef = useRef<(() => void) | null>(null);
+
+  // Keep remainingRef in sync with state
+  useEffect(() => { remainingRef.current = remaining; }, [remaining]);
 
   // Derived
   const totalSec = durations[mode] * 60;
@@ -347,7 +353,9 @@ export function TimerProvider({ children }: { children: React.ReactNode }) {
       return;
     }
     startedAtRef.current = Date.now();
-    remainingAtStartRef.current = remaining;
+    // Use the ref (not the stale closure value) so we always start from the
+    // true current remaining seconds, even if React batched the state update.
+    remainingAtStartRef.current = remainingRef.current;
 
     intervalRef.current = setInterval(() => {
       if (startedAtRef.current === null) return;

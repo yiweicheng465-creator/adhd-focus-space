@@ -144,8 +144,9 @@
 - [x] Add Space bar shortcut to start/pause focus timer from anywhere on focus page
 - [x] Remove Space bar shortcut from FocusTimer (it shortens the running timer)
 - [x] Restyle all Sonner toasts to match retro lo-fi aesthetic (Space Mono font, pink palette, retro border)
-- [ ] Add key type selector (OpenAI / Manus) to NamePrompt, EffectsPanel, and ApiKeyDialog
-- [ ] Add accurate payment requirement messaging for each key type
-- [ ] Add keyType field to users DB schema and migrate
-- [ ] Update server-side AI router to route to correct LLM endpoint based on key type
+- [x] Add key type selector (OpenAI / Manus) to NamePrompt, EffectsPanel, and ApiKeyDialog
+- [x] Add accurate payment requirement messaging for each key type
+- [x] Add keyType field to users DB schema and migrate
+- [x] Update server-side AI router to route to correct LLM endpoint based on key type
 - [x] Change all black/dark buttons to pink retro style (Sonner toast action buttons + any other dark buttons)
+- [x] Fix timer starting 2 seconds short (shows 24:58 instead of 25:00 on Start click)
