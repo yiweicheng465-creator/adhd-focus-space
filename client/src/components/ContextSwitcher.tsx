@@ -1,12 +1,13 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Context Switcher v4.0 (Dynamic Categories)
+   ADHD FOCUS SPACE — Context Switcher v5.0 (m-chip style)
+   Matches Brain Dump filter button style: m-chip / m-chip active
    Work  → sage green  oklch(0.48 0.07 145)
    Personal → dusty mauve  oklch(0.52 0.06 20)
    Custom → auto-generated Morandi palette from label hash
    ============================================================ */
 
 import { cn } from "@/lib/utils";
-import { Briefcase, LayoutGrid, User, Hash, X } from "lucide-react";
+import { Briefcase, LayoutGrid, User, Hash } from "lucide-react";
 
 // ItemContext is now a flexible string — "work" | "personal" | any custom tag
 export type ItemContext   = string;
@@ -41,7 +42,6 @@ export const CONTEXT_CONFIG = BUILTIN_CONTEXT_CONFIG;
 
 /* Generate a deterministic dreamy pastel color from a string label */
 function hashColor(label: string): { color: string; bg: string; border: string } {
-  // Dreamy hue palette: pink, lavender, mint, sky-blue, soft yellow
   const hues = [340, 355, 290, 270, 220, 200, 168, 150, 60, 40, 310, 330, 180];
   let hash = 0;
   for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) & 0xffff;
@@ -76,17 +76,23 @@ interface ContextSwitcherProps {
   counts?: Record<string, number>;
   /** All known contexts to show as tabs (besides "all") */
   contexts?: string[];
-  /** Called when user deletes a custom (non-builtin) context tag */
+  /** Called when user deletes a custom (non-builtin) context tag — kept for API compat but × button removed */
   onDeleteContext?: (ctx: string) => void;
   /** Optional label shown before the filter buttons, e.g. "FILTER BY TAG" */
   label?: string;
 }
 
-export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteContext, label }: ContextSwitcherProps) {
-  // Always show "all", then built-ins, then custom
+export function ContextSwitcher({ active, onChange, counts, contexts, label }: ContextSwitcherProps) {
   const builtins = ["work", "personal"];
   const custom   = (contexts ?? []).filter((c) => !builtins.includes(c));
-  const allCtxs  = [...builtins, ...custom];
+
+  // Hide custom tags that have 0 items — builtins always shown
+  const visibleCustom = custom.filter((c) => {
+    const count = counts?.[c] ?? 0;
+    return count > 0;
+  });
+
+  const allCtxs = [...builtins, ...visibleCustom];
 
   const options: { id: string; label: string; icon: React.ElementType }[] = [
     { id: "all", label: "All", icon: LayoutGrid },
@@ -98,7 +104,7 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
 
   return (
     <div
-      className="flex flex-wrap items-center gap-1"
+      className="flex flex-wrap items-center gap-1.5"
       style={{ padding: "2px 0" }}
     >
       {label && (
@@ -112,73 +118,28 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
             fontWeight: 600,
             whiteSpace: "nowrap" as const,
             opacity: 0.75,
-            paddingRight: 6,
+            paddingRight: 4,
             userSelect: "none" as const,
           }}
         >
           {label}
         </span>
       )}
-      {options.map(({ id, label: optLabel, icon: Icon }, idx) => {
+      {options.map(({ id, label: optLabel, icon: Icon }) => {
         const isActive = active === id;
-        const cfg      = id !== "all" ? getContextConfig(id) : null;
-
-        const isCustom = id !== "all" && !builtins.includes(id) && !!onDeleteContext;
+        const count    = counts?.[id];
         return (
-          <div
+          <button
             key={id}
-            className="group flex items-center"
-            style={{ position: "relative" }}
+            onClick={() => onChange(id)}
+            className={cn("m-chip", isActive && "active")}
           >
-            <button
-              onClick={() => onChange(id)}
-              className="flex items-center gap-1 text-[10px] font-medium transition-all justify-center shrink-0"
-              style={{
-                background:    isActive ? (cfg ? cfg.bg : "oklch(0.92 0.030 355)") : "transparent",
-                color:         isActive ? (cfg ? cfg.color : "oklch(0.38 0.060 330)") : "oklch(0.52 0.040 330)",
-                border:        `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.78 0.060 340)") : "oklch(0.84 0.040 340)"}`,
-                fontFamily:    "'DM Sans', sans-serif",
-                letterSpacing: "0.04em",
-                cursor:        "pointer",
-                borderRadius:  0,
-                /* padding: leave room for × on the right when custom */
-                padding:       isCustom ? "3px 4px 3px 8px" : "3px 8px",
-              }}
-            >
-              <Icon className="w-3 h-3" />
-              {optLabel}
-              {counts?.[id] !== undefined && counts[id] > 0 && (
-                <span
-                  className="text-[10px] px-1.5 py-0.5 font-medium"
-                  style={{
-                    background: "oklch(0.88 0.040 340 / 0.6)",
-                    color: "oklch(0.48 0.060 330)",
-                  }}
-                >
-                  {counts[id]}
-                </span>
-              )}
-              {/* × lives INSIDE the same button rectangle, hidden until group hover */}
-              {isCustom && (
-                <span
-                  onClick={(e) => { e.stopPropagation(); onDeleteContext!(id); }}
-                  title={`Delete #${id} tag`}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center ml-0.5"
-                  style={{
-                    width: 14,
-                    height: 14,
-                    color: "oklch(0.52 0.040 330)",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                  }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.55 0.18 340)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.52 0.040 330)"; }}
-                >
-                  <X style={{ width: 10, height: 10 }} />
-                </span>
-              )}
-            </button>
-          </div>
+            <Icon className="w-2.5 h-2.5" />
+            {optLabel}
+            {count !== undefined && (
+              <span>{count}</span>
+            )}
+          </button>
         );
       })}
     </div>
