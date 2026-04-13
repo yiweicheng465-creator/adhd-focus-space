@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
 import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
-import { useTimerSound } from "@/hooks/useTimerSound";
+import { useSoundContext } from "@/contexts/SoundContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 import { handleAiError } from "@/lib/aiErrorHandler";
@@ -652,8 +652,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
   const [editVal, setEditVal] = useState("");
   const editRef = useRef<HTMLInputElement>(null);
 
-  // Sound
-  const sound = useTimerSound();
+  // Sound — uses global SoundContext so audio persists across navigation
+  const sound = useSoundContext();
   const prevPhaseRef = useRef(phase);
   const prevTornRef = useRef(tornCount);
   const prevTransitionRef = useRef(transitionCountdown);
@@ -663,6 +663,10 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
     prevPhaseRef.current = phase;
     if (phase === "transition" && prev !== "transition") sound.playChimeSfx();
     if (phase === "block_complete" && prev !== "block_complete") sound.playFanfareSfx();
+    // Notify global sound context so music pauses/resumes with timer
+    if (phase === "running") sound.onTimerPhaseChange("running");
+    else if (phase === "paused") sound.onTimerPhaseChange("paused");
+    else sound.onTimerPhaseChange("other");
   }, [phase, sound]);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 /* ============================================================
-   ADHD FOCUS SPACE — Global Quick Add v3.0 (Morandi)
+   ADHD FOCUS SPACE — Global Quick Add v4.0 (Morandi)
    Minimum-friction one-sentence task capture
-   Coral accent, warm cream card, no teal
+   Now with priority selector + #tag input
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
@@ -20,6 +20,14 @@ const M = {
   card:     "oklch(0.975 0.018 355)",
 };
 
+const PRIORITY_CFG = {
+  urgent: { label: "Urgent", icon: "🔴", color: "oklch(0.50 0.18 20)" },
+  focus:  { label: "Focus",  icon: "🟡", color: "oklch(0.52 0.14 80)" },
+  normal: { label: "Normal", icon: "🔵", color: "oklch(0.50 0.08 240)" },
+} as const;
+
+type Priority = "urgent" | "focus" | "normal";
+
 interface GlobalQuickAddProps {
   onAddTask: (task: Task) => void;
 }
@@ -27,6 +35,8 @@ interface GlobalQuickAddProps {
 export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
   const [open, setOpen] = useState(false);
   const [text, setText] = useState("");
+  const [priority, setPriority] = useState<Priority>("focus");
+  const [tag, setTag] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -53,10 +63,25 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
   const submit = () => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    onAddTask({ id: nanoid(), text: trimmed, priority: "focus", context: "work", done: false, createdAt: new Date() });
+    // Parse #tag from text first, then fall back to tag input
+    const hashMatch = trimmed.match(/(^|\s)#([\w-]+)/);
+    const effectiveTag = hashMatch ? hashMatch[2].toLowerCase() : (tag.trim().replace(/^#/, "") || "work");
+    const cleanText = hashMatch ? trimmed.replace(/(^|\s)#[\w-]+(\s|$)/g, " ").replace(/\s{2,}/g, " ").trim() : trimmed;
+
+    onAddTask({
+      id: nanoid(),
+      text: cleanText,
+      priority,
+      context: (effectiveTag === "work" || effectiveTag === "personal" ? effectiveTag : "personal") as "work" | "personal",
+      done: false,
+      createdAt: new Date(),
+    });
+    toast.success(`Task added — ${PRIORITY_CFG[priority].icon} ${priority}${effectiveTag !== "work" ? ` · #${effectiveTag}` : ""}`);
     setText("");
+    setTag("");
+    setPriority("focus");
     setOpen(false);
-      };
+  };
 
   return (
     <>
@@ -140,6 +165,53 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
                 onBlur={(e)  => { (e.target as HTMLInputElement).style.borderColor = M.border; }}
               />
 
+              {/* Priority + Tag row */}
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                {/* Priority pills */}
+                <div className="flex items-center gap-1">
+                  {(["urgent", "focus", "normal"] as Priority[]).map((p) => {
+                    const cfg = PRIORITY_CFG[p];
+                    const active = priority === p;
+                    return (
+                      <button
+                        key={p}
+                        onClick={() => setPriority(p)}
+                        className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded transition-all"
+                        style={{
+                          background: active ? `${cfg.color}22` : "transparent",
+                          border: `1px solid ${active ? cfg.color : M.border}`,
+                          color: active ? cfg.color : M.muted,
+                          fontWeight: active ? 700 : 400,
+                          fontFamily: "'Space Mono', monospace",
+                        }}
+                      >
+                        {cfg.icon} {cfg.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Tag input */}
+                <div className="flex items-center gap-1 flex-1 min-w-[100px]">
+                  <span className="text-[10px]" style={{ color: M.muted, fontFamily: "'Space Mono', monospace" }}>#</span>
+                  <input
+                    value={tag}
+                    onChange={(e) => setTag(e.target.value.replace(/^#/, ""))}
+                    onKeyDown={(e) => { if (e.key === "Enter") submit(); if (e.key === "Escape") setOpen(false); }}
+                    placeholder="tag (e.g. work, personal)"
+                    autoComplete="off"
+                    className="flex-1 text-xs px-2 py-1 bg-transparent focus:outline-none"
+                    style={{
+                      border: `1px solid ${M.border}`,
+                      color: M.ink,
+                      fontFamily: "'Space Mono', monospace",
+                    }}
+                    onFocus={(e) => { (e.target as HTMLInputElement).style.borderColor = M.coralBdr; }}
+                    onBlur={(e)  => { (e.target as HTMLInputElement).style.borderColor = M.border; }}
+                  />
+                </div>
+              </div>
+
               {/* Quick examples */}
               <div className="flex flex-wrap gap-2 mt-3">
                 {["Reply to email", "Clear downloads folder", "Write daily summary", "Book appointment"].map((ex) => (
@@ -156,7 +228,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
               {/* Submit row */}
               <div className="flex items-center justify-between mt-4">
                 <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-                  Defaults: Focus priority · Work context
+                  tip: type <span style={{ color: M.coral }}>#tag</span> in text to override tag field
                 </p>
                 <button
                   onClick={submit}

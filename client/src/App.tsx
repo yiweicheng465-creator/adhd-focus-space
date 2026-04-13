@@ -8,6 +8,7 @@ import { useWorkMode } from "./components/WorkModeToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
+import { SoundProvider } from "./contexts/SoundContext";
 import Home from "./pages/Home";
 
 import Monthly from "@/pages/Monthly";
@@ -33,6 +34,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
+        <SoundProvider>
         <TimerProvider>
         <TooltipProvider>
           {/* Global aura gradient background — behind everything */}
@@ -48,6 +50,7 @@ function App() {
           </div>
         </TooltipProvider>
         </TimerProvider>
+        </SoundProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
