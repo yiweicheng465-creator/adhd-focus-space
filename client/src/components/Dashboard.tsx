@@ -696,7 +696,7 @@ export function Dashboard({
             ) : (
               [...activeTasks]
                 .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
-                .slice(0, 3)
+                .slice(0, 6)
                 .map((t) => {
                   const pd = PRIORITY_DOTS[t.priority] ?? PRIORITY_DOTS.normal;
                   const ctxColor = getContextConfig(t.context).color;
@@ -761,13 +761,13 @@ export function Dashboard({
                   );
                 })
             )}
-            {activeTasks.length > 3 && (
+            {activeTasks.length > 6 && (
               <button
                 onClick={() => onNavigate("tasks")}
                 className="m-btn-link"
                 style={{ fontSize: 9, textAlign: "center", paddingTop: 4, width: "100%", justifyContent: "center" }}
               >
-                +{activeTasks.length - 3} more →
+                +{activeTasks.length - 6} more →
               </button>
             )}
           </div>
