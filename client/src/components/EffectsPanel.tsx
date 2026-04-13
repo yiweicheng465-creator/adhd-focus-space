@@ -470,18 +470,20 @@ export function EffectsPanel() {
                   ⬡ OpenAI Key (optional)
                 </span>
 
-                {/* Built-in AI notice */}
+                {/* AI status notice — changes based on whether user has a key saved */}
                 <div style={{
-                  background: "oklch(0.95 0.030 168)",
-                  border: "1px solid oklch(0.70 0.12 168)",
+                  background: savedKeyData?.hasKey ? "oklch(0.95 0.025 260)" : "oklch(0.95 0.030 168)",
+                  border: `1px solid ${savedKeyData?.hasKey ? "oklch(0.70 0.10 260)" : "oklch(0.70 0.12 168)"}`,
                   padding: "5px 7px",
                   fontSize: "0.40rem",
-                  color: "oklch(0.35 0.12 168)",
+                  color: savedKeyData?.hasKey ? "oklch(0.30 0.12 260)" : "oklch(0.35 0.12 168)",
                   letterSpacing: "0.03em",
                   lineHeight: 1.6,
                   fontFamily: "'Space Mono', monospace",
                 }}>
-                  ✓ AI is already active — powered by built-in credits. Add your own OpenAI key below only if the built-in AI stops working.
+                  {savedKeyData?.hasKey
+                    ? "✓ Using your OpenAI key — AI calls are billed to your OpenAI account."
+                    : "✓ AI is already active — powered by built-in credits. Add your own OpenAI key below only if the built-in AI stops working."}
                 </div>
 
                 {/* OpenAI key input */}
