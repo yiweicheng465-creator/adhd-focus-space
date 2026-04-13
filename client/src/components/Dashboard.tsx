@@ -634,7 +634,7 @@ export function Dashboard({
                       onNavigate("braindump");
                     }
                   }}
-                  placeholder="what's in your mind? or dump your thought here"
+                  placeholder="what's in your mind?"
                   autoComplete="new-password"
                   style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
@@ -647,7 +647,7 @@ export function Dashboard({
             </div>
             {/* Enter hint — always visible */}
             <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, marginTop: 2, paddingLeft: 2 }}>
-              press D to open brain dump
+              press D to focus
             </div>
           </div>
           {/* Right: motivational micro-text */}
