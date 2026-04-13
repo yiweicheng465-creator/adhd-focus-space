@@ -504,7 +504,13 @@ export default function Home() {
     handleConvertToTask(task);
   };
 
-  const meta = SECTION_META[activeSection];
+  // Guard: if activeSection is a stale value (e.g. 'ai' removed from nav), reset to dashboard
+  const VALID_SECTIONS = Object.keys(SECTION_META) as Section[];
+  const safeSection: Section = VALID_SECTIONS.includes(activeSection) ? activeSection : "dashboard";
+  useEffect(() => {
+    if (!VALID_SECTIONS.includes(activeSection)) setActiveSection("dashboard");
+  }, [activeSection]);
+  const meta = SECTION_META[safeSection];
   const Icon = meta.icon;
   const runningAgents = agents.filter((a) => a.status === "running").length;
 
