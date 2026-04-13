@@ -266,24 +266,28 @@ function MonthlyLink() {
 
 
 
-/* Tiny hidden ? link to /guide — unobvious, discoverable only by curious users */
+/* Guide link — secondary/help item, visually demoted below the divider */
 function GuideLink() {
   const [location, navigate] = useLocation();
   const active = location === "/guide";
-  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.72 0.030 330)";
+  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.68 0.025 330)";
   return (
     <button
       onClick={() => navigate("/guide")}
       title="App Guide"
       className="relative w-full flex flex-col items-center justify-center py-1.5 transition-all duration-150"
-      style={{ background: "transparent", opacity: 0.55 }}
-      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
-      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.55"; }}
+      style={{
+        background: active ? "oklch(0.58 0.18 340 / 0.08)" : "transparent",
+        opacity: active ? 1 : 0.5,
+      }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
+      onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.opacity = "0.5"; }}
     >
-      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-        <circle cx="8" cy="8" r="6.5" stroke={color} strokeWidth="1.3"/>
-        <text x="8" y="12" textAnchor="middle" fontFamily="'Space Mono', monospace" fontSize="8" fill={color} fontWeight="700">?</text>
+      <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke={color} strokeWidth="1.2"/>
+        <text x="8" y="12" textAnchor="middle" fontFamily="'Space Mono', monospace" fontSize="8" fill={color} fontWeight="600">?</text>
       </svg>
+      <span style={{ fontSize: 6, marginTop: 1.5, letterSpacing: "0.10em", fontFamily: "'Space Mono', monospace", color }}>GUIDE</span>
     </button>
   );
 }
@@ -374,10 +378,12 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       </div>
 
       {/* Effects panel (grain + work mode) */}
-      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
       <EffectsPanel />
 
-      {/* Hidden guide link — very bottom, unobvious */}
+      {/* Secondary divider — separates functional items from help */}
+      <div style={{ width: "60%", height: "1px", background: "oklch(0.80 0.060 340 / 0.5)", margin: "12px 0 4px" }} />
+
+      {/* Guide — secondary/help group, smaller and lighter */}
       <GuideLink />
     </aside>
   );
