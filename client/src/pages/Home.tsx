@@ -205,7 +205,20 @@ export default function Home() {
   const profileQuery = trpc.profile.getName.useQuery(undefined, { enabled: isAuthenticated });
   // ── tRPC mutations ───
   const createTask   = trpc.tasks.create.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
-  const updateTask   = trpc.tasks.update.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
+  const updateTask   = trpc.tasks.update.useMutation({
+    onMutate: async (input) => {
+      await utils.tasks.list.cancel();
+      const prev = utils.tasks.list.getData();
+      utils.tasks.list.setData(undefined, (old) =>
+        old?.map((t) => t.id === input.id ? { ...t, ...input } : t)
+      );
+      return { prev };
+    },
+    onError: (_err, _input, ctx) => {
+      if (ctx?.prev) utils.tasks.list.setData(undefined, ctx.prev);
+    },
+    onSettled: () => utils.tasks.list.invalidate(),
+  });
   const deleteTask   = trpc.tasks.delete.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
   const createWin    = trpc.wins.create.useMutation({ onSuccess: () => utils.wins.list.invalidate() });
   const updateWin    = trpc.wins.update.useMutation({ onSuccess: () => utils.wins.list.invalidate() });
