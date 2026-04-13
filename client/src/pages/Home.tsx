@@ -955,6 +955,7 @@ export default function Home() {
           onSkip={() => dismissCheckIn(true)}
           onClose={() => dismissCheckIn(false)}
           displayName={displayName || undefined}
+          existingTasks={tasks}
         />
       )}
       {showNamePrompt && (

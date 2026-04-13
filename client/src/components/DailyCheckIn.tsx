@@ -57,6 +57,7 @@ interface DailyCheckInProps {
   onSkip: () => void;
   onClose: () => void; // X button — temporary dismiss
   displayName?: string;
+  existingTasks?: import("./TaskManager").Task[];
 }
 
 export interface CheckInResult {
@@ -122,7 +123,7 @@ function FaceGlowing({ active }: { active: boolean }) {
 const FACE_COMPONENTS = [FaceDrained, FaceLow, FaceOkay, FaceGood, FaceGlowing];
 
 /* ── Main component ── */
-export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: DailyCheckInProps) {
+export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existingTasks = [] }: DailyCheckInProps) {
   const [step, setStep] = useState<Step>("greeting");
   const [mitSuggestion, setMitSuggestion] = useState<string | null>(null);
   const [mood, setMood] = useState<number | null>(null);
@@ -188,7 +189,16 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
 
   const addAgent = () => {
     if (agentName.trim()) {
-      const linkedTask = agentLinkedTaskIdx !== null ? tasks[agentLinkedTaskIdx]?.text || "General task" : "General task";
+      let linkedTask = "General task";
+      if (agentLinkedTaskIdx !== null) {
+        if (agentLinkedTaskIdx >= 0) {
+          linkedTask = tasks[agentLinkedTaskIdx]?.text || "General task";
+        } else {
+          // negative sentinel: -(index+1) into existingTasks
+          const idx = -(agentLinkedTaskIdx + 1);
+          linkedTask = existingTasks[idx]?.text || "General task";
+        }
+      }
       setAgents((p) => [...p, { name: agentName.trim(), task: linkedTask, linkedTaskIdx: agentLinkedTaskIdx }]);
       setAgentName("");
       setAgentLinkedTaskIdx(null);
@@ -592,23 +602,52 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
               <p className="text-sm mb-3" style={{ color: M.muted }}>
                 Log any AI agents you have running. Optionally link to a task.
               </p>
-              {/* Task link dropdown */}
-              {tasks.length > 0 && (
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px]" style={{ color: M.muted }}>↳ Task:</span>
-                  <select
-                    value={agentLinkedTaskIdx ?? ""}
-                    onChange={(e) => setAgentLinkedTaskIdx(e.target.value === "" ? null : Number(e.target.value))}
-                    className="flex-1 px-2 py-1 text-xs bg-transparent focus:outline-none"
-                    style={{ border: `1px solid ${M.border}`, color: agentLinkedTaskIdx !== null ? M.ink : M.muted }}
-                  >
-                    <option value="">No linked task</option>
-                    {tasks.map((t, i) => (
-                      <option key={i} value={i}>{t.text.length > 45 ? t.text.slice(0, 45) + "…" : t.text}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {/* Task link dropdown — always visible, merges new + existing tasks */}
+              {(() => {
+                const newTaskOptions = tasks.map((t, i) => ({ label: t.text, value: `new:${i}` }));
+                const existingOptions = existingTasks
+                  .filter((t) => !t.done)
+                  .map((t) => ({ label: t.text, value: `existing:${t.id}` }));
+                const allOptions = [...newTaskOptions, ...existingOptions];
+                return (
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="text-[10px] shrink-0" style={{ color: M.muted }}>↳ Link task:</span>
+                    <select
+                      value={agentLinkedTaskIdx === null
+                        ? ""
+                        : agentLinkedTaskIdx >= 0
+                          ? `new:${agentLinkedTaskIdx}`
+                          : `existing:${existingTasks[-(agentLinkedTaskIdx + 1)]?.id ?? ""}`
+                      }
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        if (v === "") { setAgentLinkedTaskIdx(null); return; }
+                        if (v.startsWith("new:")) { setAgentLinkedTaskIdx(Number(v.slice(4))); return; }
+                        // existing task — store as negative sentinel so addAgent can read the id
+                        setAgentLinkedTaskIdx(-(existingTasks.findIndex((t) => t.id === v.slice(9)) + 1));
+                      }}
+                      className="flex-1 px-2 py-1 text-xs bg-transparent focus:outline-none"
+                      style={{ border: `1px solid ${M.border}`, color: agentLinkedTaskIdx !== null ? M.ink : M.muted }}
+                    >
+                      <option value="">No linked task</option>
+                      {newTaskOptions.length > 0 && (
+                        <optgroup label="Added today">
+                          {newTaskOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label.length > 45 ? o.label.slice(0, 45) + "…" : o.label}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {existingOptions.length > 0 && (
+                        <optgroup label="Existing tasks">
+                          {existingOptions.map((o) => (
+                            <option key={o.value} value={o.value}>{o.label.length > 45 ? o.label.slice(0, 45) + "…" : o.label}</option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </select>
+                  </div>
+                );
+              })()}
               <div className="flex gap-2 mb-2">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}

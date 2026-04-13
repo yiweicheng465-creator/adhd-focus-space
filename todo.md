@@ -189,3 +189,5 @@
 - [x] Fix Wins category icon picker bug (wins.update procedure + Home.tsx wiring already in place — confirmed working)
 - [x] Add inline category and tag editing to existing tasks (pencil icon on hover opens edit popover)
 - [x] Add goal link/change/remove to existing tasks (goal dropdown in edit popover, can add/change/remove)
+- [x] Disable browser autocomplete on daily check-in task input (already had autoComplete=off)
+- [x] Add task link dropdown to daily check-in agents step (always visible, shows new + existing tasks)
