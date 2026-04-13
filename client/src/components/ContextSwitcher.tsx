@@ -112,7 +112,7 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
           >
             <button
               onClick={() => onChange(id)}
-              className="flex items-center gap-1.5 text-xs font-medium transition-all justify-center shrink-0"
+              className="flex items-center gap-1 text-[10px] font-medium transition-all justify-center shrink-0"
               style={{
                 background:    isActive ? (cfg ? cfg.bg : "oklch(0.92 0.030 355)") : "transparent",
                 color:         isActive ? (cfg ? cfg.color : "oklch(0.38 0.060 330)") : "oklch(0.52 0.040 330)",
@@ -122,7 +122,7 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
                 cursor:        "pointer",
                 borderRadius:  0,
                 /* padding: leave room for × on the right when custom */
-                padding:       isCustom ? "8px 6px 8px 12px" : "8px 12px",
+                padding:       isCustom ? "3px 4px 3px 8px" : "3px 8px",
               }}
             >
               <Icon className="w-3 h-3" />
