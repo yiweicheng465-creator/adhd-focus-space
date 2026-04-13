@@ -618,7 +618,7 @@ export function Dashboard({
                       onNavigate("braindump");
                     }
                   }}
-                  placeholder="What's on your mind?"
+                  placeholder="press / to start..."
                   autoComplete="new-password"
                   style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
