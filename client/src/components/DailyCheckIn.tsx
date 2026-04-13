@@ -507,18 +507,25 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
                 </div>
               )}
               {/* Row 3: Input + add */}
-              <div className="flex gap-2 mb-2">
+              <div className="flex gap-2 mb-1">
                 <input
                   ref={inputRef as React.RefObject<HTMLInputElement>}
                   value={taskInput}
                   onChange={(e) => setTaskInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && addTask()}
                   placeholder="e.g. Reply to Alice's email…"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
                   className="flex-1 px-3 py-2 text-sm bg-transparent focus:outline-none"
                   style={{ border: `1px solid ${M.border}`, color: M.ink }}
                 />
                 <button onClick={addTask} className="px-3 py-2 text-sm font-bold" style={{ background: M.accent, color: "white" }}>+</button>
               </div>
+              <p className="text-[10px] mb-2" style={{ color: M.muted, fontFamily: "'Space Mono', monospace", opacity: 0.7 }}>
+                tip: add <span style={{ color: M.accent }}>#tag</span> to categorise — e.g. <span style={{ color: M.accent }}>#work</span>, <span style={{ color: M.accent }}>#personal</span>
+              </p>
               {tasks.length > 0 && (
                 <ul className="space-y-1.5 mt-3 max-h-28 overflow-y-auto">
                   {tasks.map((t, i) => (
