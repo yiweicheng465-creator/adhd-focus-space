@@ -1205,7 +1205,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
 
             {/* Play / Pause */}
             {phase !== "recovering" && (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+              <>
                 <button onClick={handleStartPause} style={{
                   display: "flex", alignItems: "center", gap: 5,
                   padding: "5px 16px",
@@ -1215,21 +1215,36 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
                   fontFamily: "'JetBrains Mono', monospace", fontSize: 7,
                   letterSpacing: "0.14em", cursor: "pointer",
                   boxShadow: running ? `2px 2px 0 ${BORDER}` : `2px 2px 0 ${DARK}`,
-                  fontWeight: 700, transition: "all 0.12s",
+                  fontWeight: 700, transition: "all 0.12s", flexShrink: 0,
                 }}>
                   {running ? <><Pause size={8} /> PAUSE</> : <><Play size={8} /> {phase === "paused" ? "RESUME" : "START"}</>}
                 </button>
                 <span style={{
+                  display: "inline-flex", alignItems: "center", gap: 3,
                   fontFamily: "'JetBrains Mono', monospace",
                   fontSize: 6,
                   letterSpacing: "0.08em",
                   color: BORDER,
                   userSelect: "none",
                   pointerEvents: "none",
+                  whiteSpace: "nowrap",
+                  flexShrink: 0,
                 }}>
-                  press Space
+                  press
+                  <kbd style={{
+                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                    fontFamily: "'JetBrains Mono', monospace",
+                    fontSize: 9,
+                    lineHeight: 1,
+                    color: BORDER,
+                    border: `1px solid ${BORDER}`,
+                    borderRadius: 2,
+                    padding: "1px 4px",
+                    background: "transparent",
+                    boxShadow: `1px 1px 0 ${BORDER}`,
+                  }}>⎵</kbd>
                 </span>
-              </div>
+              </>
             )}
 
             {/* Session dots */}
