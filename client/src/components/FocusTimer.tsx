@@ -1231,18 +1231,13 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
                   flexShrink: 0,
                 }}>
                   press
-                  <kbd style={{
-                    display: "inline-flex", alignItems: "center", justifyContent: "center",
+                  <span style={{
                     fontFamily: "'JetBrains Mono', monospace",
-                    fontSize: 9,
+                    fontSize: 11,
                     lineHeight: 1,
                     color: BORDER,
-                    border: `1px solid ${BORDER}`,
-                    borderRadius: 2,
-                    padding: "1px 4px",
-                    background: "transparent",
-                    boxShadow: `1px 1px 0 ${BORDER}`,
-                  }}>⎵</kbd>
+                    marginLeft: 2,
+                  }}>⎵</span>
                 </span>
               </>
             )}
