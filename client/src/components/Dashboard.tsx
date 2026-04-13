@@ -637,7 +637,7 @@ export function Dashboard({
               </div>
               {/* Context switcher */}
               <div style={{ flex: "1 1 auto", minWidth: 0 }}>
-                <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
+                <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} label="FILTER BY TAG" />
               </div>
             </div>
             {/* Enter hint — always visible */}

@@ -78,9 +78,11 @@ interface ContextSwitcherProps {
   contexts?: string[];
   /** Called when user deletes a custom (non-builtin) context tag */
   onDeleteContext?: (ctx: string) => void;
+  /** Optional label shown before the filter buttons, e.g. "FILTER BY TAG" */
+  label?: string;
 }
 
-export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteContext }: ContextSwitcherProps) {
+export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteContext, label }: ContextSwitcherProps) {
   // Always show "all", then built-ins, then custom
   const builtins = ["work", "personal"];
   const custom   = (contexts ?? []).filter((c) => !builtins.includes(c));
@@ -99,7 +101,25 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
       className="flex flex-wrap items-center gap-1"
       style={{ padding: "2px 0" }}
     >
-      {options.map(({ id, label, icon: Icon }, idx) => {
+      {label && (
+        <span
+          style={{
+            fontSize: 9,
+            fontFamily: "'Space Mono', monospace",
+            letterSpacing: "0.10em",
+            color: "oklch(0.52 0.040 330)",
+            textTransform: "uppercase" as const,
+            fontWeight: 600,
+            whiteSpace: "nowrap" as const,
+            opacity: 0.75,
+            paddingRight: 6,
+            userSelect: "none" as const,
+          }}
+        >
+          {label}
+        </span>
+      )}
+      {options.map(({ id, label: optLabel, icon: Icon }, idx) => {
         const isActive = active === id;
         const cfg      = id !== "all" ? getContextConfig(id) : null;
 
@@ -126,7 +146,7 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
               }}
             >
               <Icon className="w-3 h-3" />
-              {label}
+              {optLabel}
               {counts?.[id] !== undefined && counts[id] > 0 && (
                 <span
                   className="text-[10px] px-1.5 py-0.5 font-medium"

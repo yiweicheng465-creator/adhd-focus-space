@@ -520,12 +520,21 @@ export default function Home() {
   const runningAgents = agents.filter((a) => a.status === "running").length;
 
   // ── Unified category system: aggregate all contexts from tasks, goals, agents ──
-  const allCategories = Array.from(new Set([
-    "work", "personal",
+  // Custom tags (non-builtin) are only shown if at least 1 item uses them
+  const allItemContexts = new Set([
     ...tasks.map((t) => t.context),
     ...goals.map((g) => g.context),
     ...agents.map((a) => a.context),
-  ])).filter(Boolean).filter((c) => !deletedCategories.includes(c));
+  ]);
+  const allCategories = Array.from(new Set([
+    "work", "personal",
+    ...Array.from(allItemContexts),
+  ])).filter(Boolean).filter((c) => {
+    if (deletedCategories.includes(c)) return false;
+    // Always keep builtins; auto-remove custom tags with no items
+    if (c === "work" || c === "personal") return true;
+    return allItemContexts.has(c);
+  });
 
   /** Clear all test data — wipes tasks, wins, goals, agents but keeps settings */
   const handleClearTestData = () => {
