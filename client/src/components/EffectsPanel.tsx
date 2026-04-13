@@ -8,6 +8,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useFilmGrain } from "@/components/FilmGrain";
 import { useWorkMode } from "@/components/WorkModeToggle";
+import { useHue, HUE_PRESETS } from "@/components/HueShift";
 import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 
@@ -98,6 +99,7 @@ export function EffectsPanel() {
   const apiKeyInputRef = useRef<HTMLInputElement>(null);
   const { intensity, setIntensity, speed, setSpeed } = useFilmGrain();
   const { enabled: workMode, toggle: toggleWorkMode } = useWorkMode();
+  const { hue, setHue, reset: resetHue } = useHue();
 
   // API key state (OpenAI only — Manus built-in is the default, OpenAI is optional fallback)
   const [apiKeyInput, setApiKeyInput] = useState("");
@@ -434,9 +436,94 @@ export function EffectsPanel() {
                   </div>
                 </div>
 
-                {/* Divider */}
+                 {/* Divider */}
                 <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
 
+                {/* ── Hue Shift section ── */}
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                    <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                      ◈ Theme Hue
+                    </span>
+                    <button
+                      onClick={resetHue}
+                      style={{
+                        fontSize: "0.40rem",
+                        fontFamily: "'Space Mono', monospace",
+                        letterSpacing: "0.08em",
+                        padding: "2px 6px",
+                        borderRadius: 10,
+                        border: "1px solid oklch(0.72 0.040 330)",
+                        background: "transparent",
+                        color: "oklch(0.60 0.040 330)",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                    >
+                      RESET
+                    </button>
+                  </div>
+                  {/* Preset swatches */}
+                  <div style={{ display: "flex", gap: 5, marginBottom: 8, flexWrap: "wrap" }}>
+                    {HUE_PRESETS.map((p) => (
+                      <button
+                        key={p.label}
+                        title={p.label}
+                        onClick={() => setHue(p.hue)}
+                        style={{
+                          width: 18, height: 18,
+                          borderRadius: "50%",
+                          background: p.color,
+                          border: Math.abs(hue - p.hue) < 10
+                            ? "2.5px solid oklch(0.30 0 0)"
+                            : "2px solid transparent",
+                          cursor: "pointer",
+                          flexShrink: 0,
+                          transition: "border-color 0.15s, transform 0.15s",
+                          transform: Math.abs(hue - p.hue) < 10 ? "scale(1.25)" : "scale(1)",
+                          boxShadow: "0 1px 3px rgba(0,0,0,0.20)",
+                          outline: "none",
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {/* Hue range slider */}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between" }}>
+                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>HUE</span>
+                      <span style={{
+                        fontSize: "0.48rem",
+                        color: `hsl(${hue},60%,45%)`,
+                        letterSpacing: "0.06em",
+                        fontFamily: "'Space Mono', monospace",
+                      }}>{hue}°</span>
+                    </div>
+                    <input
+                      type="range"
+                      min={0}
+                      max={360}
+                      value={hue}
+                      onChange={(e) => setHue(Number(e.target.value))}
+                      style={{
+                        width: "100%",
+                        height: 6,
+                        borderRadius: 3,
+                        cursor: "pointer",
+                        WebkitAppearance: "none",
+                        appearance: "none",
+                        background: `linear-gradient(to right,
+                          hsl(0,65%,62%), hsl(45,65%,62%), hsl(90,65%,55%),
+                          hsl(140,55%,52%), hsl(190,65%,55%), hsl(220,65%,62%),
+                          hsl(270,60%,65%), hsl(310,65%,65%), hsl(330,65%,65%), hsl(360,65%,62%))`,
+                        outline: "none",
+                        border: "none",
+                      }}
+                    />
+                  </div>
+                </div>
+
+                {/* Divider */}
+                <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
                 {/* Work Mode section */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>

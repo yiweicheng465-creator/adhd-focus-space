@@ -6,6 +6,7 @@ import AuraBackground from "./components/AuraBackground";
 import BackgroundStickers from "./components/BackgroundStickers";
 import { FilmGrainOverlay } from "./components/FilmGrain";
 import { useWorkMode } from "./components/WorkModeToggle";
+import { useHue } from "./components/HueShift";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
@@ -33,6 +34,8 @@ function Router() {
 function App() {
   // Initialise work mode from localStorage on mount
   useWorkMode();
+  // Initialise hue shift from localStorage on mount
+  useHue();
 
   return (
     <ErrorBoundary>

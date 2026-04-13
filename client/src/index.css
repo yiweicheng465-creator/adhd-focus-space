@@ -56,118 +56,103 @@
 :root {
   --radius: 0.25rem; /* slightly rounded — soft retro feel */
 
-  /* ── Lofi Pastel Sticker Palette — dusty, muted, warm ── */
-  /* Dusty cream-pink — warm faded page base */
-  --background:          oklch(0.950 0.022 355);
-  --foreground:          oklch(0.30 0.030 320);
+  /* ── Hue Shift System ──
+     --base-hue is set dynamically by HueShift.tsx via JS.
+     All theme colors derive from it. Semantic colors (error/success/warning)
+     and neutral colors (text/shadow) are FIXED and do NOT shift. */
+  --base-hue: 330; /* default: pink */
+
+  /* ── Layer 1: Theme Colors (HUE-DERIVED) ── */
+  --background:          hsl(var(--base-hue), 38%, 95%);
+  --foreground:          hsl(calc(var(--base-hue) - 20), 18%, 25%);
 
   /* Warm cream card / window panel */
-  --card:                oklch(0.975 0.012 355);
-  --card-foreground:     oklch(0.30 0.030 320);
-  --popover:             oklch(0.975 0.012 355);
-  --popover-foreground:  oklch(0.30 0.030 320);
+  --card:                hsl(var(--base-hue), 30%, 97%);
+  --card-foreground:     hsl(calc(var(--base-hue) - 20), 18%, 25%);
+  --popover:             hsl(var(--base-hue), 30%, 97%);
+  --popover-foreground:  hsl(calc(var(--base-hue) - 20), 18%, 25%);
+  /* Primary CTA */
+  --primary:             hsl(var(--base-hue), 55%, 58%);
+  --primary-foreground:  hsl(var(--base-hue), 20%, 98%);
+  /* Secondary */
+  --secondary:           hsl(calc(var(--base-hue) + 20), 30%, 90%);
+  --secondary-foreground: hsl(calc(var(--base-hue) + 20), 22%, 38%);
+  /* Muted */
+  --muted:               hsl(var(--base-hue), 22%, 93%);
+  --muted-foreground:    hsl(calc(var(--base-hue) - 10), 18%, 50%);
 
-  /* Dusty rose — primary CTA (less vivid) */
-  --primary:             oklch(0.58 0.12 340);
-  --primary-foreground:  oklch(0.98 0.005 355);
-
-  /* Soft muted lavender — secondary */
-  --secondary:           oklch(0.92 0.025 290);
-  --secondary-foreground: oklch(0.42 0.040 290);
-
-  /* Muted warm pink */
-  --muted:               oklch(0.94 0.015 355);
-  --muted-foreground:    oklch(0.55 0.028 330);
-
-  /* Soft sage — accent */
-  --accent:              oklch(0.86 0.040 168);
-  --accent-foreground:   oklch(0.32 0.060 168);
-
-  /* Dusty rose — destructive (less vivid) */
-  --destructive:         oklch(0.58 0.13 10);
-  --destructive-foreground: oklch(0.98 0.005 355);
-
-  /* Soft mauve/pink borders — more faint */
-  --border:              oklch(0.86 0.030 340);
-  --input:               oklch(0.86 0.030 340);
-  --ring:                oklch(0.58 0.12 340 / 0.25);
-
-  /* Charts — muted pastel tones */
-  --chart-1:             oklch(0.62 0.12 340);   /* dusty rose */
-  --chart-2:             oklch(0.74 0.07 168);   /* soft sage */
-  --chart-3:             oklch(0.74 0.06 220);   /* faded sky */
-  --chart-4:             oklch(0.74 0.06 290);   /* muted lavender */
-  --chart-5:             oklch(0.80 0.07 60);    /* warm cream-yellow */
-
-  /* Sidebar — slightly deeper dusty pink */
-  --sidebar:             oklch(0.940 0.025 355);
-  --sidebar-foreground:  oklch(0.30 0.030 320);
-  --sidebar-primary:     oklch(0.58 0.12 340);
-  --sidebar-primary-foreground: oklch(0.98 0.005 355);
-  --sidebar-accent:      oklch(0.92 0.025 290);
-  --sidebar-accent-foreground: oklch(0.30 0.030 320);
-  --sidebar-border:      oklch(0.84 0.030 340);
-  --sidebar-ring:        oklch(0.58 0.12 340 / 0.25);
+  /* Accent */
+  --accent:              hsl(calc(var(--base-hue) + 20), 28%, 84%);
+  --accent-foreground:   hsl(calc(var(--base-hue) + 20), 32%, 28%);
+  /* Layer 2: Semantic colors — FIXED, never shift with hue */
+  --destructive:         hsl(4, 72%, 54%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  /* Layer 1 continued: borders */
+  --border:              hsl(var(--base-hue), 22%, 84%);
+  --input:               hsl(var(--base-hue), 22%, 84%);
+  --ring:                hsla(var(--base-hue), 55%, 58%, 0.25);
+  /* Charts — spread around the hue wheel */
+  --chart-1:             hsl(var(--base-hue), 55%, 60%);
+  --chart-2:             hsl(calc(var(--base-hue) + 60), 45%, 62%);
+  --chart-3:             hsl(calc(var(--base-hue) + 120), 40%, 62%);
+  --chart-4:             hsl(calc(var(--base-hue) + 180), 40%, 62%);
+  --chart-5:             hsl(calc(var(--base-hue) + 240), 40%, 65%);
+  /* Sidebar */
+  --sidebar:             hsl(var(--base-hue), 32%, 93%);
+  --sidebar-foreground:  hsl(calc(var(--base-hue) - 20), 18%, 25%);
+  --sidebar-primary:     hsl(var(--base-hue), 55%, 58%);
+  --sidebar-primary-foreground: hsl(var(--base-hue), 20%, 98%);
+  --sidebar-accent:      hsl(calc(var(--base-hue) + 20), 30%, 90%);
+  --sidebar-accent-foreground: hsl(calc(var(--base-hue) - 20), 18%, 25%);
+  --sidebar-border:      hsl(var(--base-hue), 22%, 82%);
+  --sidebar-ring:        hsla(var(--base-hue), 55%, 58%, 0.25);
 }
 
-/* ── Semantic color tokens ── */
+/* ── Semantic color tokens (HUE-DERIVED) ── */
 :root {
-  /* Dusty rose */
-  --r-terra:         oklch(0.58 0.12 340);
-  --r-terra-light:   oklch(0.58 0.12 340 / 0.10);
-  --r-terra-border:  oklch(0.58 0.12 340 / 0.22);
-
-  /* Soft dusty pink */
-  --r-rose:          oklch(0.84 0.07 355);
-  --r-rose-light:    oklch(0.84 0.07 355 / 0.12);
-  --r-rose-border:   oklch(0.84 0.07 355 / 0.28);
-
-  /* Soft sage */
-  --r-sage:          oklch(0.74 0.07 168);
-  --r-sage-light:    oklch(0.74 0.07 168 / 0.10);
-  --r-sage-border:   oklch(0.74 0.07 168 / 0.22);
-
-  /* Faded sky */
-  --r-blue:          oklch(0.74 0.06 220);
-  --r-blue-light:    oklch(0.74 0.06 220 / 0.10);
-  --r-blue-border:   oklch(0.74 0.06 220 / 0.22);
-
-  /* Muted lavender */
-  --r-lavender:      oklch(0.74 0.06 290);
-  --r-lavender-light: oklch(0.74 0.06 290 / 0.10);
-  --r-lavender-border: oklch(0.74 0.06 290 / 0.22);
-
-  /* Warm cream-pink base */
-  --r-sand:          oklch(0.94 0.018 355);
-  --r-ink:           oklch(0.30 0.030 320);
-  --r-muted:         oklch(0.55 0.028 330);
-  --r-border:        oklch(0.86 0.030 340);
-  --r-bg:            oklch(0.950 0.022 355);
-  --r-card:          oklch(0.975 0.012 355);
-
-  /* Aliases for backward compat — mapped to lofi palette */
-  --m-coral:         oklch(0.58 0.12 340);
-  --m-coral-light:   oklch(0.58 0.12 340 / 0.10);
-  --m-coral-border:  oklch(0.58 0.12 340 / 0.22);
-  --m-sage:          oklch(0.74 0.07 168);
-  --m-sage-light:    oklch(0.74 0.07 168 / 0.10);
-  --m-sage-border:   oklch(0.74 0.07 168 / 0.22);
-  --m-slumber:       oklch(0.84 0.028 290);
-  --m-slumber-light: oklch(0.84 0.028 290 / 0.14);
-  --m-pink:          oklch(0.84 0.07 355);
-  --m-pink-light:    oklch(0.84 0.07 355 / 0.12);
-  --m-pink-border:   oklch(0.84 0.07 355 / 0.28);
-  --m-lavender:      oklch(0.74 0.06 290);
-  --m-lavender-light: oklch(0.74 0.06 290 / 0.10);
-  --m-lavender-border: oklch(0.74 0.06 290 / 0.22);
-  --m-indigo:        oklch(0.62 0.08 290);
-  --m-indigo-light:  oklch(0.62 0.08 290 / 0.08);
-  --m-indigo-border: oklch(0.62 0.08 290 / 0.22);
-  --m-ink:           oklch(0.30 0.030 320);
-  --m-muted:         oklch(0.55 0.028 330);
-  --m-border:        oklch(0.86 0.030 340);
-  --m-bg:            oklch(0.950 0.022 355);
-  --m-card:          oklch(0.975 0.012 355);
+  --r-terra:         hsl(var(--base-hue), 52%, 55%);
+  --r-terra-light:   hsla(var(--base-hue), 52%, 55%, 0.10);
+  --r-terra-border:  hsla(var(--base-hue), 52%, 55%, 0.22);
+  --r-rose:          hsl(var(--base-hue), 40%, 80%);
+  --r-rose-light:    hsla(var(--base-hue), 40%, 80%, 0.12);
+  --r-rose-border:   hsla(var(--base-hue), 40%, 80%, 0.28);
+  --r-sage:          hsl(calc(var(--base-hue) + 120), 38%, 68%);
+  --r-sage-light:    hsla(calc(var(--base-hue) + 120), 38%, 68%, 0.10);
+  --r-sage-border:   hsla(calc(var(--base-hue) + 120), 38%, 68%, 0.22);
+  --r-blue:          hsl(calc(var(--base-hue) + 180), 38%, 68%);
+  --r-blue-light:    hsla(calc(var(--base-hue) + 180), 38%, 68%, 0.10);
+  --r-blue-border:   hsla(calc(var(--base-hue) + 180), 38%, 68%, 0.22);
+  --r-lavender:      hsl(calc(var(--base-hue) + 60), 35%, 70%);
+  --r-lavender-light: hsla(calc(var(--base-hue) + 60), 35%, 70%, 0.10);
+  --r-lavender-border: hsla(calc(var(--base-hue) + 60), 35%, 70%, 0.22);
+  --r-sand:          hsl(var(--base-hue), 28%, 92%);
+  --r-ink:           hsl(calc(var(--base-hue) - 20), 18%, 22%);
+  --r-muted:         hsl(calc(var(--base-hue) - 10), 16%, 50%);
+  --r-border:        hsl(var(--base-hue), 20%, 83%);
+  --r-bg:            hsl(var(--base-hue), 38%, 95%);
+  --r-card:          hsl(var(--base-hue), 30%, 97%);
+  --m-coral:         hsl(var(--base-hue), 52%, 55%);
+  --m-coral-light:   hsla(var(--base-hue), 52%, 55%, 0.10);
+  --m-coral-border:  hsla(var(--base-hue), 52%, 55%, 0.22);
+  --m-sage:          hsl(calc(var(--base-hue) + 120), 38%, 68%);
+  --m-sage-light:    hsla(calc(var(--base-hue) + 120), 38%, 68%, 0.10);
+  --m-sage-border:   hsla(calc(var(--base-hue) + 120), 38%, 68%, 0.22);
+  --m-slumber:       hsl(calc(var(--base-hue) + 60), 22%, 80%);
+  --m-slumber-light: hsla(calc(var(--base-hue) + 60), 22%, 80%, 0.14);
+  --m-pink:          hsl(var(--base-hue), 40%, 80%);
+  --m-pink-light:    hsla(var(--base-hue), 40%, 80%, 0.12);
+  --m-pink-border:   hsla(var(--base-hue), 40%, 80%, 0.28);
+  --m-lavender:      hsl(calc(var(--base-hue) + 60), 35%, 70%);
+  --m-lavender-light: hsla(calc(var(--base-hue) + 60), 35%, 70%, 0.10);
+  --m-lavender-border: hsla(calc(var(--base-hue) + 60), 35%, 70%, 0.22);
+  --m-indigo:        hsl(calc(var(--base-hue) + 60), 42%, 58%);
+  --m-indigo-light:  hsla(calc(var(--base-hue) + 60), 42%, 58%, 0.08);
+  --m-indigo-border: hsla(calc(var(--base-hue) + 60), 42%, 58%, 0.22);
+  --m-ink:           hsl(calc(var(--base-hue) - 20), 18%, 22%);
+  --m-muted:         hsl(calc(var(--base-hue) - 10), 16%, 50%);
+  --m-border:        hsl(var(--base-hue), 20%, 83%);
+  --m-bg:            hsl(var(--base-hue), 38%, 95%);
+  --m-card:          hsl(var(--base-hue), 30%, 97%);
 }
 
 @layer base {
@@ -180,7 +165,7 @@
     font-family: 'DM Sans', system-ui, sans-serif;
     font-feature-settings: "kern" 1, "liga" 1;
     /* Dreamy pink grid paper — soft mauve lines on bubblegum pink bg */
-    background-color: #F2E4EC;
+    background-color: hsl(var(--base-hue), 38%, 95%);
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
       linear-gradient(rgba(185, 140, 165, 0.12) 1px, transparent 1px),
@@ -718,4 +703,16 @@ html.work-mode {
     border-color 0.25s ease,
     color 0.25s ease,
     box-shadow 0.25s ease;
+}
+
+/* ── Smooth hue shift animation ──────────────────────────────
+   When --base-hue changes (via JS), transition background and
+   border colors smoothly so the theme shift feels intentional. */
+html {
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease;
+}
+body {
+  transition: background-color 0.35s ease;
 }
