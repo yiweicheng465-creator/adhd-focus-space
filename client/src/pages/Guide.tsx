@@ -254,11 +254,16 @@ export default function Guide() {
           >
             <Row
               label="Priority levels"
-              desc="Four levels: Urgent (red), Focus (pink), Normal (lavender), Someday (grey). Tasks are colour-coded and sorted by priority on the Dashboard."
+              desc="Three levels: Urgent (coral), Focus (purple), Normal (pink). Tasks are colour-coded by priority and sorted accordingly on the Dashboard."
+            />
+            <Row
+              label="Priority Matrix (Eisenhower)"
+              desc="Scroll down on the Tasks page to see the 4-quadrant Eisenhower Matrix. Drag any task between quadrants to instantly update its priority — Q1 Do Now sets Urgent, Q2 Schedule sets Focus, Q3 Delegate and Q4 Eliminate set Normal. The matrix shows only active (not completed) tasks."
+              where="Tasks page → scroll down → Priority Matrix"
             />
             <Row
               label="Context tags"
-              desc="Tag tasks as Work, Personal, or Video. Use the filter tabs at the top to view tasks by context."
+              desc="Tag tasks with any category using #hashtag syntax (e.g. #yoga, #reading). Custom tags appear as filter tabs at the top. Built-in tags: Work, Personal."
             />
             <Row
               label="Goal linking"
@@ -266,8 +271,9 @@ export default function Guide() {
             />
             <Row
               label="Quick capture"
-              desc="Press the lightning bolt FAB or Cmd/Ctrl+K anywhere in the app to open the quick-capture popup. Type one sentence — no formatting needed."
+              desc="Press + anywhere in the app to open the quick-capture popup. Type one sentence — no formatting needed."
             />
+            <Tip>Drag a task from Q4 (Eliminate) to Q1 (Do Now) to instantly mark it Urgent — no need to edit the task manually.</Tip>
           </Section>
 
           <Section
