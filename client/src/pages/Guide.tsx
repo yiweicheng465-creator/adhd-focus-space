@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/Sidebar";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 const M = {
   bg:       "oklch(0.975 0.012 355)",
@@ -162,21 +163,27 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
   const [type, setType] = useState<"bug" | "feature">("bug");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
-  const [sending, setSending] = useState(false);
+
+  const submitFeedback = trpc.feedback.submit.useMutation({
+    onSuccess: (data) => {
+      if (data.success) {
+        toast.success("Feedback sent! Thank you ♥");
+      } else {
+        toast.error("Could not send feedback — please try again.");
+      }
+      onClose();
+    },
+    onError: () => {
+      toast.error("Something went wrong. Please try again.");
+    },
+  });
 
   const handleSend = () => {
     if (!title.trim()) { toast.error("Please enter a title."); return; }
-    setSending(true);
-    const subject = encodeURIComponent(`[${type === "bug" ? "BUG" : "Feature Request"}] ${title.trim()}`);
-    const bodyText = encodeURIComponent(body.trim() || "(no details provided)");
-    const mailto = `mailto:vicky1272432881@gmail.com?subject=${subject}&body=${bodyText}`;
-    window.location.href = mailto;
-    setTimeout(() => {
-      setSending(false);
-      toast.success("Opening your email client…");
-      onClose();
-    }, 600);
+    submitFeedback.mutate({ type, title: title.trim(), details: body.trim() || undefined });
   };
+
+  const sending = submitFeedback.isPending;
 
   return (
     <div
@@ -275,7 +282,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
 
         {/* Send */}
         <div className="flex items-center justify-between">
-          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.52rem", color: M.muted, opacity: 0.7 }}>Opens your email client to send</p>
+          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.52rem", color: M.muted, opacity: 0.7 }}>Sends directly — no email client needed</p>
           <button
             onClick={handleSend}
             disabled={sending}
@@ -294,7 +301,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
               borderRadius: 2,
             }}
           >
-            {sending ? "Opening…" : "Send →"}
+            {sending ? "Sending…" : "Send →"}
           </button>
         </div>
       </div>

@@ -8,6 +8,7 @@
   - Music pauses when timer is paused (phase === "paused")
   - Music resumes when timer resumes (phase === "running")
   - User can manually toggle music on/off at any time
+  - User can pick from a catalog of ambient tracks
 */
 
 import {
@@ -19,8 +20,41 @@ import {
   useState,
 } from "react";
 
-const COFFEE_SHOP_URL =
-  "https://archive.org/download/1-hour-relaxing-jazz-coffee-shop-music-the-best-melodies-that-will-warm-your-heart/1%20Hour%20Relaxing%20Jazz%20Coffee%20Shop%20Music%20%20The%20Best%20Melodies%20That%20Will%20Warm%20Your%20Heart.mp3";
+// ── Music track catalog ───────────────────────────────────────────────────────
+
+export interface MusicTrack {
+  id: string;
+  label: string;
+  icon: string;
+  url: string;
+}
+
+export const MUSIC_TRACKS: MusicTrack[] = [
+  {
+    id: "lofi",
+    label: "Lo-fi Jazz",
+    icon: "cafe",
+    url: "https://archive.org/download/1-hour-relaxing-jazz-coffee-shop-music-the-best-melodies-that-will-warm-your-heart/1%20Hour%20Relaxing%20Jazz%20Coffee%20Shop%20Music%20%20The%20Best%20Melodies%20That%20Will%20Warm%20Your%20Heart.mp3",
+  },
+  {
+    id: "rain",
+    label: "Rain",
+    icon: "rain",
+    url: "https://archive.org/download/rain-and-thunder-sounds/rain-and-thunder-sounds.mp3",
+  },
+  {
+    id: "whitenoise",
+    label: "White Noise",
+    icon: "wave",
+    url: "https://archive.org/download/whitenoise_20200617/whitenoise.mp3",
+  },
+  {
+    id: "forest",
+    label: "Forest",
+    icon: "leaf",
+    url: "https://archive.org/download/forest-ambience-birds-and-wind/forest-ambience-birds-and-wind.mp3",
+  },
+];
 
 // ── Web Audio helpers ─────────────────────────────────────────────────────────
 
@@ -114,6 +148,10 @@ export interface SoundContextValue {
   musicLoading: boolean;
   /** Whether music is currently playing (enabled AND not timer-paused) */
   musicPlaying: boolean;
+  /** Currently selected track id */
+  selectedTrackId: string;
+  /** Select a different track */
+  selectTrack: (id: string) => void;
   toggleSfx: () => void;
   toggleMusic: () => void;
   setMusicVolume: (v: number) => void;
@@ -143,14 +181,15 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     try { return localStorage.getItem("adhd-sfx-enabled") !== "false"; } catch { return true; }
   });
   // Music always starts OFF on page load — user must explicitly enable it each session.
-  // We still save the user's preference to localStorage for future reference, but
-  // never auto-start music on load (avoids unexpected autoplay).
   const [musicEnabled, setMusicEnabled] = useState(false);
   const [musicVolume, setMusicVolumeState] = useState(() => {
     try { return parseFloat(localStorage.getItem("adhd-music-vol") ?? "0.25"); } catch { return 0.25; }
   });
   const [sfxVolume, setSfxVolumeState] = useState(() => {
     try { return parseFloat(localStorage.getItem("adhd-sfx-vol") ?? "0.6"); } catch { return 0.6; }
+  });
+  const [selectedTrackId, setSelectedTrackId] = useState(() => {
+    try { return localStorage.getItem("adhd-music-track") ?? "lofi"; } catch { return "lofi"; }
   });
   const [musicLoading, setMusicLoading] = useState(false);
   const [musicPlaying, setMusicPlaying] = useState(false);
@@ -195,8 +234,9 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   const playAudio = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
-    if (!audio.src) {
-      audio.src = COFFEE_SHOP_URL;
+    const track = MUSIC_TRACKS.find(t => t.id === selectedTrackId) ?? MUSIC_TRACKS[0];
+    if (!audio.src || !audio.src.includes(track.id === "lofi" ? "jazz" : track.id)) {
+      audio.src = track.url;
     }
     const ctx = ensureCtx();
     if (ctx && !gainRef.current) {
@@ -216,7 +256,7 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     audio.play()
       .then(() => { setMusicLoading(false); setMusicPlaying(true); })
       .catch(() => { setMusicLoading(false); setMusicPlaying(false); });
-  }, [ensureCtx, musicVolume]);
+  }, [ensureCtx, musicVolume, selectedTrackId]);
 
   // Internal helper: pause the audio
   const pauseAudio = useCallback(() => {
@@ -240,6 +280,27 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [musicEnabled]);
+
+  // When selected track changes: swap the src and restart if music is enabled
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const track = MUSIC_TRACKS.find(t => t.id === selectedTrackId) ?? MUSIC_TRACKS[0];
+    const wasPlaying = musicEnabled && !audio.paused;
+    // Disconnect old gain node so we can reconnect with new source
+    if (gainRef.current) {
+      try { gainRef.current.disconnect(); } catch { /* ignore */ }
+      gainRef.current = null;
+    }
+    audio.pause();
+    audio.src = track.url;
+    audio.load();
+    if (wasPlaying && timerPhaseRef.current !== "paused") {
+      playAudio();
+    }
+    try { localStorage.setItem("adhd-music-track", selectedTrackId); } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTrackId]);
 
   // Sync gain node volume
   useEffect(() => {
@@ -280,6 +341,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     try { localStorage.setItem("adhd-sfx-vol", String(clamped)); } catch {}
   }, []);
 
+  const selectTrack = useCallback((id: string) => {
+    setSelectedTrackId(id);
+  }, []);
+
   // ── Timer phase integration ───────────────────────────────────────────────
 
   const onTimerPhaseChange = useCallback((phase: "running" | "paused" | "other") => {
@@ -310,12 +375,14 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     sfxVolume,
     musicLoading,
     musicPlaying,
+    selectedTrackId,
+    selectTrack,
     toggleSfx,
     toggleMusic,
     setMusicVolume,
     setSfxVolume,
     onTimerPhaseChange,
-     getAudioCtx,
+    getAudioCtx,
     playChimeSfx: useCallback(() => {
       if (!sfxEnabled) return;
       const ctx = ensureCtx();

@@ -4,9 +4,10 @@
    Aesthetic: clean outline icons like a vintage OS sidebar
    ============================================================ */
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { useTimer } from "@/contexts/TimerContext";
+import { useSoundContext } from "@/contexts/SoundContext";
 import { EffectsPanel } from "@/components/EffectsPanel";
 
 interface SidebarProps {
@@ -141,11 +142,13 @@ const NAV: Array<{
 
 /* ── Floating timer pill ── */
 function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
-  const { phase, remaining, mode, durations } = useTimer();
+  const { phase, remaining, mode, durations, handleStartPause } = useTimer();
+  const sound = useSoundContext();
+  const [showPopover, setShowPopover] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const active = phase === "running" || phase === "paused" || phase === "transition";
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
-  // Idle: show default focus duration
   const idleMins = String(durations?.focus ?? 25).padStart(2, "0");
   const modeColor = active
     ? (mode === "focus" ? "oklch(0.52 0.10 32)" : mode === "short" ? "oklch(0.60 0.07 138)" : "oklch(0.58 0.08 220)")
@@ -156,36 +159,160 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
   const label = active
     ? (mode === "focus" ? "FOCUS" : mode === "short" ? "SHORT" : "LONG")
     : "FOCUS";
+
+  // Close popover on outside click
+  useEffect(() => {
+    if (!showPopover) return;
+    const handler = (e: MouseEvent) => {
+      if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+        setShowPopover(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [showPopover]);
+
+  const handleClick = () => {
+    if (active) {
+      setShowPopover(p => !p);
+    } else {
+      onGoToFocus();
+    }
+  };
+
   return (
-    <button
-      onClick={onGoToFocus}
-      title={active ? `${mm}:${ss} · ${label} — click to go to timer` : "Go to Focus Timer"}
-      className="w-full flex flex-col items-center justify-center py-2 transition-all duration-200"
-      style={{
-        background: modeBg,
-        borderTop: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
-        borderBottom: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
-        opacity: active ? 1 : 0.55,
-      }}
-    >
-      <div style={{ position: "relative", width: 6, height: 6, marginBottom: 3 }}>
-        <div style={{
-          width: 6, height: 6, borderRadius: "50%", background: modeColor,
-          animation: phase === "running" ? "timerPulse 2s ease-in-out infinite" : "none"
-        }} />
-      </div>
-      <span
-        className="tabular-nums"
-        style={{ fontSize: 10, letterSpacing: "0.06em", color: modeColor, fontFamily: "'Space Mono', monospace", lineHeight: 1 }}
+    <div style={{ position: "relative" }} ref={popoverRef}>
+      <button
+        onClick={handleClick}
+        title={active ? `${mm}:${ss} · ${label} — click for controls` : "Go to Focus Timer"}
+        className="w-full flex flex-col items-center justify-center py-2 transition-all duration-200"
+        style={{
+          background: modeBg,
+          borderTop: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
+          borderBottom: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
+          opacity: active ? 1 : 0.55,
+        }}
       >
-        {phase === "transition" ? "NEXT" : active ? `${mm}:${ss}` : `${idleMins}:00`}
-      </span>
-      <span
-        style={{ fontSize: 6, color: modeColor, fontFamily: "'Space Mono', monospace", marginTop: 2, opacity: 0.75, letterSpacing: "0.12em" }}
-      >
-        {phase === "paused" ? "PAUSED" : label}
-      </span>
-    </button>
+        <div style={{ position: "relative", width: 6, height: 6, marginBottom: 3 }}>
+          <div style={{
+            width: 6, height: 6, borderRadius: "50%", background: modeColor,
+            animation: phase === "running" ? "timerPulse 2s ease-in-out infinite" : "none"
+          }} />
+        </div>
+        <span
+          className="tabular-nums"
+          style={{ fontSize: 10, letterSpacing: "0.06em", color: modeColor, fontFamily: "'Space Mono', monospace", lineHeight: 1 }}
+        >
+          {phase === "transition" ? "NEXT" : active ? `${mm}:${ss}` : `${idleMins}:00`}
+        </span>
+        <span
+          style={{ fontSize: 6, color: modeColor, fontFamily: "'Space Mono', monospace", marginTop: 2, opacity: 0.75, letterSpacing: "0.12em" }}
+        >
+          {phase === "paused" ? "PAUSED" : label}
+        </span>
+      </button>
+
+      {/* Mini popover — only when timer is active */}
+      {showPopover && active && (
+        <div
+          style={{
+            position: "absolute",
+            left: "calc(100% + 8px)",
+            bottom: 0,
+            zIndex: 200,
+            background: "oklch(0.97 0.015 340)",
+            border: "1.5px solid oklch(0.75 0.08 340)",
+            boxShadow: "3px 3px 0 oklch(0.82 0.040 340 / 0.5)",
+            padding: "10px 12px",
+            minWidth: 160,
+            display: "flex",
+            flexDirection: "column",
+            gap: 8,
+          }}
+        >
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, letterSpacing: "0.14em", color: "oklch(0.45 0.08 340)", textTransform: "uppercase" }}>
+              {label} · {mm}:{ss}
+            </span>
+            <button
+              onClick={() => setShowPopover(false)}
+              style={{ fontSize: 8, color: "oklch(0.65 0.06 340)", background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}
+            >✕</button>
+          </div>
+
+          {/* Pause / Resume */}
+          <button
+            onClick={() => { handleStartPause(); setShowPopover(false); }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "5px 8px",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 7,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              background: modeColor,
+              color: "#fff",
+              border: "none",
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            <span style={{ fontSize: 9 }}>{phase === "running" ? "⏸" : "▶"}</span>
+            {phase === "running" ? "Pause" : "Resume"}
+          </button>
+
+          {/* Music toggle */}
+          <button
+            onClick={sound.toggleMusic}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 8px",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 7,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              background: sound.musicEnabled ? "oklch(0.90 0.04 340)" : "transparent",
+              color: "oklch(0.45 0.08 340)",
+              border: "1px solid oklch(0.75 0.08 340)",
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            <span style={{ fontSize: 9 }}>♪</span>
+            {sound.musicEnabled ? "Music On" : "Music Off"}
+          </button>
+
+          {/* Go to Focus */}
+          <button
+            onClick={() => { setShowPopover(false); onGoToFocus(); }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "4px 8px",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: 7,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              background: "transparent",
+              color: "oklch(0.55 0.08 340)",
+              border: "1px solid oklch(0.80 0.06 340)",
+              cursor: "pointer",
+              width: "100%",
+            }}
+          >
+            <span style={{ fontSize: 8 }}>→</span>
+            Open Timer
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
 

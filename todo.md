@@ -175,3 +175,8 @@
 - [x] Remove AI Features tab from sidebar navigation
 - [x] Create detailed instruction/guide page (hidden, accessible from unobvious location)
 - [x] Disable autocomplete on Quick Capture input
+
+## New Features (Current Session)
+- [ ] Music track picker in sound panel (lo-fi, rain, white noise) with localStorage
+- [ ] Sidebar timer pill mini popover with pause/resume controls
+- [ ] In-app bug/feature report via tRPC + email API instead of mailto
