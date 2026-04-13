@@ -36,24 +36,7 @@ export const MUSIC_TRACKS: MusicTrack[] = [
     icon: "cafe",
     url: "https://archive.org/download/1-hour-relaxing-jazz-coffee-shop-music-the-best-melodies-that-will-warm-your-heart/1%20Hour%20Relaxing%20Jazz%20Coffee%20Shop%20Music%20%20The%20Best%20Melodies%20That%20Will%20Warm%20Your%20Heart.mp3",
   },
-  {
-    id: "rain",
-    label: "Rain",
-    icon: "rain",
-    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/rain_5d8c43c3.mp3",
-  },
-  {
-    id: "whitenoise",
-    label: "White Noise",
-    icon: "wave",
-    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/whitenoise_49878aff.mp3",
-  },
-  {
-    id: "forest",
-    label: "Forest",
-    icon: "leaf",
-    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/forest_b10b8d41.mp3",
-  },
+
 ];
 
 // ── Web Audio helpers ─────────────────────────────────────────────────────────

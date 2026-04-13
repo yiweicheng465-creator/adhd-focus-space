@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Loader2, RotateCcw, Play, Pause, Settings, Check, X, Plus, Trash2, Pencil, Coffee, Volume2, VolumeX } from "lucide-react";
 import { useTimer, MODE_LABELS, MODE_COLORS, PRESETS, DEFAULT_STRIPS, type TimerMode } from "@/contexts/TimerContext";
-import { useSoundContext, MUSIC_TRACKS } from "@/contexts/SoundContext";
+import { useSoundContext } from "@/contexts/SoundContext";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { trpc } from "@/lib/trpc";
 import { handleAiError } from "@/lib/aiErrorHandler";
@@ -976,37 +976,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? DARK : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? `${DARK}18` : "transparent", cursor: "pointer", flexShrink: 0 }}>
                 {sound.musicLoading ? <span style={{ fontSize: 6, color: DARK }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? DARK : BORDER} />}
               </button>
-              <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>{MUSIC_TRACKS.find(t => t.id === sound.selectedTrackId)?.label ?? "Music"}</span>
+              <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Lo-fi Jazz</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
                 onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
                 disabled={!sound.musicEnabled}
                 style={{ flex: 1, accentColor: "oklch(0.58 0.18 340)", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
             </div>
-            {/* Track picker */}
-            <div style={{ display: "flex", gap: 4, paddingLeft: 25 }}>
-              {MUSIC_TRACKS.map(track => (
-                <button
-                  key={track.id}
-                  onClick={() => sound.selectTrack(track.id)}
-                  title={track.label}
-                  style={{
-                    padding: "2px 7px",
-                    fontSize: 6,
-                    letterSpacing: "0.12em",
-                    fontFamily: "'JetBrains Mono', monospace",
-                    textTransform: "uppercase",
-                    border: `1px solid ${sound.selectedTrackId === track.id ? DARK : BORDER}`,
-                    background: sound.selectedTrackId === track.id ? `${DARK}18` : "transparent",
-                    color: sound.selectedTrackId === track.id ? DARK : BORDER,
-                    cursor: "pointer",
-                    fontWeight: sound.selectedTrackId === track.id ? 700 : 400,
-                  }}
-                >
-                  {track.label}
-                </button>
-              ))}
-            </div>
+
           </div>
         </div>
       )}
