@@ -10,17 +10,19 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { TimerProvider } from "./contexts/TimerContext";
 import { SoundProvider } from "./contexts/SoundContext";
 import Home from "./pages/Home";
-
 import Monthly from "@/pages/Monthly";
 import Guide from "@/pages/Guide";
+import AdminDashboard from "@/pages/AdminDashboard";
+
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
       <Route path={"/"} component={Home} />
-
-        <Route path="/monthly" component={Monthly} />
-        <Route path="/guide" component={Guide} />
+      <Route path="/monthly" component={Monthly} />
+      <Route path="/guide" component={Guide} />
+      {/* Admin-only route — no nav entry point, direct URL access only */}
+      <Route path="/admin" component={AdminDashboard} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>
