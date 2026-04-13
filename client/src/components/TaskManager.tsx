@@ -4,11 +4,11 @@
    Context: Work=sage-green, Personal=dusty-mauve
    ============================================================ */
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { EisenhowerMatrix, priorityToQuadrant, type QuadrantId } from "./EisenhowerMatrix";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle, Flame, Plus, Star, Trash2, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Flame, Plus, Star, Trash2, Zap, Pencil, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
@@ -105,6 +105,12 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
   const [completingId,    setCompletingId]    = useState<string | null>(null);
   const [activeContext,   setActiveContext]   = useState<ActiveContext>(defaultContext);
   const [filter,          setFilter]          = useState<"all" | "active" | "done">("active");
+  // Inline editing state
+  const [editingTaskId,   setEditingTaskId]   = useState<string | null>(null);
+  const [editContext,     setEditContext]      = useState<ItemContext>("work");
+  const [editGoalId,      setEditGoalId]       = useState<string | null>(null);
+  const [editPriority,    setEditPriority]     = useState<TaskPriority>("focus");
+  const editPopoverRef = useRef<HTMLDivElement>(null);
   // Quadrant map: taskId → quadrantId (persisted in component state)
   const [quadrantMap, setQuadrantMap]         = useState<Record<string, QuadrantId>>(() => {
     try {
@@ -156,6 +162,40 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
   };
 
   const deleteTask = (id: string) => onTasksChange(tasks.filter((t) => t.id !== id));
+
+  // Open inline edit popover for a task
+  const openEdit = (task: Task) => {
+    setEditingTaskId(task.id);
+    setEditContext(task.context);
+    setEditGoalId(task.goalId ?? null);
+    setEditPriority(task.priority);
+  };
+
+  // Save inline edits
+  const saveEdit = (taskId: string) => {
+    onTasksChange(tasks.map((t) =>
+      t.id === taskId
+        ? { ...t, context: editContext, goalId: editGoalId ?? undefined, priority: editPriority }
+        : t
+    ));
+    setEditingTaskId(null);
+    toast("Task updated.", { duration: 1500 });
+  };
+
+  // Close without saving
+  const closeEdit = () => setEditingTaskId(null);
+
+  // Close popover when clicking outside
+  useEffect(() => {
+    if (!editingTaskId) return;
+    const handler = (e: MouseEvent) => {
+      if (editPopoverRef.current && !editPopoverRef.current.contains(e.target as Node)) {
+        setEditingTaskId(null);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [editingTaskId]);
 
   // Build counts for all known contexts
   const counts: Record<string, number> = { all: tasks.filter((t) => !t.done).length };
@@ -339,6 +379,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
           const pcfg        = PRIORITY_CONFIG[task.priority];
           const PIcon       = pcfg.icon;
           const isCompleting = completingId === task.id;
+          const isEditing    = editingTaskId === task.id;
           const cleanText = task.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim() || task.text;
 
           return (
@@ -350,6 +391,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 transform: isCompleting ? "scale(0.98)" : undefined,
                 transition: "all 0.3s ease",
                 alignItems: "flex-start",
+                position: "relative",
               }}
             >
               {/* Left: priority icon box */}
@@ -398,13 +440,172 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                     </span>
                   ) : null;
                 })()}
+
+                {/* Inline edit popover */}
+                {isEditing && (
+                  <div
+                    ref={editPopoverRef}
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      zIndex: 50,
+                      background: M.card,
+                      border: `1.5px solid ${M.border}`,
+                      borderRadius: 6,
+                      padding: "10px 12px",
+                      minWidth: 260,
+                      boxShadow: "0 4px 16px oklch(0.28 0.04 320 / 0.12)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      marginTop: 4,
+                    }}
+                  >
+                    {/* Priority row */}
+                    <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                      <span style={{ ...LABEL_STYLE, marginRight: 4, minWidth: 52 }}>Priority</span>
+                      {(Object.keys(PRIORITY_CONFIG) as TaskPriority[]).map((p) => {
+                        const { icon: PIco, color, bg, border } = PRIORITY_CONFIG[p];
+                        const isAct = editPriority === p;
+                        return (
+                          <button
+                            key={p}
+                            onClick={() => setEditPriority(p)}
+                            style={{
+                              width: 26, height: 26,
+                              border: `1.5px solid ${isAct ? border : M.border}`,
+                              borderRadius: 4,
+                              background: isAct ? bg : "transparent",
+                              display: "flex", alignItems: "center", justifyContent: "center",
+                              cursor: "pointer",
+                            }}
+                            title={PRIORITY_CONFIG[p].label}
+                          >
+                            <PIco size={12} style={{ color: isAct ? color : M.muted }} />
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Category row */}
+                    <div style={{ display: "flex", gap: 4, alignItems: "center", flexWrap: "wrap" }}>
+                      <span style={{ ...LABEL_STYLE, marginRight: 4, minWidth: 52 }}>Category</span>
+                      {allContexts.map((ctx) => {
+                        const cfg = getContextConfig(ctx);
+                        const isAct = editContext === ctx;
+                        return (
+                          <button
+                            key={ctx}
+                            onClick={() => setEditContext(ctx)}
+                            style={{
+                              padding: "2px 8px",
+                              border: `1px solid ${isAct ? cfg.border : M.border}`,
+                              borderRadius: 0,
+                              background: isAct ? cfg.bg : "transparent",
+                              color: isAct ? cfg.color : M.muted,
+                              fontFamily: "'DM Sans', sans-serif",
+                              fontSize: "0.62rem",
+                              fontWeight: isAct ? 600 : 400,
+                              letterSpacing: "0.10em",
+                              textTransform: "uppercase",
+                              cursor: "pointer",
+                            }}
+                          >
+                            {cfg.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    {/* Goal row */}
+                    {goals.length > 0 && (
+                      <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+                        <span style={{ ...LABEL_STYLE, marginRight: 4, minWidth: 52 }}>Goal</span>
+                        <select
+                          value={editGoalId ?? ""}
+                          onChange={(e) => setEditGoalId(e.target.value || null)}
+                          style={{
+                            flex: 1,
+                            background: editGoalId ? "oklch(0.52 0.14 290 / 0.10)" : "transparent",
+                            color: editGoalId ? "oklch(0.40 0.14 290)" : M.muted,
+                            border: `1px solid ${editGoalId ? "oklch(0.52 0.14 290 / 0.40)" : M.border}`,
+                            fontFamily: "'DM Sans', sans-serif",
+                            fontSize: "0.62rem",
+                            letterSpacing: "0.08em",
+                            borderRadius: 0,
+                            padding: "3px 6px",
+                            cursor: "pointer",
+                            outline: "none",
+                          }}
+                        >
+                          <option value="">No goal</option>
+                          {goals.map((g) => (
+                            <option key={g.id} value={g.id}>
+                              {g.text.length > 32 ? g.text.slice(0, 32) + "…" : g.text}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+
+                    {/* Save / Cancel */}
+                    <div style={{ display: "flex", gap: 6, justifyContent: "flex-end", marginTop: 2 }}>
+                      <button
+                        onClick={closeEdit}
+                        style={{
+                          padding: "3px 10px",
+                          border: `1px solid ${M.border}`,
+                          background: "transparent",
+                          color: M.muted,
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "0.62rem",
+                          letterSpacing: "0.10em",
+                          textTransform: "uppercase",
+                          cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                        }}
+                      >
+                        <X size={10} /> Cancel
+                      </button>
+                      <button
+                        onClick={() => saveEdit(task.id)}
+                        style={{
+                          padding: "3px 10px",
+                          border: `1px solid ${M.coral}60`,
+                          background: `${M.coral}12`,
+                          color: M.coral,
+                          fontFamily: "'DM Sans', sans-serif",
+                          fontSize: "0.62rem",
+                          fontWeight: 600,
+                          letterSpacing: "0.10em",
+                          textTransform: "uppercase",
+                          cursor: "pointer",
+                          display: "flex", alignItems: "center", gap: 4,
+                        }}
+                      >
+                        <Check size={10} /> Save
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {/* Right side: context badge + priority stamp + checkbox */}
+              {/* Right side: context badge + edit button + checkbox + delete */}
               <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, marginTop: 2 }}>
                 {/* Context badge */}
                 <ContextBadge context={task.context} />
-                {/* Priority stamp removed — icon box on left is sufficient */}
+                {/* Edit button — appears on hover */}
+                {!task.done && (
+                  <button
+                    onClick={() => isEditing ? closeEdit() : openEdit(task)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    title="Edit task details"
+                    style={{ color: isEditing ? M.coral : M.muted }}
+                  >
+                    <Pencil className="w-3 h-3" />
+                  </button>
+                )}
                 {/* Checkbox */}
                 <button
                   onClick={() => toggleTask(task.id)}

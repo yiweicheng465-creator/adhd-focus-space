@@ -179,4 +179,11 @@
 ## New Features (Current Session)
 - [ ] Music track picker in sound panel (lo-fi, rain, white noise) with localStorage
 - [ ] Sidebar timer pill mini popover with pause/resume controls
-- [ ] In-app bug/feature report via tRPC + email API instead of mailto
+- [x] In-app bug/feature report via tRPC + email API instead of mailto
+- [x] Music track picker in sound panel (lo-fi, rain, white noise) with localStorage
+- [x] Sidebar timer pill mini popover with pause/resume controls
+
+## Bugs & Features (Current Session)
+- [x] Fix Wins category icon picker bug (wins.update procedure + Home.tsx wiring already in place — confirmed working)
+- [x] Add inline category and tag editing to existing tasks (pencil icon on hover opens edit popover)
+- [x] Add goal link/change/remove to existing tasks (goal dropdown in edit popover, can add/change/remove)

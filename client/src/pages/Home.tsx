@@ -208,6 +208,7 @@ export default function Home() {
   const updateTask   = trpc.tasks.update.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
   const deleteTask   = trpc.tasks.delete.useMutation({ onSuccess: () => utils.tasks.list.invalidate() });
   const createWin    = trpc.wins.create.useMutation({ onSuccess: () => utils.wins.list.invalidate() });
+  const updateWin    = trpc.wins.update.useMutation({ onSuccess: () => utils.wins.list.invalidate() });
   const deleteWin    = trpc.wins.delete.useMutation({ onSuccess: () => utils.wins.list.invalidate() });
   const createGoal   = trpc.goals.create.useMutation({ onSuccess: () => utils.goals.list.invalidate() });
   const updateGoal   = trpc.goals.update.useMutation({ onSuccess: () => utils.goals.list.invalidate() });
@@ -840,6 +841,13 @@ export default function Home() {
                       wins.forEach(w => { if (!newWins.find(nw => nw.id === w.id)) deleteWin.mutate({ id: w.id }); });
                       // Find new wins
                       newWins.forEach(w => { if (!wins.find(ow => ow.id === w.id)) createWin.mutate({ id: w.id, text: w.text, iconIdx: w.iconIdx ?? 0 }); });
+                      // Find updated wins (iconIdx or archived changed)
+                      newWins.forEach(w => {
+                        const old = wins.find(ow => ow.id === w.id);
+                        if (old && (old.iconIdx !== w.iconIdx || old.archived !== w.archived)) {
+                          updateWin.mutate({ id: w.id, iconIdx: w.iconIdx ?? 0, archived: w.archived ?? false });
+                        }
+                      });
                     } else { setLocalWins(newWins); }
                   }} />
                 </div>

@@ -30,6 +30,27 @@ export const winsRouter = router({
       return { success: true };
     }),
 
+  update: protectedProcedure
+    .input(z.object({
+      id: z.string(),
+      iconIdx: z.number().optional(),
+      text: z.string().optional(),
+      archived: z.boolean().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new Error("DB unavailable");
+      const { id, ...rest } = input;
+      const updateData: Record<string, unknown> = {};
+      if (rest.iconIdx !== undefined) updateData.iconIdx = rest.iconIdx;
+      if (rest.text !== undefined) updateData.text = rest.text;
+      if (rest.archived !== undefined) updateData.archived = rest.archived;
+      await db.update(wins)
+        .set(updateData)
+        .where(and(eq(wins.id, id), eq(wins.userId, ctx.user.id)));
+      return { success: true };
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async ({ ctx, input }) => {
