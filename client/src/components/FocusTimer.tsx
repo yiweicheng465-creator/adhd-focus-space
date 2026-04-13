@@ -1187,7 +1187,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
           <div style={{
             display: "flex", alignItems: "center", gap: 6, padding: "6px 9px",
             background: PANEL, borderTop: `2px solid ${DARK}`,
-            flexShrink: 0,
+            flexShrink: 0, flexWrap: "nowrap", overflow: "hidden",
           }}>
             {/* Quit */}
             {(running || phase === "paused") && (
