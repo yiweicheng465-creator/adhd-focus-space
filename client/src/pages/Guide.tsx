@@ -231,7 +231,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
                 borderRadius: 2,
               }}
             >
-              {t === "bug" ? "🐛 Bug Report" : "✨ Feature Request"}
+              {t === "bug" ? "Bug Report" : "Feature Request"}
             </button>
           ))}
         </div>
