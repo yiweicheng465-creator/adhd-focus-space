@@ -892,9 +892,9 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
           <button
             onClick={() => { setShowSound(s => !s); setShowSettings(false); }}
             title="Sound & music"
-            style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.58 0.18 340 / 0.12)" : "transparent", cursor: "pointer" }}
+            style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? DARK : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? `${DARK}18` : "transparent", cursor: "pointer" }}
           >
-            {sound.musicLoading ? <span style={{ fontSize: 6, color: "oklch(0.58 0.18 340)" }}>…</span> : sound.musicEnabled ? <Coffee size={8} color="oklch(0.58 0.18 340)" /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
+            {sound.musicLoading ? <span style={{ fontSize: 6, color: DARK }}>…</span> : sound.musicEnabled ? <Coffee size={8} color={DARK} /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
           </button>
           <button
             onClick={() => { setShowSettings(s => !s); setShowSound(false); }}
@@ -969,8 +969,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? "oklch(0.58 0.18 340 / 0.12)" : "transparent", cursor: "pointer", flexShrink: 0 }}>
-                {sound.musicLoading ? <span style={{ fontSize: 6, color: "oklch(0.58 0.18 340)" }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? "oklch(0.58 0.18 340)" : BORDER} />}
+              <button onClick={sound.toggleMusic} style={{ width: 18, height: 18, border: `1px solid ${sound.musicEnabled ? DARK : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? `${DARK}18` : "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.musicLoading ? <span style={{ fontSize: 6, color: DARK }}>…</span> : <Coffee size={8} color={sound.musicEnabled ? DARK : BORDER} />}
               </button>
               <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Cafe Music</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
