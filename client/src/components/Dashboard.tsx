@@ -622,19 +622,17 @@ export function Dashboard({
                   autoComplete="new-password"
                   style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
-                <kbd title="press D to focus" style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED, borderRadius: 3, opacity: quickCapture ? 0 : 0.7 }}>D</kbd>
+                <span style={{ fontSize: 10, color: MUTED, opacity: 0.65, fontFamily: "'Space Mono', monospace", flexShrink: 0 }}>↵</span>
               </div>
               {/* Context switcher */}
               <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                 <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
               </div>
             </div>
-            {/* D shortcut hint */}
-            {!quickCapture && (
-              <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.6, marginTop: 2, paddingLeft: 2 }}>
-                press <kbd style={{ fontSize: 8, border: `1px solid ${BORDER}`, padding: "0px 4px", borderRadius: 2, fontFamily: "inherit" }}>D</kbd> to focus
-              </div>
-            )}
+            {/* Enter hint — always visible */}
+            <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, marginTop: 2, paddingLeft: 2 }}>
+              press ↵ to send
+            </div>
           </div>
           {/* Right: motivational micro-text */}
           <div className="hidden lg:flex shrink-0 flex-col items-end justify-end" style={{ width: 80, padding: "10px 14px 10px 0", position: "relative" }}>
