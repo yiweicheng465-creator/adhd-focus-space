@@ -188,6 +188,98 @@ export default function Guide() {
             </p>
           </div>
 
+          {/* ── KEYBOARD SHORTCUTS ── */}
+          <div
+            style={{
+              background: M.card,
+              border: `1px solid ${M.border}`,
+              borderRadius: 4,
+              overflow: "hidden",
+              boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
+            }}
+          >
+            <div
+              style={{
+                padding: "10px 16px",
+                borderBottom: `1px solid ${M.border}`,
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+              }}
+            >
+              <span
+                style={{
+                  fontSize: "0.55rem",
+                  fontFamily: "'Space Mono', monospace",
+                  letterSpacing: "0.10em",
+                  color: M.gold,
+                  background: M.goldBg,
+                  border: `1px solid ${M.goldBdr}`,
+                  padding: "1px 6px",
+                  borderRadius: 2,
+                }}
+              >
+                SHORTCUTS
+              </span>
+              <span
+                style={{
+                  fontFamily: "'Space Mono', monospace",
+                  fontSize: "0.70rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.06em",
+                  color: M.ink,
+                }}
+              >
+                KEYBOARD SHORTCUTS
+              </span>
+            </div>
+            <div style={{ padding: "12px 16px" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.10em", color: M.muted, textAlign: "left", paddingBottom: 8, fontWeight: 600, textTransform: "uppercase", borderBottom: `1px solid ${M.border}` }}>Key</th>
+                    <th style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.10em", color: M.muted, textAlign: "left", paddingBottom: 8, fontWeight: 600, textTransform: "uppercase", borderBottom: `1px solid ${M.border}` }}>Action</th>
+                    <th style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", letterSpacing: "0.10em", color: M.muted, textAlign: "left", paddingBottom: 8, fontWeight: 600, textTransform: "uppercase", borderBottom: `1px solid ${M.border}` }}>Where</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { key: "D",        action: "Focus the \"What's on your mind?\" input", where: "Dashboard" },
+                    { key: "/",        action: "Focus the AI chat input",                  where: "Dashboard" },
+                    { key: "+",        action: "Open Quick Capture modal",                 where: "Anywhere" },
+                    { key: "⌘K / ⌃K", action: "Open Quick Capture modal",                 where: "Anywhere" },
+                    { key: "↵ Enter",  action: "Submit Quick Capture / Brain Dump",        where: "Modal / Dump" },
+                    { key: "Esc",      action: "Close Quick Capture or SET panel",         where: "Anywhere" },
+                  ].map(({ key, action, where }, i, arr) => (
+                    <tr key={key} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${M.border}` : "none" }}>
+                      <td style={{ padding: "7px 0" }}>
+                        <kbd style={{
+                          fontFamily: "'Space Mono', monospace",
+                          fontSize: "0.68rem",
+                          fontWeight: 700,
+                          color: M.coral,
+                          background: M.coralBg,
+                          border: `1px solid ${M.coralBdr}`,
+                          borderRadius: 3,
+                          padding: "2px 7px",
+                          display: "inline-block",
+                          whiteSpace: "nowrap",
+                        }}>
+                          {key}
+                        </kbd>
+                      </td>
+                      <td style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", color: M.ink, padding: "7px 12px 7px 8px", lineHeight: 1.5 }}>{action}</td>
+                      <td style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.55rem", color: M.muted, letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{where}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.70rem", color: M.muted, marginTop: 10, lineHeight: 1.5 }}>
+                Shortcuts are disabled when you are typing in an input or textarea.
+              </p>
+            </div>
+          </div>
+
           {/* ── CORE FEATURES ── */}
 
           <Section

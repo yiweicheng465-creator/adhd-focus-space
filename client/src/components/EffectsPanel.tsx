@@ -225,7 +225,7 @@ export function EffectsPanel() {
     return () => window.removeEventListener("openFxPanel", onOpenFx);
   }, []);
 
-  // Close on outside click
+  // Close on outside click or Escape key
   useEffect(() => {
     if (!open) return;
     function onDown(e: MouseEvent) {
@@ -233,8 +233,15 @@ export function EffectsPanel() {
         setOpen(false);
       }
     }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
     document.addEventListener("mousedown", onDown);
-    return () => document.removeEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
   }, [open]);
 
   return (

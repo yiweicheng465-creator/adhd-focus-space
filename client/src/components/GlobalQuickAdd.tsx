@@ -61,21 +61,36 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
   return (
     <>
       {/* Floating trigger — retro lo-fi style */}
-      <button
-        onClick={() => setOpen(true)}
-        title="Quick add task (⌘K or +)"
-        className="fixed bottom-6 right-6 z-50 w-12 h-12 flex items-center justify-center transition-all duration-200 active:translate-y-[2px] active:shadow-none"
-        style={{
-          background:   "oklch(0.975 0.018 355)",
-          border:       `2px solid ${M.ink}`,
-          boxShadow:    `3px 3px 0 ${M.ink}`,
-          opacity:      open ? 0 : 1,
-          pointerEvents: open ? "none" : "auto",
-          fontFamily:   "'Space Mono', monospace",
-        }}
+      <div
+        className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-1.5"
+        style={{ opacity: open ? 0 : 1, pointerEvents: open ? "none" : "auto", transition: "opacity 0.15s" }}
       >
-        <Plus className="w-5 h-5" style={{ color: M.coral }} />
-      </button>
+        <button
+          onClick={() => setOpen(true)}
+          title="Quick add task (⌘K or +)"
+          className="w-12 h-12 flex items-center justify-center transition-all duration-200 active:translate-y-[2px] active:shadow-none"
+          style={{
+            background:   "oklch(0.975 0.018 355)",
+            border:       `2px solid ${M.ink}`,
+            boxShadow:    `3px 3px 0 ${M.ink}`,
+            fontFamily:   "'Space Mono', monospace",
+          }}
+        >
+          <Plus className="w-5 h-5" style={{ color: M.coral }} />
+        </button>
+        <span style={{
+          fontFamily: "'Space Mono', monospace",
+          fontSize: "0.50rem",
+          letterSpacing: "0.08em",
+          color: M.muted,
+          textAlign: "center",
+          lineHeight: 1.3,
+          userSelect: "none",
+          pointerEvents: "none",
+        }}>
+          press +
+        </span>
+      </div>
 
       {/* Backdrop + modal */}
       {open && (
