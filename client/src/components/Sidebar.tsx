@@ -371,12 +371,14 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">
         <MonthlyLink />
-        {/* Hidden guide link — unobvious tiny ? button */}
-        <GuideLink />      </div>
+      </div>
 
       {/* Effects panel (grain + work mode) */}
       <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
       <EffectsPanel />
+
+      {/* Hidden guide link — very bottom, unobvious */}
+      <GuideLink />
     </aside>
   );
 }

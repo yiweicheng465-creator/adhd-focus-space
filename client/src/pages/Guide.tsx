@@ -171,24 +171,6 @@ export default function Guide() {
 
           {/* Header */}
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <div
-                style={{
-                  background: "oklch(0.22 0.040 320)",
-                  padding: "3px 8px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 5,
-                }}
-              >
-                <div style={{ display: "flex", gap: 4 }}>
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.10 75)" }} />
-                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.52 0.07 145)" }} />
-                </div>
-                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "oklch(0.75 0.02 75)", marginLeft: 2 }}>guide.exe</span>
-              </div>
-            </div>
             <h1
               style={{
                 fontFamily: "'Space Mono', monospace",
