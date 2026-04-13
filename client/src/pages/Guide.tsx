@@ -907,7 +907,7 @@ export default function Guide() {
                 borderRadius: 3,
               }}
             >
-              🐛 report a bug / request a feature
+              report a bug / request a feature
             </button>
           </div>
         </div>
