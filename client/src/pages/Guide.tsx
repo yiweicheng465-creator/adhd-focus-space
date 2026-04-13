@@ -7,6 +7,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Sidebar } from "@/components/Sidebar";
+import { toast } from "sonner";
 
 const M = {
   bg:       "oklch(0.975 0.012 355)",
@@ -156,8 +157,154 @@ function Tip({ children }: { children: React.ReactNode }) {
   );
 }
 
+/* ── Bug / Feature Request modal ── */
+function FeedbackModal({ onClose }: { onClose: () => void }) {
+  const [type, setType] = useState<"bug" | "feature">("bug");
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [sending, setSending] = useState(false);
+
+  const handleSend = () => {
+    if (!title.trim()) { toast.error("Please enter a title."); return; }
+    setSending(true);
+    const subject = encodeURIComponent(`[${type === "bug" ? "BUG" : "Feature Request"}] ${title.trim()}`);
+    const bodyText = encodeURIComponent(body.trim() || "(no details provided)");
+    const mailto = `mailto:vicky1272432881@gmail.com?subject=${subject}&body=${bodyText}`;
+    window.location.href = mailto;
+    setTimeout(() => {
+      setSending(false);
+      toast.success("Opening your email client…");
+      onClose();
+    }, 600);
+  };
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: "oklch(0.20 0.04 320 / 0.45)" }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div
+        style={{
+          background: M.card,
+          border: `1.5px solid ${M.border}`,
+          borderRadius: 4,
+          boxShadow: "4px 4px 0 oklch(0.82 0.040 340 / 0.5)",
+          width: "min(480px, 92vw)",
+          padding: "20px 22px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+        }}
+      >
+        {/* Title bar */}
+        <div className="flex items-center justify-between">
+          <span style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.68rem", fontWeight: 700, letterSpacing: "0.08em", color: M.ink }}>SEND FEEDBACK</span>
+          <button onClick={onClose} style={{ fontSize: "0.75rem", color: M.muted, background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}>✕</button>
+        </div>
+
+        {/* Type toggle */}
+        <div className="flex gap-2">
+          {(["bug", "feature"] as const).map((t) => (
+            <button
+              key={t}
+              onClick={() => setType(t)}
+              style={{
+                flex: 1,
+                padding: "6px 0",
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.58rem",
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                fontWeight: type === t ? 700 : 400,
+                background: type === t ? M.accentBg : "transparent",
+                border: `1px solid ${type === t ? M.accentBdr : M.border}`,
+                color: type === t ? M.accent : M.muted,
+                cursor: "pointer",
+                borderRadius: 2,
+              }}
+            >
+              {t === "bug" ? "🐛 Bug Report" : "✨ Feature Request"}
+            </button>
+          ))}
+        </div>
+
+        {/* Title */}
+        <div className="flex flex-col gap-1.5">
+          <label style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.10em", color: M.muted }}>TITLE</label>
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder={type === "bug" ? "e.g. Timer doesn't pause music" : "e.g. Add dark mode toggle"}
+            autoFocus
+            style={{
+              background: "transparent",
+              border: `1px solid ${M.border}`,
+              padding: "8px 10px",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "0.82rem",
+              color: M.ink,
+              outline: "none",
+              borderRadius: 2,
+            }}
+          />
+        </div>
+
+        {/* Details */}
+        <div className="flex flex-col gap-1.5">
+          <label style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.58rem", letterSpacing: "0.10em", color: M.muted }}>DETAILS <span style={{ opacity: 0.5 }}>(optional)</span></label>
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder={type === "bug" ? "Steps to reproduce, what you expected vs what happened…" : "Describe the feature and why it would help…"}
+            rows={4}
+            style={{
+              background: "transparent",
+              border: `1px solid ${M.border}`,
+              padding: "8px 10px",
+              fontFamily: "'DM Sans', sans-serif",
+              fontSize: "0.80rem",
+              color: M.ink,
+              outline: "none",
+              resize: "vertical",
+              borderRadius: 2,
+              lineHeight: 1.55,
+            }}
+          />
+        </div>
+
+        {/* Send */}
+        <div className="flex items-center justify-between">
+          <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.52rem", color: M.muted, opacity: 0.7 }}>Opens your email client to send</p>
+          <button
+            onClick={handleSend}
+            disabled={sending}
+            style={{
+              background: M.accent,
+              color: "white",
+              border: "none",
+              padding: "8px 20px",
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "0.60rem",
+              letterSpacing: "0.10em",
+              textTransform: "uppercase",
+              fontWeight: 700,
+              cursor: sending ? "default" : "pointer",
+              opacity: sending ? 0.6 : 1,
+              borderRadius: 2,
+            }}
+          >
+            {sending ? "Opening…" : "Send →"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Guide() {
   const [, navigate] = useLocation();
+  const [showFeedback, setShowFeedback] = useState(false);
 
   const handleSectionChange = (section: string) => {
     // Navigate to home first, then dispatch the section event after a tick
@@ -173,6 +320,7 @@ export default function Guide() {
       className="flex min-h-screen"
       style={{ background: M.bg, fontFamily: "'DM Sans', sans-serif" }}
     >
+      {showFeedback && <FeedbackModal onClose={() => setShowFeedback(false)} />}
       <Sidebar activeSection="" onSectionChange={handleSectionChange} />
 
       <main className="flex-1 ml-14 overflow-y-auto">
@@ -719,7 +867,7 @@ export default function Guide() {
           </div>
 
           {/* Footer */}
-          <div className="mt-6 mb-10 text-center">
+          <div className="mt-6 mb-10 flex items-center justify-between gap-4">
             <button
               onClick={() => navigate("/")}
               style={{
@@ -736,6 +884,23 @@ export default function Guide() {
               }}
             >
               ← back to workspace
+            </button>
+            <button
+              onClick={() => setShowFeedback(true)}
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.62rem",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
+                color: M.accent,
+                background: M.accentBg,
+                border: `1px solid ${M.accentBdr}`,
+                padding: "7px 18px",
+                cursor: "pointer",
+                borderRadius: 3,
+              }}
+            >
+              🐛 report a bug / request a feature
             </button>
           </div>
         </div>

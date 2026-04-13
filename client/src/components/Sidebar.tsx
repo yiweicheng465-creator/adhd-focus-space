@@ -141,25 +141,31 @@ const NAV: Array<{
 
 /* ── Floating timer pill ── */
 function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
-  const { phase, remaining, mode } = useTimer();
+  const { phase, remaining, mode, durations } = useTimer();
   const active = phase === "running" || phase === "paused" || phase === "transition";
-  if (!active) return null;
-
   const mm = String(Math.floor(remaining / 60)).padStart(2, "0");
   const ss = String(remaining % 60).padStart(2, "0");
-  const modeColor = mode === "focus" ? "oklch(0.52 0.10 32)" : mode === "short" ? "oklch(0.60 0.07 138)" : "oklch(0.58 0.08 220)";
-  const modeBg = mode === "focus" ? "oklch(0.52 0.10 32 / 0.10)" : mode === "short" ? "oklch(0.60 0.07 138 / 0.10)" : "oklch(0.58 0.08 220 / 0.10)";
-  const label = mode === "focus" ? "FOCUS" : mode === "short" ? "SHORT" : "LONG";
-
+  // Idle: show default focus duration
+  const idleMins = String(durations?.focus ?? 25).padStart(2, "0");
+  const modeColor = active
+    ? (mode === "focus" ? "oklch(0.52 0.10 32)" : mode === "short" ? "oklch(0.60 0.07 138)" : "oklch(0.58 0.08 220)")
+    : "oklch(0.62 0.060 330)";
+  const modeBg = active
+    ? (mode === "focus" ? "oklch(0.52 0.10 32 / 0.10)" : mode === "short" ? "oklch(0.60 0.07 138 / 0.10)" : "oklch(0.58 0.08 220 / 0.10)")
+    : "transparent";
+  const label = active
+    ? (mode === "focus" ? "FOCUS" : mode === "short" ? "SHORT" : "LONG")
+    : "FOCUS";
   return (
     <button
       onClick={onGoToFocus}
-      title={`${mm}:${ss} · ${label} — click to go to timer`}
+      title={active ? `${mm}:${ss} · ${label} — click to go to timer` : "Go to Focus Timer"}
       className="w-full flex flex-col items-center justify-center py-2 transition-all duration-200"
       style={{
         background: modeBg,
-        borderTop: `1px solid ${modeColor}`,
-        borderBottom: `1px solid ${modeColor}`,
+        borderTop: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
+        borderBottom: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
+        opacity: active ? 1 : 0.55,
       }}
     >
       <div style={{ position: "relative", width: 6, height: 6, marginBottom: 3 }}>
@@ -172,7 +178,7 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
         className="tabular-nums"
         style={{ fontSize: 10, letterSpacing: "0.06em", color: modeColor, fontFamily: "'Space Mono', monospace", lineHeight: 1 }}
       >
-        {phase === "transition" ? "NEXT" : `${mm}:${ss}`}
+        {phase === "transition" ? "NEXT" : active ? `${mm}:${ss}` : `${idleMins}:00`}
       </span>
       <span
         style={{ fontSize: 6, color: modeColor, fontFamily: "'Space Mono', monospace", marginTop: 2, opacity: 0.75, letterSpacing: "0.12em" }}

@@ -142,9 +142,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
   const [sfxEnabled, setSfxEnabled] = useState(() => {
     try { return localStorage.getItem("adhd-sfx-enabled") !== "false"; } catch { return true; }
   });
-  const [musicEnabled, setMusicEnabled] = useState(() => {
-    try { return localStorage.getItem("adhd-music-enabled") === "true"; } catch { return false; }
-  });
+  // Music always starts OFF on page load — user must explicitly enable it each session.
+  // We still save the user's preference to localStorage for future reference, but
+  // never auto-start music on load (avoids unexpected autoplay).
+  const [musicEnabled, setMusicEnabled] = useState(false);
   const [musicVolume, setMusicVolumeState] = useState(() => {
     try { return parseFloat(localStorage.getItem("adhd-music-vol") ?? "0.25"); } catch { return 0.25; }
   });
