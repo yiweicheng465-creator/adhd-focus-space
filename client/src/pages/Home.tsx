@@ -858,6 +858,8 @@ export default function Home() {
                       else setLocalGoals((p) => [{ id, text, progress: 0, context: "personal", createdAt: new Date() }, ...p]);
                     }}
                     onDump={() => recordDumpEntry()}
+                    initialText={pendingDump ?? undefined}
+                    onInitialTextConsumed={() => setPendingDump(null)}
                   />
                 </div>
               </div>

@@ -103,7 +103,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === "Enter") submit(); if (e.key === "Escape") setOpen(false); }}
                 placeholder="e.g. Reply to Alice's email…"
-                autoComplete="off"
+                autoComplete="new-password"
                 autoCorrect="off"
                 autoCapitalize="off"
                 spellCheck={false}
