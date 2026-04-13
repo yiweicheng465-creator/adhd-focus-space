@@ -137,7 +137,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
   const [taskContext, setTaskContext] = useState<"work" | "personal">("work");
   const [taskCustomTag, setTaskCustomTag] = useState("");
   const [taskGoalIdx, setTaskGoalIdx] = useState<number | null>(null); // index into newGoals
-  const [tasks, setTasks] = useState<{ text: string; context: string; goalIdx: number | null }[]>([]);
+  const [taskPriority, setTaskPriority] = useState<"urgent" | "focus" | "normal">("focus");
+  const [tasks, setTasks] = useState<{ text: string; context: string; goalIdx: number | null; priority: "urgent" | "focus" | "normal" }[]>([]);
 
   // Agents
   const [agentName, setAgentName] = useState("");
@@ -180,7 +181,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
     // Custom tag overrides the toggle; hashtag in text overrides custom tag
     const { cleanText, tag: hashTag } = parseHashtag(taskInput);
     const effectiveContext = hashTag ?? (taskCustomTag.trim() ? taskCustomTag.trim().replace(/^#/, "") : taskContext);
-    setTasks((p) => [...p, { text: cleanText || taskInput.trim(), context: effectiveContext, goalIdx: taskGoalIdx }]);
+    setTasks((p) => [...p, { text: cleanText || taskInput.trim(), context: effectiveContext, goalIdx: taskGoalIdx, priority: taskPriority }]);
     setTaskInput("");
     setTaskCustomTag("");
   };
@@ -259,7 +260,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
       newTasks: tasks.map((t) => ({
         id: nanoid(),
         text: t.text,
-        priority: "focus",
+        priority: t.priority,
         context: (t.context === "work" || t.context === "personal" ? t.context : "personal") as "work" | "personal",
         done: false,
         createdAt: new Date(),
@@ -506,6 +507,34 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
                   </select>
                 </div>
               )}
+              {/* Priority selector */}
+              <div className="flex items-center gap-1.5 mb-2">
+                <span className="text-[10px]" style={{ color: M.muted }}>Priority:</span>
+                {(["urgent", "focus", "normal"] as const).map((p) => {
+                  const cfg = {
+                    urgent: { label: "Urgent", icon: "🔴", color: "oklch(0.50 0.18 20)" },
+                    focus:  { label: "Focus",  icon: "🟡", color: "oklch(0.52 0.14 80)" },
+                    normal: { label: "Normal", icon: "🔵", color: "oklch(0.50 0.08 240)" },
+                  }[p];
+                  const active = taskPriority === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setTaskPriority(p)}
+                      className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded transition-all"
+                      style={{
+                        background: active ? `${cfg.color}22` : "transparent",
+                        border: `1px solid ${active ? cfg.color : M.border}`,
+                        color: active ? cfg.color : M.muted,
+                        fontWeight: active ? 700 : 400,
+                        fontFamily: "'Space Mono', monospace",
+                      }}
+                    >
+                      {cfg.icon} {cfg.label}
+                    </button>
+                  );
+                })}
+              </div>
               {/* Row 3: Input + add */}
               <div className="flex gap-2 mb-1">
                 <input
@@ -532,6 +561,13 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
                     <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
                       <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.58 0.10 290 / 0.12)", color: M.muted }}>
                         #{t.context}
+                      </span>
+                      <span className="text-[9px] px-1.5 py-0.5 rounded" style={{
+                        background: t.priority === "urgent" ? "oklch(0.50 0.18 20 / 0.12)" : t.priority === "focus" ? "oklch(0.52 0.14 80 / 0.12)" : "oklch(0.50 0.08 240 / 0.12)",
+                        color: t.priority === "urgent" ? "oklch(0.50 0.18 20)" : t.priority === "focus" ? "oklch(0.52 0.14 80)" : "oklch(0.50 0.08 240)",
+                        fontFamily: "'Space Mono', monospace",
+                      }}>
+                        {t.priority === "urgent" ? "🔴" : t.priority === "focus" ? "🟡" : "🔵"} {t.priority}
                       </span>
                       {t.goalIdx !== null && newGoals[t.goalIdx] && (
                         <span className="text-[9px]" style={{ color: M.accent }}>↳ {newGoals[t.goalIdx].text.length > 20 ? newGoals[t.goalIdx].text.slice(0, 20) + "…" : newGoals[t.goalIdx].text}</span>
