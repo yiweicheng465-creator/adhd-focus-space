@@ -86,21 +86,6 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
             </p>
           </div>
 
-          {/* AI ready notice */}
-          <div style={{
-            background: "oklch(0.95 0.030 168)",
-            border: "1.5px solid oklch(0.70 0.12 168)",
-            padding: "7px 10px",
-            fontSize: 8,
-            color: "oklch(0.32 0.12 168)",
-            letterSpacing: "0.03em",
-            lineHeight: 1.65,
-            fontFamily: "'JetBrains Mono', monospace",
-            textAlign: "center",
-          }}>
-            ✓ AI features are ready to use — no key needed.
-          </div>
-
           {/* Name input */}
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
             <label style={{ fontSize: 7, letterSpacing: "0.16em", color: BORDER, textTransform: "uppercase" }}>
