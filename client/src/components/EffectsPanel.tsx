@@ -669,44 +669,28 @@ export function EffectsPanel() {
 
 
 
-                {/* Save row: button + inline ✓ tick */}
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <button
-                    onClick={handleSaveApiKey}
-                    disabled={!apiKeyInput.trim() || isSaving}
-                    style={{
-                      flex: 1,
-                      fontSize: "0.50rem",
-                      fontFamily: "'Space Mono', monospace",
-                      letterSpacing: "0.08em",
-                      padding: "5px 0",
-                      borderRadius: 3,
-                      border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
-                      background: apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
-                      color: "white",
-                      cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
-                      opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
-                      transition: "background 0.2s, border-color 0.2s",
-                      textAlign: "center",
-                    }}
-                  >
-                    {isSaving ? "SAVING..." : "SAVE"}
-                  </button>
-                  {/* Inline ✓ confirmation — fades in for 1.5s after save */}
-                  <span
-                    style={{
-                      fontSize: "0.55rem",
-                      fontFamily: "'Space Mono', monospace",
-                      color: "oklch(0.52 0.16 145)",
-                      opacity: showSavedTick ? 1 : 0,
-                      transition: "opacity 0.3s ease",
-                      flexShrink: 0,
-                      letterSpacing: "0.04em",
-                    }}
-                  >
-                    ✓ saved
-                  </span>
-                </div>
+                {/* Save button — full width, tick shown inside */}
+                <button
+                  onClick={handleSaveApiKey}
+                  disabled={!apiKeyInput.trim() || isSaving}
+                  style={{
+                    width: "100%",
+                    fontSize: "0.50rem",
+                    fontFamily: "'Space Mono', monospace",
+                    letterSpacing: "0.08em",
+                    padding: "5px 0",
+                    borderRadius: 3,
+                    border: `1.5px solid ${showSavedTick ? "oklch(0.52 0.16 145)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
+                    background: showSavedTick ? "oklch(0.52 0.16 145)" : apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
+                    color: "white",
+                    cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
+                    opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
+                    transition: "background 0.2s, border-color 0.2s",
+                    textAlign: "center",
+                  }}
+                >
+                  {showSavedTick ? "✓ SAVED" : isSaving ? "SAVING..." : "SAVE"}
+                </button>
                 {/* Remove key link — only shown when a key is already saved */}
                 {savedKeyData?.hasKey && (
                   <button
