@@ -292,6 +292,32 @@ export default function Guide() {
           {/* ── CORE FEATURES ── */}
 
           <Section
+            title="DAILY CHECK-IN CARD"
+            badge="OPENING"
+            badgeColor={M.coral}
+            badgeBg={M.coralBg}
+            badgeBdr={M.coralBdr}
+            defaultOpen
+          >
+            <Row
+              label="What it is"
+              desc="Every day when you first open the app, a step-by-step card appears. It lets you set up your whole day in one place — mood, goals, tasks, AI agents, and wins — without jumping between pages. Designed for ADHD: one focused flow instead of scattered navigation."
+            />
+            <Row
+              label="Steps in order"
+              desc="Greeting → Mood check (1–5) → Goals (add today's goals) → Tasks (add tasks, link to goals) → Agents (launch AI agents for tasks) → Wins (log anything you already did) → Done."
+            />
+            <Row
+              label="Skipping"
+              desc="Hit 'skip for today' at any step and the card won't appear again until tomorrow. You can also press Esc to dismiss it temporarily — it will reappear next time you reload until you complete or skip it."
+            />
+            <Row
+              label="Why it helps"
+              desc="ADHD brains struggle with task-switching and getting started. The check-in removes the 'where do I even begin?' friction by walking you through a short ritual before the day starts. Even if you only fill in mood + one task, that's enough."
+            />
+          </Section>
+
+          <Section
             title="DASHBOARD"
             badge="HOME"
             badgeColor={M.coral}
