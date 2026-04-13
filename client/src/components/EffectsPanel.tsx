@@ -569,6 +569,7 @@ export function EffectsPanel() {
                       cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
                       opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
                       transition: "background 0.2s, border-color 0.2s",
+                      textAlign: "center",
                     }}
                   >
                     {isSaving ? "SAVING..." : "SAVE"}
