@@ -272,26 +272,7 @@ export function EffectsPanel() {
           position: "relative",
         }}
       >
-        {/* AI signal dot — green = AI working, red = credits exhausted + no fallback key */}
-        <div
-          title={aiAvailable
-            ? (savedKeyData?.hasKey ? "AI ready — using your OpenAI key" : "AI ready — using built-in credits")
-            : "AI unavailable — add OpenAI key in SET"}
-          style={{
-            position: "absolute",
-            top: 5,
-            right: 8,
-            width: 6,
-            height: 6,
-            borderRadius: "50%",
-            background: aiAvailable ? "oklch(0.60 0.18 145)" : "oklch(0.60 0.22 25)",
-            boxShadow: aiAvailable
-              ? "0 0 4px oklch(0.60 0.18 145 / 0.6)"
-              : "0 0 4px oklch(0.60 0.22 25 / 0.6)",
-            flexShrink: 0,
-            cursor: "help",
-          }}
-        />
+
         {/* Gear icon */}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
@@ -599,11 +580,11 @@ export function EffectsPanel() {
                     color: "oklch(0.50 0.06 330)",
                     letterSpacing: "0.04em",
                   }}>
+                    <span style={{ opacity: 0.7 }}>AI calls</span>
+                    <span style={{ opacity: 0.4 }}>|</span>
                     <span>total: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.total ?? 0}</strong></span>
                     <span style={{ opacity: 0.4 }}>|</span>
                     <span>this month: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.thisMonth ?? 0}</strong></span>
-                    <span style={{ opacity: 0.4 }}>|</span>
-                    <span style={{ opacity: 0.7 }}>AI calls</span>
                   </div>
                 )}
                 {/* OpenAI key input */}
