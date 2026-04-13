@@ -488,8 +488,7 @@ export function DailyWins({ wins, onWinsChange }: DailyWinsProps) {
     if (!newWin.trim()) return;
     onWinsChange([{ id: nanoid(), text: newWin.trim(), iconIdx: selectedIcon, createdAt: new Date() }, ...wins]);
     setNewWin("");
-    toast.success("Win logged! You're doing great.", { duration: 3000 });
-  };
+      };
 
   const changeWinIcon = (winId: string, idx: number) => {
     onWinsChange(wins.map((w) => w.id === winId ? { ...w, iconIdx: idx } : w));

@@ -182,8 +182,7 @@ export default function StorageBackup() {
       localStorage.setItem("adhd-last-backup-info", info);
       setLastBackupInfo(info);
       recordBackupTime();
-      toast.success("Backup downloaded to your device.", { duration: 3000 });
-    } catch (e) {
+          } catch (e) {
       toast.error("Backup failed: " + (e as Error).message, { duration: 4000 });
     }
   };
@@ -200,8 +199,7 @@ export default function StorageBackup() {
       const info = getBackupSummary(backup);
       localStorage.setItem("adhd-last-backup-info", info);
       setLastBackupInfo(info);
-      toast.success("Data restored! Refreshing…", { duration: 2500 });
-      setTimeout(() => window.location.reload(), 1500);
+            setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       toast.error("Restore failed: " + (e as Error).message, { duration: 5000 });
     }
@@ -230,8 +228,7 @@ export default function StorageBackup() {
       recordBackupTime();
       setGdStatus("success");
       setGdMessage(`Backed up to Google Drive · ${info}`);
-      toast.success("Backup saved to Google Drive!", { duration: 3000 });
-    } catch (e) {
+          } catch (e) {
       setGdStatus("error");
       setGdMessage((e as Error).message ?? "Unknown error");
       toast.error("Google Drive backup failed.", { duration: 4000 });
@@ -258,8 +255,7 @@ export default function StorageBackup() {
       setLastBackupInfo(info);
       setGdStatus("success");
       setGdMessage(`Restored · ${info}`);
-      toast.success("Data restored from Google Drive! Refreshing…", { duration: 2500 });
-      setTimeout(() => window.location.reload(), 1500);
+            setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
       setGdStatus("error");
       setGdMessage((e as Error).message ?? "Unknown error");
@@ -382,7 +378,7 @@ export default function StorageBackup() {
                 }}
               />
               <button
-                onClick={() => { saveClientId(gdClientId); setShowClientIdInput(false); toast.success("Client ID saved.", { duration: 2000 }); }}
+                onClick={() => { saveClientId(gdClientId); setShowClientIdInput(false);  }}
                 style={{
                   alignSelf: "flex-start", padding: "5px 14px", fontSize: 10,
                   fontFamily: "'JetBrains Mono', monospace", letterSpacing: "0.08em",

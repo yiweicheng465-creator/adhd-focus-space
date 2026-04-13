@@ -139,8 +139,6 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
     onTasksChange([task, ...tasks]);
     setNewTaskText("");
     setNewTaskGoalId(null);
-    if (tag) toast.success(`Task added to #${tag}.`, { duration: 2000 });
-    else toast.success("Task added.", { duration: 2000 });
   };
 
   const toggleTask = (id: string) => {
@@ -151,8 +149,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
       setTimeout(() => {
         onTasksChange(tasks.map((t) => t.id === id ? { ...t, done: true } : t));
         setCompletingId(null);
-        toast.success("Task complete. Well done.", { duration: 3000 });
-      }, 400);
+              }, 400);
     } else {
       onTasksChange(tasks.map((t) => t.id === id ? { ...t, done: false } : t));
     }

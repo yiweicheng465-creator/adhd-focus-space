@@ -289,8 +289,7 @@ export default function Home() {
       // Save name only — AI works via built-in credits, no key needed on first run
       setupProfileMut.mutate({ name });
     }
-    toast.success(`Got it! I'll call you ${name} from now on ✦`, { duration: 3000 });
-  };
+      };
   const handleNameSkip = () => {
     localStorage.setItem("adhd-name-skipped", "1");
     setShowNamePrompt(false);
@@ -385,8 +384,7 @@ export default function Home() {
       }
     }
     dismissCheckIn(true);
-    toast.success("Workspace ready.", { duration: 2500 });
-  };
+      };
 
   /* ── Task completion with confetti + goal auto-nudge ── */
   const handleTasksChange = (newTasks: Task[]) => {
@@ -425,10 +423,8 @@ export default function Home() {
               updateGoal.mutate({ id: gid, progress: newProgress });
               if (newProgress >= 100 && g.progress < 100) {
                 setTimeout(() => setConfettiTrigger(true), 300);
-                toast.success(`🎉 Goal achieved: "${g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}"`, { duration: 6000 });
-              } else {
-                toast.success(`→ Goal: "${g.text.length > 35 ? g.text.slice(0, 35) + "…" : g.text}" +${inc}%`, { duration: 3500 });
-              }
+                              } else {
+                              }
             }
           });
         } else {
@@ -438,11 +434,9 @@ export default function Home() {
               const newProgress = Math.min(100, g.progress + goalNudges[g.id]);
               if (newProgress >= 100 && g.progress < 100) {
                 setTimeout(() => setConfettiTrigger(true), 300);
-                toast.success(`🎉 Goal achieved: "${g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}"`, { duration: 6000 });
-              } else {
+                              } else {
                 const pct = goalNudges[g.id];
-                toast.success(`→ Goal: "${g.text.length > 35 ? g.text.slice(0, 35) + "…" : g.text}" +${pct}%`, { duration: 3500 });
-              }
+                              }
               return { ...g, progress: newProgress };
             });
           });
@@ -504,8 +498,7 @@ export default function Home() {
     } else {
       setLocalTasks((prev) => [task, ...prev]);
     }
-    toast.success("Added to tasks.", { duration: 2000 });
-  };
+      };
 
   const handleDumpEntry = (task: Task) => {
     recordDumpEntry();
@@ -537,8 +530,7 @@ export default function Home() {
     localStorage.removeItem(`adhd-checkin-x-${today}`);
     dismissCheckIn(false);
     setTimeout(() => { window.location.reload(); }, 300);
-    toast.success("All test data cleared. Reloading…", { duration: 2000 });
-  };
+      };
 
   /** Delete a custom category: reassign all its items to "personal", then hide the tag */
   const handleDeleteCategory = (ctx: string) => {
@@ -553,8 +545,7 @@ export default function Home() {
       setLocalAgents((prev) => prev.map((a) => a.context === ctx ? { ...a, context: "personal" } : a));
     }
     setDeletedCategories((prev) => [...prev, ctx]);
-    toast.success(`#${ctx} tag removed. Items moved to Personal.`, { duration: 3000 });
-  };
+      };
 
   return (
     <div className="min-h-screen flex">

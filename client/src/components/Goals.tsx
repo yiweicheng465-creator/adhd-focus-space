@@ -93,15 +93,12 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
     }
     onGoalsChange([...goals, { id: nanoid(), text: cleanText || newGoal.trim(), progress: 0, context, createdAt: new Date() }]);
     setNewGoal("");
-    if (tag) toast.success(`Goal added to #${tag}.`, { duration: 2000 });
-    else toast.success(`Goal added to ${context}.`, { duration: 2000 });
   };
 
   const updateProgress = (id: string, delta: number) => {
     onGoalsChange(goals.map((g) => {
       if (g.id !== id) return g;
       const next = Math.min(100, Math.max(0, g.progress + delta));
-      if (next === 100) toast.success("Goal complete! 🎯", { duration: 3000 });
       return { ...g, progress: next };
     }));
   };

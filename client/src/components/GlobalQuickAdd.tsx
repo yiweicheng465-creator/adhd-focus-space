@@ -48,11 +48,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
     onAddTask({ id: nanoid(), text: trimmed, priority: "focus", context: "work", done: false, createdAt: new Date() });
     setText("");
     setOpen(false);
-    toast.success("Task added.", {
-      description: trimmed.length > 40 ? trimmed.slice(0, 40) + "…" : trimmed,
-      duration: 2500,
-    });
-  };
+      };
 
   return (
     <>

@@ -165,8 +165,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       notes: popupFirstStep ? `First step: ${popupFirstStep}` : undefined,
     };
     onAgentsChange([agent, ...agents]);
-    toast.success(`Agent "${agent.name}" created!`, { duration: 2500 });
-    setPopupTask(null);
+        setPopupTask(null);
   };
 
   const today        = new Date().toDateString();
@@ -208,8 +207,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
     };
     onAgentsChange([agent, ...agents]);
     setName(""); setTaskDesc(""); setLinkedTaskId("");
-    toast.success(`Agent "${agent.name}" is now running.`, { duration: 2500 });
-  };
+      };
 
   const createAgentFromTask = (task: Task) => {
     const agent: Agent = {
@@ -222,8 +220,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
       startedAt: new Date(),
     };
     onAgentsChange([agent, ...agents]);
-    toast.success(`Agent created for "${task.text.slice(0, 30)}…"`, { duration: 2500 });
-  };
+      };
 
   const cycleStatus = (id: string) => {
     const cycle: AgentStatus[] = ["running", "paused", "done", "failed"];
@@ -240,8 +237,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
     if (!noteEditing) return;
     onAgentsChange(agents.map((a) => a.id === noteEditing.id ? { ...a, notes: noteEditing.value } : a));
     setNoteEditing(null);
-    toast.success("Note saved.", { duration: 1500 });
-  };
+      };
 
   const updateLinkedTask = (agentId: string, taskId: string) => {
     const linked = activeTasks.find((t) => t.id === taskId);
@@ -251,8 +247,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
         : a
     ));
     setTaskEditing(null);
-    toast.success(taskId ? "Task linked." : "Task link removed.", { duration: 1500 });
-  };
+      };
 
   const filtered = agents
     .filter((a) => activeContext === "all" ? true : a.context === activeContext)

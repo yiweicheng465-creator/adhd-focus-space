@@ -162,8 +162,7 @@ export function EffectsPanel() {
       // User saved their own OpenAI key — restore green signal
       setAiAvailable(true);
       localStorage.setItem("adhd-ai-available", "true");
-      toast.success("OpenAI key saved! AI is now using your key.");
-    },
+          },
     onError: () => toast.error("Failed to save API key."),
   });
 

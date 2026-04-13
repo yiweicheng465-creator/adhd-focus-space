@@ -406,8 +406,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
     try {
       await navigator.clipboard.writeText(generateDigest());
       setCopied(true);
-      toast.success("Copied to clipboard!");
-      setTimeout(() => setCopied(false), 3000);
+            setTimeout(() => setCopied(false), 3000);
     } catch {
       toast.error("Copy failed — please select text manually.");
     }

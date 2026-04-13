@@ -30,8 +30,7 @@ export function ApiKeyDialog() {
       // Restore green signal dot
       window.dispatchEvent(new CustomEvent("aiKeyRestored"));
       localStorage.setItem("adhd-ai-available", "true");
-      toast.success("OpenAI key saved! AI is back online.", { duration: 3500 });
-      setTimeout(() => {
+            setTimeout(() => {
         setOpen(false);
         setApiKeyInput("");
       }, 1200);

@@ -228,16 +228,14 @@ function AICommandPanel({
         createdAt: new Date(),
       };
       onTaskCreate?.(task);
-      toast.success(`Task added: "${task.text}"`, { duration: 2500 });
-    } else if (type === "complete_task") {
+          } else if (type === "complete_task") {
       const match = tasks.find(t =>
         t.id === String(payload.id) ||
         t.text.toLowerCase().includes(String(payload.text ?? "").toLowerCase())
       );
       if (match) {
         onTaskToggle?.(match.id);
-        toast.success(`Task completed: "${match.text}"`, { duration: 2500 });
-      }
+              }
     } else if (type === "delete_task") {
       const match = tasks.find(t =>
         t.id === String(payload.id) ||
@@ -245,8 +243,7 @@ function AICommandPanel({
       );
       if (match) {
         onTaskToggle?.(match.id);
-        toast.success(`Task removed: "${match.text}"`, { duration: 2500 });
-      }
+              }
     } else if (type === "create_goal") {
       const goal: Goal = {
         id: id(),
@@ -256,8 +253,7 @@ function AICommandPanel({
         createdAt: new Date(),
       };
       onGoalCreate?.(goal);
-      toast.success(`Goal set: "${goal.text}"`, { duration: 2500 });
-    } else if (type === "create_agent") {
+          } else if (type === "create_agent") {
       const agent: Agent = {
         id: id(),
         name: String(payload.name ?? "AI Agent"),
@@ -267,8 +263,7 @@ function AICommandPanel({
         startedAt: new Date(),
       };
       onAgentCreate?.(agent);
-      toast.success(`Agent created: "${agent.name}"`, { duration: 2500 });
-    } else if (type === "log_win") {
+          } else if (type === "log_win") {
       const win: Win = {
         id: id(),
         text: String(payload.text ?? "Win logged"),
@@ -276,8 +271,7 @@ function AICommandPanel({
         createdAt: new Date(),
       };
       onWinCreate?.(win);
-      toast.success(`Win logged: "${win.text}"`, { duration: 2500 });
-    }
+          }
   };
 
   const sendMessage = (text?: string) => {

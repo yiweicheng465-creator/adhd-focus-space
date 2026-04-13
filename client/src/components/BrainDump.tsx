@@ -151,8 +151,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
     if (!text) setCurrentThought("");
     onDump?.();
     const tagMsg = tags.length > 0 ? ` Tagged: ${tags.map((t) => `#${t}`).join(", ")}` : "";
-    toast.success(`Thought captured.${tagMsg}`, { duration: 2500 });
-  };
+      };
 
   const convertToTask = (entry: BrainDumpEntry) => {
     const cleanText = entry.text.replace(/(?:^|\s)#[a-zA-Z0-9\u4e00-\u9fa5_-]+/g, " ").replace(/\s{2,}/g, " ").trim();
@@ -161,8 +160,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       context: "work", done: false, createdAt: new Date(),
     });
     updateMutation.mutate({ id: entry.id, converted: true });
-    toast.success("Moved to tasks.", { duration: 2000 });
-  };
+      };
 
   const deleteEntry = (id: string) => {
     deleteMutation.mutate({ id });
@@ -187,8 +185,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
     onSuccess: (data) => {
       setAiResults(data.items);
       setAiDismissed(false);
-      toast.success("AI sorted your thoughts!", { duration: 2500 });
-    },
+          },
     onError: (err) => { handleAiError(err, "AI couldn't categorise right now. Try again."); },
   });
 
@@ -210,8 +207,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       });
       const orig = entries.find((e) => e.text === item.original);
       if (orig) updateMutation.mutate({ id: orig.id, converted: true });
-      toast.success("Added to tasks.", { duration: 2000 });
-    } else if (item.action === "archive") {
+          } else if (item.action === "archive") {
       const orig = entries.find((e) => e.text === item.original);
       if (orig) deleteMutation.mutate({ id: orig.id });
       toast.info("Archived.", { duration: 1500 });
@@ -227,8 +223,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
     const orig = entries.find((e) => e.text === item.original);
     if (orig) updateMutation.mutate({ id: orig.id, converted: true });
     setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
-    toast.success("Added to tasks.", { duration: 2000 });
-  };
+      };
 
   const pushAllToTasks = () => {
     if (!aiResults) return;
@@ -241,8 +236,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       if (orig) updateMutation.mutate({ id: orig.id, converted: true });
     });
     setAiResults((prev) => prev ? prev.filter((r) => r.action !== "add_to_tasks" && r.category !== "task") : null);
-    toast.success(`${taskItems.length} item${taskItems.length !== 1 ? "s" : ""} added to tasks.`, { duration: 2500 });
-  };
+      };
 
   const pushItemToGoal = (item: typeof aiResults extends Array<infer T> | null ? T : never) => {
     if (!item) return;
@@ -251,8 +245,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
     const orig = entries.find((e) => e.text === item.original);
     if (orig) updateMutation.mutate({ id: orig.id, converted: true });
     setAiResults((prev) => prev ? prev.filter((r) => r.original !== item.original) : null);
-    toast.success("Added to goals.", { duration: 2000 });
-  };
+      };
 
   // Auto-dump initialText once on mount
   useEffect(() => {
