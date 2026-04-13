@@ -12,7 +12,7 @@ import { toast } from "sonner";
    ============================================================ */
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, Loader2, SkipForward, Sparkles, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Flame, Loader2, SkipForward, Sparkles, Star, X, Zap } from "lucide-react";
 import { nanoid } from "nanoid";
 import type { Task } from "./TaskManager";
 import type { Win } from "./DailyWins";
@@ -507,30 +507,35 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
                   </select>
                 </div>
               )}
-              {/* Priority selector */}
+              {/* Priority selector — icon-based, matching TaskManager */}
               <div className="flex items-center gap-1.5 mb-2">
                 <span className="text-[10px]" style={{ color: M.muted }}>Priority:</span>
                 {(["urgent", "focus", "normal"] as const).map((p) => {
                   const cfg = {
-                    urgent: { label: "Urgent", icon: "🔴", color: "oklch(0.50 0.18 20)" },
-                    focus:  { label: "Focus",  icon: "🟡", color: "oklch(0.52 0.14 80)" },
-                    normal: { label: "Normal", icon: "🔵", color: "oklch(0.50 0.08 240)" },
+                    urgent: { label: "Urgent", Icon: Flame, color: "oklch(0.55 0.09 35)",  bg: "oklch(0.55 0.09 35 / 0.08)",  border: "oklch(0.55 0.09 35 / 0.28)" },
+                    focus:  { label: "Focus",  Icon: Zap,   color: "oklch(0.52 0.14 290)", bg: "oklch(0.52 0.14 290 / 0.08)", border: "oklch(0.52 0.14 290 / 0.28)" },
+                    normal: { label: "Normal", Icon: Star,  color: "oklch(0.55 0.10 330)", bg: "oklch(0.72 0.10 330 / 0.10)", border: "oklch(0.72 0.10 330 / 0.30)" },
                   }[p];
                   const active = taskPriority === p;
                   return (
                     <button
                       key={p}
                       onClick={() => setTaskPriority(p)}
-                      className="flex items-center gap-1 px-2 py-0.5 text-[10px] rounded transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1 transition-all"
                       style={{
-                        background: active ? `${cfg.color}22` : "transparent",
-                        border: `1px solid ${active ? cfg.color : M.border}`,
-                        color: active ? cfg.color : M.muted,
-                        fontWeight: active ? 700 : 400,
-                        fontFamily: "'Space Mono', monospace",
+                        background:    active ? cfg.bg : "transparent",
+                        color:         active ? cfg.color : M.muted,
+                        border:        `1px solid ${active ? cfg.border : M.border}`,
+                        fontFamily:    "'DM Sans', sans-serif",
+                        fontSize:      "0.62rem",
+                        fontWeight:    active ? 600 : 400,
+                        letterSpacing: "0.12em",
+                        textTransform: "uppercase",
+                        borderRadius:  0,
                       }}
                     >
-                      {cfg.icon} {cfg.label}
+                      <cfg.Icon className="w-3 h-3" />
+                      {cfg.label}
                     </button>
                   );
                 })}
@@ -567,7 +572,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName }: Daily
                         color: t.priority === "urgent" ? "oklch(0.50 0.18 20)" : t.priority === "focus" ? "oklch(0.52 0.14 80)" : "oklch(0.50 0.08 240)",
                         fontFamily: "'Space Mono', monospace",
                       }}>
-                        {t.priority === "urgent" ? "🔴" : t.priority === "focus" ? "🟡" : "🔵"} {t.priority}
+                        {t.priority === "urgent" ? <Flame className="w-3 h-3 inline mr-0.5" /> : t.priority === "focus" ? <Zap className="w-3 h-3 inline mr-0.5" /> : <Star className="w-3 h-3 inline mr-0.5" />}{t.priority}
                       </span>
                       {t.goalIdx !== null && newGoals[t.goalIdx] && (
                         <span className="text-[9px]" style={{ color: M.accent }}>↳ {newGoals[t.goalIdx].text.length > 20 ? newGoals[t.goalIdx].text.slice(0, 20) + "…" : newGoals[t.goalIdx].text}</span>

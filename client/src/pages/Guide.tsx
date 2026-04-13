@@ -370,6 +370,19 @@ export default function Guide() {
               label="Session tracking"
               desc="Each completed session is saved to your Monthly calendar. You can see your focus history per day in the Monthly page's day detail panel."
             />
+            <Row
+              label="Focus music"
+              desc="The Focus page has a built-in ambient music player. Choose from lo-fi beats, rain sounds, white noise, or cafe ambience. Press the play button in the music player to start. Music runs independently of the timer."
+            />
+            <Row
+              label="Music + timer sync"
+              desc="When you pause the Pomodoro timer, the music pauses automatically. When you resume the timer, the music resumes from where it left off. Navigating to another page (Tasks, Wins, etc.) does not stop the music — it keeps playing in the background."
+            />
+            <Row
+              label="Volume and track controls"
+              desc="Use the volume slider in the music player to adjust loudness. Click the track name or arrow buttons to switch between ambient tracks. Your last-used track and volume are remembered across sessions."
+            />
+            <Tip>Start a focus session, pick a lo-fi track, then navigate freely between pages — the music stays on until you manually stop it or close the tab.</Tip>
           </Section>
 
           <Section
