@@ -327,9 +327,6 @@ function AICommandPanel({
       <div style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", gap: 7, minHeight: 0, paddingRight: 2 }}>
         {!hasMessages ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 5 }}>
-            <p style={{ fontSize: 11, color: MUTED, lineHeight: 1.6, marginBottom: 4 }}>
-              Tell me what to do — I can create tasks, set goals, launch AI agents, log wins, complete tasks, or help you prioritise. Try a suggestion below:
-            </p>
             {COMMANDS.map((c) => (
               <button
                 key={c}
