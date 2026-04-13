@@ -103,6 +103,7 @@ export function EffectsPanel() {
   const [apiKeyInput, setApiKeyInput] = useState("");
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKeySaved, setApiKeySaved] = useState(false);
+  const [showSavedTick, setShowSavedTick] = useState(false);
   const [apiKeyValidating, setApiKeyValidating] = useState(false);
   const [apiKeyError, setApiKeyError] = useState<string | null>(null);
   const [dbSynced, setDbSynced] = useState(false);
@@ -157,14 +158,28 @@ export function EffectsPanel() {
     onSuccess: () => {
       setApiKeySaved(true);
       setApiKeyError(null);
-      setTimeout(() => setApiKeySaved(false), 2000);
+      setApiKeyInput("");
+      setShowSavedTick(true);
+      setTimeout(() => { setApiKeySaved(false); setShowSavedTick(false); }, 1500);
       utils.profile.getApiKey.invalidate();
       // User saved their own OpenAI key — restore green signal
       setAiAvailable(true);
       localStorage.setItem("adhd-ai-available", "true");
-          },
+    },
     onError: () => toast.error("Failed to save API key."),
   });
+
+  const removeApiKey = trpc.profile.updateApiKey.useMutation({
+    onSuccess: () => {
+      utils.profile.getApiKey.invalidate();
+      // Back to built-in AI — keep green (assume built-in still works)
+    },
+    onError: () => toast.error("Failed to remove API key."),
+  });
+
+  const handleRemoveKey = useCallback(() => {
+    removeApiKey.mutate({ apiKey: "", keyType: "openai" });
+  }, [removeApiKey]);
 
   const validateApiKey = trpc.profile.validateApiKey.useMutation({
     onSuccess: () => {
@@ -243,19 +258,25 @@ export function EffectsPanel() {
         }}
       >
         {/* AI signal dot — green = AI working, red = credits exhausted + no fallback key */}
-        <div style={{
-          position: "absolute",
-          top: 5,
-          right: 8,
-          width: 6,
-          height: 6,
-          borderRadius: "50%",
-          background: aiAvailable ? "oklch(0.60 0.18 145)" : "oklch(0.60 0.22 25)",
-          boxShadow: aiAvailable
-            ? "0 0 4px oklch(0.60 0.18 145 / 0.6)"
-            : "0 0 4px oklch(0.60 0.22 25 / 0.6)",
-          flexShrink: 0,
-        }} />
+        <div
+          title={aiAvailable
+            ? (savedKeyData?.hasKey ? "AI ready — using your OpenAI key" : "AI ready — using built-in credits")
+            : "AI unavailable — add OpenAI key in SET"}
+          style={{
+            position: "absolute",
+            top: 5,
+            right: 8,
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: aiAvailable ? "oklch(0.60 0.18 145)" : "oklch(0.60 0.22 25)",
+            boxShadow: aiAvailable
+              ? "0 0 4px oklch(0.60 0.18 145 / 0.6)"
+              : "0 0 4px oklch(0.60 0.22 25 / 0.6)",
+            flexShrink: 0,
+            cursor: "help",
+          }}
+        />
         {/* Gear icon */}
         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={iconColor} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="3" />
@@ -518,27 +539,64 @@ export function EffectsPanel() {
 
 
 
-                {/* Save button — always shown, saves keyType selection */}
-                <button
-                  onClick={handleSaveApiKey}
-                  disabled={!apiKeyInput.trim() || isSaving}
-                  style={{
-                    width: "100%",
-                    fontSize: "0.50rem",
-                    fontFamily: "'Space Mono', monospace",
-                    letterSpacing: "0.08em",
-                    padding: "5px 0",
-                    borderRadius: 3,
-                    border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
-                    background: apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
-                    color: "white",
-                    cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
-                    opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
-                    transition: "background 0.2s, border-color 0.2s",
-                  }}
-                >
-                  {isSaving ? "SAVING..." : "SAVE"}
-                </button>
+                {/* Save row: button + inline ✓ tick */}
+                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                  <button
+                    onClick={handleSaveApiKey}
+                    disabled={!apiKeyInput.trim() || isSaving}
+                    style={{
+                      flex: 1,
+                      fontSize: "0.50rem",
+                      fontFamily: "'Space Mono', monospace",
+                      letterSpacing: "0.08em",
+                      padding: "5px 0",
+                      borderRadius: 3,
+                      border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
+                      background: apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
+                      color: "white",
+                      cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
+                      opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
+                      transition: "background 0.2s, border-color 0.2s",
+                    }}
+                  >
+                    {isSaving ? "SAVING..." : "SAVE"}
+                  </button>
+                  {/* Inline ✓ confirmation — fades in for 1.5s after save */}
+                  <span
+                    style={{
+                      fontSize: "0.55rem",
+                      fontFamily: "'Space Mono', monospace",
+                      color: "oklch(0.52 0.16 145)",
+                      opacity: showSavedTick ? 1 : 0,
+                      transition: "opacity 0.3s ease",
+                      flexShrink: 0,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    ✓ saved
+                  </span>
+                </div>
+                {/* Remove key link — only shown when a key is already saved */}
+                {savedKeyData?.hasKey && (
+                  <button
+                    onClick={handleRemoveKey}
+                    disabled={removeApiKey.isPending}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      fontSize: "0.40rem",
+                      fontFamily: "'Space Mono', monospace",
+                      color: "oklch(0.55 0.08 25)",
+                      textDecoration: "underline",
+                      cursor: "pointer",
+                      letterSpacing: "0.04em",
+                      opacity: removeApiKey.isPending ? 0.5 : 0.7,
+                    }}
+                  >
+                    {removeApiKey.isPending ? "removing..." : "× remove key → use built-in AI"}
+                  </button>
+                )}
               </div>
             )}
 

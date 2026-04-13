@@ -167,3 +167,6 @@
 - [ ] Show clear "AI credits exhausted" message with prompt to add OpenAI key
 - [x] Fix signal dot: green=AI working (built-in or OpenAI key), red=credits exhausted+no key
 - [ ] Remove green SAVED button state - keep pink/terracotta retro style
+- [x] Add inline ✓ fade confirmation next to SAVE button in EffectsPanel (1.5s fade, no toast)
+- [ ] Add "remove key" link in SET panel (visible only when key is saved, switches back to built-in AI)
+- [x] Wire signal dot tooltip in sidebar (hover shows "AI ready" or "AI unavailable — add OpenAI key in SET")
