@@ -583,6 +583,20 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
     return () => window.removeEventListener("adhd-start-mit-focus", handler);
   }, []);
 
+  // Space key → start / pause (skip when typing in an input)
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== " " && e.code !== "Space") return;
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable) return;
+      if (phase === "recovering" || phase === "block_complete" || phase === "quit") return;
+      e.preventDefault();
+      handleStartPause();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [phase, handleStartPause]);
+
   // ── Pet growth counter (all-time sessions, animates up) ──────────────────────
   const getTotalSessions = () => {
     try {
@@ -1191,19 +1205,31 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
 
             {/* Play / Pause */}
             {phase !== "recovering" && (
-              <button onClick={handleStartPause} style={{
-                display: "flex", alignItems: "center", gap: 5,
-                padding: "5px 16px",
-                background: running ? BTN_BG : ACCENT,
-                border: `1.5px solid ${running ? BORDER : DARK}`,
-                color: running ? DARK : "#fff",
-                fontFamily: "'JetBrains Mono', monospace", fontSize: 7,
-                letterSpacing: "0.14em", cursor: "pointer",
-                boxShadow: running ? `2px 2px 0 ${BORDER}` : `2px 2px 0 ${DARK}`,
-                fontWeight: 700, transition: "all 0.12s",
-              }}>
-                {running ? <><Pause size={8} /> PAUSE</> : <><Play size={8} /> {phase === "paused" ? "RESUME" : "START"}</>}
-              </button>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
+                <button onClick={handleStartPause} style={{
+                  display: "flex", alignItems: "center", gap: 5,
+                  padding: "5px 16px",
+                  background: running ? BTN_BG : ACCENT,
+                  border: `1.5px solid ${running ? BORDER : DARK}`,
+                  color: running ? DARK : "#fff",
+                  fontFamily: "'JetBrains Mono', monospace", fontSize: 7,
+                  letterSpacing: "0.14em", cursor: "pointer",
+                  boxShadow: running ? `2px 2px 0 ${BORDER}` : `2px 2px 0 ${DARK}`,
+                  fontWeight: 700, transition: "all 0.12s",
+                }}>
+                  {running ? <><Pause size={8} /> PAUSE</> : <><Play size={8} /> {phase === "paused" ? "RESUME" : "START"}</>}
+                </button>
+                <span style={{
+                  fontFamily: "'JetBrains Mono', monospace",
+                  fontSize: 6,
+                  letterSpacing: "0.08em",
+                  color: BORDER,
+                  userSelect: "none",
+                  pointerEvents: "none",
+                }}>
+                  press Space
+                </span>
+              </div>
             )}
 
             {/* Session dots */}

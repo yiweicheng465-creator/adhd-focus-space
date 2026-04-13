@@ -457,9 +457,7 @@ function AICommandDemo() {
 
   return (
     <div className="flex flex-col gap-3">
-      <p className="text-xs" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-        Type a natural language command or try one of the examples below. The AI will create tasks, set goals, log wins, launch agents, or coach you — directly from the Dashboard.
-      </p>
+
       {messages.length === 0 && (
         <div className="flex flex-col gap-1.5">
           {EXAMPLES.map((e) => (

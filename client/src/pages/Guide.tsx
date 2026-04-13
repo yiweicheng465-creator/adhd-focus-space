@@ -244,12 +244,12 @@ export default function Guide() {
                 </thead>
                 <tbody>
                   {[
-                    { key: "D",        action: "Focus the \"What's on your mind?\" input", where: "Dashboard" },
-                    { key: "/",        action: "Focus the AI chat input",                  where: "Dashboard" },
-                    { key: "+",        action: "Open Quick Capture modal",                 where: "Anywhere" },
-                    { key: "⌘K / ⌃K", action: "Open Quick Capture modal",                 where: "Anywhere" },
-                    { key: "↵ Enter",  action: "Submit Quick Capture / Brain Dump",        where: "Modal / Dump" },
-                    { key: "Esc",      action: "Close Quick Capture or SET panel",         where: "Anywhere" },
+                    { key: "D",       action: "Focus the \"What's on your mind?\" input", where: "Dashboard" },
+                    { key: "/",       action: "Focus the AI chat input",                  where: "Dashboard" },
+                    { key: "+",       action: "Open Quick Capture modal",                 where: "Anywhere" },
+                    { key: "Space",   action: "Start or pause the Focus Timer",           where: "Focus page" },
+                    { key: "↵ Enter", action: "Submit Quick Capture / Brain Dump",        where: "Modal / Dump" },
+                    { key: "Esc",     action: "Close Quick Capture or SET panel",         where: "Anywhere" },
                   ].map(({ key, action, where }, i, arr) => (
                     <tr key={key} style={{ borderBottom: i < arr.length - 1 ? `1px solid ${M.border}` : "none" }}>
                       <td style={{ padding: "7px 0" }}>
