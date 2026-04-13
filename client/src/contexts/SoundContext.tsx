@@ -40,19 +40,19 @@ export const MUSIC_TRACKS: MusicTrack[] = [
     id: "rain",
     label: "Rain",
     icon: "rain",
-    url: "https://archive.org/download/rain-and-thunder-sounds/rain-and-thunder-sounds.mp3",
+    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/rain_5d8c43c3.mp3",
   },
   {
     id: "whitenoise",
     label: "White Noise",
     icon: "wave",
-    url: "https://archive.org/download/whitenoise_20200617/whitenoise.mp3",
+    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/whitenoise_49878aff.mp3",
   },
   {
     id: "forest",
     label: "Forest",
     icon: "leaf",
-    url: "https://archive.org/download/forest-ambience-birds-and-wind/forest-ambience-birds-and-wind.mp3",
+    url: "https://d2xsxph8kpxj0f.cloudfront.net/310519663410012773/WNs8kMVMKanwFbtYhk72en/forest_b10b8d41.mp3",
   },
 ];
 
