@@ -487,6 +487,12 @@
 .animate-scale-in   { animation: scaleIn 0.28s ease forwards; }
 .animate-float      { animation: floatUp 3s ease-in-out infinite; }
 
+@keyframes musicBeat {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.75; }
+}
+.animate-music-beat { animation: musicBeat 0.8s ease-in-out infinite; }
+
 /* ── Retro scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: oklch(0.94 0.018 355); }

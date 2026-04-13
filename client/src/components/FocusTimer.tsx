@@ -894,7 +894,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
             title="Sound & music"
             style={{ width: 18, height: 18, border: `1px solid ${showSound || sound.musicEnabled ? DARK : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.musicEnabled ? `${DARK}18` : "transparent", cursor: "pointer" }}
           >
-            {sound.musicLoading ? <span style={{ fontSize: 6, color: DARK }}>…</span> : sound.musicEnabled ? <Coffee size={8} color={DARK} /> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
+            {sound.musicLoading ? <span style={{ fontSize: 6, color: DARK }}>…</span> : sound.musicEnabled ? <span className="animate-music-beat" style={{ display: "flex", alignItems: "center", justifyContent: "center" }}><Coffee size={8} color={DARK} /></span> : (sound.sfxEnabled ? <Volume2 size={8} color={BORDER} /> : <VolumeX size={8} color={BORDER} />)}
           </button>
           <button
             onClick={() => { setShowSettings(s => !s); setShowSound(false); }}
@@ -958,8 +958,8 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
           <p style={{ fontSize: 7, letterSpacing: "0.2em", color: BORDER, textTransform: "uppercase", marginBottom: 9, fontFamily: "'JetBrains Mono', monospace" }}>Sound</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-              <button onClick={sound.toggleSfx} style={{ width: 18, height: 18, border: `1px solid ${sound.sfxEnabled ? "oklch(0.55 0.14 310)" : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: "transparent", cursor: "pointer", flexShrink: 0 }}>
-                {sound.sfxEnabled ? <Volume2 size={8} color="oklch(0.55 0.14 310)" /> : <VolumeX size={8} color={BORDER} />}
+              <button onClick={sound.toggleSfx} style={{ width: 18, height: 18, border: `1px solid ${sound.sfxEnabled ? DARK : BORDER}`, display: "flex", alignItems: "center", justifyContent: "center", background: sound.sfxEnabled ? `${DARK}18` : "transparent", cursor: "pointer", flexShrink: 0 }}>
+                {sound.sfxEnabled ? <Volume2 size={8} color={DARK} /> : <VolumeX size={8} color={BORDER} />}
               </button>
               <span style={{ fontSize: 7, letterSpacing: "0.14em", color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 74 }}>Sound Effects</span>
               <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}

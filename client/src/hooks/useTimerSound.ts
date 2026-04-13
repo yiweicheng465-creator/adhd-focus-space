@@ -117,7 +117,9 @@ export function useTimerSound(): TimerSoundControls {
   const [sfxEnabled, setSfxEnabled] = useState(() => {
     try { return localStorage.getItem("adhd-sfx-enabled") !== "false"; } catch { return true; }
   });
-  const [musicEnabled, setMusicEnabled] = useState(false);
+  const [musicEnabled, setMusicEnabled] = useState(() => {
+    try { return localStorage.getItem("adhd-music-enabled") === "true"; } catch { return false; }
+  });
   const [musicVolume, setMusicVolumeState] = useState(() => {
     try { return parseFloat(localStorage.getItem("adhd-music-vol") ?? "0.25"); } catch { return 0.25; }
   });
@@ -213,7 +215,11 @@ export function useTimerSound(): TimerSoundControls {
 
   const toggleMusic = useCallback(() => {
     ensureCtx(); // must be called from user gesture
-    setMusicEnabled(prev => !prev);
+    setMusicEnabled(prev => {
+      const next = !prev;
+      try { localStorage.setItem("adhd-music-enabled", String(next)); } catch {}
+      return next;
+    });
   }, [ensureCtx]);
 
   const setMusicVolume = useCallback((v: number) => {
