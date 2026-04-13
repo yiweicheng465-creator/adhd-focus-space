@@ -159,12 +159,21 @@ function Tip({ children }: { children: React.ReactNode }) {
 export default function Guide() {
   const [, navigate] = useLocation();
 
+  const handleSectionChange = (section: string) => {
+    // Navigate to home first, then dispatch the section event after a tick
+    // so Home.tsx's navigateTo listener is mounted and ready
+    navigate("/");
+    setTimeout(() => {
+      window.dispatchEvent(new CustomEvent("navigateTo", { detail: section }));
+    }, 80);
+  };
+
   return (
     <div
       className="flex min-h-screen"
       style={{ background: M.bg, fontFamily: "'DM Sans', sans-serif" }}
     >
-      <Sidebar activeSection="" onSectionChange={() => {}} />
+      <Sidebar activeSection="" onSectionChange={handleSectionChange} />
 
       <main className="flex-1 ml-14 overflow-y-auto">
         <div className="max-w-2xl mx-auto px-6 py-10 flex flex-col gap-6">
