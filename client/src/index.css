@@ -160,57 +160,57 @@
      Each has a -fg (foreground) and -border variant. */
 
   /* Dark ink — title bar text, strong labels */
-  --c-ink:           oklch(0.28 0.040 var(--base-hue));
-  --c-ink-soft:      oklch(0.30 0.060 var(--base-hue));
+  --c-ink:           hsl(var(--base-hue), 18%, 18%);
+  --c-ink-soft:      hsl(var(--base-hue), 28%, 20%);
   /* Deep accent — active states, strong buttons */
-  --c-deep:          oklch(0.45 0.14 var(--base-hue));
-  --c-deep-text:     oklch(0.42 0.14 var(--base-hue));
+  --c-deep:          hsl(var(--base-hue), 62%, 32%);
+  --c-deep-text:     hsl(var(--base-hue), 62%, 30%);
   /* Primary accent — buttons, active highlights */
-  --c-accent:        oklch(0.58 0.18 var(--base-hue));
-  --c-accent-hover:  oklch(0.52 0.18 var(--base-hue));
-  --c-accent-muted:  oklch(0.55 0.10 var(--base-hue));
-  --c-accent-text:   oklch(0.48 0.16 var(--base-hue));
-  --c-accent-label:  oklch(0.45 0.08 var(--base-hue));
-  --c-accent-icon:   oklch(0.55 0.08 var(--base-hue));
-  --c-accent-dim:    oklch(0.62 0.14 var(--base-hue));
-  --c-accent-soft:   oklch(0.65 0.06 var(--base-hue));
-  --c-accent-faint:  oklch(0.62 0.060 var(--base-hue));
+  --c-accent:        hsl(var(--base-hue), 72%, 48%);
+  --c-accent-hover:  hsl(var(--base-hue), 72%, 38%);
+  --c-accent-muted:  hsl(var(--base-hue), 48%, 42%);
+  --c-accent-text:   hsl(var(--base-hue), 68%, 35%);
+  --c-accent-label:  hsl(var(--base-hue), 38%, 32%);
+  --c-accent-icon:   hsl(var(--base-hue), 38%, 42%);
+  --c-accent-dim:    hsl(var(--base-hue), 62%, 52%);
+  --c-accent-soft:   hsl(var(--base-hue), 28%, 56%);
+  --c-accent-faint:  hsl(var(--base-hue), 28%, 52%);
   /* Alpha variants for backgrounds and borders */
-  --c-accent-bg-xs:  oklch(0.58 0.18 var(--base-hue) / 0.05);
-  --c-accent-bg-sm:  oklch(0.58 0.18 var(--base-hue) / 0.08);
-  --c-accent-bg-md:  oklch(0.58 0.18 var(--base-hue) / 0.12);
-  --c-accent-bg-lg:  oklch(0.58 0.18 var(--base-hue) / 0.22);
-  --c-accent-bd-sm:  oklch(0.58 0.18 var(--base-hue) / 0.25);
-  --c-accent-bd-md:  oklch(0.58 0.18 var(--base-hue) / 0.28);
-  --c-accent-bd-lg:  oklch(0.58 0.18 var(--base-hue) / 0.30);
+  --c-accent-bg-xs:  hsla(var(--base-hue), 72%, 48%, 0.05);
+  --c-accent-bg-sm:  hsla(var(--base-hue), 72%, 48%, 0.08);
+  --c-accent-bg-md:  hsla(var(--base-hue), 72%, 48%, 0.12);
+  --c-accent-bg-lg:  hsla(var(--base-hue), 72%, 48%, 0.22);
+  --c-accent-bd-sm:  hsla(var(--base-hue), 72%, 48%, 0.25);
+  --c-accent-bd-md:  hsla(var(--base-hue), 72%, 48%, 0.28);
+  --c-accent-bd-lg:  hsla(var(--base-hue), 72%, 48%, 0.30);
   /* Mid tones — secondary borders, dividers */
-  --c-mid:           oklch(0.75 0.08 var(--base-hue));
-  --c-mid-soft:      oklch(0.78 0.060 var(--base-hue));
-  --c-mid-border:    oklch(0.80 0.06 var(--base-hue));
-  --c-mid-border2:   oklch(0.80 0.060 var(--base-hue));
-  --c-mid-shadow:    oklch(0.82 0.040 var(--base-hue) / 0.5);
-  --c-mid-shadow2:   oklch(0.80 0.060 var(--base-hue) / 0.4);
-  --c-mid-shadow3:   oklch(0.80 0.060 var(--base-hue) / 0.5);
-  --c-mid-active:    oklch(0.80 0.060 var(--base-hue) / 0.4);
+  --c-mid:           hsl(var(--base-hue), 38%, 65%);
+  --c-mid-soft:      hsl(var(--base-hue), 28%, 68%);
+  --c-mid-border:    hsl(var(--base-hue), 28%, 70%);
+  --c-mid-border2:   hsl(var(--base-hue), 28%, 70%);
+  --c-mid-shadow:    hsla(var(--base-hue), 20%, 72%, 0.5);
+  --c-mid-shadow2:   hsla(var(--base-hue), 28%, 70%, 0.4);
+  --c-mid-shadow3:   hsla(var(--base-hue), 28%, 70%, 0.5);
+  --c-mid-active:    hsla(var(--base-hue), 28%, 70%, 0.4);
   /* Light tones — panel backgrounds, hover states */
-  --c-light:         oklch(0.82 0.060 var(--base-hue));
-  --c-light-soft:    oklch(0.82 0.050 var(--base-hue));
-  --c-light-border:  oklch(0.82 0.060 var(--base-hue));
-  --c-light-divider: oklch(0.88 0.060 var(--base-hue));
-  --c-light-hover:   oklch(0.90 0.04 var(--base-hue));
+  --c-light:         hsl(var(--base-hue), 28%, 72%);
+  --c-light-soft:    hsl(var(--base-hue), 24%, 72%);
+  --c-light-border:  hsl(var(--base-hue), 28%, 72%);
+  --c-light-divider: hsl(var(--base-hue), 28%, 80%);
+  --c-light-hover:   hsl(var(--base-hue), 20%, 83%);
   /* Pale tones — window panel backgrounds */
-  --c-pale:          oklch(0.93 0.020 var(--base-hue));
-  --c-pale-bg:       oklch(0.97 0.015 var(--base-hue));
-  --c-pale-bg2:      oklch(0.965 0.025 var(--base-hue) / 0.96);
-  --c-pale-bg3:      oklch(0.975 0.018 var(--base-hue) / 0.98);
+  --c-pale:          hsl(var(--base-hue), 10%, 88%);
+  --c-pale-bg:       hsl(var(--base-hue), 8%, 94%);
+  --c-pale-bg2:      hsla(var(--base-hue), 12%, 93%, 0.96);
+  --c-pale-bg3:      hsla(var(--base-hue), 9%, 95%, 0.98);
   /* Shadow ink */
-  --c-shadow-ink:    oklch(0.22 0.040 var(--base-hue));
-  --c-shadow-ink2:   oklch(0.28 0.040 var(--base-hue));
-  --c-shadow-ink3:   oklch(0.28 0.040 var(--base-hue) / 0.12);
+  --c-shadow-ink:    hsl(var(--base-hue), 18%, 14%);
+  --c-shadow-ink2:   hsl(var(--base-hue), 18%, 18%);
+  --c-shadow-ink3:   hsla(var(--base-hue), 18%, 18%, 0.12);
   /* Sidebar specific */
-  --c-sidebar-bg:    oklch(0.97 0.015 var(--base-hue));
-  --c-sidebar-border: oklch(0.80 0.060 var(--base-hue));
-  --c-sidebar-shadow: oklch(0.58 0.18 var(--base-hue) / 0.08);
+  --c-sidebar-bg:    hsl(var(--base-hue), 8%, 94%);
+  --c-sidebar-border: hsl(var(--base-hue), 28%, 70%);
+  --c-sidebar-shadow: hsla(var(--base-hue), 72%, 48%, 0.08);
 }
 
 @layer base {
