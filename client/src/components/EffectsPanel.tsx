@@ -491,7 +491,7 @@ export function EffectsPanel() {
                     type={showApiKey ? "text" : "password"}
                     value={apiKeyInput}
                     onChange={(e) => { setApiKeyInput(e.target.value); setApiKeyError(null); }}
-                    placeholder="sk-... (OpenAI fallback key)"
+                    placeholder="sk-..."
                     style={{
                       flex: 1,
                       fontSize: "0.50rem",
@@ -518,6 +518,18 @@ export function EffectsPanel() {
                     ⚠ {apiKeyError}
                   </p>
                 )}
+
+                {/* Payment reminder note */}
+                <p style={{
+                  fontSize: "0.40rem",
+                  fontFamily: "'Space Mono', monospace",
+                  color: "oklch(0.52 0.10 50)",
+                  margin: 0,
+                  lineHeight: 1.5,
+                  letterSpacing: "0.02em",
+                }}>
+                  ⚠ Your OpenAI account must have a paid plan / credits — free-tier keys won't work.
+                </p>
 
                 <a
                   href="https://platform.openai.com/api-keys"
