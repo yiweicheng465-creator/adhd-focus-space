@@ -167,7 +167,7 @@ export function EffectsPanel() {
       setAiAvailable(true);
       localStorage.setItem("adhd-ai-available", "true");
     },
-    onError: () => toast.error("Failed to save API key."),
+    onError: () => { setApiKeyValidating(false); toast.error("Failed to save API key."); },
   });
 
   const removeApiKey = trpc.profile.updateApiKey.useMutation({
@@ -522,34 +522,49 @@ export function EffectsPanel() {
                   </p>
                 )}
 
-                {/* Payment reminder note */}
-                <p style={{
-                  fontSize: "0.40rem",
-                  fontFamily: "'Space Mono', monospace",
-                  color: "oklch(0.52 0.10 50)",
-                  margin: 0,
-                  lineHeight: 1.5,
-                  letterSpacing: "0.02em",
-                }}>
-                  ⚠ Your OpenAI account must have a paid plan / credits — free-tier keys won't work.
-                </p>
-
-                <a
-                  href="https://platform.openai.com/api-keys"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "block",
-                    fontSize: "0.42rem",
+                {savedKeyData?.hasKey ? (
+                  /* Masked key preview — shown when a key is already saved */
+                  <p style={{
+                    fontSize: "0.40rem",
                     fontFamily: "'Space Mono', monospace",
-                    color: "oklch(0.55 0.14 340)",
-                    textDecoration: "underline",
-                    textAlign: "center",
+                    color: "oklch(0.50 0.08 260)",
+                    margin: 0,
+                    lineHeight: 1.5,
                     letterSpacing: "0.04em",
-                  }}
-                >
-                  → platform.openai.com/api-keys
-                </a>
+                  }}>
+                    active key: <span style={{ letterSpacing: "0.06em" }}>{savedKeyData.maskedKey}</span>
+                  </p>
+                ) : (
+                  /* Payment reminder + link — only shown when no key is saved */
+                  <>
+                    <p style={{
+                      fontSize: "0.40rem",
+                      fontFamily: "'Space Mono', monospace",
+                      color: "oklch(0.52 0.10 50)",
+                      margin: 0,
+                      lineHeight: 1.5,
+                      letterSpacing: "0.02em",
+                    }}>
+                      ⚠ Your OpenAI account must have a paid plan / credits — free-tier keys won't work.
+                    </p>
+                    <a
+                      href="https://platform.openai.com/api-keys"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        display: "block",
+                        fontSize: "0.42rem",
+                        fontFamily: "'Space Mono', monospace",
+                        color: "oklch(0.55 0.14 340)",
+                        textDecoration: "underline",
+                        textAlign: "center",
+                        letterSpacing: "0.04em",
+                      }}
+                    >
+                      → platform.openai.com/api-keys
+                    </a>
+                  </>
+                )}
 
 
 
