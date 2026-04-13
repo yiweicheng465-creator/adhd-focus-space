@@ -21,7 +21,6 @@ import { GlobalQuickAdd } from "@/components/GlobalQuickAdd";
 import { ConfettiCelebration } from "@/components/ConfettiCelebration";
 import { DailyWrapUp } from "@/components/DailyWrapUp";
 import { recordWrapUp, recordDumpEntry, recordFocusSession, recordBlockComplete } from "@/components/MonthlyProgress";
-import { WeeklyResetNudge } from "@/components/WeeklyResetNudge";
 import { DailyCheckIn, useDailyCheckIn, type CheckInResult } from "@/components/DailyCheckIn";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useBlockStreak } from "@/hooks/useBlockStreak";
@@ -661,11 +660,6 @@ export default function Home() {
         {/* Page content */}
         <div className="flex-1 px-8 py-8 overflow-y-auto">
           <div className={cn("mx-auto", activeSection === "dashboard" ? "max-w-7xl" : "max-w-3xl")}>
-
-            {/* Weekly reset nudge */}
-            <div className="mb-6">
-              <WeeklyResetNudge />
-            </div>
 
             {activeSection === "dashboard" && (
               <div className="relative">
