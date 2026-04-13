@@ -159,6 +159,7 @@ export function EffectsPanel() {
       setApiKeySaved(true);
       setApiKeyError(null);
       setApiKeyInput("");
+      setApiKeyValidating(false);
       setShowSavedTick(true);
       setTimeout(() => { setApiKeySaved(false); setShowSavedTick(false); }, 1500);
       utils.profile.getApiKey.invalidate();
