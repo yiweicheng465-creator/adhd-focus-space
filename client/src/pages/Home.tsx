@@ -73,8 +73,8 @@ const PILL_FACES = [PillFaceDrained, PillFaceLow, PillFaceOkay, PillFaceGood, Pi
 const MOOD_DATA = [
   { value: 1, label: "Drained", color: "oklch(0.50 0.06 280)" },
   { value: 2, label: "Low",     color: "oklch(0.48 0.08 290)" },
-  { value: 3, label: "Okay",    color: "oklch(0.55 0.18 340)" },
-  { value: 4, label: "Good",    color: "oklch(0.55 0.14 310)" },
+  { value: 3, label: "Okay",    color: "var(--c-accent)" },
+  { value: 4, label: "Good",    color: "var(--c-accent-muted)" },
   { value: 5, label: "Glowing", color: "oklch(0.58 0.18 355)" },
 ];
 
@@ -99,12 +99,12 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         onClick={() => setOpen((o: boolean) => !o)}
         className="flex items-center gap-1.5 px-2.5 py-1 transition-all"
         style={{
-          border: "1px solid oklch(0.87 0.025 340)",
+          border: "1px solid var(--c-light-divider)",
           background: open ? "oklch(0.965 0.015 355)" : "transparent",
           borderRadius: 20,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "0.72rem",
-          color: current ? current.color : "oklch(0.52 0.040 330)",
+          color: current ? current.color : "var(--c-accent-faint)",
         }}
         title="How are you feeling?"
       >
@@ -120,9 +120,9 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
           className="absolute right-0 top-full mt-1 z-50 flex gap-1.5 p-2"
           style={{
             background: "oklch(0.990 0.006 355)",
-            border: "1px solid oklch(0.87 0.025 340)",
+            border: "1px solid var(--c-light-divider)",
             borderRadius: 12,
-            boxShadow: "0 4px 16px oklch(0.18 0.04 320 / 0.10)",
+            boxShadow: "0 4px 16px var(--c-shadow-ink3)",
           }}
         >
           {MOOD_DATA.map((m, i) => {
@@ -721,22 +721,22 @@ export default function Home() {
                   {/* Stars */}
                   <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "oklch(0.62 0.18 355)" }}>✦</div>
                   <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "oklch(0.62 0.18 355)" }}>✦</div>
-                  <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "oklch(0.58 0.18 340)" }}>★</div>
+                  <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "var(--c-accent)" }}>★</div>
                   {/* Bubble */}
                   <div style={{
                     background: "oklch(0.985 0.010 355)",
-                    border: "1.5px solid oklch(0.72 0.14 340)",
+                    border: "1.5px solid var(--c-mid-soft)",
                     borderRadius: 8,
                     padding: "10px 14px",
                     maxWidth: 148,
                     position: "relative",
-                    boxShadow: "2px 2px 0 oklch(0.72 0.14 340 / 0.30)",
+                    boxShadow: "2px 2px 0 var(--c-accent-bd-sm)",
                   }}>
                     <p style={{
                       fontFamily: "'Space Mono', monospace",
                       fontSize: 10,
                       lineHeight: 1.55,
-                      color: "oklch(0.38 0.18 340)",
+                      color: "var(--c-deep)",
                       letterSpacing: "0.03em",
                       textTransform: "uppercase",
                       margin: 0,
@@ -750,7 +750,7 @@ export default function Home() {
                       height: 0,
                       borderLeft: "8px solid transparent",
                       borderRight: "0px solid transparent",
-                      borderTop: "10px solid oklch(0.72 0.14 340)",
+                      borderTop: "10px solid var(--c-mid-soft)",
                     }} />
                     <div style={{
                       position: "absolute",
@@ -802,9 +802,9 @@ export default function Home() {
                           <div key={i} className="flex items-start gap-3">
                             <div
                               className="w-1 h-1 mt-1.5 shrink-0"
-                              style={{ background: "oklch(0.58 0.18 340)", transform: "rotate(45deg)" }}
+                              style={{ background: "var(--c-accent)", transform: "rotate(45deg)" }}
                             />
-                            <p className="text-xs" style={{ color: "oklch(0.45 0.04 330)" }}>{tip}</p>
+                            <p className="text-xs" style={{ color: "var(--c-accent-label)" }}>{tip}</p>
                           </div>
                         ))}
                       </div>

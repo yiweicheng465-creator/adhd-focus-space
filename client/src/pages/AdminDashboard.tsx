@@ -6,11 +6,11 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { Loader2, ShieldAlert, Users, Zap, Calendar, Key, Bot, Cpu } from "lucide-react";
 
-const INK    = "oklch(0.28 0.040 320)";
-const MUTED  = "oklch(0.52 0.040 330)";
-const BORDER = "oklch(0.82 0.060 340)";
+const INK    = "var(--c-shadow-ink2)";
+const MUTED  = "var(--c-accent-faint)";
+const BORDER = "var(--c-light-border)";
 const CREAM  = "oklch(0.970 0.022 355)";
-const TC     = "oklch(0.58 0.18 340)";
+const TC     = "var(--c-accent)";
 const BG     = "oklch(0.960 0.018 355)";
 const GREEN  = "oklch(0.40 0.14 168)";
 const BLUE   = "oklch(0.44 0.16 250)";

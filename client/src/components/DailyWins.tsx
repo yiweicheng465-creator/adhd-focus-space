@@ -135,11 +135,11 @@ const WIN_ICONS = [
   { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.58 0.18 355)" },
   { key: "study",     Component: IconStudy,     label: "Study",     color: "oklch(0.52 0.14 270)" },
   { key: "work",      Component: IconWork,      label: "Work",      color: "oklch(0.50 0.14 290)" },
-  { key: "social",    Component: IconSocial,    label: "Social",    color: "oklch(0.58 0.18 340)" },
-  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "oklch(0.55 0.14 310)" },
+  { key: "social",    Component: IconSocial,    label: "Social",    color: "var(--c-accent)" },
+  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "var(--c-accent-muted)" },
   { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "oklch(0.55 0.10 250)" },
-  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "oklch(0.53 0.18 340)" },
-  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "oklch(0.52 0.12 320)" },
+  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "var(--c-accent)" },
+  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "var(--c-accent-hover)" },
 ];
 
 const M = {

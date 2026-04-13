@@ -30,9 +30,9 @@ export const BUILTIN_CONTEXT_CONFIG: Record<string, {
   personal: {
     label:  "Personal",
     icon:   User,
-    color:  "oklch(0.48 0.18 340)",
-    bg:     "oklch(0.48 0.18 340 / 0.08)",
-    border: "oklch(0.48 0.18 340 / 0.25)",
+    color:  "var(--c-accent-text)",
+    bg:     "var(--c-accent-bg-sm)",
+    border: "var(--c-accent-bd-sm)",
   },
 };
 
@@ -115,8 +115,8 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
               className="flex items-center gap-1.5 text-xs font-medium transition-all justify-center shrink-0"
               style={{
                 background:    isActive ? (cfg ? cfg.bg : "oklch(0.92 0.030 355)") : "transparent",
-                color:         isActive ? (cfg ? cfg.color : "oklch(0.38 0.060 330)") : "oklch(0.52 0.040 330)",
-                border:        `1px solid ${isActive ? (cfg ? cfg.border : "oklch(0.78 0.060 340)") : "oklch(0.84 0.040 340)"}`,
+                color:         isActive ? (cfg ? cfg.color : "var(--c-deep-text)") : "var(--c-accent-faint)",
+                border:        `1px solid ${isActive ? (cfg ? cfg.border : "var(--c-mid-soft)") : "var(--c-light-border)"}`,
                 fontFamily:    "'DM Sans', sans-serif",
                 letterSpacing: "0.04em",
                 cursor:        "pointer",
@@ -131,8 +131,8 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
                 <span
                   className="text-[10px] px-1.5 py-0.5 font-medium"
                   style={{
-                    background: "oklch(0.88 0.040 340 / 0.6)",
-                    color: "oklch(0.48 0.060 330)",
+                    background: "var(--c-light-divider)",
+                    color: "var(--c-accent-faint)",
                   }}
                 >
                   {counts[id]}
@@ -147,12 +147,12 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
                   style={{
                     width: 14,
                     height: 14,
-                    color: "oklch(0.52 0.040 330)",
+                    color: "var(--c-accent-faint)",
                     cursor: "pointer",
                     flexShrink: 0,
                   }}
-                  onMouseEnter={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.55 0.18 340)"; }}
-                  onMouseLeave={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "oklch(0.52 0.040 330)"; }}
+                  onMouseEnter={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "var(--c-accent)"; }}
+                  onMouseLeave={(e) => { (e.currentTarget as HTMLSpanElement).style.color = "var(--c-accent-faint)"; }}
                 >
                   <X style={{ width: 10, height: 10 }} />
                 </span>

@@ -356,7 +356,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                 width: 8, height: 8, borderRadius: "50%",
                 background: i <= STEP_ORDER.indexOf(step) ? M.accent : "#E8C8DC",
                 boxShadow: i <= STEP_ORDER.indexOf(step)
-                  ? `0 1px 0 oklch(0.40 0.18 340), inset 0 1px 1px rgba(255,255,255,0.55)`
+                  ? `0 1px 0 var(--c-deep), inset 0 1px 1px rgba(255,255,255,0.55)`
                   : `0 1px 0 rgba(180,120,160,0.3), inset 0 1px 1px rgba(255,255,255,0.40)`,
                 transition: "background 0.3s, box-shadow 0.3s",
               }} />
@@ -412,7 +412,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                 className="w-36 shrink-0" style={{ borderRadius: 0, display: "block" }}
               />
               <div className="pt-2">
-                <p className="text-base leading-relaxed" style={{ color: "oklch(0.28 0.04 320)" }}>
+                <p className="text-base leading-relaxed" style={{ color: "var(--c-shadow-ink2)" }}>
                   Let's set up your day in just a few quick questions. No pressure — answer what you can, skip anything you don't have yet.
                 </p>
                 <p className="text-sm mt-3 italic" style={{ color: M.muted }}>
@@ -458,7 +458,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                   <div
                     key={m.value}
                     className="flex-1 h-0.5 transition-all duration-300"
-                    style={{ background: mood !== null && m.value <= mood ? m.fill : "oklch(0.92 0.018 355)" }}
+                    style={{ background: mood !== null && m.value <= mood ? m.fill : "var(--c-pale)" }}
                   />
                 ))}
               </div>
@@ -486,10 +486,10 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
               {newGoals.length > 0 && (
                 <ul className="space-y-1.5 mt-3">
                   {newGoals.map((g, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "var(--c-shadow-ink2)" }}>
                       🎯 <span>{g.text}</span>
                       {g.context && (
-                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.92 0.018 355)", color: "oklch(0.48 0.12 340)" }}>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: "var(--c-pale)", color: "var(--c-accent-text)" }}>
                           #{g.context}
                         </span>
                       )}
@@ -546,7 +546,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                   const cfg = {
                     urgent: { label: "Urgent", Icon: Flame, color: "oklch(0.55 0.09 35)",  bg: "oklch(0.55 0.09 35 / 0.08)",  border: "oklch(0.55 0.09 35 / 0.28)" },
                     focus:  { label: "Focus",  Icon: Zap,   color: "oklch(0.52 0.14 290)", bg: "oklch(0.52 0.14 290 / 0.08)", border: "oklch(0.52 0.14 290 / 0.28)" },
-                    normal: { label: "Normal", Icon: Star,  color: "oklch(0.55 0.10 330)", bg: "oklch(0.72 0.10 330 / 0.10)", border: "oklch(0.72 0.10 330 / 0.30)" },
+                    normal: { label: "Normal", Icon: Star,  color: "var(--c-accent-muted)", bg: "var(--c-accent-bg-md)", border: "var(--c-accent-bd-sm)" },
                   }[p];
                   const active = taskPriority === p;
                   return (
@@ -595,7 +595,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
               {tasks.length > 0 && (
                 <ul className="space-y-1.5 mt-3 max-h-28 overflow-y-auto">
                   {tasks.map((t, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "var(--c-shadow-ink2)" }}>
                       <span className="text-[9px] px-1.5 py-0.5 rounded" style={{ background: "oklch(0.58 0.10 290 / 0.12)", color: M.muted }}>
                         #{t.context}
                       </span>
@@ -685,7 +685,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
               {agents.length > 0 && (
                 <ul className="space-y-1.5 mt-3">
                   {agents.map((a, i) => (
-                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                    <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "var(--c-shadow-ink2)" }}>
                       <span style={{ color: M.accent }}>⚡</span>
                       <span className="font-medium">{a.name}</span>
                       {a.task !== "General task" && (
@@ -745,7 +745,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                   {wins.map((w, i) => {
                     const cat = WIN_CATS[w.catIdx];
                     return (
-                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                      <li key={i} className="flex items-center gap-2 text-sm" style={{ color: "var(--c-shadow-ink2)" }}>
                         <span className="text-[9px] px-1.5 py-0.5 rounded-full" style={{ background: `${cat.color}18`, color: cat.color, border: `1px solid ${cat.color}44` }}>
                           {cat.emoji} {cat.label}
                         </span>
@@ -768,17 +768,17 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                   alt="heartbeat planet"
                   className="w-32 shrink-0" style={{ borderRadius: 0, display: "block" }}
                 />
-                <div className="pt-1 space-y-2 text-sm" style={{ color: "oklch(0.28 0.04 320)" }}>
+                <div className="pt-1 space-y-2 text-sm" style={{ color: "var(--c-shadow-ink2)" }}>
                   {mood && (
                     <div className="flex items-center gap-2">
                       <span style={{ fontSize: 14 }}>{["😶","😔","😐","🌸","✨"][MOODS.findIndex((m) => m.value === mood)] ?? "💭"}</span>
-                      <span>Mood: <span className="font-semibold" style={{ color: "oklch(0.55 0.18 340)" }}>{MOODS.find((m) => m.value === mood)?.label}</span></span>
+                      <span>Mood: <span className="font-semibold" style={{ color: "var(--c-accent)" }}>{MOODS.find((m) => m.value === mood)?.label}</span></span>
                     </div>
                   )}
                   {newGoals.length > 0 && (
                     <div className="flex items-center gap-2">
                       <span style={{ fontSize: 13 }}>🎯</span>
-                      <span><span className="font-semibold" style={{ color: "oklch(0.55 0.14 310)" }}>{newGoals.length}</span> goal{newGoals.length > 1 ? "s" : ""} added</span>
+                      <span><span className="font-semibold" style={{ color: "var(--c-accent-muted)" }}>{newGoals.length}</span> goal{newGoals.length > 1 ? "s" : ""} added</span>
                     </div>
                   )}
                   {tasks.length > 0 && (
@@ -802,7 +802,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                   {!mood && !newGoals.length && !tasks.length && !agents.length && !wins.length && (
                     <div className="flex items-center gap-2">
                       <span style={{ fontSize: 13 }}>🌙</span>
-                      <span className="italic" style={{ color: "oklch(0.52 0.040 330)" }}>Nothing added — that's okay. Your space is ready.</span>
+                      <span className="italic" style={{ color: "var(--c-accent-faint)" }}>Nothing added — that's okay. Your space is ready.</span>
                     </div>
                   )}
                 </div>
@@ -812,7 +812,7 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
               {(tasks.length > 0 || newGoals.length > 0) && (
                 <div
                   className="mt-4 p-3 rounded-lg"
-                  style={{ background: "oklch(0.58 0.18 340 / 0.07)", border: "1px solid oklch(0.58 0.18 340 / 0.22)" }}
+                  style={{ background: "var(--c-accent-bg-sm)", border: "1px solid var(--c-accent-bg-lg)" }}
                 >
                   <div className="flex items-center gap-1.5 mb-1.5">
                     <Sparkles className="w-3.5 h-3.5" style={{ color: M.accent }} />

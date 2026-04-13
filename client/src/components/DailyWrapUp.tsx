@@ -20,10 +20,10 @@ const WIN_CAT_COLORS = [
   "oklch(0.62 0.18 355)",   // health
   "oklch(0.52 0.08 230)",  // study
   "oklch(0.55 0.14 290)",  // work
-  "oklch(0.62 0.14 310)",   // social
+  "var(--c-accent-dim)",   // social
   "oklch(0.55 0.10 300)",  // creative
   "oklch(0.55 0.07 250)",  // mindful
-  "oklch(0.58 0.18 340)",   // fitness
+  "var(--c-accent)",   // fitness
   "oklch(0.55 0.12 270)",  // nutrition
 ];
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
@@ -85,7 +85,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
 
   if (wins.length === 0) {
     return (
-      <p className="text-sm italic" style={{ color: "oklch(0.52 0.040 330)", fontFamily: "'DM Sans', sans-serif" }}>
+      <p className="text-sm italic" style={{ color: "var(--c-accent-faint)", fontFamily: "'DM Sans', sans-serif" }}>
         No wins logged yet — completing tasks adds them automatically.
       </p>
     );
@@ -150,7 +150,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
       <div style={{ position: "relative", width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} style={{ position: "absolute", inset: 0, overflow: "hidden" }}>
           {/* Background guide ring */}
-          <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="oklch(0.88 0.025 340)" strokeWidth="1" strokeDasharray="3 5" />
+          <circle cx={cx} cy={cy} r={arcR} fill="none" stroke="var(--c-light-divider)" strokeWidth="1" strokeDasharray="3 5" />
 
           {/* Arc segments — use butt caps so gaps are clean */}
           {arcSegments.map((seg) => {
@@ -174,8 +174,8 @@ function WinsRing({ wins }: { wins: Win[] }) {
           })}
 
           {/* Center count */}
-          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fill: "oklch(0.22 0.040 320)", fontWeight: 700 }}>{total}</text>
-          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "oklch(0.52 0.040 330)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
+          <text x={cx} y={cy - 8} textAnchor="middle" style={{ fontFamily: "'Playfair Display', serif", fontSize: 30, fill: "var(--c-shadow-ink)", fontWeight: 700 }}>{total}</text>
+          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, fill: "var(--c-accent-faint)", textTransform: "uppercase", letterSpacing: 2 }}>wins</text>
         </svg>
 
         {/* Category icons — positioned OUTSIDE the arc ring, fixed small size */}
@@ -247,9 +247,9 @@ function WinsRing({ wins }: { wins: Win[] }) {
                   left: "50%",
                   transform: "translateX(-50%)",
                   background: "oklch(0.970 0.022 355)",
-                  color: "oklch(0.28 0.040 320)",
-                  border: "2px solid oklch(0.58 0.12 340)",
-                  boxShadow: "3px 3px 0px oklch(0.30 0.030 320)",
+                  color: "var(--c-shadow-ink2)",
+                  border: "2px solid var(--c-accent)",
+                  boxShadow: "3px 3px 0px var(--c-ink-soft)",
                   borderRadius: 4,
                   padding: "7px 12px",
                   whiteSpace: "nowrap",
@@ -514,7 +514,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
             ) : (
               <div className="space-y-2">
                 {todayAgents.map((a) => {
-                  const sc: Record<string, string> = { running: M.coral, paused: M.slumber, done: M.sage, failed: "oklch(0.58 0.18 340)" };
+                  const sc: Record<string, string> = { running: M.coral, paused: M.slumber, done: M.sage, failed: "var(--c-accent)" };
                   return (
                     <div key={a.id} className="flex items-start gap-2 p-2.5" style={{ background: M.bg, border: `1px solid ${M.border}` }}>
                       <div className="w-2 h-2 mt-1.5 shrink-0" style={{ background: sc[a.status] }} />
@@ -567,7 +567,7 @@ export function DailyWrapUp({ tasks, wins, agents, quitCount = 0, onClose }: Dai
                   disabled={summaryMutation.isPending}
                   className="flex items-center gap-2 px-3 py-2 text-xs font-medium self-start"
                   style={{
-                    background: summaryMutation.isPending ? "oklch(0.88 0.025 340)" : M.coralBg,
+                    background: summaryMutation.isPending ? "var(--c-light-divider)" : M.coralBg,
                     border: `1px solid ${M.coralBdr}`,
                     color: M.coral,
                     fontFamily: "'DM Sans', sans-serif",
@@ -633,7 +633,7 @@ function TaskRow({ text, color }: { text: string; color: string }) {
   return (
     <div className="flex items-center gap-2 py-1">
       <CheckCircle2 className="w-3.5 h-3.5 shrink-0" style={{ color }} />
-      <span className="text-sm" style={{ color: "oklch(0.22 0.040 320)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
+      <span className="text-sm" style={{ color: "var(--c-shadow-ink)", fontFamily: "'DM Sans', sans-serif" }}>{text}</span>
     </div>
   );
 }
@@ -670,7 +670,7 @@ function FocusTrackerSection() {
   })();
 
   const count = Math.max(sessions.length, logCount);
-  const timerColor = "oklch(0.58 0.18 340)"; // coral / timer color
+  const timerColor = "var(--c-accent)"; // coral / timer color
 
   return (
     <Section
@@ -691,8 +691,8 @@ function FocusTrackerSection() {
                 key={s.sessionNumber}
                 className="flex items-center gap-3 py-1.5 px-2.5"
                 style={{
-                  background: "oklch(0.58 0.18 340 / 0.06)",
-                  border: "1px solid oklch(0.58 0.18 340 / 0.18)",
+                  background: "var(--c-accent-bg-sm)",
+                  border: "1px solid var(--c-accent-bg-lg)",
                   borderRadius: 6,
                 }}
               >
@@ -725,8 +725,8 @@ function FocusTrackerSection() {
               key={i}
               className="flex items-center gap-3 py-1.5 px-2.5"
               style={{
-                background: "oklch(0.58 0.18 340 / 0.06)",
-                border: "1px solid oklch(0.58 0.18 340 / 0.18)",
+                background: "var(--c-accent-bg-sm)",
+                border: "1px solid var(--c-accent-bg-lg)",
                 borderRadius: 6,
               }}
             >

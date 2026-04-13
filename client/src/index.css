@@ -153,6 +153,64 @@
   --m-border:        hsl(var(--base-hue), 20%, 83%);
   --m-bg:            hsl(var(--base-hue), 38%, 95%);
   --m-card:          hsl(var(--base-hue), 30%, 97%);
+
+  /* ── Component-level hue tokens (oklch equivalents, derived from --base-hue) ──
+     These replace hardcoded oklch(... 330/340) values in component inline styles.
+     Named by lightness level: --c-dark, --c-mid, --c-light, --c-pale, --c-ghost
+     Each has a -fg (foreground) and -border variant. */
+
+  /* Dark ink — title bar text, strong labels */
+  --c-ink:           oklch(0.28 0.040 var(--base-hue));
+  --c-ink-soft:      oklch(0.30 0.060 var(--base-hue));
+  /* Deep accent — active states, strong buttons */
+  --c-deep:          oklch(0.45 0.14 var(--base-hue));
+  --c-deep-text:     oklch(0.42 0.14 var(--base-hue));
+  /* Primary accent — buttons, active highlights */
+  --c-accent:        oklch(0.58 0.18 var(--base-hue));
+  --c-accent-hover:  oklch(0.52 0.18 var(--base-hue));
+  --c-accent-muted:  oklch(0.55 0.10 var(--base-hue));
+  --c-accent-text:   oklch(0.48 0.16 var(--base-hue));
+  --c-accent-label:  oklch(0.45 0.08 var(--base-hue));
+  --c-accent-icon:   oklch(0.55 0.08 var(--base-hue));
+  --c-accent-dim:    oklch(0.62 0.14 var(--base-hue));
+  --c-accent-soft:   oklch(0.65 0.06 var(--base-hue));
+  --c-accent-faint:  oklch(0.62 0.060 var(--base-hue));
+  /* Alpha variants for backgrounds and borders */
+  --c-accent-bg-xs:  oklch(0.58 0.18 var(--base-hue) / 0.05);
+  --c-accent-bg-sm:  oklch(0.58 0.18 var(--base-hue) / 0.08);
+  --c-accent-bg-md:  oklch(0.58 0.18 var(--base-hue) / 0.12);
+  --c-accent-bg-lg:  oklch(0.58 0.18 var(--base-hue) / 0.22);
+  --c-accent-bd-sm:  oklch(0.58 0.18 var(--base-hue) / 0.25);
+  --c-accent-bd-md:  oklch(0.58 0.18 var(--base-hue) / 0.28);
+  --c-accent-bd-lg:  oklch(0.58 0.18 var(--base-hue) / 0.30);
+  /* Mid tones — secondary borders, dividers */
+  --c-mid:           oklch(0.75 0.08 var(--base-hue));
+  --c-mid-soft:      oklch(0.78 0.060 var(--base-hue));
+  --c-mid-border:    oklch(0.80 0.06 var(--base-hue));
+  --c-mid-border2:   oklch(0.80 0.060 var(--base-hue));
+  --c-mid-shadow:    oklch(0.82 0.040 var(--base-hue) / 0.5);
+  --c-mid-shadow2:   oklch(0.80 0.060 var(--base-hue) / 0.4);
+  --c-mid-shadow3:   oklch(0.80 0.060 var(--base-hue) / 0.5);
+  --c-mid-active:    oklch(0.80 0.060 var(--base-hue) / 0.4);
+  /* Light tones — panel backgrounds, hover states */
+  --c-light:         oklch(0.82 0.060 var(--base-hue));
+  --c-light-soft:    oklch(0.82 0.050 var(--base-hue));
+  --c-light-border:  oklch(0.82 0.060 var(--base-hue));
+  --c-light-divider: oklch(0.88 0.060 var(--base-hue));
+  --c-light-hover:   oklch(0.90 0.04 var(--base-hue));
+  /* Pale tones — window panel backgrounds */
+  --c-pale:          oklch(0.93 0.020 var(--base-hue));
+  --c-pale-bg:       oklch(0.97 0.015 var(--base-hue));
+  --c-pale-bg2:      oklch(0.965 0.025 var(--base-hue) / 0.96);
+  --c-pale-bg3:      oklch(0.975 0.018 var(--base-hue) / 0.98);
+  /* Shadow ink */
+  --c-shadow-ink:    oklch(0.22 0.040 var(--base-hue));
+  --c-shadow-ink2:   oklch(0.28 0.040 var(--base-hue));
+  --c-shadow-ink3:   oklch(0.28 0.040 var(--base-hue) / 0.12);
+  /* Sidebar specific */
+  --c-sidebar-bg:    oklch(0.97 0.015 var(--base-hue));
+  --c-sidebar-border: oklch(0.80 0.060 var(--base-hue));
+  --c-sidebar-shadow: oklch(0.58 0.18 var(--base-hue) / 0.08);
 }
 
 @layer base {
@@ -168,10 +226,10 @@
     background-color: hsl(var(--base-hue), 38%, 95%);
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
-      linear-gradient(rgba(185, 140, 165, 0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(185, 140, 165, 0.12) 1px, transparent 1px),
-      linear-gradient(rgba(185, 140, 165, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(185, 140, 165, 0.05) 1px, transparent 1px);
+      linear-gradient(hsl(var(--base-hue), 28%, 65%, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--base-hue), 28%, 65%, 0.12) 1px, transparent 1px),
+      linear-gradient(hsl(var(--base-hue), 28%, 65%, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--base-hue), 28%, 65%, 0.05) 1px, transparent 1px);
     background-size: 200px 200px, 128px 128px, 128px 128px, 32px 32px, 32px 32px;
     background-attachment: fixed;
   }

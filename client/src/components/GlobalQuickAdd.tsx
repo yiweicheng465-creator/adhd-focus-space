@@ -11,19 +11,19 @@ import { trpc } from "@/lib/trpc";
 import type { Task } from "./TaskManager";
 
 const M = {
-  coral:    "oklch(0.58 0.18 340)",
-  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
-  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
-  ink:      "oklch(0.28 0.040 320)",
-  muted:    "oklch(0.52 0.040 330)",
-  border:   "oklch(0.82 0.050 340)",
+  coral:    "var(--c-accent)",
+  coralBg:  "var(--c-accent-bg-sm)",
+  coralBdr: "var(--c-accent-bd-md)",
+  ink:      "var(--c-shadow-ink2)",
+  muted:    "var(--c-accent-faint)",
+  border:   "var(--c-light-soft)",
   card:     "oklch(0.975 0.018 355)",
 };
 
 const PRIORITY_CFG = {
   urgent: { label: "Urgent", Icon: Flame, color: "oklch(0.55 0.09 35)",  bg: "oklch(0.55 0.09 35 / 0.08)",  border: "oklch(0.55 0.09 35 / 0.28)" },
   focus:  { label: "Focus",  Icon: Zap,   color: "oklch(0.52 0.14 290)", bg: "oklch(0.52 0.14 290 / 0.08)", border: "oklch(0.52 0.14 290 / 0.28)" },
-  normal: { label: "Normal", Icon: Star,  color: "oklch(0.55 0.10 330)", bg: "oklch(0.72 0.10 330 / 0.10)", border: "oklch(0.72 0.10 330 / 0.30)" },
+  normal: { label: "Normal", Icon: Star,  color: "var(--c-accent-muted)", bg: "var(--c-accent-bg-md)", border: "var(--c-accent-bd-sm)" },
 } as const;
 
 type Priority = "urgent" | "focus" | "normal";

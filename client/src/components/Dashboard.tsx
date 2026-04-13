@@ -20,12 +20,12 @@ if (typeof document !== "undefined" && !document.getElementById(STICKER_STYLE_ID
   s.id = STICKER_STYLE_ID;
   s.textContent = `
     @keyframes stickerPeelIn {
-      0%   { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px oklch(0.60 0.08 340 / 0.18); }
-      100% { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px oklch(0.60 0.08 340 / 0.28); }
+      0%   { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px var(--c-accent-bg-lg); }
+      100% { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px var(--c-accent-bd-md); }
     }
     @keyframes stickerPeelOut {
-      0%   { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px oklch(0.60 0.08 340 / 0.28); }
-      100% { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px oklch(0.60 0.08 340 / 0.18); }
+      0%   { transform: rotate(-3deg) scale(1.04); box-shadow: 3px 6px 10px var(--c-accent-bd-md); }
+      100% { transform: rotate(0deg) scale(1);    box-shadow: 1px 2px 4px var(--c-accent-bg-lg); }
     }
     @keyframes curlGrow {
       0%   { border-width: 10px 10px 0 0; }
@@ -107,18 +107,18 @@ function getGreeting() {
 }
 
 /* ── Dreamy SukiSketch Palette (aligned with index.css CSS vars) ── */
-const TC        = "oklch(0.58 0.18 340)";   // hot pink accent
+const TC        = "var(--c-accent)";   // hot pink accent
 const CREAM     = "oklch(0.970 0.022 355)"; // soft pink card bg
-const BORDER    = "oklch(0.78 0.060 340)";  // mauve border
-const INK       = "oklch(0.28 0.040 320)";  // dark plum ink
-const MUTED     = "oklch(0.52 0.040 330)";  // muted mauve text
+const BORDER    = "var(--c-mid-soft)";  // mauve border
+const INK       = "var(--c-shadow-ink2)";  // dark plum ink
+const MUTED     = "var(--c-accent-faint)";  // muted mauve text
 // AI panel: soft lavender
 const AI_BG     = "oklch(0.960 0.030 290)";  // soft lavender
 const AI_BORDER = "oklch(0.78 0.060 290)";   // lavender border
 const AI_MSG_BG = "oklch(0.940 0.040 355)";  // bubblegum pink for AI messages
-const AI_ACCENT = "oklch(0.58 0.18 340)";    // hot pink for AI header/icons
-const TITLEBAR  = "oklch(0.88 0.060 340)";   // pink title bar bg
-const TITLEBAR_TEXT = "oklch(0.30 0.060 320)"; // title bar text
+const AI_ACCENT = "var(--c-accent)";    // hot pink for AI header/icons
+const TITLEBAR  = "var(--c-light-divider)";   // pink title bar bg
+const TITLEBAR_TEXT = "var(--c-ink-soft)"; // title bar text
 
 function CornerMark() {
   return (
@@ -369,7 +369,7 @@ function AICommandPanel({
                   maxWidth: "92%", padding: "7px 11px", fontSize: 12, lineHeight: 1.55,
                   color: m.role === "user" ? CREAM : INK,
                   background: m.role === "user"
-                    ? "oklch(0.52 0.18 340)"   // hot pink for user
+                    ? "var(--c-accent-hover)"   // hot pink for user
                     : AI_MSG_BG,              // bubblegum pink for AI
                   border: m.role === "user" ? "none" : `1px solid ${AI_BORDER}`,
                   borderRadius: m.role === "user" ? "12px 12px 3px 12px" : "3px 12px 12px 12px",
@@ -500,7 +500,7 @@ export function Dashboard({
       {/* ── HERO: Retro Lo-Fi Desktop Window ── */}
       <div className="retro-window relative overflow-hidden" style={{ minHeight: 148 }}>
         {/* Soft pink overlay */}
-        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, oklch(0.975 0.018 355 / 0.98) 0%, oklch(0.965 0.025 340 / 0.96) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, var(--c-pale-bg3) 0%, var(--c-pale-bg2) 100%)" }} />
 
         {/* ── Retro title bar ── */}
         <div className="retro-titlebar relative z-10">
@@ -516,18 +516,18 @@ export function Dashboard({
         {/* Crescent moon — top right */}
         <div className="absolute" style={{ top: 28, right: 18, opacity: 0.55, transform: "rotate(12deg)" }}>
           <svg width="38" height="38" viewBox="0 0 40 40" fill="none">
-            <path d="M28 20c0 8.837-7.163 16-16 16a16.07 16.07 0 0 1-4-.504C11.84 37.1 15.78 38 20 38c9.941 0 18-8.059 18-18S29.941 2 20 2c-4.22 0-8.16.9-11 2.504A16.07 16.07 0 0 1 13 4c8.837 0 15 7.163 15 16z" fill="oklch(0.68 0.12 340)" />
-            <circle cx="22" cy="9" r="1.2" fill="oklch(0.78 0.10 320)" />
-            <circle cx="30" cy="14" r="0.8" fill="oklch(0.78 0.10 320)" />
-            <circle cx="26" cy="5" r="0.6" fill="oklch(0.78 0.10 320)" />
+            <path d="M28 20c0 8.837-7.163 16-16 16a16.07 16.07 0 0 1-4-.504C11.84 37.1 15.78 38 20 38c9.941 0 18-8.059 18-18S29.941 2 20 2c-4.22 0-8.16.9-11 2.504A16.07 16.07 0 0 1 13 4c8.837 0 15 7.163 15 16z" fill="var(--c-accent-dim)" />
+            <circle cx="22" cy="9" r="1.2" fill="var(--c-mid-soft)" />
+            <circle cx="30" cy="14" r="0.8" fill="var(--c-mid-soft)" />
+            <circle cx="26" cy="5" r="0.6" fill="var(--c-mid-soft)" />
           </svg>
         </div>
         {/* Small stars cluster — top right area */}
         <div className="absolute" style={{ top: 32, right: 62, opacity: 0.45 }}>
           <svg width="28" height="20" viewBox="0 0 28 20" fill="none">
-            <path d="M4 2 L4.6 3.8 L6.5 3.8 L5 4.9 L5.6 6.7 L4 5.6 L2.4 6.7 L3 4.9 L1.5 3.8 L3.4 3.8 Z" fill="oklch(0.62 0.14 340)" />
-            <path d="M14 8 L14.4 9.2 L15.7 9.2 L14.7 10 L15.1 11.2 L14 10.4 L12.9 11.2 L13.3 10 L12.3 9.2 L13.6 9.2 Z" fill="oklch(0.62 0.14 340)" />
-            <path d="M23 2 L23.3 3 L24.3 3 L23.5 3.6 L23.8 4.6 L23 4 L22.2 4.6 L22.5 3.6 L21.7 3 L22.7 3 Z" fill="oklch(0.62 0.14 340)" />
+            <path d="M4 2 L4.6 3.8 L6.5 3.8 L5 4.9 L5.6 6.7 L4 5.6 L2.4 6.7 L3 4.9 L1.5 3.8 L3.4 3.8 Z" fill="var(--c-accent-dim)" />
+            <path d="M14 8 L14.4 9.2 L15.7 9.2 L14.7 10 L15.1 11.2 L14 10.4 L12.9 11.2 L13.3 10 L12.3 9.2 L13.6 9.2 Z" fill="var(--c-accent-dim)" />
+            <path d="M23 2 L23.3 3 L24.3 3 L23.5 3.6 L23.8 4.6 L23 4 L22.2 4.6 L22.5 3.6 L21.7 3 L22.7 3 Z" fill="var(--c-accent-dim)" />
           </svg>
         </div>
         {/* Potted plant — bottom right */}
@@ -535,12 +535,12 @@ export function Dashboard({
           <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
             {/* pot */}
             <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="oklch(0.62 0.12 300)" />
-            <rect x="8" y="28" width="20" height="4" rx="2" fill="oklch(0.55 0.14 310)" />
+            <rect x="8" y="28" width="20" height="4" rx="2" fill="var(--c-accent-muted)" />
             {/* stem */}
             <line x1="18" y1="28" x2="18" y2="14" stroke="oklch(0.55 0.14 290)" strokeWidth="1.5" strokeLinecap="round" />
             {/* leaves */}
             <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="oklch(0.60 0.14 290)" />
-            <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="oklch(0.55 0.14 295)" />
+            <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="var(--c-accent-muted)" />
             <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.58 0.13 292)" />
           </svg>
         </div>
@@ -550,7 +550,7 @@ export function Dashboard({
           <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
             <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.55 0.14 290)" strokeWidth="1.2" strokeLinecap="round" />
             <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.60 0.14 290)" />
-            <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="oklch(0.55 0.14 295)" />
+            <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="var(--c-accent-muted)" />
           </svg>
         </div>
         {/* Cloud puff — far right, mid height */}
@@ -559,7 +559,7 @@ export function Dashboard({
             <ellipse cx="22" cy="14" rx="18" ry="8" fill="oklch(0.82 0.06 290)" />
             <ellipse cx="14" cy="12" rx="10" ry="7" fill="oklch(0.84 0.05 300)" />
             <ellipse cx="30" cy="11" rx="9" ry="6" fill="oklch(0.84 0.05 300)" />
-            <ellipse cx="22" cy="9" rx="8" ry="6" fill="oklch(0.86 0.04 310)" />
+            <ellipse cx="22" cy="9" rx="8" ry="6" fill="var(--c-light-divider)" />
           </svg>
         </div>
 
@@ -580,9 +580,9 @@ export function Dashboard({
                   {getGreeting()}{displayName ? `, ${displayName}` : ""}
                 </h1>
                 {blockStreak > 0 && (
-                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: "oklch(0.58 0.18 340 / 0.10)", border: "1px solid oklch(0.58 0.18 340 / 0.30)", padding: "2px 8px", borderRadius: 20 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: 5, background: "var(--c-accent-bg-sm)", border: "1px solid var(--c-accent-bd-lg)", padding: "2px 8px", borderRadius: 20 }}>
                     <svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M12 2c0 0-1 3-1 5 0 1.5 1 3 1 3s-3-1-3-4c0 0-3 3-3 7a6 6 0 0 0 12 0c0-5-4-8-6-11z" fill={TC} opacity="0.9" /></svg>
-                    <span style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "oklch(0.45 0.14 340)", fontFamily: "'JetBrains Mono', monospace" }}>{blockStreak}d streak</span>
+                    <span style={{ fontSize: "0.6rem", fontWeight: 600, letterSpacing: "0.08em", textTransform: "uppercase", color: "var(--c-deep)", fontFamily: "'JetBrains Mono', monospace" }}>{blockStreak}d streak</span>
                   </div>
                 )}
               </div>
@@ -590,17 +590,17 @@ export function Dashboard({
               <div style={{ marginTop: 5, display: "inline-block", transform: "rotate(-1.5deg)", opacity: 0.88, position: "relative" }}>
                 <div style={{
                   background: "oklch(0.96 0.030 355)",
-                  border: "1px solid oklch(0.82 0.060 340)",
+                  border: "1px solid var(--c-light-border)",
                   padding: "4px 22px 4px 9px",
                   fontSize: 8,
                   fontFamily: "'Space Mono', monospace",
-                  color: "oklch(0.42 0.08 320)",
+                  color: "var(--c-deep-text)",
                   lineHeight: 1.5,
                   letterSpacing: "0.04em",
                   position: "relative",
                   /* clip the bottom-right corner so the curl triangle shows */
                   clipPath: "polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%)",
-                  boxShadow: "1px 2px 4px oklch(0.60 0.08 340 / 0.18), 2px 2px 0 oklch(0.82 0.060 340)",
+                  boxShadow: "1px 2px 4px var(--c-accent-bg-lg), 2px 2px 0 var(--c-light-border)",
                 }}>
                   be kind to yourself ✦
                 </div>
@@ -613,8 +613,8 @@ export function Dashboard({
                   height: 0,
                   borderStyle: "solid",
                   borderWidth: "10px 10px 0 0",
-                  borderColor: "transparent oklch(0.88 0.060 340) transparent transparent",
-                  filter: "drop-shadow(-1px 1px 1px oklch(0.60 0.08 340 / 0.25))",
+                  borderColor: "transparent var(--c-light-divider) transparent transparent",
+                  filter: "drop-shadow(-1px 1px 1px var(--c-accent-bd-sm))",
                 }} />
               </div>
             </div>
@@ -680,7 +680,7 @@ export function Dashboard({
               <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ opacity: 0.55 }}>
                 <line x1="5" y1="11" x2="5" y2="2" stroke="oklch(0.55 0.14 290)" strokeWidth="1" strokeLinecap="round" />
                 <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="oklch(0.60 0.14 290)" />
-                <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="oklch(0.55 0.14 295)" />
+                <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="var(--c-accent-muted)" />
               </svg>
             </div>
             <div className="retro-titlebar-buttons">
@@ -797,7 +797,7 @@ export function Dashboard({
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
               {/* sparkle sticker */}
               <svg width="10" height="10" viewBox="0 0 12 12" fill="none" style={{ opacity: 0.55 }}>
-                <path d="M6 0 L6.5 5 L12 6 L6.5 7 L6 12 L5.5 7 L0 6 L5.5 5 Z" fill="oklch(0.62 0.14 340)" />
+                <path d="M6 0 L6.5 5 L12 6 L6.5 7 L6 12 L5.5 7 L0 6 L5.5 5 Z" fill="var(--c-accent-dim)" />
               </svg>
             </div>
             <div className="retro-titlebar-buttons">
@@ -825,7 +825,7 @@ export function Dashboard({
 
       {/* ── BOTTOM: Today's wins + focus strip ── */}
       {(todayWins.length > 0 || focusSessions > 0) && (
-        <div style={{ position: "relative", border: `1px solid oklch(0.65 0.12 340 / 0.3)`, background: "oklch(0.65 0.12 340 / 0.04)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderRadius: 8 }}>
+        <div style={{ position: "relative", border: `1px solid var(--c-accent-bd-sm)`, background: "var(--c-accent-bg-xs)", padding: "7px 14px", display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", borderRadius: 8 }}>
           {/* Cat sticker: olive playing cat — right side of wins strip */}
           <img src={CAT_OLIVE} alt="" aria-hidden="true" style={{ position: "absolute", right: 8, bottom: -22, width: 60, opacity: 0.42, pointerEvents: "none", zIndex: 5 }} />
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0 }}>
@@ -833,7 +833,7 @@ export function Dashboard({
             <p className="editorial-label" style={{ fontSize: 9 }}>Today{todayWins.length > 0 ? ` · ${todayWins.length} win${todayWins.length > 1 ? "s" : ""}` : ""}</p>
           </div>
           {focusSessions > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "oklch(0.52 0.18 340 / 0.08)", border: "1px solid oklch(0.52 0.18 340 / 0.25)", borderRadius: 20, color: "oklch(0.42 0.14 340)", fontSize: 10, fontWeight: 600, fontFamily: "'DM Mono', monospace", letterSpacing: "0.04em", padding: "2px 9px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, background: "var(--c-accent-bg-sm)", border: "1px solid var(--c-accent-bd-sm)", borderRadius: 20, color: "var(--c-deep-text)", fontSize: 10, fontWeight: 600, fontFamily: "'DM Mono', monospace", letterSpacing: "0.04em", padding: "2px 9px" }}>
               ⏱ {focusSessions} session{focusSessions > 1 ? "s" : ""}
             </div>
           )}

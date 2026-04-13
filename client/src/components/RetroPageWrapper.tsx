@@ -8,10 +8,10 @@
 
 import React from "react";
 
-const BORDER = "oklch(0.78 0.060 340)";
-const TITLEBAR_BG = "oklch(0.88 0.060 340)";
-const TITLEBAR_TEXT = "oklch(0.30 0.060 320)";
-const GRID_COLOR = "oklch(0.72 0.060 340 / 0.14)";
+const BORDER = "var(--c-mid-soft)";
+const TITLEBAR_BG = "var(--c-light-divider)";
+const TITLEBAR_TEXT = "var(--c-ink-soft)";
+const GRID_COLOR = "var(--c-accent-bg-md)";
 
 /* Small sticker SVGs for title bars */
 const STICKERS: Record<string, React.ReactNode> = {

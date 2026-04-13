@@ -10,10 +10,10 @@ import { handleAiError, isNoApiKeyError, isQuotaError } from "@/lib/aiErrorHandl
 
 /* ── Retro lo-fi button style ── */
 const retroBtn: React.CSSProperties = {
-  background: "oklch(0.58 0.18 340)",
+  background: "var(--c-accent)",
   color: "white",
-  border: "1.5px solid oklch(0.30 0.10 320)",
-  boxShadow: "2px 2px 0px oklch(0.30 0.10 320)",
+  border: "1.5px solid var(--c-ink-soft)",
+  boxShadow: "2px 2px 0px var(--c-ink-soft)",
   fontFamily: "'Space Mono', monospace",
   fontSize: "0.70rem",
   letterSpacing: "0.04em",
@@ -31,17 +31,17 @@ const retroBtn: React.CSSProperties = {
 const retroBtnInactive: React.CSSProperties = {
   ...retroBtn,
   background: "oklch(0.975 0.018 355)",
-  color: "oklch(0.48 0.16 340)",
-  border: "1.5px solid oklch(0.82 0.050 340)",
-  boxShadow: "2px 2px 0px oklch(0.82 0.050 340)",
+  color: "var(--c-accent-text)",
+  border: "1.5px solid var(--c-light-soft)",
+  boxShadow: "2px 2px 0px var(--c-light-soft)",
 };
 
 const retroBtnActive: React.CSSProperties = {
   ...retroBtn,
-  background: "oklch(0.58 0.18 340)",
+  background: "var(--c-accent)",
   color: "white",
-  border: "1.5px solid oklch(0.22 0.040 320)",
-  boxShadow: "2px 2px 0px oklch(0.22 0.040 320)",
+  border: "1.5px solid var(--c-shadow-ink)",
+  boxShadow: "2px 2px 0px var(--c-shadow-ink)",
 };
 
 const retroBtnDisabled: React.CSSProperties = {
@@ -51,12 +51,12 @@ const retroBtnDisabled: React.CSSProperties = {
 };
 
 const M = {
-  ink:     "oklch(0.22 0.040 320)",
-  muted:   "oklch(0.52 0.040 330)",
-  border:  "oklch(0.82 0.050 340)",
-  accent:  "oklch(0.58 0.18 340)",
-  accentBg:"oklch(0.58 0.18 340 / 0.10)",
-  accentBdr:"oklch(0.58 0.18 340 / 0.25)",
+  ink:     "var(--c-shadow-ink)",
+  muted:   "var(--c-accent-faint)",
+  border:  "var(--c-light-soft)",
+  accent:  "var(--c-accent)",
+  accentBg:"var(--c-accent-bg-sm)",
+  accentBdr:"var(--c-accent-bd-sm)",
   bg:      "oklch(0.985 0.012 355)",
   card:    "oklch(0.975 0.018 355)",
   demoBg:  "oklch(0.96 0.015 355)",
@@ -155,9 +155,9 @@ function BrainDumpDemo() {
         }}
         disabled={mutation.isPending}
         style={mutation.isPending ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
         ✦ Categorise with AI
@@ -224,9 +224,9 @@ function DailySummaryDemo() {
         onClick={runDemo}
         disabled={mutation.isPending}
         style={mutation.isPending ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
         ✦ Generate sample summary
@@ -286,9 +286,9 @@ function FocusReflectionDemo() {
         onClick={() => mutation.mutate({ phase, sessionNumber: 1, intention, outcome, blocksCompleted: 0 })}
         disabled={mutation.isPending}
         style={mutation.isPending ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
         ✦ Get AI reflection
@@ -336,9 +336,9 @@ function MonthlyReviewDemo() {
         onClick={runDemo}
         disabled={mutation.isPending}
         style={mutation.isPending ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
         ✦ Generate sample review
@@ -386,9 +386,9 @@ function MITDemo() {
         onClick={runDemo}
         disabled={mutation.isPending}
         style={mutation.isPending ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
         ✦ Pick my MIT
@@ -508,9 +508,9 @@ function AICommandDemo() {
           onClick={send}
           disabled={!input.trim() || mutation.isPending}
           style={!input.trim() || mutation.isPending ? retroBtnDisabled : retroBtn}
-          onMouseDown={e => { if (input.trim() && !mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-          onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+          onMouseDown={e => { if (input.trim() && !mutation.isPending) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+          onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
         >
           Send
         </button>
@@ -549,9 +549,9 @@ function AgentBriefDemo() {
         onClick={() => mutation.mutate({ taskText, context: "work" })}
         disabled={mutation.isPending || !taskText.trim()}
         style={mutation.isPending || !taskText.trim() ? retroBtnDisabled : retroBtn}
-        onMouseDown={e => { if (!mutation.isPending && taskText.trim()) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
-        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
-        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px oklch(0.22 0.040 320)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseDown={e => { if (!mutation.isPending && taskText.trim()) { (e.currentTarget as HTMLButtonElement).style.boxShadow = "0px 0px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = "translate(2px,2px)"; } }}
+        onMouseUp={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
+        onMouseLeave={e => { (e.currentTarget as HTMLButtonElement).style.boxShadow = "2px 2px 0px var(--c-shadow-ink)"; (e.currentTarget as HTMLButtonElement).style.transform = ""; }}
       >
         {mutation.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
         ✦ Generate agent brief

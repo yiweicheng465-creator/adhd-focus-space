@@ -9,11 +9,11 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { X, Key, Loader2, AlertCircle } from "lucide-react";
 
-const DARK   = "oklch(0.28 0.040 320)";
-const ACCENT = "oklch(0.58 0.18 340)";
-const BORDER = "oklch(0.78 0.060 340)";
+const DARK   = "var(--c-shadow-ink2)";
+const ACCENT = "var(--c-accent)";
+const BORDER = "var(--c-mid-soft)";
 const BG     = "oklch(0.970 0.022 355)";
-const MUTED  = "oklch(0.55 0.06 340)";
+const MUTED  = "var(--c-accent-icon)";
 const RED    = "oklch(0.52 0.20 25)";
 
 export function ApiKeyDialog() {
@@ -84,7 +84,7 @@ export function ApiKeyDialog() {
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 99999,
-        background: "oklch(0.28 0.04 320 / 0.55)",
+        background: "var(--c-shadow-ink3)",
         display: "flex", alignItems: "center", justifyContent: "center",
         backdropFilter: "blur(3px)",
         animation: "ft-fadeIn 0.2s ease forwards",
@@ -163,7 +163,7 @@ export function ApiKeyDialog() {
                 maxLength={512}
                 style={{
                   border: `2px solid ${keyError ? RED : apiKeyInput.trim() ? ACCENT : BORDER}`,
-                  background: "oklch(0.960 0.018 350)",
+                  background: "var(--c-pale-bg)",
                   padding: "9px 44px 9px 10px",
                   fontSize: 11,
                   fontFamily: "'JetBrains Mono', monospace",

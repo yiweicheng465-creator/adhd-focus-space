@@ -30,14 +30,14 @@ function HSlider({
     <div style={{ position: "relative", width: "100%", height: 16, display: "flex", alignItems: "center" }}>
       <div style={{
         position: "absolute", left: 0, right: 0, height: 4,
-        background: disabled ? "oklch(0.88 0.015 330)" : "oklch(0.88 0.06 340)",
+        background: disabled ? "var(--c-light-divider)" : "var(--c-light-divider)",
         borderRadius: 2,
-        border: `1px solid ${disabled ? "oklch(0.82 0.010 330)" : "oklch(0.80 0.06 340)"}`,
+        border: `1px solid ${disabled ? "var(--c-light)" : "var(--c-mid-border)"}`,
         overflow: "hidden",
       }}>
         <div style={{
           width: `${value}%`, height: "100%",
-          background: disabled ? "oklch(0.72 0.015 330)" : accentColor,
+          background: disabled ? "var(--c-mid)" : accentColor,
           borderRadius: 2,
           transition: "width 0.05s linear, background 0.2s",
         }} />
@@ -59,8 +59,8 @@ function HSlider({
         position: "absolute",
         left: `calc(${value}% - 6px)`,
         width: 12, height: 12,
-        background: disabled ? "oklch(0.82 0.010 330)" : "white",
-        border: `2px solid ${disabled ? "oklch(0.72 0.015 330)" : accentColor}`,
+        background: disabled ? "var(--c-light)" : "white",
+        border: `2px solid ${disabled ? "var(--c-mid)" : accentColor}`,
         borderRadius: "50%",
         boxShadow: disabled ? "none" : `0 1px 3px ${accentColor}55`,
         transition: "left 0.05s linear, border-color 0.2s, background 0.2s",
@@ -218,8 +218,8 @@ export function EffectsPanel() {
 
   const grainOn = intensity > 0;
   const iconColor = (open || grainOn || workMode)
-    ? "oklch(0.48 0.18 340)"
-    : "oklch(0.60 0.060 330)";
+    ? "var(--c-accent-text)"
+    : "var(--c-accent-soft)";
 
   // Listen for global openFxPanel event — auto-open on API KEY tab
   useEffect(() => {
@@ -265,7 +265,7 @@ export function EffectsPanel() {
           justifyContent: "center",
           padding: "6px 0 5px",
           gap: 2,
-          background: open ? "oklch(0.58 0.18 340 / 0.10)" : "none",
+          background: open ? "var(--c-accent-bg-sm)" : "none",
           border: "none",
           cursor: "pointer",
           transition: "background 0.15s",
@@ -318,14 +318,14 @@ export function EffectsPanel() {
           width: 240,
           zIndex: 10000,
           fontFamily: "'Space Mono', monospace",
-          filter: "drop-shadow(3px 3px 0 oklch(0.55 0.12 340 / 0.35))",
+          filter: "drop-shadow(3px 3px 0 var(--c-accent-bd-lg))",
         }}>
           {/* Title bar */}
           <div style={{
             background: "#F9D6E8",
             borderRadius: "6px 6px 0 0",
-            border: "1.5px solid oklch(0.82 0.08 340)",
-            borderBottom: "1px solid oklch(0.82 0.08 340)",
+            border: "1.5px solid var(--c-light-border)",
+            borderBottom: "1px solid var(--c-light-border)",
             padding: "5px 8px",
             display: "flex",
             alignItems: "center",
@@ -333,21 +333,21 @@ export function EffectsPanel() {
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
               <TitleDots />
-              <span style={{ fontSize: "0.60rem", color: "oklch(0.38 0.10 340)", letterSpacing: "0.10em", textTransform: "lowercase" }}>
+              <span style={{ fontSize: "0.60rem", color: "var(--c-deep-text)", letterSpacing: "0.10em", textTransform: "lowercase" }}>
                 settings.exe
               </span>
             </div>
             <button
               onClick={() => setOpen(false)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "oklch(0.50 0.10 340)", fontSize: "0.75rem", lineHeight: 1, padding: "0 2px" }}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "var(--c-accent-muted)", fontSize: "0.75rem", lineHeight: 1, padding: "0 2px" }}
             >×</button>
           </div>
 
           {/* Tab bar */}
           <div style={{
             display: "flex",
-            background: "oklch(0.96 0.020 340)",
-            border: "1.5px solid oklch(0.82 0.08 340)",
+            background: "var(--c-pale-bg)",
+            border: "1.5px solid var(--c-light-border)",
             borderTop: "none",
             borderBottom: "none",
           }}>
@@ -364,11 +364,11 @@ export function EffectsPanel() {
                   fontFamily: "'Space Mono', monospace",
                   border: "none",
                   borderBottom: activeTab === tab
-                    ? "2px solid oklch(0.55 0.18 340)"
+                    ? "2px solid var(--c-accent)"
                     : "2px solid transparent",
-                  borderRight: tab === "effects" ? "1px solid oklch(0.88 0.06 340)" : "none",
-                  background: activeTab === tab ? "oklch(0.98 0.015 340)" : "transparent",
-                  color: activeTab === tab ? "oklch(0.45 0.14 340)" : "oklch(0.62 0.060 330)",
+                  borderRight: tab === "effects" ? "1px solid var(--c-light-divider)" : "none",
+                  background: activeTab === tab ? "var(--c-pale-bg)" : "transparent",
+                  color: activeTab === tab ? "var(--c-deep)" : "var(--c-accent-faint)",
                   cursor: "pointer",
                   fontWeight: activeTab === tab ? 700 : 400,
                   transition: "all 0.12s",
@@ -381,8 +381,8 @@ export function EffectsPanel() {
 
           {/* Body */}
           <div style={{
-            background: "oklch(0.98 0.015 340)",
-            border: "1.5px solid oklch(0.82 0.08 340)",
+            background: "var(--c-pale-bg)",
+            border: "1.5px solid var(--c-light-border)",
             borderTop: "none",
             borderRadius: "0 0 6px 6px",
             padding: "12px 14px 14px",
@@ -397,7 +397,7 @@ export function EffectsPanel() {
                 {/* Film Grain section */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "0.55rem", color: "var(--c-deep)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                       ▣ Film Grain
                     </span>
                     <button
@@ -408,9 +408,9 @@ export function EffectsPanel() {
                         letterSpacing: "0.08em",
                         padding: "2px 6px",
                         borderRadius: 10,
-                        border: `1px solid ${grainOn ? "oklch(0.55 0.18 340)" : "oklch(0.72 0.040 330)"}`,
-                        background: grainOn ? "oklch(0.55 0.18 340)" : "transparent",
-                        color: grainOn ? "white" : "oklch(0.60 0.040 330)",
+                        border: `1px solid ${grainOn ? "var(--c-accent)" : "var(--c-mid)"}`,
+                        background: grainOn ? "var(--c-accent)" : "transparent",
+                        color: grainOn ? "white" : "var(--c-accent-soft)",
                         cursor: "pointer",
                         transition: "all 0.15s",
                       }}
@@ -421,28 +421,28 @@ export function EffectsPanel() {
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 4, marginBottom: 10 }}>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>INTENSITY</span>
-                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.14 340)", letterSpacing: "0.06em" }}>{intensity === 0 ? "OFF" : `${intensity}%`}</span>
+                      <span style={{ fontSize: "0.48rem", color: "var(--c-accent-icon)", letterSpacing: "0.06em" }}>INTENSITY</span>
+                      <span style={{ fontSize: "0.48rem", color: "var(--c-accent-muted)", letterSpacing: "0.06em" }}>{intensity === 0 ? "OFF" : `${intensity}%`}</span>
                     </div>
-                    <HSlider value={intensity} onChange={setIntensity} accentColor="oklch(0.55 0.18 340)" />
+                    <HSlider value={intensity} onChange={setIntensity} accentColor="var(--c-accent)" />
                   </div>
 
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>SPEED</span>
-                      <span style={{ fontSize: "0.48rem", color: "oklch(0.50 0.14 295)", letterSpacing: "0.06em" }}>{speed === 0 ? "FROZEN" : `${speed}%`}</span>
+                      <span style={{ fontSize: "0.48rem", color: "var(--c-accent-icon)", letterSpacing: "0.06em" }}>SPEED</span>
+                      <span style={{ fontSize: "0.48rem", color: "var(--c-accent-muted)", letterSpacing: "0.06em" }}>{speed === 0 ? "FROZEN" : `${speed}%`}</span>
                     </div>
-                    <HSlider value={speed} onChange={setSpeed} accentColor="oklch(0.55 0.14 295)" disabled={!grainOn} />
+                    <HSlider value={speed} onChange={setSpeed} accentColor="var(--c-accent-muted)" disabled={!grainOn} />
                   </div>
                 </div>
 
                  {/* Divider */}
-                <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
+                <div style={{ height: 1, background: "var(--c-light-divider)", margin: "0 -2px" }} />
 
                 {/* ── Hue Shift section ── */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                    <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    <span style={{ fontSize: "0.55rem", color: "var(--c-deep)", letterSpacing: "0.12em", textTransform: "uppercase" }}>
                       ◈ Theme Hue
                     </span>
                     <button
@@ -453,9 +453,9 @@ export function EffectsPanel() {
                         letterSpacing: "0.08em",
                         padding: "2px 6px",
                         borderRadius: 10,
-                        border: "1px solid oklch(0.72 0.040 330)",
+                        border: "1px solid var(--c-mid)",
                         background: "transparent",
-                        color: "oklch(0.60 0.040 330)",
+                        color: "var(--c-accent-soft)",
                         cursor: "pointer",
                         transition: "all 0.15s",
                       }}
@@ -490,7 +490,7 @@ export function EffectsPanel() {
                   {/* Hue range slider */}
                   <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ fontSize: "0.48rem", color: "oklch(0.55 0.08 340)", letterSpacing: "0.06em" }}>HUE</span>
+                      <span style={{ fontSize: "0.48rem", color: "var(--c-accent-icon)", letterSpacing: "0.06em" }}>HUE</span>
                       <span style={{
                         fontSize: "0.48rem",
                         color: `hsl(${hue},60%,45%)`,
@@ -523,15 +523,15 @@ export function EffectsPanel() {
                 </div>
 
                 {/* Divider */}
-                <div style={{ height: 1, background: "oklch(0.88 0.06 340)", margin: "0 -2px" }} />
+                <div style={{ height: 1, background: "var(--c-light-divider)", margin: "0 -2px" }} />
                 {/* Work Mode section */}
                 <div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                     <div>
-                      <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
+                      <span style={{ fontSize: "0.55rem", color: "var(--c-deep)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
                         ▤ Work Mode
                       </span>
-                      <span style={{ fontSize: "0.44rem", color: "oklch(0.62 0.060 330)", letterSpacing: "0.04em", marginTop: 2, display: "block" }}>
+                      <span style={{ fontSize: "0.44rem", color: "var(--c-accent-faint)", letterSpacing: "0.04em", marginTop: 2, display: "block" }}>
                         strips all colour → greyscale
                       </span>
                     </div>
@@ -540,8 +540,8 @@ export function EffectsPanel() {
                       style={{
                         width: 36, height: 20,
                         borderRadius: 10,
-                        border: `1.5px solid ${workMode ? "oklch(0.30 0 0)" : "oklch(0.72 0.040 330)"}`,
-                        background: workMode ? "oklch(0.25 0 0)" : "oklch(0.92 0.015 330)",
+                        border: `1.5px solid ${workMode ? "oklch(0.30 0 0)" : "var(--c-mid)"}`,
+                        background: workMode ? "oklch(0.25 0 0)" : "var(--c-pale)",
                         cursor: "pointer",
                         position: "relative",
                         transition: "background 0.2s, border-color 0.2s",
@@ -553,7 +553,7 @@ export function EffectsPanel() {
                         top: 2, left: workMode ? 16 : 2,
                         width: 14, height: 14,
                         borderRadius: "50%",
-                        background: workMode ? "white" : "oklch(0.72 0.040 330)",
+                        background: workMode ? "white" : "var(--c-mid)",
                         transition: "left 0.2s, background 0.2s",
                         boxShadow: "0 1px 2px rgba(0,0,0,0.25)",
                       }} />
@@ -566,7 +566,7 @@ export function EffectsPanel() {
             {/* ── API KEY TAB ── */}
             {activeTab === "apikey" && (
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                <span style={{ fontSize: "0.55rem", color: "oklch(0.45 0.12 340)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
+                <span style={{ fontSize: "0.55rem", color: "var(--c-deep)", letterSpacing: "0.12em", textTransform: "uppercase", display: "block" }}>
                   ⬡ OpenAI Key (optional)
                 </span>
 
@@ -592,16 +592,16 @@ export function EffectsPanel() {
                     display: "flex",
                     gap: 8,
                     padding: "4px 7px",
-                    background: "oklch(0.96 0.015 330)",
-                    border: "1px solid oklch(0.85 0.04 330)",
+                    background: "var(--c-pale-bg)",
+                    border: "1px solid var(--c-light-divider)",
                     fontSize: "0.38rem",
                     fontFamily: "'Space Mono', monospace",
-                    color: "oklch(0.50 0.06 330)",
+                    color: "var(--c-accent-faint)",
                     letterSpacing: "0.04em",
                   }}>
-                    <span>total: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.total ?? 0}</strong></span>
+                    <span>total: <strong style={{ color: "var(--c-deep-text)" }}>{usageStats?.total ?? 0}</strong></span>
                     <span style={{ opacity: 0.4 }}>|</span>
-                    <span>this month: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.thisMonth ?? 0}</strong></span>
+                    <span>this month: <strong style={{ color: "var(--c-deep-text)" }}>{usageStats?.thisMonth ?? 0}</strong></span>
                     <span style={{ opacity: 0.4 }}>|</span>
                     <span style={{ opacity: 0.7 }}>AI calls</span>
                   </div>
@@ -620,16 +620,16 @@ export function EffectsPanel() {
                       fontFamily: "'Space Mono', monospace",
                       padding: "4px 6px",
                       borderRadius: 3,
-                      border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.80 0.06 340)"}`,
-                      background: "oklch(0.97 0.010 340)",
-                      color: "oklch(0.35 0.10 340)",
+                      border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-mid-border)"}`,
+                      background: "var(--c-pale-bg)",
+                      color: "var(--c-deep-text)",
                       outline: "none",
                       minWidth: 0,
                     }}
                   />
                   <button
                     onClick={() => setShowApiKey(v => !v)}
-                    style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid oklch(0.80 0.06 340)", background: "transparent", color: "oklch(0.55 0.08 340)", cursor: "pointer", flexShrink: 0 }}
+                    style={{ fontSize: "0.42rem", fontFamily: "'Space Mono', monospace", padding: "3px 5px", borderRadius: 3, border: "1px solid var(--c-mid-border)", background: "transparent", color: "var(--c-accent-icon)", cursor: "pointer", flexShrink: 0 }}
                   >
                     {showApiKey ? "hide" : "show"}
                   </button>
@@ -674,7 +674,7 @@ export function EffectsPanel() {
                         display: "block",
                         fontSize: "0.42rem",
                         fontFamily: "'Space Mono', monospace",
-                        color: "oklch(0.55 0.14 340)",
+                        color: "var(--c-accent-muted)",
                         textDecoration: "underline",
                         textAlign: "center",
                         letterSpacing: "0.04em",
@@ -700,8 +700,8 @@ export function EffectsPanel() {
                       letterSpacing: "0.08em",
                       padding: "5px 0",
                       borderRadius: 3,
-                      border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)"}`,
-                      background: apiKeyError ? "oklch(0.52 0.20 25)" : "oklch(0.55 0.18 340)",
+                      border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-accent)"}`,
+                      background: apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-accent)",
                       color: "white",
                       cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
                       opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,

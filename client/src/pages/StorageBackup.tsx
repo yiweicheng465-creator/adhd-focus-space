@@ -19,12 +19,12 @@ import { AlertTriangle, CheckCircle2, CloudDownload, CloudUpload, Download, Hard
 
 /* ── Design tokens ── */
 const M = {
-  ink:    "oklch(0.28 0.040 320)",
-  muted:  "oklch(0.52 0.040 330)",
-  border: "oklch(0.82 0.050 340)",
+  ink:    "var(--c-shadow-ink2)",
+  muted:  "var(--c-accent-faint)",
+  border: "var(--c-light-soft)",
   card:   "oklch(0.975 0.018 355)",
-  coral:  "oklch(0.58 0.18 340)",
-  sage:   "oklch(0.50 0.16 340)",
+  coral:  "var(--c-accent)",
+  sage:   "var(--c-accent-text)",
   warn:   "oklch(0.60 0.15 60)",
   warnBg: "oklch(0.97 0.025 60)",
   warnBdr:"oklch(0.82 0.07 60)",
@@ -354,8 +354,8 @@ export default function StorageBackup() {
         {/* Last backed up badge — always visible */}
         <div style={{
           display: "flex", gap: 8, alignItems: "center",
-          background: lastBackupRelative ? "oklch(0.97 0.018 340)" : "oklch(0.97 0.025 60)",
-          border: `1px solid ${lastBackupRelative ? "oklch(0.82 0.08 340)" : M.warnBdr}`,
+          background: lastBackupRelative ? "var(--c-pale-bg)" : "oklch(0.97 0.025 60)",
+          border: `1px solid ${lastBackupRelative ? "var(--c-light-border)" : M.warnBdr}`,
           padding: "10px 14px", marginTop: 12, borderRadius: 2,
         }}>
           {lastBackupRelative
@@ -388,7 +388,7 @@ export default function StorageBackup() {
           onChange={handleLocalRestoreFile}
         />
         <p style={{ fontSize: 10, color: M.muted, fontFamily: "'DM Sans', sans-serif", marginTop: 8 }}>
-          Backup file: <code style={{ background: "oklch(0.93 0.015 340)", padding: "1px 5px" }}>adhd-focus-backup-YYYY-MM-DD.json</code>
+          Backup file: <code style={{ background: "var(--c-pale)", padding: "1px 5px" }}>adhd-focus-backup-YYYY-MM-DD.json</code>
         </p>
       </Section>
 
@@ -461,8 +461,8 @@ export default function StorageBackup() {
         {gdMessage && (
           <div style={{
             marginTop: 10, padding: "8px 12px",
-            background: gdStatus === "error" ? "oklch(0.97 0.025 355)" : gdStatus === "success" ? "oklch(0.97 0.018 340)" : "oklch(0.96 0.015 340)",
-            border: `1px solid ${gdStatus === "error" ? "oklch(0.80 0.08 355)" : gdStatus === "success" ? "oklch(0.82 0.08 340)" : M.border}`,
+            background: gdStatus === "error" ? "var(--c-pale-bg)" : gdStatus === "success" ? "var(--c-pale-bg)" : "var(--c-pale-bg)",
+            border: `1px solid ${gdStatus === "error" ? "var(--c-mid-border)" : gdStatus === "success" ? "var(--c-light-border)" : M.border}`,
             display: "flex", alignItems: "center", gap: 8,
           }}>
             {gdStatus === "success" && <CheckCircle2 size={12} style={{ color: M.sage, flexShrink: 0 }} />}
@@ -478,7 +478,7 @@ export default function StorageBackup() {
 
         <p style={{ fontSize: 10, color: M.muted, fontFamily: "'DM Sans', sans-serif", marginTop: 10, lineHeight: 1.6 }}>
           Google Drive access is only requested when you click Backup or Restore. No automatic syncing occurs.
-          The backup file is named <code style={{ background: "oklch(0.93 0.015 340)", padding: "1px 5px" }}>{BACKUP_FILENAME}</code> in your Drive root.
+          The backup file is named <code style={{ background: "var(--c-pale)", padding: "1px 5px" }}>{BACKUP_FILENAME}</code> in your Drive root.
         </p>
       </Section>
 
@@ -552,7 +552,7 @@ function ActionButton({
         fontSize: 10, letterSpacing: "0.08em",
         cursor: disabled ? "not-allowed" : "pointer",
         opacity: disabled ? 0.5 : 1,
-        boxShadow: primary ? `2px 2px 0 oklch(0.40 0.15 340)` : `1px 1px 0 ${M.border}`,
+        boxShadow: primary ? `2px 2px 0 var(--c-deep)` : `1px 1px 0 ${M.border}`,
         transition: "opacity 0.15s",
       }}
     >

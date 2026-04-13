@@ -32,18 +32,18 @@ interface BrainDumpProps {
 }
 
 const M = {
-  coral:    "oklch(0.58 0.18 340)",
-  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
-  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
+  coral:    "var(--c-accent)",
+  coralBg:  "var(--c-accent-bg-sm)",
+  coralBdr: "var(--c-accent-bd-md)",
   sage:     "oklch(0.52 0.10 168)",
   sageBg:   "oklch(0.52 0.10 168 / 0.08)",
   sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
-  ink:      "oklch(0.28 0.040 320)",
-  muted:    "oklch(0.52 0.040 330)",
-  border:   "oklch(0.82 0.050 340)",
+  ink:      "var(--c-shadow-ink2)",
+  muted:    "var(--c-accent-faint)",
+  border:   "var(--c-light-soft)",
   card:     "oklch(0.975 0.018 355)",
-  tagBg:    "oklch(0.58 0.18 340 / 0.10)",
-  tagBdr:   "oklch(0.58 0.18 340 / 0.22)",
+  tagBg:    "var(--c-accent-bg-sm)",
+  tagBdr:   "var(--c-accent-bg-lg)",
 };
 
 /** Extract all #tags from a string, return lowercase without the # */
@@ -324,7 +324,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
           <div style={{
             display: "flex",
             alignItems: "center",
-            background: "oklch(0.88 0.060 340)",
+            background: "var(--c-light-divider)",
             borderBottom: `2px solid ${M.border}`,
             padding: "0 10px",
             height: 28,
@@ -381,7 +381,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     display: "inline-block", marginTop: 2, padding: "1px 5px",
                     fontSize: 7, letterSpacing: "0.12em", textTransform: "uppercase",
                     fontFamily: "'JetBrains Mono', monospace",
-                    background: item.category === "task" ? "oklch(0.93 0.030 168)" : item.category === "goal" ? "oklch(0.93 0.030 290)" : item.category === "worry" ? "oklch(0.93 0.030 355)" : "oklch(0.93 0.020 340)",
+                    background: item.category === "task" ? "oklch(0.93 0.030 168)" : item.category === "goal" ? "oklch(0.93 0.030 290)" : item.category === "worry" ? "var(--c-pale)" : "var(--c-pale)",
                     color: item.category === "task" ? "oklch(0.40 0.10 168)" : item.category === "goal" ? "oklch(0.40 0.10 290)" : item.category === "worry" ? "oklch(0.40 0.10 355)" : M.muted,
                     border: `1px solid ${item.category === "task" ? "oklch(0.75 0.08 168)" : item.category === "goal" ? "oklch(0.75 0.08 290)" : item.category === "worry" ? "oklch(0.75 0.08 355)" : M.border}`,
                   }}>
@@ -394,7 +394,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     title="Add to tasks"
                     style={{
                       display: "flex", alignItems: "center", gap: 3, padding: "3px 8px",
-                      background: "oklch(0.88 0.060 340)", border: `1px solid ${M.border}`,
+                      background: "var(--c-light-divider)", border: `1px solid ${M.border}`,
                       color: M.ink, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 7, letterSpacing: "0.10em", boxShadow: `1px 1px 0 ${M.border}`,
                     }}
@@ -407,7 +407,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                       title="Add to goals"
                       style={{
                         display: "flex", alignItems: "center", gap: 3, padding: "3px 8px",
-                        background: "oklch(0.88 0.060 340)", border: `1px solid ${M.border}`,
+                        background: "var(--c-light-divider)", border: `1px solid ${M.border}`,
                         color: M.ink, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 7, letterSpacing: "0.10em", boxShadow: `1px 1px 0 ${M.border}`,
                       }}
@@ -496,8 +496,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               disabled={categorizeMutation.isPending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-all"
               style={{
-                background: categorizeMutation.isPending ? "oklch(0.88 0.060 340)" : "oklch(0.58 0.18 340 / 0.10)",
-                border: `1px solid oklch(0.58 0.18 340 / 0.28)`,
+                background: categorizeMutation.isPending ? "var(--c-light-divider)" : "var(--c-accent-bg-sm)",
+                border: `1px solid var(--c-accent-bd-md)`,
                 color: M.coral, fontFamily: "'DM Sans', sans-serif", borderRadius: 6,
                 cursor: categorizeMutation.isPending ? "not-allowed" : "pointer",
               }}

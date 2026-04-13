@@ -28,13 +28,13 @@ export default function Monthly() {
           style={{
             background: "oklch(0.975 0.018 355 / 0.90)",
             backdropFilter: "blur(8px)",
-            borderBottom: "1px solid oklch(0.87 0.025 340)",
+            borderBottom: "1px solid var(--c-light-divider)",
           }}
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
 
             {/* Calendar icon */}
-            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" style={{ color: "oklch(0.58 0.18 340)", flexShrink: 0 }}>
+            <svg width="16" height="16" viewBox="0 0 18 18" fill="none" style={{ color: "var(--c-accent)", flexShrink: 0 }}>
               <rect x="2" y="4" width="14" height="12" rx="2" stroke="currentColor" strokeWidth="1.4"/>
               <line x1="2" y1="8" x2="16" y2="8" stroke="currentColor" strokeWidth="1.2"/>
               <line x1="6" y1="2" x2="6" y2="6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
@@ -42,7 +42,7 @@ export default function Monthly() {
             </svg>
             <h1
               className="text-base font-bold italic leading-tight truncate"
-              style={{ fontFamily: "'Playfair Display', serif", color: "oklch(0.22 0.040 320)" }}
+              style={{ fontFamily: "'Playfair Display', serif", color: "var(--c-shadow-ink)" }}
             >
               Monthly Progress
             </h1>
@@ -50,7 +50,7 @@ export default function Monthly() {
           <button
             onClick={() => navigate("/")}
             className="text-xs transition-colors"
-            style={{ color: "oklch(0.52 0.040 330)", fontFamily: "'DM Sans', sans-serif" }}
+            style={{ color: "var(--c-accent-faint)", fontFamily: "'DM Sans', sans-serif" }}
           >
             ← Back to dashboard
           </button>

@@ -152,7 +152,7 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
   const idleMins = String(durations?.focus ?? 25).padStart(2, "0");
   const modeColor = active
     ? (mode === "focus" ? "oklch(0.52 0.10 32)" : mode === "short" ? "oklch(0.60 0.07 138)" : "oklch(0.58 0.08 220)")
-    : "oklch(0.62 0.060 330)";
+    : "var(--c-accent-faint)";
   const modeBg = active
     ? (mode === "focus" ? "oklch(0.52 0.10 32 / 0.10)" : mode === "short" ? "oklch(0.60 0.07 138 / 0.10)" : "oklch(0.58 0.08 220 / 0.10)")
     : "transparent";
@@ -188,8 +188,8 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
         className="w-full flex flex-col items-center justify-center py-2 transition-all duration-200"
         style={{
           background: modeBg,
-          borderTop: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
-          borderBottom: `1px solid ${active ? modeColor : "oklch(0.80 0.060 340 / 0.4)"}`,
+          borderTop: `1px solid ${active ? modeColor : "var(--c-mid-shadow2)"}`,
+          borderBottom: `1px solid ${active ? modeColor : "var(--c-mid-shadow2)"}`,
           opacity: active ? 1 : 0.55,
         }}
       >
@@ -220,9 +220,9 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
             left: "calc(100% + 8px)",
             bottom: 0,
             zIndex: 200,
-            background: "oklch(0.97 0.015 340)",
-            border: "1.5px solid oklch(0.75 0.08 340)",
-            boxShadow: "3px 3px 0 oklch(0.82 0.040 340 / 0.5)",
+            background: "var(--c-pale-bg)",
+            border: "1.5px solid var(--c-mid)",
+            boxShadow: "3px 3px 0 var(--c-mid-shadow)",
             padding: "10px 12px",
             minWidth: 160,
             display: "flex",
@@ -232,12 +232,12 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
         >
           {/* Header */}
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, letterSpacing: "0.14em", color: "oklch(0.45 0.08 340)", textTransform: "uppercase" }}>
+            <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 7, letterSpacing: "0.14em", color: "var(--c-accent-label)", textTransform: "uppercase" }}>
               {label} · {mm}:{ss}
             </span>
             <button
               onClick={() => setShowPopover(false)}
-              style={{ fontSize: 8, color: "oklch(0.65 0.06 340)", background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}
+              style={{ fontSize: 8, color: "var(--c-accent-soft)", background: "transparent", border: "none", cursor: "pointer", lineHeight: 1 }}
             >✕</button>
           </div>
 
@@ -277,9 +277,9 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
               fontSize: 7,
               letterSpacing: "0.12em",
               textTransform: "uppercase",
-              background: sound.musicEnabled ? "oklch(0.90 0.04 340)" : "transparent",
-              color: "oklch(0.45 0.08 340)",
-              border: "1px solid oklch(0.75 0.08 340)",
+              background: sound.musicEnabled ? "var(--c-light-hover)" : "transparent",
+              color: "var(--c-accent-label)",
+              border: "1px solid var(--c-mid)",
               cursor: "pointer",
               width: "100%",
             }}
@@ -301,8 +301,8 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
               letterSpacing: "0.12em",
               textTransform: "uppercase",
               background: "transparent",
-              color: "oklch(0.55 0.08 340)",
-              border: "1px solid oklch(0.80 0.06 340)",
+              color: "var(--c-accent-icon)",
+              border: "1px solid var(--c-mid-border)",
               cursor: "pointer",
               width: "100%",
             }}
@@ -322,11 +322,11 @@ function LogoMark() {
     <div className="w-10 h-10 flex items-center justify-center" title="ADHD Focus Space">
       <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
         {/* Outer glow ring */}
-        <circle cx="16" cy="16" r="14" fill="oklch(0.58 0.18 340 / 0.12)" />
+        <circle cx="16" cy="16" r="14" fill="var(--c-accent-bg-md)" />
         {/* 6-point star */}
         <path
           d="M16 4 L17.8 11.2 L24.5 8.5 L20.8 14.8 L28 16 L20.8 17.2 L24.5 23.5 L17.8 20.8 L16 28 L14.2 20.8 L7.5 23.5 L11.2 17.2 L4 16 L11.2 14.8 L7.5 8.5 L14.2 11.2 Z"
-          fill="oklch(0.58 0.18 340)"
+          fill="var(--c-accent)"
           opacity="0.9"
         />
         {/* Inner star highlight */}
@@ -338,9 +338,9 @@ function LogoMark() {
         {/* Center dot */}
         <circle cx="16" cy="16" r="2" fill="white" opacity="0.9" />
         {/* Sparkle top-right */}
-        <path d="M24 7 L24.5 8.5 L26 7 L24.5 5.5 Z" fill="oklch(0.78 0.12 340)" opacity="0.8" />
+        <path d="M24 7 L24.5 8.5 L26 7 L24.5 5.5 Z" fill="var(--c-mid-soft)" opacity="0.8" />
         {/* Sparkle bottom-left */}
-        <path d="M8 25 L8.5 26.5 L10 25 L8.5 23.5 Z" fill="oklch(0.78 0.12 340)" opacity="0.6" />
+        <path d="M8 25 L8.5 26.5 L10 25 L8.5 23.5 Z" fill="var(--c-mid-soft)" opacity="0.6" />
       </svg>
     </div>
   );
@@ -356,7 +356,7 @@ function LiveTime() {
   }, []);
   return (
     <span
-      style={{ fontSize: 8, letterSpacing: "0.08em", color: "oklch(0.52 0.060 330)", fontFamily: "'Space Mono', monospace" }}
+      style={{ fontSize: 8, letterSpacing: "0.08em", color: "var(--c-accent-faint)", fontFamily: "'Space Mono', monospace" }}
     >
       {t}
     </span>
@@ -367,18 +367,18 @@ function LiveTime() {
 function MonthlyLink() {
   const [location, navigate] = useLocation();
   const active = location === "/monthly";
-  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
+  const color = active ? "var(--c-accent-text)" : "var(--c-accent-faint)";
   return (
     <button
       onClick={() => navigate("/monthly")}
       title="Monthly Progress"
       className="relative w-full flex flex-col items-center justify-center py-2.5 transition-all duration-150"
-      style={{ background: active ? "oklch(0.58 0.18 340 / 0.10)" : "transparent" }}
-      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.05)"; }}
+      style={{ background: active ? "var(--c-accent-bg-sm)" : "transparent" }}
+      onMouseEnter={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--c-accent-bg-xs)"; }}
       onMouseLeave={(e) => { if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent"; }}
     >
       {active && (
-        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "oklch(0.58 0.18 340)" }} />
+        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5" style={{ background: "var(--c-accent)" }} />
       )}
       <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
         <rect x="2" y="4" width="14" height="12" rx="1.5" stroke={color} strokeWidth="1.4"/>
@@ -403,14 +403,14 @@ function MonthlyLink() {
 function GuideLink() {
   const [location, navigate] = useLocation();
   const active = location === "/guide";
-  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.68 0.025 330)";
+  const color = active ? "var(--c-accent-text)" : "var(--c-accent-soft)";
   return (
     <button
       onClick={() => navigate("/guide")}
       title="App Guide"
       className="relative w-full flex flex-col items-center justify-center py-1.5 transition-all duration-150"
       style={{
-        background: active ? "oklch(0.58 0.18 340 / 0.08)" : "transparent",
+        background: active ? "var(--c-accent-bg-sm)" : "transparent",
         opacity: active ? 1 : 0.5,
       }}
       onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.85"; }}
@@ -438,8 +438,8 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-4"
       style={{
         background: "oklch(0.930 0.045 355)",
-        borderRight: "1.5px solid oklch(0.80 0.060 340)",
-        boxShadow: "2px 0 8px oklch(0.58 0.18 340 / 0.08)",
+        borderRight: "1.5px solid var(--c-mid-border2)",
+        boxShadow: "2px 0 8px var(--c-accent-bg-sm)",
       }}
     >
       {/* Live time at top */}
@@ -448,13 +448,13 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       </div>
 
       {/* Divider */}
-      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", marginBottom: 6 }} />
+      <div style={{ width: "70%", height: "1px", background: "var(--c-mid-border2)", marginBottom: 6 }} />
 
       {/* Nav */}
       <nav className="flex flex-col gap-0.5 flex-1 w-full px-1.5">
         {NAV.map(({ id, short, Icon, title }) => {
           const active = activeSection === id;
-          const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.52 0.060 330)";
+          const color = active ? "var(--c-accent-text)" : "var(--c-accent-faint)";
           return (
             <button
               key={id}
@@ -462,12 +462,12 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
               title={title}
               className="relative w-full flex flex-col items-center justify-center py-2 transition-all duration-150"
               style={{
-                background: active ? "oklch(0.58 0.18 340 / 0.12)" : "transparent",
+                background: active ? "var(--c-accent-bg-md)" : "transparent",
                 borderRadius: 3,
-                border: active ? "1px solid oklch(0.58 0.18 340 / 0.25)" : "1px solid transparent",
+                border: active ? "1px solid var(--c-accent-bd-sm)" : "1px solid transparent",
               }}
               onMouseEnter={(e) => {
-                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "oklch(0.58 0.18 340 / 0.06)";
+                if (!active) (e.currentTarget as HTMLButtonElement).style.background = "var(--c-accent-bg-sm)";
               }}
               onMouseLeave={(e) => {
                 if (!active) (e.currentTarget as HTMLButtonElement).style.background = "transparent";
@@ -476,7 +476,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
               {active && (
                 <div
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-5"
-                  style={{ background: "oklch(0.58 0.18 340)", borderRadius: "0 2px 2px 0" }}
+                  style={{ background: "var(--c-accent)", borderRadius: "0 2px 2px 0" }}
                 />
               )}
               <Icon color={color} />
@@ -503,7 +503,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       </div>
 
       {/* Divider */}
-      <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", marginBottom: 4 }} />
+      <div style={{ width: "70%", height: "1px", background: "var(--c-mid-border2)", marginBottom: 4 }} />
 
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">
@@ -514,7 +514,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       <EffectsPanel />
 
       {/* Secondary divider — separates functional items from help */}
-      <div style={{ width: "60%", height: "1px", background: "oklch(0.80 0.060 340 / 0.5)", margin: "12px 0 4px" }} />
+      <div style={{ width: "60%", height: "1px", background: "var(--c-mid-shadow3)", margin: "12px 0 4px" }} />
 
       {/* Guide — secondary/help group, smaller and lighter */}
       <GuideLink />

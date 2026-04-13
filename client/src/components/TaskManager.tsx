@@ -49,19 +49,19 @@ const PRIORITY_CONFIG: Record<TaskPriority, {
   },
   normal: {
     label: "Normal", icon: Star,
-    color:  "oklch(0.55 0.10 330)",
-    bg:     "oklch(0.72 0.10 330 / 0.10)",
-    border: "oklch(0.72 0.10 330 / 0.30)",
+    color:  "var(--c-accent-muted)",
+    bg:     "var(--c-accent-bg-md)",
+    border: "var(--c-accent-bd-sm)",
   },
 };
 
 const M = {
-  ink:    "oklch(0.28 0.040 320)",
-  muted:  "oklch(0.52 0.040 330)",
-  border: "oklch(0.82 0.050 340)",
+  ink:    "var(--c-shadow-ink2)",
+  muted:  "var(--c-accent-faint)",
+  border: "var(--c-light-soft)",
   card:   "oklch(0.975 0.018 355)",
   bg:     "oklch(0.960 0.030 355)",
-  coral:  "oklch(0.58 0.18 340)",
+  coral:  "var(--c-accent)",
 };
 
 const LABEL_STYLE: React.CSSProperties = {
@@ -455,7 +455,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                       borderRadius: 6,
                       padding: "10px 12px",
                       minWidth: 260,
-                      boxShadow: "0 4px 16px oklch(0.28 0.04 320 / 0.12)",
+                      boxShadow: "0 4px 16px var(--c-shadow-ink3)",
                       display: "flex",
                       flexDirection: "column",
                       gap: 8,

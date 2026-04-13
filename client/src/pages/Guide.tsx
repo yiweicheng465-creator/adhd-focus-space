@@ -13,12 +13,12 @@ import { trpc } from "@/lib/trpc";
 const M = {
   bg:       "oklch(0.975 0.012 355)",
   card:     "oklch(0.970 0.018 355)",
-  border:   "oklch(0.82 0.050 340)",
-  ink:      "oklch(0.22 0.040 320)",
-  muted:    "oklch(0.52 0.040 330)",
-  accent:   "oklch(0.58 0.18 340)",
-  accentBg: "oklch(0.58 0.18 340 / 0.08)",
-  accentBdr:"oklch(0.58 0.18 340 / 0.22)",
+  border:   "var(--c-light-soft)",
+  ink:      "var(--c-shadow-ink)",
+  muted:    "var(--c-accent-faint)",
+  accent:   "var(--c-accent)",
+  accentBg: "var(--c-accent-bg-sm)",
+  accentBdr:"var(--c-accent-bg-lg)",
   sage:     "oklch(0.52 0.07 145)",
   sageBg:   "oklch(0.52 0.07 145 / 0.08)",
   sageBdr:  "oklch(0.52 0.07 145 / 0.25)",
@@ -56,7 +56,7 @@ function Section({
         borderRadius: 4,
         overflow: "hidden",
         background: M.card,
-        boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
+        boxShadow: "2px 2px 0 var(--c-mid-shadow)",
       }}
     >
       {/* Header */}
@@ -188,7 +188,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "oklch(0.20 0.04 320 / 0.45)" }}
+      style={{ background: "var(--c-shadow-ink3)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
@@ -196,7 +196,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
           background: M.card,
           border: `1.5px solid ${M.border}`,
           borderRadius: 4,
-          boxShadow: "4px 4px 0 oklch(0.82 0.040 340 / 0.5)",
+          boxShadow: "4px 4px 0 var(--c-mid-shadow)",
           width: "min(480px, 92vw)",
           padding: "20px 22px",
           display: "flex",
@@ -359,7 +359,7 @@ export default function Guide() {
               border: `1px solid ${M.border}`,
               borderRadius: 4,
               overflow: "hidden",
-              boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
+              boxShadow: "2px 2px 0 var(--c-mid-shadow)",
             }}
           >
             <div
@@ -593,8 +593,8 @@ export default function Guide() {
             title="BRAIN DUMP"
             badge="DUMP"
             badgeColor={M.muted}
-            badgeBg="oklch(0.52 0.040 330 / 0.08)"
-            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+            badgeBg="var(--c-accent-bg-sm)"
+            badgeBdr="var(--c-accent-bd-sm)"
           >
             <Row
               label="Free-form capture"
@@ -676,8 +676,8 @@ export default function Guide() {
             title="STORAGE & BACKUP"
             badge="STORE"
             badgeColor={M.muted}
-            badgeBg="oklch(0.52 0.040 330 / 0.08)"
-            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+            badgeBg="var(--c-accent-bg-sm)"
+            badgeBdr="var(--c-accent-bd-sm)"
           >
             <Row
               label="Local file backup"
@@ -751,8 +751,8 @@ export default function Guide() {
                 title="BRAIN DUMP AI SORT"
                 badge="BRAIN DUMP"
                 badgeColor={M.muted}
-                badgeBg="oklch(0.52 0.040 330 / 0.08)"
-                badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+                badgeBg="var(--c-accent-bg-sm)"
+                badgeBdr="var(--c-accent-bd-sm)"
               >
                 <Row
                   label="What it does"

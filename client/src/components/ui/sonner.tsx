@@ -12,11 +12,11 @@ const Toaster = ({ ...props }: ToasterProps) => {
           font-family: 'Space Mono', monospace !important;
         }
         [data-sonner-toast] {
-          background: oklch(0.975 0.018 355) !important;
-          border: 2px solid oklch(0.58 0.12 340) !important;
-          box-shadow: 3px 3px 0px oklch(0.30 0.030 320) !important;
+          background: var(--c-pale-bg3) !important;
+          border: 2px solid var(--c-accent) !important;
+          box-shadow: 3px 3px 0px var(--c-ink-soft) !important;
           border-radius: 4px !important;
-          color: oklch(0.30 0.030 320) !important;
+          color: var(--c-ink-soft) !important;
           font-family: 'Space Mono', monospace !important;
           font-size: 11px !important;
           letter-spacing: 0.04em !important;
@@ -63,16 +63,16 @@ const Toaster = ({ ...props }: ToasterProps) => {
         }
         /* Close button */
         [data-sonner-toast] [data-close-button] {
-          background: oklch(0.86 0.030 340) !important;
-          border: 1.5px solid oklch(0.58 0.12 340) !important;
+          background: var(--c-light-divider) !important;
+          border: 1.5px solid var(--c-accent) !important;
           border-radius: 2px !important;
-          color: oklch(0.30 0.030 320) !important;
+          color: var(--c-ink-soft) !important;
         }
         /* Action button (e.g. "Backup now") — override the default black */
         [data-sonner-toast] [data-button] {
-          background: oklch(0.58 0.18 340) !important;
-          border: 2px solid oklch(0.30 0.030 320) !important;
-          box-shadow: 2px 2px 0px oklch(0.30 0.030 320) !important;
+          background: var(--c-accent) !important;
+          border: 2px solid var(--c-ink-soft) !important;
+          box-shadow: 2px 2px 0px var(--c-ink-soft) !important;
           border-radius: 3px !important;
           color: #FAF6F1 !important;
           font-family: 'Space Mono', monospace !important;
@@ -85,14 +85,14 @@ const Toaster = ({ ...props }: ToasterProps) => {
           transition: background 0.15s !important;
         }
         [data-sonner-toast] [data-button]:hover {
-          background: oklch(0.50 0.18 340) !important;
+          background: var(--c-accent-hover) !important;
         }
         /* Cancel button in toasts */
         [data-sonner-toast] [data-cancel] {
           background: transparent !important;
-          border: 1.5px solid oklch(0.72 0.060 340) !important;
+          border: 1.5px solid var(--c-mid-border) !important;
           border-radius: 3px !important;
-          color: oklch(0.55 0.06 340) !important;
+          color: var(--c-accent-icon) !important;
           font-family: 'Space Mono', monospace !important;
           font-size: 9px !important;
           letter-spacing: 0.08em !important;
@@ -115,9 +115,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
         }}
         style={
           {
-            "--normal-bg": "oklch(0.975 0.018 355)",
-            "--normal-text": "oklch(0.30 0.030 320)",
-            "--normal-border": "oklch(0.58 0.12 340)",
+            "--normal-bg": "var(--c-pale-bg3)",
+            "--normal-text": "var(--c-ink-soft)",
+            "--normal-border": "var(--c-accent)",
             "--success-bg": "oklch(0.96 0.025 168)",
             "--success-text": "oklch(0.28 0.060 168)",
             "--success-border": "oklch(0.55 0.10 168)",
