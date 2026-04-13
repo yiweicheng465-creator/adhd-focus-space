@@ -185,6 +185,7 @@
 
 ## Bugs & Features (Current Session)
 - [x] Remove weekly_reset.exe panel from Tasks page
+- [x] Reduce visible task count in dashboard Next Up panel (show ~3, then +N more)
 - [x] Fix Wins category icon picker bug (wins.update procedure + Home.tsx wiring already in place — confirmed working)
 - [x] Add inline category and tag editing to existing tasks (pencil icon on hover opens edit popover)
 - [x] Add goal link/change/remove to existing tasks (goal dropdown in edit popover, can add/change/remove)

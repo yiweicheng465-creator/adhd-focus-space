@@ -631,7 +631,7 @@ export function Dashboard({
             </div>
             {/* Enter hint — always visible */}
             <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, marginTop: 2, paddingLeft: 2 }}>
-              press ↵ to send
+              press D to input
             </div>
           </div>
           {/* Right: motivational micro-text */}
@@ -696,7 +696,7 @@ export function Dashboard({
             ) : (
               [...activeTasks]
                 .sort((a, b) => (PRIORITY_ORDER[a.priority] ?? 2) - (PRIORITY_ORDER[b.priority] ?? 2))
-                .slice(0, 8)
+                .slice(0, 3)
                 .map((t) => {
                   const pd = PRIORITY_DOTS[t.priority] ?? PRIORITY_DOTS.normal;
                   const ctxColor = getContextConfig(t.context).color;
@@ -761,13 +761,13 @@ export function Dashboard({
                   );
                 })
             )}
-            {activeTasks.length > 8 && (
+            {activeTasks.length > 3 && (
               <button
                 onClick={() => onNavigate("tasks")}
                 className="m-btn-link"
                 style={{ fontSize: 9, textAlign: "center", paddingTop: 4, width: "100%", justifyContent: "center" }}
               >
-                +{activeTasks.length - 8} more →
+                +{activeTasks.length - 3} more →
               </button>
             )}
           </div>
