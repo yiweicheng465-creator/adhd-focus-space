@@ -71,8 +71,24 @@ function getGoogleAccessToken(clientId: string): Promise<string> {
       client_id: clientId,
       scope: GDRIVE_SCOPE,
       callback: (response: any) => {
-        if (response.error) reject(new Error(response.error));
-        else resolve(response.access_token as string);
+        if (response.error) {
+          // access_denied or popup_closed_by_user both mean the user cancelled
+          if (response.error === "access_denied" || response.error === "popup_closed_by_user") {
+            reject(new Error("CANCELLED"));
+          } else {
+            reject(new Error(response.error));
+          }
+        } else {
+          resolve(response.access_token as string);
+        }
+      },
+      error_callback: (err: any) => {
+        // GIS fires error_callback when the popup is closed without completing
+        if (err?.type === "popup_closed" || err?.type === "popup_failed_to_open") {
+          reject(new Error("CANCELLED"));
+        } else {
+          reject(new Error(err?.type ?? "auth_error"));
+        }
       },
     });
     tokenClient.requestAccessToken({ prompt: "consent" });
@@ -228,10 +244,16 @@ export default function StorageBackup() {
       recordBackupTime();
       setGdStatus("success");
       setGdMessage(`Backed up to Google Drive · ${info}`);
-          } catch (e) {
-      setGdStatus("error");
-      setGdMessage((e as Error).message ?? "Unknown error");
-      toast.error("Google Drive backup failed.", { duration: 4000 });
+    } catch (e) {
+      const msg = (e as Error).message;
+      if (msg === "CANCELLED") {
+        setGdStatus("idle");
+        setGdMessage("Backup cancelled.");
+      } else {
+        setGdStatus("error");
+        setGdMessage(msg ?? "Unknown error");
+        toast.error("Google Drive backup failed.", { duration: 4000 });
+      }
     }
   };
 
@@ -257,9 +279,15 @@ export default function StorageBackup() {
       setGdMessage(`Restored · ${info}`);
             setTimeout(() => window.location.reload(), 1500);
     } catch (e) {
-      setGdStatus("error");
-      setGdMessage((e as Error).message ?? "Unknown error");
-      toast.error("Google Drive restore failed.", { duration: 5000 });
+      const msg = (e as Error).message;
+      if (msg === "CANCELLED") {
+        setGdStatus("idle");
+        setGdMessage("Restore cancelled.");
+      } else {
+        setGdStatus("error");
+        setGdMessage(msg ?? "Unknown error");
+        toast.error("Google Drive restore failed.", { duration: 5000 });
+      }
     }
   };
 
