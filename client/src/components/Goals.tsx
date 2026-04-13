@@ -255,29 +255,28 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                     style={{ width: `${goal.progress}%`, background: done ? M.sage : M.coral }}
                   />
                 </div>
-                <span className="text-xs font-medium w-8 text-right" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
-                  {goal.progress}%
-                </span>
+                {/* Right side: show ACHIEVED stamp when done, otherwise show % */}
+                {done ? (
+                  <div
+                    className="flex items-center gap-1 px-2 py-0.5 shrink-0"
+                    style={{
+                      background: M.sageBg,
+                      border: `1px solid ${M.sageBdr}`,
+                      borderRadius: 0,
+                      transform: "rotate(-1deg)",
+                    }}
+                  >
+                    <svg width="9" height="9" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke={M.sage} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    <span style={{ fontSize: "0.58rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: M.sage, fontFamily: "'DM Sans', sans-serif", whiteSpace: "nowrap" }}>Achieved</span>
+                  </div>
+                ) : (
+                  <span className="text-xs font-medium w-8 text-right shrink-0" style={{ color: M.muted, fontFamily: "'DM Sans', sans-serif" }}>
+                    {goal.progress}%
+                  </span>
+                )}
               </div>
-              {/* ✓ Achieved stamp — shown inline below the bar when goal hits 100% */}
-              {done && (
-                <div
-                  className="flex items-center gap-1 px-2 py-0.5 mt-2"
-                  style={{
-                    display: "inline-flex",
-                    background: M.sageBg,
-                    border: `1px solid ${M.sageBdr}`,
-                    borderRadius: 0,
-                    transform: "rotate(-1deg)",
-                    alignSelf: "flex-start",
-                  }}
-                >
-                  <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-                    <path d="M2 6l3 3 5-5" stroke={M.sage} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                  <span style={{ fontSize: "0.6rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: M.sage, fontFamily: "'DM Sans', sans-serif" }}>Achieved</span>
-                </div>
-              )}
 
               {/* Progress buttons */}
               <div className="flex items-center gap-2 mt-2">
