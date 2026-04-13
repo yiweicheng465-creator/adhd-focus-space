@@ -424,12 +424,7 @@ function AICommandPanel({
           <Send size={11} />
         </button>
       </div>
-      {/* / shortcut hint */}
-      {!input && (
-        <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.6, marginTop: 3, paddingLeft: 2 }}>
-          press <kbd style={{ fontSize: 8, border: `1px solid ${AI_BORDER}`, padding: "0px 4px", borderRadius: 2, fontFamily: "inherit" }}>/</kbd> to focus
-        </div>
-      )}
+
     </div>
   );
 }
