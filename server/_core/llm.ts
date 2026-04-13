@@ -272,8 +272,8 @@ const normalizeResponseFormat = ({
 };
 
 export async function invokeLLM(params: InvokeParams): Promise<InvokeResult> {
-  // Never fall back to the server key — each user must supply their own.
-  const resolvedApiKey = params.apiKey?.trim();
+  // Use the user's own key if provided; otherwise fall back to the built-in Manus key.
+  const resolvedApiKey = params.apiKey?.trim() || ENV.forgeApiKey;
   if (!resolvedApiKey) {
     throw new Error("NO_API_KEY");
   }

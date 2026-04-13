@@ -196,3 +196,7 @@
 - [x] Add config button (gear icon) to Quick Capture modal to manage chips
 - [x] Daily check-in task step: goal dropdown now shows both new goals (this session) and all existing DB goals in grouped optgroups
 - [x] Fix ambient sound player: removed Web Audio graph from ambient element (createMediaElementSource can only be called once per element); now uses audio.volume directly — track switching works reliably
+- [x] openai_key already in users table (apiKey + keyType columns)
+- [x] tRPC procedures already exist: profile.getApiKey, profile.updateApiKey, profile.validateApiKey, profile.testConnection
+- [x] Fixed invokeLLM to fall back to built-in Manus key when no user key provided
+- [x] OpenAI key settings UI already exists in EffectsPanel.tsx and ApiKeyDialog.tsx
