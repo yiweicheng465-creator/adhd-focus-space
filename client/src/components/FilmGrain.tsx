@@ -99,6 +99,8 @@ export function FilmGrainOverlay() {
       if (!canvas) return;
       w = canvas.width  = window.innerWidth;
       h = canvas.height = window.innerHeight;
+      // Guard: createImageData throws if width or height is 0
+      if (!w || !h || w <= 0 || h <= 0) return;
       // Recreate imageData after resize
       imageData = ctx!.createImageData(w, h);
     }
