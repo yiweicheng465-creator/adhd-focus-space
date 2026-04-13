@@ -3,7 +3,7 @@
    All entries persisted to database via tRPC
    ============================================================ */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { PixelBrain } from "@/components/PixelIcons";
 import { cn } from "@/lib/utils";
@@ -89,6 +89,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
   const [currentThought, setCurrentThought] = useState("");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [initialTextHandled, setInitialTextHandled] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const utils = trpc.useUtils();
 
@@ -275,6 +276,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
       {/* Input */}
       <div className="flex flex-col gap-2">
         <Textarea
+          ref={textareaRef}
           value={currentThought}
           onChange={(e) => setCurrentThought(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) dump(); }}

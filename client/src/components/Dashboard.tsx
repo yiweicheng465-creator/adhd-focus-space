@@ -411,6 +411,12 @@ function AICommandPanel({
           <Send size={11} />
         </button>
       </div>
+      {/* / shortcut hint */}
+      {!input && (
+        <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.6, marginTop: 3, paddingLeft: 2 }}>
+          press <kbd style={{ fontSize: 8, border: `1px solid ${AI_BORDER}`, padding: "0px 4px", borderRadius: 2, fontFamily: "inherit" }}>/</kbd> to focus
+        </div>
+      )}
     </div>
   );
 }
@@ -424,6 +430,21 @@ export function Dashboard({
   const [activeContext, setActiveContext] = useState<ActiveContext>("all");
   const [quickCapture, setQuickCapture] = useState("");
   const [completing, setCompleting] = useState<string | null>(null);
+  const dumpInputRef = useRef<HTMLInputElement>(null);
+
+  // Press / to focus the dashboard dump input
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const tag = (e.target as HTMLElement).tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA" || (e.target as HTMLElement).isContentEditable) return;
+      if (e.key === "d" || e.key === "D") {
+        e.preventDefault();
+        dumpInputRef.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
   const now = new Date();
 
   const contextTasks = tasks.filter((t) => activeContext === "all" ? true : t.context === activeContext);
@@ -589,6 +610,7 @@ export function Dashboard({
               <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.018 355 / 0.85)", padding: "5px 12px", flex: "1 1 160px", maxWidth: 280, borderRadius: 6 }}>
                 <Zap size={11} style={{ color: TC, flexShrink: 0 }} />
                 <input
+                  ref={dumpInputRef}
                   value={quickCapture}
                   onChange={(e) => setQuickCapture(e.target.value)}
                   onKeyDown={(e) => {
@@ -600,15 +622,22 @@ export function Dashboard({
                     }
                   }}
                   placeholder="What's on your mind?"
+                  autoComplete="new-password"
                   style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
-                <kbd style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED, borderRadius: 3 }}>↵</kbd>
+                <kbd title="press D to focus" style={{ fontSize: 9, border: `1px solid ${BORDER}`, padding: "1px 5px", color: MUTED, borderRadius: 3, opacity: quickCapture ? 0 : 0.7 }}>D</kbd>
               </div>
               {/* Context switcher */}
               <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                 <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} />
               </div>
             </div>
+            {/* D shortcut hint */}
+            {!quickCapture && (
+              <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.6, marginTop: 2, paddingLeft: 2 }}>
+                press <kbd style={{ fontSize: 8, border: `1px solid ${BORDER}`, padding: "0px 4px", borderRadius: 2, fontFamily: "inherit" }}>D</kbd> to focus
+              </div>
+            )}
           </div>
           {/* Right: motivational micro-text */}
           <div className="hidden lg:flex shrink-0 flex-col items-end justify-end" style={{ width: 80, padding: "10px 14px 10px 0", position: "relative" }}>

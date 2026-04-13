@@ -33,6 +33,14 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") { e.preventDefault(); setOpen((v) => !v); }
       if (e.key === "Escape") setOpen(false);
+      // Press + to open Quick Capture (only when not typing in an input)
+      if (e.key === "+") {
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag !== "INPUT" && tag !== "TEXTAREA" && !(e.target as HTMLElement).isContentEditable) {
+          e.preventDefault();
+          setOpen(true);
+        }
+      }
     };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
@@ -55,7 +63,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
       {/* Floating trigger — retro lo-fi style */}
       <button
         onClick={() => setOpen(true)}
-        title="Quick add task (⌘K)"
+        title="Quick add task (⌘K or +)"
         className="fixed bottom-6 right-6 z-50 w-12 h-12 flex items-center justify-center transition-all duration-200 active:translate-y-[2px] active:shadow-none"
         style={{
           background:   "oklch(0.975 0.018 355)",
