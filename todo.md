@@ -170,3 +170,8 @@
 - [x] Add inline ✓ fade confirmation next to SAVE button in EffectsPanel (1.5s fade, no toast)
 - [ ] Add "remove key" link in SET panel (visible only when key is saved, switches back to built-in AI)
 - [x] Wire signal dot tooltip in sidebar (hover shows "AI ready" or "AI unavailable — add OpenAI key in SET")
+
+## Current Session
+- [x] Remove AI Features tab from sidebar navigation
+- [x] Create detailed instruction/guide page (hidden, accessible from unobvious location)
+- [x] Disable autocomplete on Quick Capture input

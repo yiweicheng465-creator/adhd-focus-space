@@ -1,0 +1,617 @@
+/* ============================================================
+   ADHD FOCUS SPACE — Guide Page
+   Comprehensive feature reference + AI feature documentation
+   Accessible via the tiny ? button at the bottom of the sidebar
+   ============================================================ */
+
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { Sidebar } from "@/components/Sidebar";
+
+const M = {
+  bg:       "oklch(0.975 0.012 355)",
+  card:     "oklch(0.970 0.018 355)",
+  border:   "oklch(0.82 0.050 340)",
+  ink:      "oklch(0.22 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  accent:   "oklch(0.58 0.18 340)",
+  accentBg: "oklch(0.58 0.18 340 / 0.08)",
+  accentBdr:"oklch(0.58 0.18 340 / 0.22)",
+  sage:     "oklch(0.52 0.07 145)",
+  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
+  sageBdr:  "oklch(0.52 0.07 145 / 0.25)",
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.25)",
+  gold:     "oklch(0.65 0.10 75)",
+  goldBg:   "oklch(0.65 0.10 75 / 0.08)",
+  goldBdr:  "oklch(0.65 0.10 75 / 0.25)",
+};
+
+/* ── Section accordion ── */
+function Section({
+  title,
+  badge,
+  badgeColor,
+  badgeBg,
+  badgeBdr,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  badge: string;
+  badgeColor: string;
+  badgeBg: string;
+  badgeBdr: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div
+      style={{
+        border: `1px solid ${M.border}`,
+        borderRadius: 4,
+        overflow: "hidden",
+        background: M.card,
+        boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
+      }}
+    >
+      {/* Header */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        className="w-full flex items-center justify-between px-4 py-3 transition-colors"
+        style={{
+          background: open ? M.accentBg : "transparent",
+          borderBottom: open ? `1px solid ${M.accentBdr}` : "none",
+          cursor: "pointer",
+        }}
+      >
+        <div className="flex items-center gap-3">
+          <span
+            style={{
+              fontSize: "0.55rem",
+              fontFamily: "'Space Mono', monospace",
+              letterSpacing: "0.10em",
+              color: badgeColor,
+              background: badgeBg,
+              border: `1px solid ${badgeBdr}`,
+              padding: "1px 6px",
+              borderRadius: 2,
+            }}
+          >
+            {badge}
+          </span>
+          <span
+            style={{
+              fontFamily: "'Space Mono', monospace",
+              fontSize: "0.70rem",
+              fontWeight: 700,
+              letterSpacing: "0.06em",
+              color: M.ink,
+            }}
+          >
+            {title}
+          </span>
+        </div>
+        <span style={{ fontSize: "0.65rem", color: M.muted, fontFamily: "'Space Mono', monospace" }}>
+          {open ? "▲" : "▼"}
+        </span>
+      </button>
+
+      {/* Body */}
+      {open && (
+        <div className="px-4 py-4 flex flex-col gap-3">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Feature row ── */
+function Row({ label, desc, where }: { label: string; desc: string; where?: string }) {
+  return (
+    <div
+      style={{
+        borderLeft: `2px solid ${M.border}`,
+        paddingLeft: 12,
+        display: "flex",
+        flexDirection: "column",
+        gap: 2,
+      }}
+    >
+      <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.65rem", fontWeight: 700, color: M.ink, letterSpacing: "0.04em" }}>
+        {label}
+      </p>
+      <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", color: M.muted, lineHeight: 1.6 }}>
+        {desc}
+      </p>
+      {where && (
+        <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.52rem", color: M.accent, letterSpacing: "0.04em", marginTop: 2 }}>
+          → {where}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/* ── Tip box ── */
+function Tip({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        background: M.goldBg,
+        border: `1px solid ${M.goldBdr}`,
+        padding: "8px 12px",
+        borderRadius: 3,
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: "0.75rem",
+        color: M.gold,
+        lineHeight: 1.6,
+      }}
+    >
+      💡 {children}
+    </div>
+  );
+}
+
+export default function Guide() {
+  const [, navigate] = useLocation();
+
+  return (
+    <div
+      className="flex min-h-screen"
+      style={{ background: M.bg, fontFamily: "'DM Sans', sans-serif" }}
+    >
+      <Sidebar activeSection="" onSectionChange={() => {}} />
+
+      <main className="flex-1 ml-14 overflow-y-auto">
+        <div className="max-w-2xl mx-auto px-6 py-10 flex flex-col gap-6">
+
+          {/* Header */}
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <div
+                style={{
+                  background: "oklch(0.22 0.040 320)",
+                  padding: "3px 8px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                }}
+              >
+                <div style={{ display: "flex", gap: 4 }}>
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.10 75)" }} />
+                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.52 0.07 145)" }} />
+                </div>
+                <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "oklch(0.75 0.02 75)", marginLeft: 2 }}>guide.exe</span>
+              </div>
+            </div>
+            <h1
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "1.1rem",
+                fontWeight: 700,
+                letterSpacing: "0.06em",
+                color: M.ink,
+                marginBottom: 6,
+              }}
+            >
+              APP GUIDE
+            </h1>
+            <p style={{ fontSize: "0.82rem", color: M.muted, lineHeight: 1.65, maxWidth: 480 }}>
+              Everything in this workspace, explained. Use the sections below to explore each feature and learn how the AI tools work.
+            </p>
+          </div>
+
+          {/* ── CORE FEATURES ── */}
+
+          <Section
+            title="DASHBOARD"
+            badge="HOME"
+            badgeColor={M.coral}
+            badgeBg={M.coralBg}
+            badgeBdr={M.coralBdr}
+            defaultOpen
+          >
+            <Row
+              label="Hero bar"
+              desc="Shows your name, current date, mood score from today's check-in, and a quick-capture input. Type any thought and press Enter — it goes straight to Brain Dump and creates a task."
+            />
+            <Row
+              label="Focus Timer panel"
+              desc="A compact Pomodoro timer with a virtual pet (CYBER_PET.EXE). The pet grows as you complete focus sessions. Care log shows the last few actions."
+              where="Dashboard → left column"
+            />
+            <Row
+              label="Next Up panel"
+              desc="Your tasks sorted by priority (urgent → focus → normal → someday). Check the box to complete a task — it auto-logs a Win and triggers confetti."
+              where="Dashboard → middle column"
+            />
+            <Row
+              label="AI Command Center"
+              desc="Chat with your AI assistant to manage your whole workspace in natural language. You can create tasks, set goals, launch agents, log wins, and ask for prioritisation advice — all without leaving the dashboard."
+              where="Dashboard → right column"
+            />
+            <Tip>Press / anywhere on the dashboard to jump straight to the AI chat input.</Tip>
+          </Section>
+
+          <Section
+            title="FOCUS TIMER"
+            badge="FOCUS"
+            badgeColor={M.accent}
+            badgeBg={M.accentBg}
+            badgeBdr={M.accentBdr}
+          >
+            <Row
+              label="Pomodoro blocks"
+              desc="25-minute focus blocks followed by 5-minute short breaks. After 4 blocks, a 15-minute long break is suggested. Each completed block is recorded in your Monthly calendar."
+            />
+            <Row
+              label="CYBER_PET.EXE"
+              desc="A virtual pet that grows based on your cumulative focus sessions. Feed it by completing focus blocks. The care log shows a rolling history of your pet interactions."
+            />
+            <Row
+              label="Keyboard shortcut"
+              desc="Press Space bar anywhere on the Focus page to start or pause the timer without clicking."
+            />
+            <Row
+              label="Session tracking"
+              desc="Each completed session is saved to your Monthly calendar. You can see your focus history per day in the Monthly page's day detail panel."
+            />
+          </Section>
+
+          <Section
+            title="MY TASKS"
+            badge="TASKS"
+            badgeColor={M.sage}
+            badgeBg={M.sageBg}
+            badgeBdr={M.sageBdr}
+          >
+            <Row
+              label="Priority levels"
+              desc="Four levels: Urgent (red), Focus (pink), Normal (lavender), Someday (grey). Tasks are colour-coded and sorted by priority on the Dashboard."
+            />
+            <Row
+              label="Context tags"
+              desc="Tag tasks as Work, Personal, or Video. Use the filter tabs at the top to view tasks by context."
+            />
+            <Row
+              label="Goal linking"
+              desc="Link a task to a weekly goal. When you complete the task, the linked goal's progress bar auto-advances."
+            />
+            <Row
+              label="Quick capture"
+              desc="Press the lightning bolt FAB or Cmd/Ctrl+K anywhere in the app to open the quick-capture popup. Type one sentence — no formatting needed."
+            />
+          </Section>
+
+          <Section
+            title="DAILY WINS"
+            badge="WINS"
+            badgeColor={M.gold}
+            badgeBg={M.goldBg}
+            badgeBdr={M.goldBdr}
+          >
+            <Row
+              label="Logging wins"
+              desc="Add any positive moment — big or small. Wins are categorised with icons (work, personal, health, learning, social, creative, focus). Completing a task auto-logs a win."
+            />
+            <Row
+              label="Daily Wrap-Up"
+              desc="At the end of your day, open the Wrap-Up panel to review your wins, tasks, and mood. AI can generate a warm personal summary of your day."
+              where="Sidebar → bottom area → Wrap-Up button (appears in the evening)"
+            />
+          </Section>
+
+          <Section
+            title="BRAIN DUMP"
+            badge="DUMP"
+            badgeColor={M.muted}
+            badgeBg="oklch(0.52 0.040 330 / 0.08)"
+            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+          >
+            <Row
+              label="Free-form capture"
+              desc="Type anything — worries, ideas, tasks, random thoughts. No formatting required. Each entry is timestamped and tagged automatically."
+            />
+            <Row
+              label="AI Sort"
+              desc="Click '✦ AI Sort' to have AI categorise all your entries into tasks, goals, worries, ideas, and reminders. You can then promote entries directly to your task list or goals."
+              where="Brain Dump page → '✦ AI Sort' button"
+            />
+            <Row
+              label="→ Task / → Agent"
+              desc="Each entry has quick-action buttons to promote it to a task or create an AI agent brief from it."
+            />
+          </Section>
+
+          <Section
+            title="WEEKLY GOALS"
+            badge="GOALS"
+            badgeColor={M.coral}
+            badgeBg={M.coralBg}
+            badgeBdr={M.coralBdr}
+          >
+            <Row
+              label="Goal tracking"
+              desc="Set weekly goals with a progress bar (0–100%). Link tasks to goals — completing linked tasks auto-advances the progress bar."
+            />
+            <Row
+              label="Context filter"
+              desc="Goals are tagged Work or Personal. Filter by context to focus on one area at a time."
+            />
+          </Section>
+
+          <Section
+            title="AI AGENTS"
+            badge="AGENTS"
+            badgeColor={M.accent}
+            badgeBg={M.accentBg}
+            badgeBdr={M.accentBdr}
+          >
+            <Row
+              label="What is an agent?"
+              desc="An agent is a focused AI task — a name, a brief, and a status (active / done). Think of it as a mini project you hand off to an AI assistant."
+            />
+            <Row
+              label="Agent Brief Generator"
+              desc="Turn any task into a ready-to-paste AI agent prompt. AI generates a focused agent name and a detailed brief you can drop directly into any AI assistant (ChatGPT, Claude, etc.)."
+              where="Agents page → any task card → 'Create Agent' button"
+            />
+            <Row
+              label="Status tracking"
+              desc="Mark agents as Active or Done. Done agents are archived but visible in the history view."
+            />
+          </Section>
+
+          <Section
+            title="MONTHLY CALENDAR"
+            badge="MTH"
+            badgeColor={M.sage}
+            badgeBg={M.sageBg}
+            badgeBdr={M.sageBdr}
+          >
+            <Row
+              label="Day overview"
+              desc="Click any day to see a detail panel: mood score, focus sessions, tasks completed, wins logged, and brain dump entries for that day."
+            />
+            <Row
+              label="Monthly AI Review"
+              desc="AI reads your full month's data and writes a personalised review: what went well, one pattern it noticed, and one thing to try next month."
+              where="Monthly page → '✦ Generate AI Review' button"
+            />
+            <Row
+              label="Focus Tracker"
+              desc="Each completed focus session is recorded here. The day detail panel shows each session's number, duration, and time."
+            />
+          </Section>
+
+          <Section
+            title="STORAGE & BACKUP"
+            badge="STORE"
+            badgeColor={M.muted}
+            badgeBg="oklch(0.52 0.040 330 / 0.08)"
+            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+          >
+            <Row
+              label="Local file backup"
+              desc="Download a full JSON backup of all your data to your device. No login required. The file is named adhd-focus-backup-YYYY-MM-DD.json."
+            />
+            <Row
+              label="Google Drive backup"
+              desc="Manually save or restore your data to/from Google Drive. Requires a Google OAuth Client ID (one-time setup). The backup file is named adhd-focus-backup.json in your Drive root."
+            />
+            <Row
+              label="Restore from file"
+              desc="Upload a previously downloaded JSON backup to restore all your data. This overwrites your current data — use with care."
+            />
+            <Tip>Back up at least once a week. The app reminds you after 7 days without a backup.</Tip>
+          </Section>
+
+          {/* ── AI FEATURES ── */}
+
+          <div
+            style={{
+              borderTop: `2px solid ${M.accentBdr}`,
+              paddingTop: 20,
+              marginTop: 4,
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.60rem",
+                letterSpacing: "0.12em",
+                color: M.accent,
+                marginBottom: 12,
+              }}
+            >
+              ✦ AI FEATURES
+            </p>
+
+            <Section
+              title="AI COMMAND CENTER"
+              badge="DASHBOARD"
+              badgeColor={M.accent}
+              badgeBg={M.accentBg}
+              badgeBdr={M.accentBdr}
+              defaultOpen
+            >
+              <Row
+                label="What it does"
+                desc="A persistent chat panel on the Dashboard. Your AI assistant understands your full workspace context — tasks, goals, agents, wins — and can take actions on your behalf."
+                where="Dashboard → right column"
+              />
+              <Row
+                label="Commands you can use"
+                desc={[
+                  "Create a task: 'Add task: reply to Alice's email, urgent'",
+                  "Set a goal: 'Add goal: finish the report by Friday'",
+                  "Log a win: 'Log win: I finished the presentation'",
+                  "Launch an agent: 'Create agent for writing the blog post'",
+                  "Prioritise: 'What should I focus on today?'",
+                  "Complete a task: 'Mark the email task as done'",
+                ].join(" · ")}
+              />
+              <Row
+                label="Chat history"
+                desc="The last 10 messages are saved to your database so the conversation persists across page reloads."
+              />
+              <Tip>Press / on the Dashboard to focus the chat input instantly.</Tip>
+            </Section>
+
+            <div className="mt-3">
+              <Section
+                title="BRAIN DUMP AI SORT"
+                badge="BRAIN DUMP"
+                badgeColor={M.muted}
+                badgeBg="oklch(0.52 0.040 330 / 0.08)"
+                badgeBdr="oklch(0.52 0.040 330 / 0.22)"
+              >
+                <Row
+                  label="What it does"
+                  desc="Reads all your Brain Dump entries and categorises each one as a task, goal, worry, idea, or reminder. Suggests which ones to promote to your task list or goals."
+                  where="Brain Dump page → '✦ AI Sort' button"
+                />
+                <Row
+                  label="How to use it"
+                  desc="Dump anything into the Brain Dump page, then click '✦ AI Sort'. Review the suggestions and click '→ Task' or '→ Goal' on the ones you want to act on."
+                />
+              </Section>
+            </div>
+
+            <div className="mt-3">
+              <Section
+                title="MIT — MOST IMPORTANT THING"
+                badge="CHECK-IN"
+                badgeColor={M.gold}
+                badgeBg={M.goldBg}
+                badgeBdr={M.goldBdr}
+              >
+                <Row
+                  label="What it does"
+                  desc="Every morning during your Daily Check-In, AI looks at your tasks, goals, and mood score to pick the single most important thing to focus on today. Reduces decision paralysis."
+                  where="Daily Check-In → final step (auto-generates)"
+                />
+                <Row
+                  label="Why it helps"
+                  desc="ADHD brains struggle with prioritisation under pressure. Having one clear focus for the day — chosen by AI from your own data — removes the anxiety of choosing."
+                />
+              </Section>
+            </div>
+
+            <div className="mt-3">
+              <Section
+                title="DAILY SUMMARY"
+                badge="WRAP-UP"
+                badgeColor={M.sage}
+                badgeBg={M.sageBg}
+                badgeBdr={M.sageBdr}
+              >
+                <Row
+                  label="What it does"
+                  desc="At the end of your day, AI reads your wins, completed tasks, focus sessions, and mood score to write a warm, personal summary — not a generic template."
+                  where="Daily Wrap-Up panel → '✦ Generate AI summary' button"
+                />
+                <Row
+                  label="What it includes"
+                  desc="A personalised opening based on your mood, a summary of what you accomplished, focus time logged, and an encouraging closing note."
+                />
+              </Section>
+            </div>
+
+            <div className="mt-3">
+              <Section
+                title="MONTHLY AI REVIEW"
+                badge="MONTHLY"
+                badgeColor={M.coral}
+                badgeBg={M.coralBg}
+                badgeBdr={M.coralBdr}
+              >
+                <Row
+                  label="What it does"
+                  desc="AI reads your full month's data — every day's mood, wins, tasks, and focus sessions — and writes a personalised monthly review."
+                  where="Monthly page → '✦ Generate AI Review' button"
+                />
+                <Row
+                  label="What it includes"
+                  desc="What went well this month, one pattern it noticed in your behaviour or mood, and one concrete thing to try next month."
+                />
+              </Section>
+            </div>
+
+            <div className="mt-3">
+              <Section
+                title="AGENT BRIEF GENERATOR"
+                badge="AGENTS"
+                badgeColor={M.accent}
+                badgeBg={M.accentBg}
+                badgeBdr={M.accentBdr}
+              >
+                <Row
+                  label="What it does"
+                  desc="Turn any task into a ready-to-paste AI agent prompt. AI generates a focused agent name and a detailed brief you can drop directly into ChatGPT, Claude, or any other AI assistant."
+                  where="Agents page → any task card → 'Create Agent' button"
+                />
+                <Row
+                  label="How to use it"
+                  desc="Go to the Agents page, find a task you want to delegate to AI, click 'Create Agent', and copy the generated brief. Paste it into your preferred AI assistant to get started immediately."
+                />
+              </Section>
+            </div>
+          </div>
+
+          {/* ── AI SETUP ── */}
+          <div
+            style={{
+              background: M.accentBg,
+              border: `1px solid ${M.accentBdr}`,
+              borderRadius: 4,
+              padding: "14px 16px",
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+            }}
+          >
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.60rem", letterSpacing: "0.10em", color: M.accent, fontWeight: 700 }}>
+              ✦ AI SETUP
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.80rem", color: M.ink, lineHeight: 1.65 }}>
+              All AI features use the <strong>built-in AI credits</strong> by default — no setup needed. If the built-in credits run out, you can add your own <strong>OpenAI API key</strong> as a fallback.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", color: M.muted, lineHeight: 1.65 }}>
+              To add your OpenAI key: open the <strong>SET panel</strong> (gear icon at the bottom of the sidebar) → API KEY tab → paste your key → SAVE. Your OpenAI account must have a paid plan or credits — free-tier keys won't work.
+            </p>
+            <p style={{ fontFamily: "'Space Mono', monospace", fontSize: "0.52rem", color: M.accent, letterSpacing: "0.04em" }}>
+              → platform.openai.com/api-keys to create a key
+            </p>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 mb-10 text-center">
+            <button
+              onClick={() => navigate("/")}
+              style={{
+                fontFamily: "'Space Mono', monospace",
+                fontSize: "0.62rem",
+                letterSpacing: "0.10em",
+                textTransform: "uppercase",
+                color: M.muted,
+                background: "transparent",
+                border: `1px solid ${M.border}`,
+                padding: "7px 18px",
+                cursor: "pointer",
+                borderRadius: 3,
+              }}
+            >
+              ← back to workspace
+            </button>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

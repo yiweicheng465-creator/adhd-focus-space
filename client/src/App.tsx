@@ -11,6 +11,7 @@ import { TimerProvider } from "./contexts/TimerContext";
 import Home from "./pages/Home";
 
 import Monthly from "@/pages/Monthly";
+import Guide from "@/pages/Guide";
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
@@ -18,6 +19,7 @@ function Router() {
       <Route path={"/"} component={Home} />
 
         <Route path="/monthly" component={Monthly} />
+        <Route path="/guide" component={Guide} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />
     </Switch>

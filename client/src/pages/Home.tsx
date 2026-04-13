@@ -162,7 +162,7 @@ function GoalFlagIcon({ className, style }: { className?: string; style?: React.
   );
 }
 
-type Section = "dashboard" | "focus" | "tasks" | "wins" | "dump" | "goals" | "agents" | "ai" | "storage";
+type Section = "dashboard" | "focus" | "tasks" | "wins" | "dump" | "goals" | "agents" | "storage";
 
 const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> = {
   dashboard:  { title: "Dashboard",    icon: LayoutDashboard },
@@ -172,7 +172,6 @@ const SECTION_META: Record<Section, { title: string; icon: React.ElementType }> 
   dump:       { title: "Brain Dump",   icon: Brain           },
   goals:      { title: "Weekly Goals", icon: GoalFlagIcon      },
   agents:     { title: "AI Agents",    icon: Bot             },
-  ai:         { title: "AI Features",  icon: Sparkles        },
   storage:    { title: "Storage & Backup", icon: Star            },
 };
 
@@ -900,14 +899,6 @@ export default function Home() {
                   pendingTaskText={pendingAgentTask ?? undefined}
                   onPendingTaskConsumed={() => setPendingAgentTask(null)}
                 />
-              </div>
-              </RetroPageWrapper>
-            )}
-
-            {activeSection === "ai" && (
-              <RetroPageWrapper title="ai_hub.exe" sticker="sparkle">
-              <div className="p-8 min-h-[600px] flex flex-col">
-                <AIHub />
               </div>
               </RetroPageWrapper>
             )}

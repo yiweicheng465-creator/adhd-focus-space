@@ -136,7 +136,6 @@ const NAV: Array<{
   { id: "dump",      short: "DUMP",   Icon: IconDump,   title: "Brain Dump"   },
   { id: "goals",     short: "GOALS",  Icon: IconGoals,  title: "Goals"        },
   { id: "agents",    short: "AGENTS", Icon: IconAgents, title: "AI Agents"    },
-  { id: "ai",        short: "AI",     Icon: IconAI,     title: "AI Features"  },
   { id: "storage",   short: "STORE",  Icon: IconStorage, title: "Storage & Backup" },
 ];
 
@@ -267,6 +266,28 @@ function MonthlyLink() {
 
 
 
+/* Tiny hidden ? link to /guide — unobvious, discoverable only by curious users */
+function GuideLink() {
+  const [location, navigate] = useLocation();
+  const active = location === "/guide";
+  const color = active ? "oklch(0.48 0.18 340)" : "oklch(0.72 0.030 330)";
+  return (
+    <button
+      onClick={() => navigate("/guide")}
+      title="App Guide"
+      className="relative w-full flex flex-col items-center justify-center py-1.5 transition-all duration-150"
+      style={{ background: "transparent", opacity: 0.55 }}
+      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "1"; }}
+      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.opacity = "0.55"; }}
+    >
+      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="6.5" stroke={color} strokeWidth="1.3"/>
+        <text x="8" y="12" textAnchor="middle" fontFamily="'Space Mono', monospace" fontSize="8" fill={color} fontWeight="700">?</text>
+      </svg>
+    </button>
+  );
+}
+
 if (typeof document !== "undefined" && !document.getElementById("sidebar-timer-pulse")) {
   const s = document.createElement("style");
   s.id = "sidebar-timer-pulse";
@@ -350,7 +371,8 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
       {/* Bottom links */}
       <div className="flex flex-col w-full gap-0">
         <MonthlyLink />
-      </div>
+        {/* Hidden guide link — unobvious tiny ? button */}
+        <GuideLink />      </div>
 
       {/* Effects panel (grain + work mode) */}
       <div style={{ width: "70%", height: "1px", background: "oklch(0.80 0.060 340)", margin: "4px 0" }} />
