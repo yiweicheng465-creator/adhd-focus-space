@@ -1,13 +1,16 @@
 /* ============================================================
    ADHD FOCUS SPACE — Global Hue Shift System
-   Manages --base-hue CSS variable on <html>.
+   Uses CSS filter: hue-rotate() on <html> — same "nuclear option"
+   as work mode's grayscale(). Catches ALL colors including hardcoded
+   inline styles, SVGs, and images.
+
+   The offset is (hue - 330) degrees since 330 is the default pink.
    State persisted to localStorage under "adhd-base-hue".
-   Dispatches "adhd-hue-change" custom event for cross-component sync.
    ============================================================ */
 import { useCallback, useEffect, useState } from "react";
 
 const LS_KEY = "adhd-base-hue";
-const DEFAULT_HUE = 330; // Pink (original theme)
+export const DEFAULT_HUE = 330; // Pink (original theme)
 
 export const HUE_PRESETS = [
   { label: "Pink",   hue: 330, color: "hsl(330,60%,65%)" },
@@ -28,7 +31,17 @@ function readLS(): number {
 }
 
 function applyHue(hue: number) {
-  document.documentElement.style.setProperty("--base-hue", String(hue));
+  const offset = hue - DEFAULT_HUE; // e.g. Blue 220 → -110deg
+  const html = document.documentElement;
+  if (offset === 0) {
+    // No rotation needed — remove any existing hue-rotate to avoid
+    // stacking with work-mode grayscale
+    html.style.removeProperty("--hue-rotate-deg");
+  } else {
+    html.style.setProperty("--hue-rotate-deg", `${offset}deg`);
+  }
+  // Also keep --base-hue for any CSS variables that still reference it
+  html.style.setProperty("--base-hue", String(hue));
 }
 
 /* ── Hook ── */
@@ -40,7 +53,7 @@ export function useHue() {
     applyHue(hue);
   }, [hue]);
 
-  // Restore on mount (in case the hook is used in multiple components)
+  // Restore on mount
   useEffect(() => {
     const stored = readLS();
     applyHue(stored);
@@ -57,7 +70,7 @@ export function useHue() {
 
   const reset = useCallback(() => setHue(DEFAULT_HUE), [setHue]);
 
-  // Listen for external changes (e.g. other components calling setHue)
+  // Listen for external changes
   useEffect(() => {
     const handler = (e: Event) => {
       const val = (e as CustomEvent<number>).detail;

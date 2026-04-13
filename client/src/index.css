@@ -694,6 +694,18 @@ html.work-mode {
   filter: grayscale(1);
   transition: filter 0.35s ease;
 }
+/* ── Global Hue Rotate — same nuclear approach as work-mode ──
+   JS sets --hue-rotate-deg on <html> via useHue().
+   hue-rotate() shifts ALL colors at once — hardcoded inline styles,
+   SVGs, images — without touching individual component colors. */
+html {
+  filter: hue-rotate(var(--hue-rotate-deg, 0deg));
+  transition: filter 0.35s ease;
+}
+html.work-mode {
+  /* Combine grayscale with any active hue rotation */
+  filter: grayscale(1) hue-rotate(var(--hue-rotate-deg, 0deg));
+}
 
 /* Smooth transition when toggling */
 .work-mode,
