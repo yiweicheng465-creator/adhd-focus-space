@@ -108,17 +108,17 @@ export default function AdminDashboard() {
         {/* Summary cards — row 1: totals */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 10 }}>
           <StatCard label="Total users" value={totalUsers} icon={<Users size={11} />} />
-          <StatCard label="All calls (total)" value={totalCalls} icon={<Zap size={11} />} />
-          <StatCard label={`All calls (${currentMonth})`} value={monthCalls} icon={<Calendar size={11} />} />
-          <StatCard label="Own-key users" value={ownKeyUsers} icon={<Key size={11} />} />
+          <StatCard label="All AI calls (all time)" value={totalCalls} icon={<Zap size={11} />} />
+          <StatCard label="All AI calls (this month)" value={monthCalls} icon={<Calendar size={11} />} />
+          <StatCard label="Users with own key" value={ownKeyUsers} icon={<Key size={11} />} />
         </div>
 
         {/* Summary cards — row 2: split by provider */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10, marginBottom: 24 }}>
-          <StatCard label="Manus calls (total)" value={totalManusCalls} icon={<Bot size={11} />} accent={GREEN} />
-          <StatCard label={`Manus calls (${currentMonth})`} value={monthManusCalls} icon={<Bot size={11} />} accent={GREEN} />
-          <StatCard label="OpenAI calls (total)" value={totalOpenaiCalls} icon={<Cpu size={11} />} accent={BLUE} />
-          <StatCard label={`OpenAI calls (${currentMonth})`} value={monthOpenaiCalls} icon={<Cpu size={11} />} accent={BLUE} />
+          <StatCard label="Manus built-in (all time)" value={totalManusCalls} icon={<Bot size={11} />} accent={GREEN} />
+          <StatCard label="Manus built-in (this month)" value={monthManusCalls} icon={<Bot size={11} />} accent={GREEN} />
+          <StatCard label="OpenAI own-key (all time)" value={totalOpenaiCalls} icon={<Cpu size={11} />} accent={BLUE} />
+          <StatCard label="OpenAI own-key (this month)" value={monthOpenaiCalls} icon={<Cpu size={11} />} accent={BLUE} />
         </div>
 
         {/* Table */}
