@@ -36,6 +36,13 @@
       "when": 1775985642048,
       "tag": "0004_melted_wild_child",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1776066872009,
+      "tag": "0005_elite_mockingbird",
+      "breakpoints": true
     }
   ]
 }

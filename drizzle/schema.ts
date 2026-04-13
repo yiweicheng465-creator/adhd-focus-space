@@ -133,6 +133,18 @@ export const aiMessages = mysqlTable("ai_messages", {
 export type AiMessage = typeof aiMessages.$inferSelect;
 export type InsertAiMessage = typeof aiMessages.$inferInsert;
 
+// ── Quick Reply Chips ───────────────────────────────────────────────────────
+export const quickReplies = mysqlTable("quick_replies", {
+  id: varchar("id", { length: 36 }).primaryKey(),
+  userId: int("userId").notNull(),
+  text: varchar("text", { length: 255 }).notNull(),
+  sortOrder: int("sortOrder").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type QuickReply = typeof quickReplies.$inferSelect;
+export type InsertQuickReply = typeof quickReplies.$inferInsert;
+
 // ── Focus Sessions ────────────────────────────────────────────────────────────
 export const focusSessions = mysqlTable("focus_sessions", {
   id: int("id").autoincrement().primaryKey(),

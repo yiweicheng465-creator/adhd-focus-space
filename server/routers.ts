@@ -12,6 +12,7 @@ import { logsRouter } from "./routers/logs";
 import { profileRouter } from "./routers/profile";
 import { aiChatRouter } from "./routers/aichat";
 import { feedbackRouter } from "./routers/feedback";
+import { quickRepliesRouter } from "./routers/quickReplies";
 
 export const appRouter = router({
   system: systemRouter,
@@ -34,6 +35,7 @@ export const appRouter = router({
   profile: profileRouter,
   aiChat: aiChatRouter,
   feedback: feedbackRouter,
+  quickReplies: quickRepliesRouter,
 });
 
 export type AppRouter = typeof appRouter;

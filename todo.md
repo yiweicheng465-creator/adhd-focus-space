@@ -191,3 +191,6 @@
 - [x] Add goal link/change/remove to existing tasks (goal dropdown in edit popover, can add/change/remove)
 - [x] Disable browser autocomplete on daily check-in task input (already had autoComplete=off)
 - [x] Add task link dropdown to daily check-in agents step (always visible, shows new + existing tasks)
+- [x] Change Next Up task limit from 6 to 7
+- [x] Make Quick Capture quick-reply chips configurable (add/edit/delete) with DB persistence
+- [x] Add config button (gear icon) to Quick Capture modal to manage chips
