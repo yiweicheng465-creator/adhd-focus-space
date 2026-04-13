@@ -195,3 +195,4 @@
 - [x] Make Quick Capture quick-reply chips configurable (add/edit/delete) with DB persistence
 - [x] Add config button (gear icon) to Quick Capture modal to manage chips
 - [x] Daily check-in task step: goal dropdown now shows both new goals (this session) and all existing DB goals in grouped optgroups
+- [x] Fix ambient sound player: removed Web Audio graph from ambient element (createMediaElementSource can only be called once per element); now uses audio.volume directly — track switching works reliably

@@ -199,7 +199,10 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
 
   const ctxRef = useRef<AudioContext | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const gainRef = useRef<GainNode | null>(null);
+  // NOTE: We intentionally do NOT use createMediaElementSource / GainNode for the
+  // ambient <audio> element because the Web Audio API only allows that call once
+  // per element — reconnecting after a track switch is impossible and silently
+  // breaks playback. We use audio.volume directly instead.
   // Track if we paused due to timer (so we can resume on timer resume)
   const timerPausedRef = useRef(false);
 
@@ -235,23 +238,15 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     const audio = audioRef.current;
     if (!audio) return;
     const track = MUSIC_TRACKS.find(t => t.id === selectedTrackId) ?? MUSIC_TRACKS[0];
-    if (!audio.src || !audio.src.includes(track.id === "lofi" ? "jazz" : track.id)) {
+    // Always set src if it doesn't match the current track URL
+    if (audio.src !== track.url) {
       audio.src = track.url;
+      audio.load();
     }
-    const ctx = ensureCtx();
-    if (ctx && !gainRef.current) {
-      try {
-        const source = ctx.createMediaElementSource(audio);
-        const gain = ctx.createGain();
-        gain.gain.value = musicVolume;
-        source.connect(gain);
-        gain.connect(ctx.destination);
-        gainRef.current = gain;
-      } catch {
-        // Already connected — ignore
-      }
-    }
-    audio.volume = gainRef.current ? 1 : musicVolume;
+    // Use audio.volume directly — no Web Audio graph on the ambient element
+    audio.volume = Math.max(0, Math.min(1, musicVolume));
+    // Ensure AudioContext is alive (needed for SFX, not for ambient audio)
+    ensureCtx();
     setMusicLoading(true);
     audio.play()
       .then(() => { setMusicLoading(false); setMusicPlaying(true); })
@@ -287,30 +282,24 @@ export function SoundProvider({ children }: { children: React.ReactNode }) {
     if (!audio) return;
     const track = MUSIC_TRACKS.find(t => t.id === selectedTrackId) ?? MUSIC_TRACKS[0];
     const wasPlaying = musicEnabled && !audio.paused;
-    // Disconnect old gain node so we can reconnect with new source
-    if (gainRef.current) {
-      try { gainRef.current.disconnect(); } catch { /* ignore */ }
-      gainRef.current = null;
-    }
     audio.pause();
     audio.src = track.url;
     audio.load();
     if (wasPlaying && timerPhaseRef.current !== "paused") {
-      playAudio();
+      // Small delay to let the new src load before playing
+      setTimeout(() => playAudio(), 50);
     }
     try { localStorage.setItem("adhd-music-track", selectedTrackId); } catch {}
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTrackId]);
 
-  // Sync gain node volume
+  // Sync volume directly on the audio element
   useEffect(() => {
-    if (gainRef.current) {
-      gainRef.current.gain.value = musicVolume;
-    } else if (audioRef.current && musicEnabled) {
-      audioRef.current.volume = musicVolume;
+    if (audioRef.current) {
+      audioRef.current.volume = Math.max(0, Math.min(1, musicVolume));
     }
     try { localStorage.setItem("adhd-music-vol", String(musicVolume)); } catch {}
-  }, [musicVolume, musicEnabled]);
+  }, [musicVolume]);
 
   // ── Controls ─────────────────────────────────────────────────────────────────
 
