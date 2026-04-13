@@ -476,9 +476,13 @@ export default function Home() {
 
   const handleBlockComplete = () => {
     recordBlockComplete();
+    const totalMins = durations.focus * 4;
+    const focusLabel = totalMins >= 60
+      ? `${Math.floor(totalMins / 60)}h${totalMins % 60 > 0 ? ` ${totalMins % 60}min` : ""}`
+      : `${totalMins}min`;
     const blockWin: Win = {
       id: `block-${Date.now()}`,
-      text: "2-hour deep focus block complete",
+      text: `${focusLabel} deep focus block complete`,
       iconIdx: 99,
       createdAt: new Date(),
     };
