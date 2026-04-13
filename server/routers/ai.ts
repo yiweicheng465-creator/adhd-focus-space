@@ -47,20 +47,36 @@ async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUr
 }
 
 /** Increment per-user AI call counters (fire-and-forget, never throws) */
-async function incrementAiUsage(userId: number): Promise<void> {
+async function incrementAiUsage(userId: number, usingBuiltIn: boolean): Promise<void> {
   try {
     const db = await getDb();
     if (!db) return;
     const monthKey = new Date().toISOString().slice(0, 7); // "2026-04"
-    // Reset monthly counter if we're in a new month
-    await db
-      .update(users)
-      .set({
-        aiCallsTotal: sql`aiCallsTotal + 1`,
-        aiCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, aiCallsThisMonth + 1, 1)`,
-        aiCallsMonthKey: monthKey,
-      })
-      .where(eq(users.id, userId));
+    if (usingBuiltIn) {
+      // Manus built-in credits
+      await db
+        .update(users)
+        .set({
+          aiCallsTotal: sql`aiCallsTotal + 1`,
+          aiCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, aiCallsThisMonth + 1, 1)`,
+          aiCallsMonthKey: monthKey,
+          manusCallsTotal: sql`manusCallsTotal + 1`,
+          manusCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, manusCallsThisMonth + 1, 1)`,
+        })
+        .where(eq(users.id, userId));
+    } else {
+      // User's own OpenAI key
+      await db
+        .update(users)
+        .set({
+          aiCallsTotal: sql`aiCallsTotal + 1`,
+          aiCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, aiCallsThisMonth + 1, 1)`,
+          aiCallsMonthKey: monthKey,
+          openaiCallsTotal: sql`openaiCallsTotal + 1`,
+          openaiCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, openaiCallsThisMonth + 1, 1)`,
+        })
+        .where(eq(users.id, userId));
+    }
   } catch {
     // Non-critical — never block the AI response
   }
@@ -202,7 +218,7 @@ export const aiRouter = router({
   categorizeDump: protectedProcedure
     .input(brainDumpCategoriseInput)
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const entriesList = input.entries.map((e, i) => `${i + 1}. ${e}`).join("\n");
       const result = await invokeLLM({
         apiKey,
@@ -235,7 +251,7 @@ export const aiRouter = router({
   dailySummary: protectedProcedure
     .input(dailySummaryInput)
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const moodStr = input.mood ? moodLabels[input.mood - 1] : "not recorded";
       const prompt = `Generate a warm, personal end-of-day summary for an ADHD user.
@@ -267,7 +283,7 @@ Keep it under 80 words. Warm, human, not corporate.`;
         ],
       });
       const summary = result.choices[0]?.message?.content ?? "";
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return { summary };
     }),
 
@@ -275,7 +291,7 @@ Keep it under 80 words. Warm, human, not corporate.`;
   focusReflection: protectedProcedure
     .input(focusReflectionInput)
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       let prompt = "";
       if (input.phase === "before") {
         prompt = `An ADHD user is about to start focus session #${input.sessionNumber}. 
@@ -300,7 +316,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
         ],
       });
       const message = result.choices[0]?.message?.content ?? "";
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return { message, phase: input.phase };
     }),
 
@@ -308,7 +324,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
   monthlyReview: protectedProcedure
     .input(monthlyReviewInput)
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const avgMoodStr = input.avgMood
         ? `${moodLabels[Math.round(input.avgMood) - 1]} (${input.avgMood.toFixed(1)}/5)`
@@ -345,7 +361,7 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
         ],
       });
       const review = result.choices[0]?.message?.content ?? "";
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return { review };
     }),
 
@@ -356,7 +372,7 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
       context: z.string(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const result = await invokeLLM({
         apiKey,
         apiUrl,
@@ -394,7 +410,7 @@ Return JSON with:
       const rawContent = result.choices[0]?.message?.content;
       const content = typeof rawContent === "string" ? rawContent : null;
       if (!content) throw new Error("No response from AI");
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return JSON.parse(content) as { name: string; brief: string; firstStep: string };
     }),
 
@@ -411,7 +427,7 @@ Return JSON with:
       mood: z.number().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const contextNote = [
         input.taskCount != null ? `Active tasks: ${input.taskCount}` : "",
@@ -432,7 +448,7 @@ Return JSON with:
       });
       const reply = result.choices[0]?.message?.content;
       if (!reply || typeof reply !== "string") throw new Error("No response from AI");
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return { reply };
     }),
 
@@ -440,7 +456,7 @@ Return JSON with:
   mitSuggestion: protectedProcedure
     .input(mitSuggestionInput)
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const taskList = input.pendingTasks
         .slice(0, 15)
         .map((t, i) => `${i + 1}. [${t.priority}] ${t.text} (${t.context})`)
@@ -517,7 +533,7 @@ Pick the single most important task they should focus on today. Consider urgency
       mood: z.number().nullable().optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const { apiKey, apiUrl, model } = await getUserApiConfig(ctx.user.openId);
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
       const moodLabels = ["Drained", "Low", "Okay", "Good", "Glowing"];
       const taskSummary = (input.tasks ?? []).filter(t => !t.done).slice(0, 10)
         .map(t => `- [${t.priority}] ${t.text} (${t.context})`).join("\n");
@@ -579,7 +595,7 @@ Only include the ACTION line when performing an action. For pure conversation, o
       if (actionMatch) {
         try { action = JSON.parse(actionMatch[1]); } catch { action = null; }
       }
-      void incrementAiUsage(ctx.user.id);
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
       return { reply, action };
     }),
 

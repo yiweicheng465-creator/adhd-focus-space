@@ -50,6 +50,13 @@
       "when": 1776074624524,
       "tag": "0006_yellow_valeria_richards",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1776080317733,
+      "tag": "0007_chilly_clea",
+      "breakpoints": true
     }
   ]
 }

@@ -27,6 +27,11 @@ export const users = mysqlTable("users", {
   aiCallsTotal: int("aiCallsTotal").default(0).notNull(),
   aiCallsThisMonth: int("aiCallsThisMonth").default(0).notNull(),
   aiCallsMonthKey: varchar("aiCallsMonthKey", { length: 7 }), // e.g. "2026-04"
+  // Split counters by provider
+  manusCallsTotal: int("manusCallsTotal").default(0).notNull(),
+  manusCallsThisMonth: int("manusCallsThisMonth").default(0).notNull(),
+  openaiCallsTotal: int("openaiCallsTotal").default(0).notNull(),
+  openaiCallsThisMonth: int("openaiCallsThisMonth").default(0).notNull(),
 });
 
 export type User = typeof users.$inferSelect;

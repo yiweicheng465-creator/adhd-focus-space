@@ -5,7 +5,7 @@ import { desc } from "drizzle-orm";
 
 export const adminRouter = router({
   /**
-   * Returns all users with their AI usage stats, sorted by total calls desc.
+   * Returns all users with their AI usage stats (split by provider), sorted by total calls desc.
    * Protected by adminProcedure — throws FORBIDDEN for non-admin users.
    */
   getAllUsersUsage: adminProcedure.query(async () => {
@@ -23,6 +23,10 @@ export const adminRouter = router({
         aiCallsTotal: users.aiCallsTotal,
         aiCallsThisMonth: users.aiCallsThisMonth,
         aiCallsMonthKey: users.aiCallsMonthKey,
+        manusCallsTotal: users.manusCallsTotal,
+        manusCallsThisMonth: users.manusCallsThisMonth,
+        openaiCallsTotal: users.openaiCallsTotal,
+        openaiCallsThisMonth: users.openaiCallsThisMonth,
         lastSignedIn: users.lastSignedIn,
         createdAt: users.createdAt,
       })
@@ -40,6 +44,10 @@ export const adminRouter = router({
       aiCallsTotal: u.aiCallsTotal,
       aiCallsThisMonth: u.aiCallsThisMonth,
       aiCallsMonthKey: u.aiCallsMonthKey ?? "—",
+      manusCallsTotal: u.manusCallsTotal,
+      manusCallsThisMonth: u.manusCallsThisMonth,
+      openaiCallsTotal: u.openaiCallsTotal,
+      openaiCallsThisMonth: u.openaiCallsThisMonth,
       lastSignedIn: u.lastSignedIn,
       createdAt: u.createdAt,
     }));
