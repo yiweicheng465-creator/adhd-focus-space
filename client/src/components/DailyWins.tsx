@@ -123,7 +123,7 @@ function IconBlockComplete({ size = 20, color = "#C0622F" }: IconProps) {
       />
       <path
         d="M12 14c0 0-1.5 1-1.5 2.5a1.5 1.5 0 0 0 3 0C13.5 15 12 14 12 14z"
-        fill="var(--c-pale)"
+        fill="oklch(0.95 0.04 60)"
         stroke="none"
       />
     </svg>
@@ -132,33 +132,33 @@ function IconBlockComplete({ size = 20, color = "#C0622F" }: IconProps) {
 
 // ── Icon registry ──────────────────────────────────────────────────────────────
 const WIN_ICONS = [
-  { key: "health",    Component: IconHealth,    label: "Health",    color: "var(--c-accent)" },
-  { key: "study",     Component: IconStudy,     label: "Study",     color: "var(--c-accent-soft)" },
-  { key: "work",      Component: IconWork,      label: "Work",      color: "var(--c-accent-muted)" },
-  { key: "social",    Component: IconSocial,    label: "Social",    color: "var(--c-accent)" },
-  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "var(--c-accent-muted)" },
-  { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "var(--c-accent-dim)" },
-  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "var(--c-accent)" },
-  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "var(--c-accent-hover)" },
+  { key: "health",    Component: IconHealth,    label: "Health",    color: "oklch(0.58 0.18 355)" },
+  { key: "study",     Component: IconStudy,     label: "Study",     color: "oklch(0.52 0.14 270)" },
+  { key: "work",      Component: IconWork,      label: "Work",      color: "oklch(0.50 0.14 290)" },
+  { key: "social",    Component: IconSocial,    label: "Social",    color: "oklch(0.58 0.18 340)" },
+  { key: "creative",  Component: IconCreative,  label: "Creative",  color: "oklch(0.55 0.14 310)" },
+  { key: "mindful",   Component: IconMindful,   label: "Mindful",   color: "oklch(0.55 0.10 250)" },
+  { key: "fitness",   Component: IconFitness,   label: "Fitness",   color: "oklch(0.53 0.18 340)" },
+  { key: "nutrition", Component: IconNutrition, label: "Nutrition", color: "oklch(0.52 0.12 320)" },
 ];
 
 const M = {
-  coral:    "var(--c-deep)",
-  coralBg:  "var(--c-accent-bg-sm)",
-  coralBdr: "var(--c-accent-bd-sm)",
-  pink:     "var(--c-accent)",
-  pinkBg:   "var(--c-accent-bg-md)",
-  pinkBdr:  "var(--c-accent-bd-md)",
-  slumber:  "var(--c-muted-text)",
-  slumBg:   "var(--c-pale-bg2)",
-  slumBdr:  "var(--c-mid-border)",
-  archiveBg:  "var(--c-accent-bg-xs)",
-  archiveBdr: "var(--c-light-border)",
-  archiveClr: "var(--c-accent-faint)",
-  ink:      "var(--c-ink)",
-  muted:    "var(--c-muted-text)",
-  border:   "var(--c-light-border)",
-  card:     "var(--c-pale-bg3)",
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
+  pink:     "oklch(0.62 0.06 20)",
+  pinkBg:   "oklch(0.62 0.06 20 / 0.08)",
+  pinkBdr:  "oklch(0.62 0.06 20 / 0.28)",
+  slumber:  "oklch(0.55 0.018 70)",
+  slumBg:   "oklch(0.72 0.018 75 / 0.15)",
+  slumBdr:  "oklch(0.72 0.018 75 / 0.40)",
+  archiveBg:  "oklch(0.70 0.04 220 / 0.10)",
+  archiveBdr: "oklch(0.60 0.06 220 / 0.30)",
+  archiveClr: "oklch(0.48 0.07 220)",
+  ink:      "oklch(0.28 0.018 65)",
+  muted:    "oklch(0.55 0.018 70)",
+  border:   "oklch(0.88 0.014 75)",
+  card:     "oklch(0.985 0.007 80)",
 };
 
 // ── Floating icon picker popover ───────────────────────────────────────────────
@@ -209,7 +209,7 @@ function IconPickerPopover({
         display: "grid",
         gridTemplateColumns: "repeat(4, 1fr)",
         gap: 6,
-        boxShadow: "0 4px 20px var(--c-accent-bg-lg)",
+        boxShadow: "0 4px 20px oklch(0.28 0.018 65 / 0.12)",
         minWidth: 196,
       }}
     >
@@ -277,7 +277,7 @@ function WinCard({
   const isBlockWin = win.iconIdx === 99;
   const iconIdx = isBlockWin ? 0 : (typeof win.iconIdx === "number" ? win.iconIdx % WIN_ICONS.length : 0);
   const iconDef = WIN_ICONS[iconIdx];
-  const blockColor = "var(--c-deep)"; // deep accent for block wins
+  const blockColor = "oklch(0.55 0.13 35)"; // deep terracotta for block wins
   const isEditing = editingWinId === win.id;
 
   return (
@@ -288,7 +288,7 @@ function WinCard({
           ? M.archiveBg
           : isToday
           ? M.pinkBg
-          : "var(--c-pale-bg2)",
+          : "oklch(0.93 0.012 78 / 0.4)",
         border: `1px solid ${isArchiveView ? M.archiveBdr : isToday ? M.pinkBdr : M.border}`,
         opacity: isArchiveView ? 0.75 : isToday ? 1 : 0.65,
         borderRadius: 6,
@@ -345,9 +345,9 @@ function WinCard({
               marginBottom: 3,
               padding: "2px 6px",
               borderRadius: 4,
-              background: "var(--c-light)",
-              border: "1px solid var(--c-mid-border)",
-              color: "var(--c-deep)",
+              background: "oklch(0.88 0.06 35)",
+              border: "1px solid oklch(0.75 0.10 35 / 0.4)",
+              color: "oklch(0.40 0.13 35)",
               fontSize: 10,
               fontFamily: "'DM Mono', monospace",
               fontWeight: 600,
@@ -425,10 +425,10 @@ function WinCard({
                 alignItems: "center",
                 justifyContent: "center",
                 borderRadius: 5,
-                border: "1px solid var(--c-accent-bd-sm)",
+                border: "1px solid oklch(0.65 0.12 15 / 0.30)",
                 background: "transparent",
                 cursor: "pointer",
-                color: "var(--c-deep)",
+                color: "oklch(0.55 0.12 15)",
               }}
             >
               <Trash2 size={13} />

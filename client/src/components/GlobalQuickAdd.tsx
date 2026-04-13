@@ -11,19 +11,19 @@ import { trpc } from "@/lib/trpc";
 import type { Task } from "./TaskManager";
 
 const M = {
-  coral:    "var(--c-accent)",
-  coralBg:  "var(--c-accent-bg-sm)",
-  coralBdr: "var(--c-accent-bd-md)",
-  ink:      "var(--c-shadow-ink2)",
-  muted:    "var(--c-accent-faint)",
-  border:   "var(--c-light-soft)",
-  card:     "var(--c-pale-bg3)",
+  coral:    "oklch(0.58 0.18 340)",
+  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
+  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
+  ink:      "oklch(0.28 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  border:   "oklch(0.82 0.050 340)",
+  card:     "oklch(0.975 0.018 355)",
 };
 
 const PRIORITY_CFG = {
-  urgent: { label: "Urgent", Icon: Flame, color: "var(--c-deep)",  bg: "var(--c-accent-bg-sm)",  border: "var(--c-accent-bd-sm)" },
-  focus:  { label: "Focus",  Icon: Zap,   color: "var(--c-accent)", bg: "var(--c-accent-bg-md)", border: "var(--c-accent-bd-md)" },
-  normal: { label: "Normal", Icon: Star,  color: "var(--c-accent-muted)", bg: "var(--c-accent-bg-md)", border: "var(--c-accent-bd-sm)" },
+  urgent: { label: "Urgent", Icon: Flame, color: "oklch(0.55 0.09 35)",  bg: "oklch(0.55 0.09 35 / 0.08)",  border: "oklch(0.55 0.09 35 / 0.28)" },
+  focus:  { label: "Focus",  Icon: Zap,   color: "oklch(0.52 0.14 290)", bg: "oklch(0.52 0.14 290 / 0.08)", border: "oklch(0.52 0.14 290 / 0.28)" },
+  normal: { label: "Normal", Icon: Star,  color: "oklch(0.55 0.10 330)", bg: "oklch(0.72 0.10 330 / 0.10)", border: "oklch(0.72 0.10 330 / 0.30)" },
 } as const;
 
 type Priority = "urgent" | "focus" | "normal";
@@ -165,7 +165,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
           onClick={() => setOpen(true)}
           title="Quick add task (⌘K or +)"
           className="w-12 h-12 flex items-center justify-center transition-all duration-200 active:translate-y-[2px] active:shadow-none"
-          style={{ background: "var(--c-pale-bg3)", border: `2px solid ${M.ink}`, boxShadow: `3px 3px 0 ${M.ink}`, fontFamily: "'Space Mono', monospace" }}
+          style={{ background: "oklch(0.975 0.018 355)", border: `2px solid ${M.ink}`, boxShadow: `3px 3px 0 ${M.ink}`, fontFamily: "'Space Mono', monospace" }}
         >
           <Plus className="w-5 h-5" style={{ color: M.coral }} />
         </button>
@@ -178,7 +178,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
       {open && (
         <div
           className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4"
-          style={{ background: "var(--c-accent-bg-sm)", backdropFilter: "blur(4px)" }}
+          style={{ background: "oklch(0.18 0.01 60 / 0.25)", backdropFilter: "blur(4px)" }}
           onClick={closeModal}
         >
           <div
@@ -249,7 +249,7 @@ export function GlobalQuickAdd({ onAddTask }: GlobalQuickAddProps) {
                     <div
                       key={chip}
                       className="flex items-center justify-between gap-2 px-3 py-2"
-                      style={{ border: `1px solid ${M.border}`, background: "var(--c-pale-bg3)" }}
+                      style={{ border: `1px solid ${M.border}`, background: "oklch(0.99 0.010 355)" }}
                     >
                       <span className="text-xs flex-1 truncate" style={{ color: M.ink, fontFamily: "'DM Sans', sans-serif" }}>{chip}</span>
                       <button

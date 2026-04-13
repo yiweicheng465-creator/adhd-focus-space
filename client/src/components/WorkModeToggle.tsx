@@ -89,7 +89,7 @@ export function WorkModeToggle() {
         height="18"
         viewBox="0 0 24 24"
         fill="none"
-        stroke={enabled ? "var(--c-shadow-ink)" : "var(--c-accent-icon)"}
+        stroke={enabled ? "oklch(0.20 0 0)" : "oklch(0.55 0.040 330)"}
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -107,7 +107,7 @@ export function WorkModeToggle() {
           fontFamily:    "'Space Mono', monospace",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
-          color:         enabled ? "var(--c-shadow-ink)" : "var(--c-accent-icon)",
+          color:         enabled ? "oklch(0.20 0 0)" : "oklch(0.55 0.040 330)",
           lineHeight:    1,
           fontWeight:    enabled ? 700 : 400,
         }}

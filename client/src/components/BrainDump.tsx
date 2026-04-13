@@ -32,18 +32,18 @@ interface BrainDumpProps {
 }
 
 const M = {
-  coral:    "var(--c-accent)",
-  coralBg:  "var(--c-accent-bg-sm)",
-  coralBdr: "var(--c-accent-bd-md)",
-  sage:     "var(--c-accent-soft)",
-  sageBg:   "var(--c-accent-bg-md)",
-  sageBdr:  "var(--c-accent-bd-md)",
-  ink:      "var(--c-shadow-ink2)",
-  muted:    "var(--c-accent-faint)",
-  border:   "var(--c-light-soft)",
-  card:     "var(--c-pale-bg3)",
-  tagBg:    "var(--c-accent-bg-sm)",
-  tagBdr:   "var(--c-accent-bg-lg)",
+  coral:    "oklch(0.58 0.18 340)",
+  coralBg:  "oklch(0.58 0.18 340 / 0.08)",
+  coralBdr: "oklch(0.58 0.18 340 / 0.28)",
+  sage:     "oklch(0.52 0.10 168)",
+  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
+  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
+  ink:      "oklch(0.28 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  border:   "oklch(0.82 0.050 340)",
+  card:     "oklch(0.975 0.018 355)",
+  tagBg:    "oklch(0.58 0.18 340 / 0.10)",
+  tagBdr:   "oklch(0.58 0.18 340 / 0.22)",
 };
 
 /** Extract all #tags from a string, return lowercase without the # */
@@ -69,7 +69,7 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
               style={{
                 background: isActive ? M.coral : M.tagBg,
                 border: `1px solid ${isActive ? M.coral : M.tagBdr}`,
-                color: isActive ? "var(--c-pale-bg)" : M.coral,
+                color: isActive ? "oklch(0.97 0.010 355)" : M.coral,
                 fontFamily: "'DM Sans', sans-serif",
                 letterSpacing: "0.04em",
               }}
@@ -324,7 +324,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
           <div style={{
             display: "flex",
             alignItems: "center",
-            background: "var(--c-light-divider)",
+            background: "oklch(0.88 0.060 340)",
             borderBottom: `2px solid ${M.border}`,
             padding: "0 10px",
             height: 28,
@@ -381,9 +381,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     display: "inline-block", marginTop: 2, padding: "1px 5px",
                     fontSize: 7, letterSpacing: "0.12em", textTransform: "uppercase",
                     fontFamily: "'JetBrains Mono', monospace",
-                    background: item.category === "task" ? "var(--c-pale)" : item.category === "goal" ? "var(--c-pale)" : item.category === "worry" ? "var(--c-pale)" : "var(--c-pale)",
-                    color: item.category === "task" ? "var(--c-deep)" : item.category === "goal" ? "var(--c-deep)" : item.category === "worry" ? "var(--c-deep)" : M.muted,
-                    border: `1px solid ${item.category === "task" ? "var(--c-light)" : item.category === "goal" ? "var(--c-light)" : item.category === "worry" ? "var(--c-light)" : M.border}`,
+                    background: item.category === "task" ? "oklch(0.93 0.030 168)" : item.category === "goal" ? "oklch(0.93 0.030 290)" : item.category === "worry" ? "oklch(0.93 0.030 355)" : "oklch(0.93 0.020 340)",
+                    color: item.category === "task" ? "oklch(0.40 0.10 168)" : item.category === "goal" ? "oklch(0.40 0.10 290)" : item.category === "worry" ? "oklch(0.40 0.10 355)" : M.muted,
+                    border: `1px solid ${item.category === "task" ? "oklch(0.75 0.08 168)" : item.category === "goal" ? "oklch(0.75 0.08 290)" : item.category === "worry" ? "oklch(0.75 0.08 355)" : M.border}`,
                   }}>
                     {item.category}
                   </span>
@@ -394,7 +394,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     title="Add to tasks"
                     style={{
                       display: "flex", alignItems: "center", gap: 3, padding: "3px 8px",
-                      background: "var(--c-light-divider)", border: `1px solid ${M.border}`,
+                      background: "oklch(0.88 0.060 340)", border: `1px solid ${M.border}`,
                       color: M.ink, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                       fontSize: 7, letterSpacing: "0.10em", boxShadow: `1px 1px 0 ${M.border}`,
                     }}
@@ -407,7 +407,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                       title="Add to goals"
                       style={{
                         display: "flex", alignItems: "center", gap: 3, padding: "3px 8px",
-                        background: "var(--c-light-divider)", border: `1px solid ${M.border}`,
+                        background: "oklch(0.88 0.060 340)", border: `1px solid ${M.border}`,
                         color: M.ink, cursor: "pointer", fontFamily: "'JetBrains Mono', monospace",
                         fontSize: 7, letterSpacing: "0.10em", boxShadow: `1px 1px 0 ${M.border}`,
                       }}
@@ -471,7 +471,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                 Showing {visibleEntries.length} idea{visibleEntries.length !== 1 ? "s" : ""} tagged
               </span>
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium"
-                style={{ background: M.coral, border: `1px solid ${M.coral}`, color: "var(--c-pale-bg3)", fontFamily: "'DM Sans', sans-serif" }}>
+                style={{ background: M.coral, border: `1px solid ${M.coral}`, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}>
                 <Hash className="w-2.5 h-2.5" />
                 {activeTag}
               </span>
@@ -496,8 +496,8 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               disabled={categorizeMutation.isPending}
               className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium transition-all"
               style={{
-                background: categorizeMutation.isPending ? "var(--c-light-divider)" : "var(--c-accent-bg-sm)",
-                border: `1px solid var(--c-accent-bd-md)`,
+                background: categorizeMutation.isPending ? "oklch(0.88 0.060 340)" : "oklch(0.58 0.18 340 / 0.10)",
+                border: `1px solid oklch(0.58 0.18 340 / 0.28)`,
                 color: M.coral, fontFamily: "'DM Sans', sans-serif", borderRadius: 6,
                 cursor: categorizeMutation.isPending ? "not-allowed" : "pointer",
               }}
@@ -543,7 +543,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               key={entry.id}
               className={cn("group flex flex-col gap-2 p-3 transition-all")}
               style={{
-                background: entry.converted ? "var(--c-pale-bg2)" : M.card,
+                background: entry.converted ? "oklch(0.93 0.030 355 / 0.5)" : M.card,
                 border: `1px solid ${M.border}`,
                 opacity: entry.converted ? 0.55 : 1,
               }}

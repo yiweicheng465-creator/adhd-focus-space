@@ -7,15 +7,15 @@ import { useLocation } from "wouter";
 import { Sidebar } from "@/components/Sidebar";
 
 const M = {
-  bg:      "var(--c-pale-bg3)",
-  card:    "var(--c-pale-bg3)",
-  border:  "var(--c-light-neutral)",
-  ink:     "var(--c-ink)",
-  muted:   "var(--c-muted-text)",
-  coral:   "var(--c-deep)",
-  coralBg: "var(--c-accent-bg-sm)",
-  sage:    "var(--c-accent)",
-  sageBg:  "var(--c-accent-bg-sm)",
+  bg:      "oklch(0.975 0.012 80)",
+  card:    "oklch(0.975 0.018 75)",
+  border:  "oklch(0.88 0.012 75)",
+  ink:     "oklch(0.28 0.018 65)",
+  muted:   "oklch(0.55 0.018 70)",
+  coral:   "oklch(0.55 0.09 35)",
+  coralBg: "oklch(0.55 0.09 35 / 0.08)",
+  sage:    "oklch(0.52 0.07 145)",
+  sageBg:  "oklch(0.52 0.07 145 / 0.08)",
 };
 
 // ── Tear-strip illustration ───────────────────────────────────────────────────
@@ -29,10 +29,10 @@ function StripIllustration() {
   return (
     <svg width="110" height="148" viewBox="0 0 110 148" fill="none" style={{ flexShrink: 0 }}>
       {/* Paper background */}
-      <rect x="4" y="4" width="102" height="140" rx="3" fill="var(--c-pale-bg3)" stroke="var(--c-light-neutral)" strokeWidth="1.2" />
+      <rect x="4" y="4" width="102" height="140" rx="3" fill="oklch(0.99 0.005 80)" stroke="oklch(0.82 0.015 75)" strokeWidth="1.2" />
       {/* Torn-edge top */}
       <path d="M4 4 Q14 10 24 4 Q34 10 44 4 Q54 10 64 4 Q74 10 84 4 Q94 10 104 4 L106 4 L106 8 Q94 14 84 8 Q74 14 64 8 Q54 14 44 8 Q34 14 24 8 Q14 14 4 8 Z"
-        fill="var(--c-pale-bg)" />
+        fill="oklch(0.93 0.012 75)" />
       {/* Strips */}
       {strips.map((s, i) => {
         const y = 20 + i * 30;
@@ -41,8 +41,8 @@ function StripIllustration() {
           <g key={i}>
             {/* Strip body */}
             <rect x="10" y={y} width="90" height="22" rx="2"
-              fill={isTorn ? "var(--c-pale-bg)" : "var(--c-pale-bg3)"}
-              stroke={isTorn ? "var(--c-light-neutral)" : "var(--c-accent-bd-sm)"}
+              fill={isTorn ? "oklch(0.92 0.01 75)" : "oklch(0.97 0.008 80)"}
+              stroke={isTorn ? "oklch(0.80 0.015 75)" : "oklch(0.55 0.09 35 / 0.4)"}
               strokeWidth="0.9"
               opacity={isTorn ? 0.5 : 1}
             />
@@ -50,13 +50,13 @@ function StripIllustration() {
             {isTorn && (
               <path
                 d={`M 90 ${y + 2} Q 93 ${y + 7} 90 ${y + 11} Q 93 ${y + 15} 90 ${y + 20}`}
-                fill="none" stroke="var(--c-light-neutral)" strokeWidth="0.8" strokeDasharray="2 2"
+                fill="none" stroke="oklch(0.70 0.015 75)" strokeWidth="0.8" strokeDasharray="2 2"
               />
             )}
             {/* Label text */}
             <text x="18" y={y + 14}
               fontFamily="'DM Sans', sans-serif" fontSize="7.5"
-              fill={isTorn ? "var(--c-muted-text)" : "var(--c-ink-soft)"}
+              fill={isTorn ? "oklch(0.65 0.015 70)" : "oklch(0.35 0.018 65)"}
               opacity={isTorn ? 0.6 : 1}
             >
               {s.label}
@@ -64,7 +64,7 @@ function StripIllustration() {
             {/* Strikethrough for torn */}
             {isTorn && (
               <line x1="18" y1={y + 11} x2={18 + s.label.length * 4.4} y2={y + 11}
-                stroke="var(--c-deep)" strokeWidth="0.9" opacity="0.5" />
+                stroke="oklch(0.55 0.09 35)" strokeWidth="0.9" opacity="0.5" />
             )}
           </g>
         );
@@ -78,9 +78,9 @@ const CONCEPTS = [
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
         {/* Paper strip with tear */}
-        <rect x="3" y="8" width="22" height="12" rx="2" fill="var(--c-accent-bg-sm)" stroke="var(--c-deep)" strokeWidth="1.3" />
-        <path d="M19 8 Q21 11 19 14 Q21 17 19 20" fill="none" stroke="var(--c-deep)" strokeWidth="1.1" strokeDasharray="2 1.5" />
-        <line x1="7" y1="14" x2="16" y2="14" stroke="var(--c-deep)" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
+        <rect x="3" y="8" width="22" height="12" rx="2" fill="oklch(0.55 0.09 35 / 0.12)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
+        <path d="M19 8 Q21 11 19 14 Q21 17 19 20" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.1" strokeDasharray="2 1.5" />
+        <line x1="7" y1="14" x2="16" y2="14" stroke="oklch(0.55 0.09 35)" strokeWidth="1" strokeLinecap="round" opacity="0.6" />
       </svg>
     ),
     title: "The Strips = Things to Let Go Of",
@@ -89,8 +89,8 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <path d="M4 20 Q8 10 14 14 Q20 18 24 8" fill="none" stroke="var(--c-accent)" strokeWidth="1.6" strokeLinecap="round" />
-        <circle cx="24" cy="8" r="3" fill="var(--c-accent-bd-sm)" stroke="var(--c-accent)" strokeWidth="1.2" />
+        <path d="M4 20 Q8 10 14 14 Q20 18 24 8" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="24" cy="8" r="3" fill="oklch(0.52 0.07 145 / 0.3)" stroke="oklch(0.52 0.07 145)" strokeWidth="1.2" />
       </svg>
     ),
     title: "Tearing = Progress",
@@ -99,8 +99,8 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <circle cx="14" cy="14" r="9" fill="var(--c-accent-bg-sm)" stroke="var(--c-deep)" strokeWidth="1.3" />
-        <path d="M14 9 L14 14 L18 16" stroke="var(--c-deep)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="14" cy="14" r="9" fill="oklch(0.55 0.09 35 / 0.12)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
+        <path d="M14 9 L14 14 L18 16" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     title: "The Timer = One Thing at a Time",
@@ -110,10 +110,10 @@ const CONCEPTS = [
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
         {/* Cycle arrows */}
-        <path d="M8 6 Q14 3 20 6 Q24 10 22 16" fill="none" stroke="var(--c-accent)" strokeWidth="1.4" strokeLinecap="round" />
-        <path d="M20 22 Q14 25 8 22 Q4 18 6 12" fill="none" stroke="var(--c-deep)" strokeWidth="1.4" strokeLinecap="round" />
-        <polyline points="22,12 22,16 18,16" fill="none" stroke="var(--c-accent)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-        <polyline points="6,18 6,12 10,12" fill="none" stroke="var(--c-deep)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M8 6 Q14 3 20 6 Q24 10 22 16" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.4" strokeLinecap="round" />
+        <path d="M20 22 Q14 25 8 22 Q4 18 6 12" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.4" strokeLinecap="round" />
+        <polyline points="22,12 22,16 18,16" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+        <polyline points="6,18 6,12 10,12" fill="none" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
     ),
     title: "Cycles = Rhythm, Not Grind",
@@ -122,9 +122,9 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <rect x="5" y="12" width="18" height="12" rx="3" fill="var(--c-accent-bg-sm)" stroke="var(--c-accent)" strokeWidth="1.3" />
-        <path d="M10 12 V9 Q10 5 14 5 Q18 5 18 9 V12" fill="none" stroke="var(--c-accent)" strokeWidth="1.3" strokeLinecap="round" />
-        <circle cx="14" cy="18" r="2" fill="var(--c-accent)" />
+        <rect x="5" y="12" width="18" height="12" rx="3" fill="oklch(0.52 0.07 145 / 0.15)" stroke="oklch(0.52 0.07 145)" strokeWidth="1.3" />
+        <path d="M10 12 V9 Q10 5 14 5 Q18 5 18 9 V12" fill="none" stroke="oklch(0.52 0.07 145)" strokeWidth="1.3" strokeLinecap="round" />
+        <circle cx="14" cy="18" r="2" fill="oklch(0.52 0.07 145)" />
       </svg>
     ),
     title: "Wins = Evidence You Exist",
@@ -133,8 +133,8 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <line x1="5" y1="2" x2="5" y2="26" stroke="var(--c-deep)" strokeWidth="1.6" strokeLinecap="round" />
-        <path d="M5 4 L20 8 L5 12 Z" fill="var(--c-accent-bg-md)" stroke="var(--c-deep)" strokeWidth="1.2" />
+        <line x1="5" y1="2" x2="5" y2="26" stroke="oklch(0.55 0.09 35)" strokeWidth="1.6" strokeLinecap="round" />
+        <path d="M5 4 L20 8 L5 12 Z" fill="oklch(0.55 0.09 35 / 0.25)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.2" />
       </svg>
     ),
     title: "Goals = Direction, Not Pressure",
@@ -143,11 +143,11 @@ const CONCEPTS = [
   {
     icon: (
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-        <rect x="5" y="8" width="18" height="16" rx="2.5" fill="var(--c-accent-bg-sm)" stroke="var(--c-muted-text)" strokeWidth="1.3" />
-        <circle cx="10" cy="16" r="2.5" fill="none" stroke="var(--c-muted-text)" strokeWidth="1" />
-        <circle cx="18" cy="16" r="2.5" fill="none" stroke="var(--c-muted-text)" strokeWidth="1" />
-        <line x1="14" y1="8" x2="14" y2="4" stroke="var(--c-muted-text)" strokeWidth="1.2" />
-        <circle cx="14" cy="3" r="1.5" fill="none" stroke="var(--c-muted-text)" strokeWidth="1" />
+        <rect x="5" y="8" width="18" height="16" rx="2.5" fill="oklch(0.55 0.018 70 / 0.12)" stroke="oklch(0.55 0.018 70)" strokeWidth="1.3" />
+        <circle cx="10" cy="16" r="2.5" fill="none" stroke="oklch(0.55 0.018 70)" strokeWidth="1" />
+        <circle cx="18" cy="16" r="2.5" fill="none" stroke="oklch(0.55 0.018 70)" strokeWidth="1" />
+        <line x1="14" y1="8" x2="14" y2="4" stroke="oklch(0.55 0.018 70)" strokeWidth="1.2" />
+        <circle cx="14" cy="3" r="1.5" fill="none" stroke="oklch(0.55 0.018 70)" strokeWidth="1" />
       </svg>
     ),
     title: "AI Agents = Extended Cognition",
@@ -174,9 +174,9 @@ export default function Insight() {
         >
 
           <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-            <circle cx="9" cy="9" r="7" fill="var(--c-accent-bg-sm)" stroke="var(--c-deep)" strokeWidth="1.3" />
-            <line x1="9" y1="6" x2="9" y2="10" stroke="var(--c-deep)" strokeWidth="1.5" strokeLinecap="round" />
-            <circle cx="9" cy="12.5" r="0.9" fill="var(--c-deep)" />
+            <circle cx="9" cy="9" r="7" fill="oklch(0.55 0.09 35 / 0.15)" stroke="oklch(0.55 0.09 35)" strokeWidth="1.3" />
+            <line x1="9" y1="6" x2="9" y2="10" stroke="oklch(0.55 0.09 35)" strokeWidth="1.5" strokeLinecap="round" />
+            <circle cx="9" cy="12.5" r="0.9" fill="oklch(0.55 0.09 35)" />
           </svg>
           <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.65rem", fontWeight: 600, letterSpacing: "0.18em", textTransform: "uppercase", color: M.muted }}>
             INSIGHT
@@ -188,7 +188,7 @@ export default function Insight() {
           {/* Hero */}
           <div
             className="flex items-center gap-8 mb-10 p-7"
-            style={{ background: M.coralBg, border: `1px solid var(--c-accent-bg-sm)` }}
+            style={{ background: M.coralBg, border: `1px solid oklch(0.55 0.09 35 / 0.18)` }}
           >
             <div className="shrink-0">
               <StripIllustration />
@@ -211,15 +211,15 @@ export default function Insight() {
             {CONCEPTS.map(({ icon, title, body }) => (
               <div
                 key={title}
-                style={{ background: M.card, border: `1px solid ${M.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 var(--c-light-neutral)" }}
+                style={{ background: M.card, border: `1px solid ${M.border}`, borderRadius: 10, overflow: "hidden", boxShadow: "3px 3px 0 oklch(0.65 0.04 75)" }}
               >
-                <div style={{ background: "var(--c-ink)", padding: "4px 10px", display: "flex", alignItems: "center", gap: 6 }}>
+                <div style={{ background: "oklch(0.28 0.018 65)", padding: "4px 10px", display: "flex", alignItems: "center", gap: 6 }}>
                   <div style={{ display: "flex", gap: 4 }}>
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--c-deep)" }} />
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--c-light-neutral)" }} />
-                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--c-light-neutral)" }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.55 0.14 35)" }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
+                    <div style={{ width: 7, height: 7, borderRadius: "50%", background: "oklch(0.65 0.04 75)" }} />
                   </div>
-                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "var(--c-light-neutral)", marginLeft: 4 }}>insight.txt</span>
+                  <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: "oklch(0.75 0.02 75)", marginLeft: 4 }}>insight.txt</span>
                 </div>
                 <div className="flex items-start gap-5 p-5">
                 <div className="shrink-0 mt-0.5">{icon}</div>
@@ -251,7 +251,7 @@ export default function Insight() {
                   textTransform: "uppercase",
                   color: M.coral,
                   background: "transparent",
-                  border: `1px solid var(--c-accent-bd-sm)`,
+                  border: `1px solid oklch(0.55 0.09 35 / 0.35)`,
                   padding: "8px 20px",
                   cursor: "pointer",
                   transition: "all 0.15s",

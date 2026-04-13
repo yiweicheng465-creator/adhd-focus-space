@@ -212,7 +212,7 @@ function VerticalSlider({
   mutedColor: string;
 }) {
   const [dragging, setDragging] = useState(false);
-  const trackColor = enabled ? "var(--c-light-divider)" : "var(--c-light-divider)";
+  const trackColor = enabled ? "oklch(0.88 0.06 340)" : "oklch(0.88 0.015 330)";
   const fillColor  = enabled ? activeColor : mutedColor;
 
   function calcPct(clientY: number, rect: DOMRect) {
@@ -227,7 +227,7 @@ function VerticalSlider({
         height:       52,
         background:   trackColor,
         borderRadius: 5,
-        border:       `1px solid ${enabled ? "var(--c-mid-border)" : "var(--c-light)"}`,
+        border:       `1px solid ${enabled ? "oklch(0.80 0.06 340)" : "oklch(0.82 0.015 330)"}`,
         cursor:       "ns-resize",
         overflow:     "hidden",
         transition:   "background 0.2s, border-color 0.2s",
@@ -264,8 +264,8 @@ export function FilmGrainToggle() {
   const { intensity, setIntensity, speed, setSpeed } = useFilmGrain();
   const enabled = intensity > 0;
 
-  const activeColor = "var(--c-accent)";
-  const mutedColor  = "var(--c-accent-soft)";
+  const activeColor = "oklch(0.55 0.18 340)";
+  const mutedColor  = "oklch(0.65 0.040 330)";
 
   return (
     <div
@@ -295,8 +295,8 @@ export function FilmGrainToggle() {
 
         {/* Speed slider */}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
-          <VerticalSlider value={speed} onChange={setSpeed} enabled={enabled} activeColor="var(--c-accent-muted)" mutedColor={mutedColor} />
-          <span style={{ fontSize: "0.38rem", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", textTransform: "uppercase", color: enabled ? "var(--c-accent-muted)" : mutedColor, lineHeight: 1 }}>
+          <VerticalSlider value={speed} onChange={setSpeed} enabled={enabled} activeColor="oklch(0.55 0.14 295)" mutedColor={mutedColor} />
+          <span style={{ fontSize: "0.38rem", fontFamily: "'Space Mono', monospace", letterSpacing: "0.05em", textTransform: "uppercase", color: enabled ? "oklch(0.55 0.14 295)" : mutedColor, lineHeight: 1 }}>
             {speed === 0 ? "FRZ" : `${speed}%`}
           </span>
         </div>

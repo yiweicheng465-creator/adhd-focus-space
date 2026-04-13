@@ -103,13 +103,13 @@ function TearStrip({
   if (hidden || state === "torn") return null;
 
   // Colors — watercolor pastel theme
-  const bgActive   = "var(--c-pale-bg)"; // soft lavender tint
-  const bgInactive = "var(--c-pale-bg2)"; // very light lavender
-  const inkActive  = "var(--c-ink)";
-  const inkInactive = "var(--c-muted-text)";
-  const dotColor   = "var(--c-accent)"; // pink dot
-  const ruleColor  = "var(--c-light)";
-  const marginColor = "var(--c-accent-dim)";
+  const bgActive   = "oklch(0.96 0.018 310 / 0.55)"; // soft lavender tint
+  const bgInactive = "oklch(0.97 0.010 300 / 0.35)"; // very light lavender
+  const inkActive  = "oklch(0.22 0.030 300)";
+  const inkInactive = "oklch(0.48 0.020 290)";
+  const dotColor   = "oklch(0.55 0.18 340)"; // pink dot
+  const ruleColor  = "oklch(0.80 0.018 300)";
+  const marginColor = "oklch(0.65 0.15 340)";
 
   return (
     <div
@@ -130,9 +130,9 @@ function TearStrip({
         background: isActive ? bgActive : bgInactive,
         // Active strip: elevated with shadow to look peeled off page
         boxShadow: isActive
-          ? "0 3px 12px var(--c-accent-bd-sm), 0 1px 3px var(--c-accent-bg-md)"
+          ? "0 3px 12px oklch(0.55 0.12 310 / 0.25), 0 1px 3px oklch(0.55 0.12 310 / 0.15)"
           : "none",
-        borderBottom: `1px solid var(--c-mid-border)`,
+        borderBottom: `1px solid oklch(0.82 0.018 300 / 0.5)`,
         transition: "box-shadow 0.3s, background 0.3s",
         overflow: "hidden",
       }}>
@@ -168,8 +168,8 @@ function TearStrip({
             // The "torn away" portion grows from right to left as progress increases
             width: `${progress * 100}%`,
             background: `linear-gradient(to left,
-              var(--c-pale-bg3) 0%,
-              var(--c-pale-bg2) 40%,
+              oklch(0.94 0.018 70 / 0.85) 0%,
+              oklch(0.90 0.016 70 / 0.50) 40%,
               transparent 100%
             )`,
             transition: "width 1s linear",
@@ -184,7 +184,7 @@ function TearStrip({
             bottom: 0,
             right: `${progress * 100}%`,
             width: 2,
-            background: "linear-gradient(to bottom, transparent 0%, var(--c-mid-border) 30%, var(--c-mid-border) 70%, transparent 100%)",
+            background: "linear-gradient(to bottom, transparent 0%, oklch(0.72 0.022 65 / 0.6) 30%, oklch(0.72 0.022 65 / 0.6) 70%, transparent 100%)",
             pointerEvents: "none",
           }} />
         )}
@@ -377,12 +377,12 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
 
   // Colors / tokens — watercolor pastel
   const C = {
-    bg:       "var(--c-pale)",  // soft lavender
-    border:   "var(--c-light)",  // lavender border
-    ink:      "var(--c-ink)",  // deep purple-ink
-    muted:    "var(--c-muted-text)",  // muted lavender
-    accent:   "var(--c-accent-hover)",   // pink-rose accent
-    shadow:   "var(--c-accent-bg-lg)",
+    bg:       "oklch(0.96 0.020 300)",  // soft lavender
+    border:   "oklch(0.80 0.025 300)",  // lavender border
+    ink:      "oklch(0.22 0.030 300)",  // deep purple-ink
+    muted:    "oklch(0.52 0.022 290)",  // muted lavender
+    accent:   "oklch(0.50 0.18 340)",   // pink-rose accent
+    shadow:   "oklch(0.55 0.12 310 / 0.20)",
   };
 
   return (
@@ -399,7 +399,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
       <div style={{
         padding: "10px 14px 8px",
         borderBottom: `1px solid ${C.border}`,
-        background: "linear-gradient(135deg, var(--c-pale) 0%, var(--c-pale-bg3) 50%, var(--c-pale-bg) 100%)",
+        background: "linear-gradient(135deg, oklch(0.95 0.025 310) 0%, oklch(0.97 0.018 280) 50%, oklch(0.96 0.022 340) 100%)",
       }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ fontSize: 8, letterSpacing: "0.1em", color: C.muted, textTransform: "uppercase" }}>
@@ -440,12 +440,12 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         position: "relative",
         // Dreamy pastel watercolor gradient: lavender → pink → peach
         background: `
-          radial-gradient(ellipse at 20% 30%, var(--c-light-divider) 0%, transparent 55%),
-          radial-gradient(ellipse at 75% 15%, var(--c-light-hover) 0%, transparent 50%),
-          radial-gradient(ellipse at 55% 70%, var(--c-pale-bg2) 0%, transparent 55%),
-          radial-gradient(ellipse at 85% 80%, var(--c-pale-bg2) 0%, transparent 45%),
-          radial-gradient(ellipse at 10% 85%, var(--c-pale-bg2) 0%, transparent 45%),
-          var(--c-pale-bg3)
+          radial-gradient(ellipse at 20% 30%, oklch(0.88 0.060 310 / 0.55) 0%, transparent 55%),
+          radial-gradient(ellipse at 75% 15%, oklch(0.90 0.045 340 / 0.45) 0%, transparent 50%),
+          radial-gradient(ellipse at 55% 70%, oklch(0.92 0.038 280 / 0.50) 0%, transparent 55%),
+          radial-gradient(ellipse at 85% 80%, oklch(0.93 0.040 50 / 0.35) 0%, transparent 45%),
+          radial-gradient(ellipse at 10% 85%, oklch(0.90 0.035 200 / 0.30) 0%, transparent 45%),
+          oklch(0.97 0.012 300)
         `,
         // Ruled notebook lines
         backgroundBlendMode: "normal",
@@ -497,8 +497,8 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             to bottom,
             transparent,
             transparent ${STRIP_H - 1}px,
-            var(--c-accent-bg-sm) ${STRIP_H - 1}px,
-            var(--c-accent-bg-sm) ${STRIP_H}px
+            oklch(0.78 0.020 300 / 0.20) ${STRIP_H - 1}px,
+            oklch(0.78 0.020 300 / 0.20) ${STRIP_H}px
           )`,
           pointerEvents: "none",
           zIndex: 0,
@@ -528,7 +528,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         gap: 8,
         padding: "8px 12px",
         borderTop: `1px dashed ${C.border}`,
-        background: "var(--c-pale-bg3)",
+        background: "oklch(0.96 0.018 300 / 0.85)",
       }}>
         <input
           value={newItem}
@@ -553,7 +553,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             background: C.accent,
             border: "none",
             borderRadius: 2,
-            color: "var(--c-pale-bg3)",
+            color: "oklch(0.97 0.010 70)",
             fontSize: 14,
             lineHeight: 1,
             cursor: "pointer",
@@ -570,7 +570,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         justifyContent: "space-between",
         padding: "8px 12px",
         borderTop: `1px solid ${C.border}`,
-        background: "linear-gradient(135deg, var(--c-pale) 0%, var(--c-pale-bg3) 100%)",
+        background: "linear-gradient(135deg, oklch(0.95 0.025 310) 0%, oklch(0.97 0.018 280) 100%)",
       }}>
         <button
           onClick={handleStart}
@@ -579,8 +579,8 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             alignItems: "center",
             gap: 6,
             padding: "6px 16px",
-            background: phase === "complete" ? "var(--c-accent)" : C.accent,
-            color: "var(--c-pale-bg3)",
+            background: phase === "complete" ? "oklch(0.52 0.14 145)" : C.accent,
+            color: "oklch(0.97 0.010 70)",
             border: "none",
             borderRadius: 3,
             fontFamily: "'Space Mono', monospace",
@@ -589,7 +589,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
             textTransform: "uppercase",
             cursor: "pointer",
             fontWeight: 700,
-            boxShadow: "2px 2px 0 var(--c-accent-bg-sm)",
+            boxShadow: "2px 2px 0 oklch(0.30 0.018 55 / 0.20)",
           }}
         >
           {phase === "complete" ? "▶ AGAIN" : running ? "⏸ PAUSE" : "▶ START"}
@@ -605,8 +605,8 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
                 background: i < tornCount
                   ? C.accent
                   : i === activeIdx
-                    ? "var(--c-light-neutral)"
-                    : "var(--c-light-neutral)",
+                    ? "oklch(0.72 0.040 68)"
+                    : "oklch(0.84 0.014 68)",
                 transition: "background 0.3s",
               }} />
             ))}
@@ -623,7 +623,7 @@ export function PaperTearTimer({ durationMinutes = 25 }: PaperTearTimerProps) {
         borderTop: `1px solid ${C.border}`,
         display: "flex",
         justifyContent: "space-between",
-        background: "var(--c-pale-bg3)",
+        background: "oklch(0.94 0.022 300 / 0.90)",
       }}>
         <span style={{ fontSize: 7.5, color: C.muted, letterSpacing: "0.08em" }}>
           {durationMinutes} MIN · FOCUS

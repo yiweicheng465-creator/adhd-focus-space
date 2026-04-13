@@ -11,11 +11,11 @@ interface NamePromptProps {
   onSkip: () => void;
 }
 
-const DARK   = "var(--c-shadow-ink2)";
-const ACCENT = "var(--c-accent)";
-const BORDER = "var(--c-mid-soft)";
-const BG     = "var(--c-pale-bg3)";
-const PANEL  = "var(--c-pale-bg)";
+const DARK   = "oklch(0.28 0.040 320)";
+const ACCENT = "oklch(0.58 0.18 340)";
+const BORDER = "oklch(0.78 0.060 340)";
+const BG     = "oklch(0.970 0.022 355)";
+const PANEL  = "oklch(0.960 0.018 350)";
 
 export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
   const [name, setName] = useState("");
@@ -40,7 +40,7 @@ export function NamePrompt({ onSave, onSkip }: NamePromptProps) {
     /* Backdrop */
     <div style={{
       position: "fixed", inset: 0, zIndex: 9999,
-      background: "var(--c-shadow-ink3)",
+      background: "oklch(0.28 0.04 320 / 0.45)",
       display: "flex", alignItems: "center", justifyContent: "center",
       backdropFilter: "blur(2px)",
     }}>

@@ -9,12 +9,12 @@ import { trpc } from "@/lib/trpc";
 import { toast } from "sonner";
 import { X, Key, Loader2, AlertCircle } from "lucide-react";
 
-const DARK   = "var(--c-shadow-ink2)";
-const ACCENT = "var(--c-accent)";
-const BORDER = "var(--c-mid-soft)";
-const BG     = "var(--c-pale-bg3)";
-const MUTED  = "var(--c-accent-icon)";
-const RED    = "var(--c-deep)";
+const DARK   = "oklch(0.28 0.040 320)";
+const ACCENT = "oklch(0.58 0.18 340)";
+const BORDER = "oklch(0.78 0.060 340)";
+const BG     = "oklch(0.970 0.022 355)";
+const MUTED  = "oklch(0.55 0.06 340)";
+const RED    = "oklch(0.52 0.20 25)";
 
 export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
@@ -84,7 +84,7 @@ export function ApiKeyDialog() {
     <div
       style={{
         position: "fixed", inset: 0, zIndex: 99999,
-        background: "var(--c-shadow-ink3)",
+        background: "oklch(0.28 0.04 320 / 0.55)",
         display: "flex", alignItems: "center", justifyContent: "center",
         backdropFilter: "blur(3px)",
         animation: "ft-fadeIn 0.2s ease forwards",
@@ -136,11 +136,11 @@ export function ApiKeyDialog() {
 
           {/* Payment warning */}
           <div style={{
-            background: "var(--c-pale)",
+            background: "oklch(0.96 0.030 60)",
             border: `1.5px solid oklch(0.75 0.12 60)`,
             padding: "9px 11px",
             fontSize: 8,
-            color: "var(--c-deep)",
+            color: "oklch(0.38 0.10 60)",
             letterSpacing: "0.04em",
             lineHeight: 1.65,
           }}>
@@ -163,7 +163,7 @@ export function ApiKeyDialog() {
                 maxLength={512}
                 style={{
                   border: `2px solid ${keyError ? RED : apiKeyInput.trim() ? ACCENT : BORDER}`,
-                  background: "var(--c-pale-bg)",
+                  background: "oklch(0.960 0.018 350)",
                   padding: "9px 44px 9px 10px",
                   fontSize: 11,
                   fontFamily: "'JetBrains Mono', monospace",

@@ -179,7 +179,7 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
           fontSize: "0.68rem",
           letterSpacing: "0.22em",
           textTransform: "uppercase",
-          color: "var(--c-accent-bd-md)",
+          color: "oklch(0.45 0.06 35 / 0.65)",
           marginBottom: 8,
         }}>
           ADHD Focus Space
@@ -191,11 +191,11 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
           fontSize: "clamp(1.6rem, 5vw, 2.4rem)",
           fontWeight: 700,
           fontStyle: "italic",
-          color: "var(--c-ink)",
+          color: "oklch(0.28 0.025 35)",
           lineHeight: 1.35,
           whiteSpace: "pre-line",
           maxWidth: 480,
-          textShadow: "0 1px 24px var(--c-pale-bg2)",
+          textShadow: "0 1px 24px oklch(0.98 0.01 50 / 0.6)",
         }}>
           {quote.text}
         </div>
@@ -204,7 +204,7 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
           <div style={{
             fontFamily: "'DM Sans', sans-serif",
             fontSize: "0.85rem",
-            color: "var(--c-accent-bd-sm)",
+            color: "oklch(0.50 0.04 35 / 0.70)",
             letterSpacing: "0.04em",
             fontStyle: "italic",
           }}>
@@ -220,7 +220,7 @@ export default function DailySplash({ onDone }: { onDone: () => void }) {
           fontSize: "0.65rem",
           letterSpacing: "0.16em",
           textTransform: "uppercase",
-          color: "var(--c-accent-bg-md)",
+          color: "oklch(0.50 0.04 35 / 0.45)",
           animation: "pulse-hint 2s ease-in-out infinite",
         }}>
           Tap to continue

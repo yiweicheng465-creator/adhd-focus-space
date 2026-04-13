@@ -153,64 +153,6 @@
   --m-border:        hsl(var(--base-hue), 20%, 83%);
   --m-bg:            hsl(var(--base-hue), 38%, 95%);
   --m-card:          hsl(var(--base-hue), 30%, 97%);
-
-  /* ── Component-level hue tokens (oklch equivalents, derived from --base-hue) ──
-     These replace hardcoded oklch(... 330/340) values in component inline styles.
-     Named by lightness level: --c-dark, --c-mid, --c-light, --c-pale, --c-ghost
-     Each has a -fg (foreground) and -border variant. */
-
-  /* Dark ink — title bar text, strong labels */
-  --c-ink:           oklch(0.28 0.040 var(--base-hue));
-  --c-ink-soft:      oklch(0.30 0.060 var(--base-hue));
-  /* Deep accent — active states, strong buttons */
-  --c-deep:          oklch(0.45 0.14 var(--base-hue));
-  --c-deep-text:     oklch(0.42 0.14 var(--base-hue));
-  /* Primary accent — buttons, active highlights */
-  --c-accent:        oklch(0.58 0.18 var(--base-hue));
-  --c-accent-hover:  oklch(0.52 0.18 var(--base-hue));
-  --c-accent-muted:  oklch(0.55 0.10 var(--base-hue));
-  --c-accent-text:   oklch(0.48 0.16 var(--base-hue));
-  --c-accent-label:  oklch(0.45 0.08 var(--base-hue));
-  --c-accent-icon:   oklch(0.55 0.08 var(--base-hue));
-  --c-accent-dim:    oklch(0.62 0.14 var(--base-hue));
-  --c-accent-soft:   oklch(0.65 0.06 var(--base-hue));
-  --c-accent-faint:  oklch(0.62 0.060 var(--base-hue));
-  /* Alpha variants for backgrounds and borders */
-  --c-accent-bg-xs:  oklch(0.58 0.18 var(--base-hue) / 0.05);
-  --c-accent-bg-sm:  oklch(0.58 0.18 var(--base-hue) / 0.08);
-  --c-accent-bg-md:  oklch(0.58 0.18 var(--base-hue) / 0.12);
-  --c-accent-bg-lg:  oklch(0.58 0.18 var(--base-hue) / 0.22);
-  --c-accent-bd-sm:  oklch(0.58 0.18 var(--base-hue) / 0.25);
-  --c-accent-bd-md:  oklch(0.58 0.18 var(--base-hue) / 0.28);
-  --c-accent-bd-lg:  oklch(0.58 0.18 var(--base-hue) / 0.30);
-  /* Mid tones — secondary borders, dividers */
-  --c-mid:           oklch(0.75 0.08 var(--base-hue));
-  --c-mid-soft:      oklch(0.78 0.060 var(--base-hue));
-  --c-mid-border:    oklch(0.80 0.06 var(--base-hue));
-  --c-mid-border2:   oklch(0.80 0.060 var(--base-hue));
-  --c-mid-shadow:    oklch(0.82 0.040 var(--base-hue) / 0.5);
-  --c-mid-shadow2:   oklch(0.80 0.060 var(--base-hue) / 0.4);
-  --c-mid-shadow3:   oklch(0.80 0.060 var(--base-hue) / 0.5);
-  --c-mid-active:    oklch(0.80 0.060 var(--base-hue) / 0.4);
-  /* Light tones — panel backgrounds, hover states */
-  --c-light:         oklch(0.82 0.060 var(--base-hue));
-  --c-light-soft:    oklch(0.82 0.050 var(--base-hue));
-  --c-light-border:  oklch(0.82 0.060 var(--base-hue));
-  --c-light-divider: oklch(0.88 0.060 var(--base-hue));
-  --c-light-hover:   oklch(0.90 0.04 var(--base-hue));
-  /* Pale tones — window panel backgrounds */
-  --c-pale:          oklch(0.93 0.020 var(--base-hue));
-  --c-pale-bg:       oklch(0.97 0.015 var(--base-hue));
-  --c-pale-bg2:      oklch(0.965 0.025 var(--base-hue) / 0.96);
-  --c-pale-bg3:      oklch(0.975 0.018 var(--base-hue) / 0.98);
-  /* Shadow ink */
-  --c-shadow-ink:    oklch(0.22 0.040 var(--base-hue));
-  --c-shadow-ink2:   oklch(0.28 0.040 var(--base-hue));
-  --c-shadow-ink3:   oklch(0.28 0.040 var(--base-hue) / 0.12);
-  /* Sidebar specific */
-  --c-sidebar-bg:    oklch(0.97 0.015 var(--base-hue));
-  --c-sidebar-border: oklch(0.80 0.060 var(--base-hue));
-  --c-sidebar-shadow: oklch(0.58 0.18 var(--base-hue) / 0.08);
 }
 
 @layer base {
@@ -226,10 +168,10 @@
     background-color: hsl(var(--base-hue), 38%, 95%);
     background-image:
       url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E"),
-      linear-gradient(hsl(var(--base-hue), 28%, 65%, 0.12) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--base-hue), 28%, 65%, 0.12) 1px, transparent 1px),
-      linear-gradient(hsl(var(--base-hue), 28%, 65%, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--base-hue), 28%, 65%, 0.05) 1px, transparent 1px);
+      linear-gradient(rgba(185, 140, 165, 0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(185, 140, 165, 0.12) 1px, transparent 1px),
+      linear-gradient(rgba(185, 140, 165, 0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(185, 140, 165, 0.05) 1px, transparent 1px);
     background-size: 200px 200px, 128px 128px, 128px 128px, 32px 32px, 32px 32px;
     background-attachment: fixed;
   }
@@ -250,7 +192,7 @@
   textarea::placeholder {
     font-weight: 300;
     font-size: 0.72rem;
-    color: var(--c-light);
+    color: oklch(0.80 0.018 340);
     letter-spacing: 0.01em;
   }
 }
@@ -276,12 +218,12 @@
      Mimics the vintage desktop window aesthetic from the reference image:
      cream/parchment fill, thin pencil-stroke border, subtle shadow */
   .retro-window {
-    background: var(--c-pale-bg3);
-    border: 1.5px solid var(--c-light-border);
+    background: oklch(0.975 0.012 355);
+    border: 1.5px solid oklch(0.86 0.030 340);
     border-radius: 4px;
     box-shadow:
-      2px 3px 0px var(--c-mid-border),
-      0 1px 8px var(--c-accent-bg-sm);
+      2px 3px 0px oklch(0.84 0.030 340 / 0.40),
+      0 1px 8px oklch(0.58 0.12 340 / 0.06);
     position: relative;
     overflow: hidden;
   }
@@ -292,12 +234,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    background: var(--c-pale);
-    border-bottom: 1px solid var(--c-light-border);
+    background: oklch(0.90 0.040 340);
+    border-bottom: 1px solid oklch(0.86 0.030 340);
     font-family: 'Space Mono', monospace;
     font-size: 0.60rem;
     letter-spacing: 0.08em;
-    color: var(--c-ink-soft);
+    color: oklch(0.35 0.040 320);
     user-select: none;
   }
 
@@ -310,21 +252,21 @@
   .retro-titlebar-btn {
     width: 10px;
     height: 10px;
-    border: 1px solid var(--c-mid-border);
-    background: var(--c-pale-bg3);
+    border: 1px solid oklch(0.78 0.040 340);
+    background: oklch(0.975 0.012 355);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 7px;
-    color: var(--c-accent);
+    color: oklch(0.50 0.040 330);
     cursor: default;
     border-radius: 1px;
   }
 
   /* Morandi card base (backward compat) */
   .m-card {
-    background: var(--c-pale-bg3);
-    border: 1.5px solid var(--c-light-border);
+    background: oklch(0.975 0.012 355);
+    border: 1.5px solid oklch(0.86 0.030 340);
     border-radius: 4px;
   }
 
@@ -340,8 +282,9 @@
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-     color: var(--c-accent);
+    color: oklch(0.50 0.060 330);
   }
+
   /* Small caps editorial label (kept for compat) */
   .editorial-label {
     font-family: 'Space Mono', monospace;
@@ -349,7 +292,7 @@
     font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--c-accent);
+    color: oklch(0.50 0.060 330);
   }
 
   /* ── Retro Button System ──
@@ -358,9 +301,9 @@
 
   /* Primary: hot pink fill — the main CTA button */
   .m-btn-primary {
-    background: var(--c-accent);
-    color: var(--c-pale-bg3);
-    border: 2.5px solid var(--c-deep);
+    background: oklch(0.58 0.12 340);
+    color: oklch(0.98 0.005 355);
+    border: 2.5px solid oklch(0.42 0.10 330);
     border-radius: 3px;
     padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
@@ -369,7 +312,7 @@
     letter-spacing: 0.10em;
     text-transform: uppercase;
     /* 3D offset shadow — the key retro effect */
-    box-shadow: 3px 3px 0px var(--c-deep);
+    box-shadow: 3px 3px 0px oklch(0.42 0.10 330);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -377,20 +320,20 @@
     cursor: pointer;
   }
   .m-btn-primary:hover {
-    background: var(--c-accent-hover);
-    box-shadow: 4px 4px 0px var(--c-deep);
+    background: oklch(0.54 0.14 340);
+    box-shadow: 4px 4px 0px oklch(0.38 0.10 330);
     transform: translate(-1px, -1px);
   }
   .m-btn-primary:active {
-    box-shadow: 1px 1px 0px var(--c-deep);
+    box-shadow: 1px 1px 0px oklch(0.42 0.10 330);
     transform: translate(2px, 2px);
   }
 
   /* Dark: charcoal fill */
   .m-btn-dark {
-    background: var(--c-ink-soft);
-    color: var(--c-pale-bg3);
-    border: 2.5px solid var(--c-ink);
+    background: oklch(0.30 0.020 60);
+    color: oklch(0.97 0.005 75);
+    border: 2.5px solid oklch(0.16 0.012 60);
     border-radius: 3px;
     padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
@@ -398,7 +341,7 @@
     font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0px var(--c-ink);
+    box-shadow: 3px 3px 0px oklch(0.16 0.012 60);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -406,20 +349,20 @@
     cursor: pointer;
   }
   .m-btn-dark:hover {
-    background: var(--c-ink);
-    box-shadow: 4px 4px 0px var(--c-ink);
+    background: oklch(0.24 0.018 60);
+    box-shadow: 4px 4px 0px oklch(0.12 0.010 60);
     transform: translate(-1px, -1px);
   }
   .m-btn-dark:active {
-    box-shadow: 1px 1px 0px var(--c-ink);
+    box-shadow: 1px 1px 0px oklch(0.16 0.012 60);
     transform: translate(2px, 2px);
   }
 
   /* Ghost: soft pink fill, mauve border — secondary action */
   .m-btn-ghost {
-    background: var(--c-pale-bg3);
-    border: 2.5px solid var(--c-mid);
-    color: var(--c-accent);
+    background: oklch(0.975 0.012 355);
+    border: 2.5px solid oklch(0.74 0.050 340);
+    color: oklch(0.46 0.055 330);
     border-radius: 3px;
     padding: 0.40rem 1.0rem;
     font-family: 'Space Mono', monospace;
@@ -427,7 +370,7 @@
     font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0px var(--c-mid);
+    box-shadow: 3px 3px 0px oklch(0.74 0.050 340);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -435,13 +378,13 @@
     cursor: pointer;
   }
   .m-btn-ghost:hover {
-    border-color: var(--c-accent);
-    color: var(--c-accent);
-    box-shadow: 4px 4px 0px var(--c-accent-bg-lg);
+    border-color: oklch(0.58 0.12 340);
+    color: oklch(0.58 0.12 340);
+    box-shadow: 4px 4px 0px oklch(0.58 0.12 340 / 0.55);
     transform: translate(-1px, -1px);
   }
   .m-btn-ghost:active {
-    box-shadow: 1px 1px 0px var(--c-mid);
+    box-shadow: 1px 1px 0px oklch(0.74 0.050 340);
     transform: translate(2px, 2px);
   }
 
@@ -449,7 +392,7 @@
   .m-btn-link {
     background: transparent;
     border: none;
-    border-bottom: 2px solid var(--c-mid-border);
+    border-bottom: 2px solid oklch(0.58 0.018 68);
     border-radius: 0;
     padding: 0 0 0.1rem 0;
     font-family: 'Space Mono', monospace;
@@ -457,7 +400,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--c-muted-text);
+    color: oklch(0.40 0.020 62);
     transition: border-color 0.12s, color 0.12s;
     box-shadow: none;
     display: inline-flex;
@@ -466,38 +409,38 @@
     cursor: pointer;
   }
   .m-btn-link:hover {
-    border-color: var(--c-accent);
-    color: var(--c-accent);
+    border-color: oklch(0.52 0.10 32);
+    color: oklch(0.52 0.10 32);
   }
 
   /* Chip/tag */
   .m-chip {
-    background: var(--c-pale-bg3);
-    border: 1.5px solid var(--c-light-border);
+    background: oklch(0.975 0.012 355);
+    border: 1.5px solid oklch(0.84 0.035 340);
     border-radius: 2px;
-    padding: 0.15rem 0.5rem;
+    padding: 0.22rem 0.60rem;
     font-family: 'Space Mono', monospace;
-    font-size: 0.60rem;
+    font-size: 0.58rem;
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: var(--c-accent);
+    color: oklch(0.50 0.040 330);
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    box-shadow: 1px 1px 0px var(--c-mid-border);
+    box-shadow: 1px 1px 0px oklch(0.84 0.035 340 / 0.40);
   }
   .m-chip:hover, .m-chip.active {
-    background: var(--c-accent);
-    border-color: var(--c-deep);
-    color: var(--c-pale-bg3);
-    box-shadow: 1px 1px 0px var(--c-deep);
+    background: oklch(0.58 0.12 340);
+    border-color: oklch(0.50 0.10 330);
+    color: oklch(0.98 0.005 355);
+    box-shadow: 1px 1px 0px oklch(0.50 0.10 330 / 0.40);
   }
   .m-chip.active-sage {
-    background: var(--c-light);
-    border-color: var(--c-mid);
-    color: var(--c-pale-bg3);
+    background: oklch(0.74 0.07 168);
+    border-color: oklch(0.62 0.07 168);
+    color: oklch(0.98 0.005 355);
   }
 }
 
@@ -537,12 +480,12 @@
 
 /* ── Retro scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: var(--c-pale); }
+::-webkit-scrollbar-track { background: oklch(0.94 0.018 355); }
 ::-webkit-scrollbar-thumb {
-  background: var(--c-mid);
+  background: oklch(0.82 0.050 340);
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: var(--c-accent); }
+::-webkit-scrollbar-thumb:hover { background: oklch(0.70 0.08 340); }
 
 /* ── Pixel-art hand cursor ──
    A classic pointing hand for all interactive elements */
@@ -573,8 +516,8 @@ input[type="radio"]:not(:disabled) {
   align-items: center;
   gap: 10px;
   padding: 8px 10px 8px 10px;
-  background: var(--c-pale-bg2);
-  border: 1.5px solid var(--c-light-border);
+  background: oklch(0.978 0.008 76 / 0.55);
+  border: 1.5px solid oklch(0.82 0.018 68 / 0.6);
   border-radius: 4px;
   position: relative;
   transition: box-shadow 0.08s, transform 0.08s;
@@ -588,28 +531,28 @@ input[type="radio"]:not(:disabled) {
   bottom: -6px;
   width: 1px;
   height: 6px;
-  border-left: 1px dashed var(--c-mid-border);
+  border-left: 1px dashed oklch(0.72 0.018 68 / 0.55);
 }
 .retro-task-row:hover {
-  box-shadow: 2px 2px 0px var(--c-mid-border);
+  box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
   transform: translate(-1px, -1px);
 }
 .retro-task-row.done {
   opacity: 0.50;
-  background: var(--c-pale-bg3);
+  background: oklch(0.970 0.006 76);
 }
 /* Priority: all same neutral transparent background — no color differentiation */
 .retro-task-row.urgent {
-  background: var(--c-pale-bg2);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.focus {
-  background: var(--c-pale-bg2);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.normal {
-  background: var(--c-pale-bg2);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 .retro-task-row.someday {
-  background: var(--c-pale-bg2);
+  background: oklch(0.978 0.008 76 / 0.55);
 }
 /* Hide icon box — no longer used */
 .retro-task-icon-box { display: none; }

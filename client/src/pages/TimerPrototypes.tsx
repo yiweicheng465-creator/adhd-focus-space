@@ -1449,7 +1449,7 @@ function ProtoI() {
 
 export default function TimerPrototypes() {
   return (
-    <div style={{ minHeight: "100vh", background: "var(--c-pale-bg3)", padding: "40px 24px 60px", fontFamily: "system-ui" }}>
+    <div style={{ minHeight: "100vh", background: "oklch(0.975 0.012 80)", padding: "40px 24px 60px", fontFamily: "system-ui" }}>
       <style>{`
         .proto-card { width: 100%; box-shadow: 0 4px 24px rgba(92,61,46,0.10); }
         .proto-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: #8B9E7A; margin: 0 0 6px; }
@@ -1593,8 +1593,8 @@ export default function TimerPrototypes() {
             const hlCx = cx - rx * 0.32, hlCy = cy - ry * 0.28;
             const isUrgent = stageNum >= 8;
             const fillColor = isUrgent
-              ? (stageNum === 10 ? "var(--c-deep)" : stageNum === 9 ? "var(--c-accent)" : "var(--c-accent)")
-              : "var(--c-accent)";
+              ? (stageNum === 10 ? "oklch(0.48 0.18 25)" : stageNum === 9 ? "oklch(0.52 0.16 28)" : "oklch(0.56 0.14 32)")
+              : "oklch(0.65 0.13 35)";
             const timerFontSize = Math.max(7, Math.round(rx * 0.32));
             // Needle tip tracks balloon right edge
             const balloonRight = cx + rx;
@@ -1605,8 +1605,8 @@ export default function TimerPrototypes() {
             const needleY = cy;
             return (
               <div key={stageNum} style={{
-                background: isUrgent ? "var(--c-pale-bg3)" : "var(--c-pale-bg3)",
-                border: `1px solid ${isUrgent ? "var(--c-light)" : "var(--c-light-neutral)"}`,
+                background: isUrgent ? "oklch(0.97 0.012 25)" : "oklch(0.985 0.008 80)",
+                border: `1px solid ${isUrgent ? "oklch(0.88 0.04 25)" : "oklch(0.87 0.014 75)"}`,
                 borderRadius: 12,
                 padding: "12px 8px 8px",
                 display: "flex",
@@ -1618,12 +1618,12 @@ export default function TimerPrototypes() {
                   fontSize: 10,
                   fontWeight: 700,
                   letterSpacing: 1,
-                  color: isUrgent ? "var(--c-accent)" : "var(--c-muted-text)",
+                  color: isUrgent ? "oklch(0.52 0.14 25)" : "oklch(0.55 0.010 70)",
                   fontFamily: "'DM Sans', sans-serif",
                 }}>STAGE {stageNum}</span>
                 <svg width="160" height="200" viewBox="0 0 160 200" style={{ overflow: "visible" }}>
                   {/* Balloon body */}
-                  <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillColor} stroke="var(--c-ink-soft)" strokeWidth="1.8" />
+                  <ellipse cx={cx} cy={cy} rx={rx} ry={ry} fill={fillColor} stroke="oklch(0.35 0.06 35)" strokeWidth="1.8" />
                   {/* Highlight */}
                   {s > 0.3 && (
                     <ellipse cx={hlCx} cy={hlCy} rx={hlRx} ry={hlRy}
@@ -1633,20 +1633,20 @@ export default function TimerPrototypes() {
                   {s > 0.22 && (
                     <path
                       d={`M${cx - knotSize}${knotY} Q${cx}${knotY + knotSize * 1.4}${cx + knotSize}${knotY} Q${cx}${knotY + knotSize * 0.6}${cx - knotSize}${knotY}Z`}
-                      fill={fillColor} stroke="var(--c-ink-soft)" strokeWidth="0.8"
+                      fill={fillColor} stroke="oklch(0.35 0.06 35)" strokeWidth="0.8"
                     />
                   )}
                   {/* String */}
                   {s > 0.22 && (
                     <path
                       d={`M${cx}${stringY1} C${cx - 10}${(stringY1 + stringY2) * 0.5}${cx + 6}${(stringY1 + stringY2) * 0.75}${cx}${stringY2}`}
-                      fill="none" stroke="var(--c-muted-text)" strokeWidth="1.2" strokeLinecap="round"
+                      fill="none" stroke="oklch(0.45 0.04 50)" strokeWidth="1.2" strokeLinecap="round"
                     />
                   )}
                   {/* Timer text inside balloon */}
                   <text x={cx} y={cy + timerFontSize * 0.38}
                     textAnchor="middle"
-                    fill="var(--c-ink)"
+                    fill="oklch(0.25 0.04 35)"
                     fontSize={timerFontSize}
                     fontWeight="700"
                     fontFamily="'JetBrains Mono', monospace"
@@ -1658,15 +1658,15 @@ export default function TimerPrototypes() {
                   <line
                     x1={needleTipX} y1={needleY}
                     x2={needleEyeX} y2={needleY}
-                    stroke="var(--c-ink)" strokeWidth="1.2" strokeLinecap="round"
+                    stroke="oklch(0.25 0.02 50)" strokeWidth="1.2" strokeLinecap="round"
                   />
                   <ellipse cx={needleEyeX} cy={needleY} rx="3.5" ry="2"
-                    fill="none" stroke="var(--c-ink)" strokeWidth="1.2"
+                    fill="none" stroke="oklch(0.25 0.02 50)" strokeWidth="1.2"
                   />
                 </svg>
                 <span style={{
                   fontSize: 9,
-                  color: isUrgent ? "var(--c-accent)" : "var(--c-muted-text)",
+                  color: isUrgent ? "oklch(0.52 0.14 25)" : "oklch(0.62 0.010 70)",
                   fontFamily: "'DM Sans', sans-serif",
                 }}>{Math.round(scale * 100)}% size{isUrgent ? " 🔴" : ""}</span>
               </div>

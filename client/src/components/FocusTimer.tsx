@@ -306,7 +306,7 @@ function StripEditor({ strips, onChange }: {
                 <Pencil size={9} color={BORDER} />
               </button>
               <button onClick={() => removeStrip(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 2 }}>
-                <Trash2 size={9} color="var(--c-accent)" />
+                <Trash2 size={9} color="oklch(0.58 0.18 340)" />
               </button>
             </div>
           </div>
@@ -534,7 +534,7 @@ function QuitWrapUp({ quitCount, stripsLeft, onNewSession }: {
       <div style={{ display: "flex", gap: 8, width: "100%" }}>
         {[
           { label: "QUIT" + (quitCount !== 1 ? "S" : "") + " TODAY", value: quitCount, color: BORDER },
-          { label: "SCORE PENALTY", value: `-${penalty}`, color: "var(--c-accent)" },
+          { label: "SCORE PENALTY", value: `-${penalty}`, color: "oklch(0.58 0.18 340)" },
           { label: "STRIPS LEFT", value: stripsLeft, color: BORDER },
         ].map(({ label, value, color }) => (
           <div key={label} style={{ flex: 1, background: PANEL, border: `1px solid ${BORDER}`, padding: "9px 5px", textAlign: "center" }}>
@@ -969,7 +969,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <input type="range" min={0} max={1} step={0.05} value={sound.sfxVolume}
                 onChange={e => sound.setSfxVolume(parseFloat(e.target.value))}
                 disabled={!sound.sfxEnabled}
-                style={{ flex: 1, accentColor: "var(--c-accent-muted)", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
+                style={{ flex: 1, accentColor: "oklch(0.55 0.14 310)", cursor: sound.sfxEnabled ? "pointer" : "default", opacity: sound.sfxEnabled ? 1 : 0.4 }} />
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.sfxVolume * 100)}%</span>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
@@ -980,7 +980,7 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <input type="range" min={0} max={1} step={0.05} value={sound.musicVolume}
                 onChange={e => sound.setMusicVolume(parseFloat(e.target.value))}
                 disabled={!sound.musicEnabled}
-                style={{ flex: 1, accentColor: "var(--c-accent)", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
+                style={{ flex: 1, accentColor: "oklch(0.58 0.18 340)", cursor: sound.musicEnabled ? "pointer" : "default", opacity: sound.musicEnabled ? 1 : 0.4 }} />
               <span style={{ fontSize: 7, color: BORDER, fontFamily: "'JetBrains Mono', monospace", width: 22, textAlign: "right" }}>{Math.round(sound.musicVolume * 100)}%</span>
             </div>
 
@@ -1016,14 +1016,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
       {/* ── Block complete ── */}
       {phase === "block_complete" && (
         <div style={{ background: BG, padding: "22px 16px", textAlign: "center" }}>
-          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: "var(--c-accent-muted)", textTransform: "uppercase", marginBottom: 7 }}>BLOCK COMPLETE</p>
+          <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 7, letterSpacing: "0.22em", color: "oklch(0.55 0.14 310)", textTransform: "uppercase", marginBottom: 7 }}>BLOCK COMPLETE</p>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 14, fontWeight: 700, color: DARK, marginBottom: 5 }}>4 sessions done.</p>
           <p style={{ fontFamily: "'JetBrains Mono', monospace", fontSize: 8, color: BORDER, lineHeight: 1.6, marginBottom: 16 }}>
             You completed a full Pomodoro block.<br />Take a real break — you earned it.
           </p>
           <div style={{ display: "flex", gap: 5, justifyContent: "center", marginBottom: 16 }}>
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} style={{ width: 7, height: 7, background: "var(--c-accent-muted)" }} />
+              <div key={i} style={{ width: 7, height: 7, background: "oklch(0.55 0.14 310)" }} />
             ))}
           </div>
           <button onClick={handleNewSession} style={{
@@ -1099,14 +1099,14 @@ export function FocusTimer({ onSessionComplete, onBlockComplete, onQuit, fillHei
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 9, fontWeight: 700,
-                color: displayedGrowth >= 100 ? ACCENT : "var(--c-mid)",
+                color: displayedGrowth >= 100 ? ACCENT : "oklch(0.72 0.12 350)",
                 letterSpacing: "0.04em",
                 lineHeight: 1,
               }}>{displayedGrowth}%</span>
               <span style={{
                 fontFamily: "'JetBrains Mono', monospace",
                 fontSize: 5, letterSpacing: "0.12em",
-                color: "var(--c-mid)", textTransform: "uppercase", marginTop: 1,
+                color: "oklch(0.72 0.10 350)", textTransform: "uppercase", marginTop: 1,
               }}>grown</span>
             </div>
           </div>

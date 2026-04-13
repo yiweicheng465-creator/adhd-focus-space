@@ -11,23 +11,23 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 const M = {
-  bg:       "var(--c-pale-bg3)",
-  card:     "var(--c-pale-bg3)",
-  border:   "var(--c-light-soft)",
-  ink:      "var(--c-shadow-ink)",
-  muted:    "var(--c-accent-faint)",
-  accent:   "var(--c-accent)",
-  accentBg: "var(--c-accent-bg-sm)",
-  accentBdr:"var(--c-accent-bg-lg)",
-  sage:     "var(--c-accent)",
-  sageBg:   "var(--c-accent-bg-sm)",
-  sageBdr:  "var(--c-accent-bg-md)",
-  coral:    "var(--c-deep)",
-  coralBg:  "var(--c-accent-bg-sm)",
-  coralBdr: "var(--c-accent-bg-md)",
-  gold:     "var(--c-light)",
-  goldBg:   "var(--c-accent-bg-xs)",
-  goldBdr:  "var(--c-accent-bg-md)",
+  bg:       "oklch(0.975 0.012 355)",
+  card:     "oklch(0.970 0.018 355)",
+  border:   "oklch(0.82 0.050 340)",
+  ink:      "oklch(0.22 0.040 320)",
+  muted:    "oklch(0.52 0.040 330)",
+  accent:   "oklch(0.58 0.18 340)",
+  accentBg: "oklch(0.58 0.18 340 / 0.08)",
+  accentBdr:"oklch(0.58 0.18 340 / 0.22)",
+  sage:     "oklch(0.52 0.07 145)",
+  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
+  sageBdr:  "oklch(0.52 0.07 145 / 0.25)",
+  coral:    "oklch(0.55 0.09 35)",
+  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
+  coralBdr: "oklch(0.55 0.09 35 / 0.25)",
+  gold:     "oklch(0.65 0.10 75)",
+  goldBg:   "oklch(0.65 0.10 75 / 0.08)",
+  goldBdr:  "oklch(0.65 0.10 75 / 0.25)",
 };
 
 /* ── Section accordion ── */
@@ -56,7 +56,7 @@ function Section({
         borderRadius: 4,
         overflow: "hidden",
         background: M.card,
-        boxShadow: "2px 2px 0 var(--c-mid-shadow)",
+        boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
       }}
     >
       {/* Header */}
@@ -188,7 +188,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background: "var(--c-shadow-ink3)" }}
+      style={{ background: "oklch(0.20 0.04 320 / 0.45)" }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div
@@ -196,7 +196,7 @@ function FeedbackModal({ onClose }: { onClose: () => void }) {
           background: M.card,
           border: `1.5px solid ${M.border}`,
           borderRadius: 4,
-          boxShadow: "4px 4px 0 var(--c-mid-shadow)",
+          boxShadow: "4px 4px 0 oklch(0.82 0.040 340 / 0.5)",
           width: "min(480px, 92vw)",
           padding: "20px 22px",
           display: "flex",
@@ -359,7 +359,7 @@ export default function Guide() {
               border: `1px solid ${M.border}`,
               borderRadius: 4,
               overflow: "hidden",
-              boxShadow: "2px 2px 0 var(--c-mid-shadow)",
+              boxShadow: "2px 2px 0 oklch(0.82 0.040 340 / 0.5)",
             }}
           >
             <div
@@ -593,8 +593,8 @@ export default function Guide() {
             title="BRAIN DUMP"
             badge="DUMP"
             badgeColor={M.muted}
-            badgeBg="var(--c-accent-bg-sm)"
-            badgeBdr="var(--c-accent-bd-sm)"
+            badgeBg="oklch(0.52 0.040 330 / 0.08)"
+            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
           >
             <Row
               label="Free-form capture"
@@ -676,8 +676,8 @@ export default function Guide() {
             title="STORAGE & BACKUP"
             badge="STORE"
             badgeColor={M.muted}
-            badgeBg="var(--c-accent-bg-sm)"
-            badgeBdr="var(--c-accent-bd-sm)"
+            badgeBg="oklch(0.52 0.040 330 / 0.08)"
+            badgeBdr="oklch(0.52 0.040 330 / 0.22)"
           >
             <Row
               label="Local file backup"
@@ -751,8 +751,8 @@ export default function Guide() {
                 title="BRAIN DUMP AI SORT"
                 badge="BRAIN DUMP"
                 badgeColor={M.muted}
-                badgeBg="var(--c-accent-bg-sm)"
-                badgeBdr="var(--c-accent-bd-sm)"
+                badgeBg="oklch(0.52 0.040 330 / 0.08)"
+                badgeBdr="oklch(0.52 0.040 330 / 0.22)"
               >
                 <Row
                   label="What it does"

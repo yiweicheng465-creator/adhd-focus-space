@@ -132,9 +132,9 @@ const MOOD_BARS = [
 ];
 
 const M = {
-  ink:    "var(--c-ink)",
-  muted:  "var(--c-muted-text)",
-  border: "var(--c-light-border)",
+  ink:    "oklch(0.28 0.018 65)",
+  muted:  "oklch(0.55 0.018 70)",
+  border: "oklch(0.88 0.014 75)",
 };
 
 interface MoodCheckInProps {
