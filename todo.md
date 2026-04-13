@@ -194,3 +194,4 @@
 - [x] Change Next Up task limit from 6 to 7
 - [x] Make Quick Capture quick-reply chips configurable (add/edit/delete) with DB persistence
 - [x] Add config button (gear icon) to Quick Capture modal to manage chips
+- [x] Daily check-in task step: goal dropdown now shows both new goals (this session) and all existing DB goals in grouped optgroups

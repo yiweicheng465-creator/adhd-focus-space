@@ -212,6 +212,9 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
     }
   };
 
+  // Fetch existing goals from DB so user can link tasks to them
+  const { data: existingGoals = [] } = trpc.goals.list.useQuery(undefined, { staleTime: 60_000 });
+
   const mitMutation = trpc.ai.mitSuggestion.useMutation({
     onSuccess: (data) => {
       setMitSuggestion(data.mit ?? "");
@@ -274,7 +277,11 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
         context: (t.context === "work" || t.context === "personal" ? t.context : "personal") as "work" | "personal",
         done: false,
         createdAt: new Date(),
-        goalId: t.goalIdx !== null && goalIds[t.goalIdx] ? goalIds[t.goalIdx] : undefined,
+        goalId: t.goalIdx !== null
+          ? (t.goalIdx >= 0
+            ? (goalIds[t.goalIdx] ?? undefined)  // new goal added this session
+            : (existingGoals[-(t.goalIdx + 1)]?.id ?? undefined))  // existing DB goal
+          : undefined,
       })),
       newWins: wins.map((w) => ({
         id: nanoid(),
@@ -500,8 +507,8 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
               <p className="text-sm mb-3" style={{ color: M.muted }}>
                 Add tasks for today. Press Enter to add each one.
               </p>
-              {/* Goal link dropdown (only if goals were set) */}
-              {newGoals.length > 0 && (
+              {/* Goal link dropdown — always visible, shows both new goals and existing DB goals */}
+              {(newGoals.length > 0 || existingGoals.length > 0) && (
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[10px]" style={{ color: M.muted }}>↳ Goal:</span>
                   <select
@@ -511,9 +518,24 @@ export function DailyCheckIn({ onComplete, onSkip, onClose, displayName, existin
                     style={{ border: `1px solid ${M.border}`, color: taskGoalIdx !== null ? M.ink : M.muted }}
                   >
                     <option value="">None</option>
-                    {newGoals.map((g, i) => (
-                      <option key={i} value={i}>{g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}</option>
-                    ))}
+                    {newGoals.length > 0 && (
+                      <optgroup label="Added this session">
+                        {newGoals.map((g, i) => (
+                          <option key={`new-${i}`} value={i}>
+                            {g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {existingGoals.length > 0 && (
+                      <optgroup label="Existing goals">
+                        {existingGoals.map((g, i) => (
+                          <option key={`existing-${g.id}`} value={-(i + 1)}>
+                            {g.text.length > 40 ? g.text.slice(0, 40) + "…" : g.text}
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
               )}
