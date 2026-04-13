@@ -275,7 +275,12 @@ const WIN_CAT_COLORS = [
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
 
 /* ── Day detail panel ── */
-function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dateStr: string; dateKey: string; onClose: () => void }) {
+function DayDetail({ log, dateStr, dateKey: dk, onClose, isPast }: { log?: DailyLog; dateStr: string; dateKey: string; onClose: () => void; isPast?: boolean }) {
+  const [reflection, setReflection] = useState<string | null>(null);
+  const reflectMutation = trpc.ai.dayReflection.useMutation({
+    onSuccess: (data) => setReflection(data.reflection),
+    onError: (err) => handleAiError(err),
+  });
   const hasAny = log && (log.wrapUpDone || log.dumpCount > 0 || log.winsCount > 0 || log.tasksCompleted > 0 || (log.focusSessions ?? 0) > 0);
 
   // Read detailed wins for this day from localStorage
@@ -446,6 +451,54 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose }: { log?: DailyLog; dat
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <CheckCircle2 size={13} style={{ color: M.pink, flexShrink: 0 }} />
                 <span style={{ fontSize: 12, color: M.ink }}>{log!.tasksCompleted} {log!.tasksCompleted === 1 ? "task" : "tasks"} completed</span>
+              </div>
+            )}
+
+            {/* AI Reflection — only for past days */}
+            {isPast && (
+              <div style={{ borderTop: `1px dashed ${M.border}`, paddingTop: 12, marginTop: 2 }}>
+                {!reflection && (
+                  <button
+                    onClick={() => reflectMutation.mutate({
+                      dateStr,
+                      mood: log?.mood ?? undefined,
+                      focusSessions: focusCount > 0 ? focusCount : undefined,
+                      wins: dayWins.map(w => w.text),
+                      brainDumps: dayDumps.map(d => d.text),
+                      tasksCompleted: log?.tasksCompleted ?? undefined,
+                      wrapUpDone: log?.wrapUpDone ?? undefined,
+                      score: log?.score ?? undefined,
+                    })}
+                    disabled={reflectMutation.isPending}
+                    style={{
+                      display: "flex", alignItems: "center", gap: 6,
+                      background: "none", border: `1px solid ${M.border}`,
+                      borderRadius: 6, padding: "5px 10px", cursor: reflectMutation.isPending ? "default" : "pointer",
+                      fontFamily: "'Space Mono', monospace", fontSize: 10, color: M.coral,
+                      opacity: reflectMutation.isPending ? 0.6 : 1, transition: "opacity 0.2s",
+                    }}
+                  >
+                    {reflectMutation.isPending ? (
+                      <><Loader2 size={11} style={{ animation: "spin 1s linear infinite" }} /> generating reflection...</>
+                    ) : (
+                      <><Sparkles size={11} /> AI reflect on this day</>
+                    )}
+                  </button>
+                )}
+                {reflection && (
+                  <div style={{ background: M.pinkBg, borderRadius: 8, padding: "10px 12px", border: `1px solid ${M.border}` }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
+                      <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 9, color: M.muted, textTransform: "uppercase", letterSpacing: "0.08em" }}>
+                        <Sparkles size={9} style={{ display: "inline", marginRight: 3, color: M.coral }} />
+                        AI Reflection
+                      </span>
+                      <button onClick={() => setReflection(null)} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 14, color: M.muted, lineHeight: 1, padding: 0 }}>×</button>
+                    </div>
+                    <div style={{ fontSize: 12, color: M.ink, lineHeight: 1.6 }}>
+                      <Streamdown>{reflection}</Streamdown>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </>
@@ -690,6 +743,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
           dateStr={selectedDateStr}
           dateKey={new Date(viewYear, viewMonth, selectedDay).toDateString()}
           onClose={() => setSelectedDay(null)}
+          isPast={!(isCurrentMonth && selectedDay === today.getDate())}
         />
       )}
 

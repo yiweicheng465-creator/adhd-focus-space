@@ -3,6 +3,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import AuraBackground from "./components/AuraBackground";
+import BackgroundStickers from "./components/BackgroundStickers";
 import { FilmGrainOverlay } from "./components/FilmGrain";
 import { useWorkMode } from "./components/WorkModeToggle";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -41,6 +42,8 @@ function App() {
         <TooltipProvider>
           {/* Global aura gradient background — behind everything */}
           <AuraBackground />
+          {/* Scattered decorative stickers — fixed, behind content */}
+          <BackgroundStickers />
 
           {/* Film grain overlay — fixed, covers entire app */}
           <FilmGrainOverlay />

@@ -599,6 +599,54 @@ Only include the ACTION line when performing an action. For pure conversation, o
       return { reply, action };
     }),
 
+  /* ── Day Reflection ──
+   * Given a day's activity data, generate a warm ADHD-friendly reflection.
+   */
+  dayReflection: protectedProcedure
+    .input(z.object({
+      dateStr: z.string(),
+      mood: z.number().optional(),
+      focusSessions: z.number().optional(),
+      wins: z.array(z.string()).optional(),
+      brainDumps: z.array(z.string()).optional(),
+      tasksCompleted: z.number().optional(),
+      wrapUpDone: z.boolean().optional(),
+      score: z.number().optional(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const { apiKey, apiUrl, model, usingBuiltIn } = await getUserApiConfig(ctx.user.openId);
+      const MOOD_LABELS = ["Drained", "Low", "Okay", "Good", "Energised"];
+      const moodLabel = input.mood ? MOOD_LABELS[input.mood - 1] : null;
+      const summary = [
+        moodLabel ? `Mood: ${moodLabel}` : null,
+        input.focusSessions ? `Focus sessions: ${input.focusSessions}` : null,
+        input.score ? `Day score: ${input.score}/100` : null,
+        input.wrapUpDone ? "Completed daily wrap-up" : null,
+        input.tasksCompleted ? `Tasks completed: ${input.tasksCompleted}` : null,
+        input.wins?.length ? `Wins:\n${input.wins.map(w => `  - ${w}`).join("\n")}` : null,
+        input.brainDumps?.length ? `Brain dump entries:\n${input.brainDumps.map(d => `  - ${d}`).join("\n")}` : null,
+      ].filter(Boolean).join("\n");
+      const result = await invokeLLM({
+        apiKey,
+        apiUrl,
+        model,
+        messages: [
+          {
+            role: "system",
+            content: `You are a warm, encouraging ADHD coach. Write a short daily reflection (3-4 sentences max) for the user based on their day's activity. Be specific to what they actually did, celebrate small wins, acknowledge struggles without judgment, and end with one gentle, concrete nudge for tomorrow. Tone: warm, human, never preachy. Write flowing prose — no bullet points.`,
+          },
+          {
+            role: "user",
+            content: `Here is my activity for ${input.dateStr}:\n\n${summary || "No activity recorded."}\n\nPlease write a short reflection for this day.`,
+          },
+        ],
+      });
+      const reflection = result.choices[0]?.message?.content;
+      if (!reflection || typeof reflection !== "string") throw new Error("No response from AI");
+      void incrementAiUsage(ctx.user.id, usingBuiltIn);
+      return { reflection: reflection.trim() };
+    }),
+
   /* ── AI Status Check ──
    * Returns whether AI is currently available.
    * green = built-in credits working OR user has a valid OpenAI key
