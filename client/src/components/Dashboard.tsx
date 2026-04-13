@@ -158,6 +158,8 @@ function AICommandPanel({
   const { data: dbMessages = [] } = trpc.aiChat.list.useQuery({ limit: 100 }, { staleTime: 60_000 });
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
   const utils = trpc.useUtils();
+  // AI provider indicator
+  const { data: aiProvider } = trpc.profile.getAiProvider.useQuery(undefined, { staleTime: 60_000 });
 
   // Merge DB messages with any locally-added ones not yet confirmed
   const messages: ChatMessage[] = dbMessages.length > 0
@@ -308,18 +310,32 @@ function AICommandPanel({
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, flexShrink: 0 }}>
         <Bot size={13} style={{ color: AI_ACCENT }} />
         <p className="editorial-label" style={{ color: AI_ACCENT }}>AI Assistant</p>
+        {/* AI provider badge — always visible in header */}
+        <span
+          title={aiProvider?.hasOwnKey ? "Using your OpenAI key" : "Using built-in Manus AI"}
+          style={{
+            marginLeft: "auto",
+            fontSize: 8,
+            fontFamily: "'DM Mono', monospace",
+            letterSpacing: "0.04em",
+            color: aiProvider?.hasOwnKey ? "oklch(0.42 0.14 260)" : "oklch(0.42 0.12 168)",
+            background: aiProvider?.hasOwnKey ? "oklch(0.93 0.030 260)" : "oklch(0.93 0.030 168)",
+            border: `1px solid ${aiProvider?.hasOwnKey ? "oklch(0.72 0.10 260)" : "oklch(0.70 0.12 168)"}`,
+            padding: "1px 5px",
+            borderRadius: 3,
+            cursor: "help",
+            flexShrink: 0,
+          }}
+        >
+          {aiProvider?.hasOwnKey ? "OpenAI" : "Manus AI"}
+        </span>
         {hasMessages && (
           <button
             onClick={() => clearChatMutation.mutate()}
-            style={{ marginLeft: "auto", fontSize: 9, color: MUTED, background: "none", border: "none", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "'DM Mono', monospace" }}
+            style={{ fontSize: 9, color: MUTED, background: "none", border: "none", cursor: "pointer", letterSpacing: "0.04em", fontFamily: "'DM Mono', monospace", flexShrink: 0 }}
           >
             CLEAR
           </button>
-        )}
-        {!hasMessages && (
-          <span style={{ fontSize: 9, color: MUTED, marginLeft: "auto", fontFamily: "'DM Mono', monospace", letterSpacing: "0.05em" }}>
-            TASKS · GOALS · AGENTS · WINS · COACH
-          </span>
         )}
       </div>
 
@@ -389,7 +405,7 @@ function AICommandPanel({
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-          placeholder="Add task, set goal, log win…"
+          placeholder="press / to start..."
           style={{ flex: 1, fontSize: 12, background: "transparent", border: "none", outline: "none", color: INK }}
         />
         <button
@@ -618,7 +634,7 @@ export function Dashboard({
                       onNavigate("braindump");
                     }
                   }}
-                  placeholder="press / to start..."
+                  placeholder="what's in your mind? or dump your thought here"
                   autoComplete="new-password"
                   style={{ flex: 1, fontSize: 11, background: "transparent", border: "none", outline: "none", color: INK }}
                 />
@@ -631,7 +647,7 @@ export function Dashboard({
             </div>
             {/* Enter hint — always visible */}
             <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, marginTop: 2, paddingLeft: 2 }}>
-              press D to input
+              press D to open brain dump
             </div>
           </div>
           {/* Right: motivational micro-text */}

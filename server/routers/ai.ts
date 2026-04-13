@@ -4,7 +4,7 @@
    ============================================================ */
 
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { protectedProcedure, router } from "../_core/trpc";
 import { invokeLLM } from "../_core/llm";
@@ -44,6 +44,26 @@ async function getUserApiConfig(openId: string): Promise<{ apiKey: string; apiUr
     throw new TRPCError({ code: "PRECONDITION_FAILED", message: "NO_API_KEY" });
   }
   return { apiKey: builtInKey, apiUrl: builtInUrl, model: "gemini-2.5-flash", usingBuiltIn: true };
+}
+
+/** Increment per-user AI call counters (fire-and-forget, never throws) */
+async function incrementAiUsage(userId: number): Promise<void> {
+  try {
+    const db = await getDb();
+    if (!db) return;
+    const monthKey = new Date().toISOString().slice(0, 7); // "2026-04"
+    // Reset monthly counter if we're in a new month
+    await db
+      .update(users)
+      .set({
+        aiCallsTotal: sql`aiCallsTotal + 1`,
+        aiCallsThisMonth: sql`IF(aiCallsMonthKey = ${monthKey}, aiCallsThisMonth + 1, 1)`,
+        aiCallsMonthKey: monthKey,
+      })
+      .where(eq(users.id, userId));
+  } catch {
+    // Non-critical — never block the AI response
+  }
 }
 
 /* ── Shared ADHD-aware system prompt ── */
@@ -247,6 +267,7 @@ Keep it under 80 words. Warm, human, not corporate.`;
         ],
       });
       const summary = result.choices[0]?.message?.content ?? "";
+      void incrementAiUsage(ctx.user.id);
       return { summary };
     }),
 
@@ -279,6 +300,7 @@ Give them a 1-2 sentence reflection: acknowledge what happened (even if they wen
         ],
       });
       const message = result.choices[0]?.message?.content ?? "";
+      void incrementAiUsage(ctx.user.id);
       return { message, phase: input.phase };
     }),
 
@@ -323,6 +345,7 @@ Keep it under 120 words. Sound like a coach who actually read the data, not a te
         ],
       });
       const review = result.choices[0]?.message?.content ?? "";
+      void incrementAiUsage(ctx.user.id);
       return { review };
     }),
 
@@ -371,6 +394,7 @@ Return JSON with:
       const rawContent = result.choices[0]?.message?.content;
       const content = typeof rawContent === "string" ? rawContent : null;
       if (!content) throw new Error("No response from AI");
+      void incrementAiUsage(ctx.user.id);
       return JSON.parse(content) as { name: string; brief: string; firstStep: string };
     }),
 
@@ -408,6 +432,7 @@ Return JSON with:
       });
       const reply = result.choices[0]?.message?.content;
       if (!reply || typeof reply !== "string") throw new Error("No response from AI");
+      void incrementAiUsage(ctx.user.id);
       return { reply };
     }),
 
@@ -554,6 +579,7 @@ Only include the ACTION line when performing an action. For pure conversation, o
       if (actionMatch) {
         try { action = JSON.parse(actionMatch[1]); } catch { action = null; }
       }
+      void incrementAiUsage(ctx.user.id);
       return { reply, action };
     }),
 

@@ -160,6 +160,37 @@ export const profileRouter = router({
     }
   }),
 
+  // Get AI usage stats for the current user
+  getUsageStats: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return { total: 0, thisMonth: 0, monthKey: null };
+    const rows = await db
+      .select({ aiCallsTotal: users.aiCallsTotal, aiCallsThisMonth: users.aiCallsThisMonth, aiCallsMonthKey: users.aiCallsMonthKey })
+      .from(users)
+      .where(eq(users.openId, ctx.user.openId))
+      .limit(1);
+    return {
+      total: rows[0]?.aiCallsTotal ?? 0,
+      thisMonth: rows[0]?.aiCallsThisMonth ?? 0,
+      monthKey: rows[0]?.aiCallsMonthKey ?? null,
+    };
+  }),
+
+  // Get which AI provider is active for the current user
+  getAiProvider: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) return { provider: "manus" as const, hasOwnKey: false };
+    const rows = await db
+      .select({ apiKey: users.apiKey, keyType: users.keyType })
+      .from(users)
+      .where(eq(users.openId, ctx.user.openId))
+      .limit(1);
+    const key = rows[0]?.apiKey?.trim();
+    const keyType = rows[0]?.keyType ?? "openai";
+    const hasOwnKey = !!(key && keyType === "openai");
+    return { provider: hasOwnKey ? ("openai" as const) : ("manus" as const), hasOwnKey };
+  }),
+
   // Save name + API key together (used by the hello.exe setup modal)
   setupProfile: protectedProcedure
     .input(z.object({

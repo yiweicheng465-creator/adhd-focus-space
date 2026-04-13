@@ -43,6 +43,13 @@
       "when": 1776066872009,
       "tag": "0005_elite_mockingbird",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776074624524,
+      "tag": "0006_yellow_valeria_richards",
+      "breakpoints": true
     }
   ]
 }

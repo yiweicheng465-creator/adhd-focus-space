@@ -118,6 +118,11 @@ export function EffectsPanel() {
   const { data: savedKeyData } = trpc.profile.getApiKey.useQuery(undefined, {
     staleTime: 30_000,
   });
+  // Usage stats
+  const { data: usageStats } = trpc.profile.getUsageStats.useQuery(undefined, {
+    staleTime: 60_000,
+    enabled: open && activeTab === "apikey",
+  });
 
   // Sync from DB once on first load (just mark as synced — no keyType to set)
   useEffect(() => {
@@ -494,6 +499,26 @@ export function EffectsPanel() {
                     : "✓ AI is already active — powered by built-in credits. Add your own OpenAI key below only if the built-in AI stops working."}
                 </div>
 
+                {/* Usage stats */}
+                {(usageStats?.total ?? 0) > 0 && (
+                  <div style={{
+                    display: "flex",
+                    gap: 8,
+                    padding: "4px 7px",
+                    background: "oklch(0.96 0.015 330)",
+                    border: "1px solid oklch(0.85 0.04 330)",
+                    fontSize: "0.38rem",
+                    fontFamily: "'Space Mono', monospace",
+                    color: "oklch(0.50 0.06 330)",
+                    letterSpacing: "0.04em",
+                  }}>
+                    <span>total: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.total ?? 0}</strong></span>
+                    <span style={{ opacity: 0.4 }}>|</span>
+                    <span>this month: <strong style={{ color: "oklch(0.40 0.10 340)" }}>{usageStats?.thisMonth ?? 0}</strong></span>
+                    <span style={{ opacity: 0.4 }}>|</span>
+                    <span style={{ opacity: 0.7 }}>AI calls</span>
+                  </div>
+                )}
                 {/* OpenAI key input */}
                 <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
                   <input

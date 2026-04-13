@@ -200,3 +200,8 @@
 - [x] tRPC procedures already exist: profile.getApiKey, profile.updateApiKey, profile.validateApiKey, profile.testConnection
 - [x] Fixed invokeLLM to fall back to built-in Manus key when no user key provided
 - [x] OpenAI key settings UI already exists in EffectsPanel.tsx and ApiKeyDialog.tsx
+- [ ] AI active indicator: show "Using: OpenAI" vs "Using: Manus built-in" in AI Hub
+- [ ] Auto-show API key dialog when OpenAI returns 401/quota error
+- [ ] Per-user AI usage stats: track call count in DB, show in settings
+- [ ] Fix dashboard top bar placeholder: change "press / to start..." to "what's in your mind? or dump your thought here"
+- [ ] AI chatbox: move "press / to focus" hint into typing bar placeholder; remove old chip hints (add task, set goal, log win)

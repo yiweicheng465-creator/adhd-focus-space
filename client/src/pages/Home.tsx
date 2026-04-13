@@ -43,6 +43,7 @@ import { Bot, Brain, Clock, LayoutDashboard, Moon, Sparkles, Star } from "lucide
 import { PixelDump } from "@/components/PixelIcons";
 import { NamePrompt } from "@/components/NamePrompt";
 import StorageBackup from "@/pages/StorageBackup";
+import { ApiKeyDialog } from "@/components/ApiKeyDialog";
 
 
 /* ── Compact mood pill SVG faces (same as MoodCheckIn) ── */
@@ -964,6 +965,8 @@ export default function Home() {
           onSkip={handleNameSkip}
         />
       )}
+      {/* ApiKeyDialog — auto-opens on AI 401/quota errors via openApiKeyDialog event */}
+      <ApiKeyDialog />
     </div>
   );
 }

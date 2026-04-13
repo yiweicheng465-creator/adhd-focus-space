@@ -24,6 +24,9 @@ export const users = mysqlTable("users", {
   lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull(),
   apiKey: text("apiKey"),
   keyType: mysqlEnum("keyType", ["openai", "manus"]).default("openai"),
+  aiCallsTotal: int("aiCallsTotal").default(0).notNull(),
+  aiCallsThisMonth: int("aiCallsThisMonth").default(0).notNull(),
+  aiCallsMonthKey: varchar("aiCallsMonthKey", { length: 7 }), // e.g. "2026-04"
 });
 
 export type User = typeof users.$inferSelect;
