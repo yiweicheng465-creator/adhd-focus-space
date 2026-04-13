@@ -23,12 +23,12 @@ interface Particle {
 
 // Morandi palette — warm, muted, editorial
 const COLORS = [
-  "oklch(0.55 0.09 35)",   // coral
-  "oklch(0.52 0.07 145)",  // sage
-  "oklch(0.62 0.06 20)",   // pinky beige
-  "oklch(0.55 0.018 70)",  // slumber
-  "oklch(0.52 0.06 300)",  // dusty mauve
-  "oklch(0.72 0.018 75)",  // warm sand
+  "var(--c-deep)",   // coral
+  "var(--c-accent)",  // sage
+  "var(--c-accent)",   // pinky beige
+  "var(--c-muted-text)",  // slumber
+  "var(--c-accent)",  // dusty mauve
+  "var(--c-light-neutral)",  // warm sand
 ];
 
 interface ConfettiCelebrationProps {

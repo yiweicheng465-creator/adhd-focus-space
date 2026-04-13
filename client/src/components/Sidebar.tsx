@@ -151,10 +151,10 @@ function TimerPill({ onGoToFocus }: { onGoToFocus: () => void }) {
   const ss = String(remaining % 60).padStart(2, "0");
   const idleMins = String(durations?.focus ?? 25).padStart(2, "0");
   const modeColor = active
-    ? (mode === "focus" ? "oklch(0.52 0.10 32)" : mode === "short" ? "oklch(0.60 0.07 138)" : "oklch(0.58 0.08 220)")
+    ? (mode === "focus" ? "var(--c-accent)" : mode === "short" ? "var(--c-accent-soft)" : "var(--c-accent-soft)")
     : "var(--c-accent-faint)";
   const modeBg = active
-    ? (mode === "focus" ? "oklch(0.52 0.10 32 / 0.10)" : mode === "short" ? "oklch(0.60 0.07 138 / 0.10)" : "oklch(0.58 0.08 220 / 0.10)")
+    ? (mode === "focus" ? "var(--c-accent-bg-sm)" : mode === "short" ? "var(--c-accent-bg-sm)" : "var(--c-accent-bg-sm)")
     : "transparent";
   const label = active
     ? (mode === "focus" ? "FOCUS" : mode === "short" ? "SHORT" : "LONG")
@@ -437,7 +437,7 @@ export function Sidebar({ activeSection, onSectionChange, onClearData }: Sidebar
     <aside
       className="fixed left-0 top-0 h-screen w-14 z-40 flex flex-col items-center py-4"
       style={{
-        background: "oklch(0.930 0.045 355)",
+        background: "var(--c-pale)",
         borderRight: "1.5px solid var(--c-mid-border2)",
         boxShadow: "2px 0 8px var(--c-accent-bg-sm)",
       }}

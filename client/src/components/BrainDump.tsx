@@ -35,13 +35,13 @@ const M = {
   coral:    "var(--c-accent)",
   coralBg:  "var(--c-accent-bg-sm)",
   coralBdr: "var(--c-accent-bd-md)",
-  sage:     "oklch(0.52 0.10 168)",
-  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
-  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
+  sage:     "var(--c-accent-soft)",
+  sageBg:   "var(--c-accent-bg-md)",
+  sageBdr:  "var(--c-accent-bd-md)",
   ink:      "var(--c-shadow-ink2)",
   muted:    "var(--c-accent-faint)",
   border:   "var(--c-light-soft)",
-  card:     "oklch(0.975 0.018 355)",
+  card:     "var(--c-pale-bg3)",
   tagBg:    "var(--c-accent-bg-sm)",
   tagBdr:   "var(--c-accent-bg-lg)",
 };
@@ -69,7 +69,7 @@ function HighlightedText({ text, activeTag }: { text: string; activeTag: string 
               style={{
                 background: isActive ? M.coral : M.tagBg,
                 border: `1px solid ${isActive ? M.coral : M.tagBdr}`,
-                color: isActive ? "oklch(0.97 0.010 355)" : M.coral,
+                color: isActive ? "var(--c-pale-bg)" : M.coral,
                 fontFamily: "'DM Sans', sans-serif",
                 letterSpacing: "0.04em",
               }}
@@ -381,9 +381,9 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                     display: "inline-block", marginTop: 2, padding: "1px 5px",
                     fontSize: 7, letterSpacing: "0.12em", textTransform: "uppercase",
                     fontFamily: "'JetBrains Mono', monospace",
-                    background: item.category === "task" ? "oklch(0.93 0.030 168)" : item.category === "goal" ? "oklch(0.93 0.030 290)" : item.category === "worry" ? "var(--c-pale)" : "var(--c-pale)",
-                    color: item.category === "task" ? "oklch(0.40 0.10 168)" : item.category === "goal" ? "oklch(0.40 0.10 290)" : item.category === "worry" ? "oklch(0.40 0.10 355)" : M.muted,
-                    border: `1px solid ${item.category === "task" ? "oklch(0.75 0.08 168)" : item.category === "goal" ? "oklch(0.75 0.08 290)" : item.category === "worry" ? "oklch(0.75 0.08 355)" : M.border}`,
+                    background: item.category === "task" ? "var(--c-pale)" : item.category === "goal" ? "var(--c-pale)" : item.category === "worry" ? "var(--c-pale)" : "var(--c-pale)",
+                    color: item.category === "task" ? "var(--c-deep)" : item.category === "goal" ? "var(--c-deep)" : item.category === "worry" ? "var(--c-deep)" : M.muted,
+                    border: `1px solid ${item.category === "task" ? "var(--c-light)" : item.category === "goal" ? "var(--c-light)" : item.category === "worry" ? "var(--c-light)" : M.border}`,
                   }}>
                     {item.category}
                   </span>
@@ -471,7 +471,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
                 Showing {visibleEntries.length} idea{visibleEntries.length !== 1 ? "s" : ""} tagged
               </span>
               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-xs font-medium"
-                style={{ background: M.coral, border: `1px solid ${M.coral}`, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}>
+                style={{ background: M.coral, border: `1px solid ${M.coral}`, color: "var(--c-pale-bg3)", fontFamily: "'DM Sans', sans-serif" }}>
                 <Hash className="w-2.5 h-2.5" />
                 {activeTag}
               </span>
@@ -543,7 +543,7 @@ export function BrainDump({ onConvertToTask, onCreateAgent, onAddGoal, onDump, i
               key={entry.id}
               className={cn("group flex flex-col gap-2 p-3 transition-all")}
               style={{
-                background: entry.converted ? "oklch(0.93 0.030 355 / 0.5)" : M.card,
+                background: entry.converted ? "var(--c-pale-bg2)" : M.card,
                 border: `1px solid ${M.border}`,
                 opacity: entry.converted ? 0.55 : 1,
               }}

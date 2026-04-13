@@ -30,7 +30,7 @@ const retroBtn: React.CSSProperties = {
 /* Inactive toggle variant — light cream background, deep pink text */
 const retroBtnInactive: React.CSSProperties = {
   ...retroBtn,
-  background: "oklch(0.975 0.018 355)",
+  background: "var(--c-pale-bg3)",
   color: "var(--c-accent-text)",
   border: "1.5px solid var(--c-light-soft)",
   boxShadow: "2px 2px 0px var(--c-light-soft)",
@@ -57,9 +57,9 @@ const M = {
   accent:  "var(--c-accent)",
   accentBg:"var(--c-accent-bg-sm)",
   accentBdr:"var(--c-accent-bd-sm)",
-  bg:      "oklch(0.985 0.012 355)",
-  card:    "oklch(0.975 0.018 355)",
-  demoBg:  "oklch(0.96 0.015 355)",
+  bg:      "var(--c-pale-bg3)",
+  card:    "var(--c-pale-bg3)",
+  demoBg:  "var(--c-pale-bg)",
 };
 
 /* ── Feature card shell ── */
@@ -130,11 +130,11 @@ function BrainDumpDemo() {
   });
 
   const CATEGORY_COLORS: Record<string, string> = {
-    task:     "oklch(0.40 0.10 168)",
-    worry:    "oklch(0.50 0.10 355)",
-    idea:     "oklch(0.50 0.12 290)",
-    reminder: "oklch(0.45 0.10 220)",
-    goal:     "oklch(0.45 0.10 270)",
+    task:     "var(--c-deep)",
+    worry:    "var(--c-accent)",
+    idea:     "var(--c-accent)",
+    reminder: "var(--c-accent-dim)",
+    goal:     "var(--c-accent-dim)",
     other:    M.muted,
   };
 
@@ -177,8 +177,8 @@ function BrainDumpDemo() {
               <span
                 className="shrink-0 text-[9px] px-1.5 py-0.5"
                 style={{
-                  background: item.action === "add_to_tasks" ? "oklch(0.40 0.10 168 / 0.12)" : item.action === "add_to_goals" ? "oklch(0.40 0.10 290 / 0.12)" : M.accentBg,
-                  color: item.action === "add_to_tasks" ? "oklch(0.40 0.10 168)" : item.action === "add_to_goals" ? "oklch(0.40 0.10 290)" : M.muted,
+                  background: item.action === "add_to_tasks" ? "var(--c-accent-bg-sm)" : item.action === "add_to_goals" ? "var(--c-accent-bg-sm)" : M.accentBg,
+                  color: item.action === "add_to_tasks" ? "var(--c-deep)" : item.action === "add_to_goals" ? "var(--c-deep)" : M.muted,
                   fontFamily: "'JetBrains Mono', monospace",
                   border: `1px solid ${M.border}`,
                 }}

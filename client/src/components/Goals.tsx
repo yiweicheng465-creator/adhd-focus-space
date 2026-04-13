@@ -35,13 +35,13 @@ const M = {
   coral:    "var(--c-accent)",
   coralBg:  "var(--c-accent-bg-sm)",
   coralBdr: "var(--c-accent-bd-md)",
-  sage:     "oklch(0.52 0.10 168)",
-  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
-  sageBdr:  "oklch(0.52 0.10 168 / 0.28)",
+  sage:     "var(--c-accent-soft)",
+  sageBg:   "var(--c-accent-bg-md)",
+  sageBdr:  "var(--c-accent-bd-md)",
   ink:      "var(--c-shadow-ink2)",
   muted:    "var(--c-accent-faint)",
   border:   "var(--c-light-soft)",
-  card:     "oklch(0.975 0.018 355)",
+  card:     "var(--c-pale-bg3)",
 };
 
 const LABEL: React.CSSProperties = {
@@ -134,7 +134,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
             </span>
           </div>
           {/* Custom progress bar */}
-          <div className="h-1.5 w-full" style={{ background: "oklch(0.88 0.014 75)" }}>
+          <div className="h-1.5 w-full" style={{ background: "var(--c-light-border)" }}>
             <div
               className="h-full transition-all duration-500"
               style={{ width: `${avgProgress}%`, background: M.coral }}
@@ -162,7 +162,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
               letterSpacing: "0.01em",
               paddingTop: "0.55rem",
               paddingBottom: "0.55rem",
-              color: "oklch(0.35 0.02 70)",
+              color: "var(--c-ink-soft)",
             }}
           />
           <button
@@ -265,7 +265,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
 
               {/* Progress bar */}
               <div className="flex items-center gap-3">
-                <div className="flex-1 h-1.5" style={{ background: "oklch(0.88 0.014 75)" }}>
+                <div className="flex-1 h-1.5" style={{ background: "var(--c-light-border)" }}>
                   <div
                     className="h-full transition-all duration-500"
                     style={{ width: `${goal.progress}%`, background: done ? M.sage : M.coral }}
@@ -310,7 +310,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                           key={t.id}
                           className="flex items-center gap-2 px-2 py-1.5 transition-all"
                           style={{
-                            background: t.done ? "oklch(0.97 0.006 78)" : "oklch(0.975 0.010 78)",
+                            background: t.done ? "var(--c-pale-bg3)" : "var(--c-pale-bg3)",
                             border: `1px solid ${t.done ? M.sageBdr : M.border}`,
                             opacity: t.done ? 0.7 : 1,
                           }}
@@ -324,7 +324,7 @@ export function Goals({ goals, onGoalsChange, defaultContext = "all", allCategor
                               onTasksChange(updated);
                             }}
                             className="shrink-0 transition-all hover:scale-110"
-                            style={{ color: t.done ? M.sage : "oklch(0.80 0.012 75)" }}
+                            style={{ color: t.done ? M.sage : "var(--c-light-neutral)" }}
                           >
                             {t.done
                               ? <CheckCircle2 className="w-3.5 h-3.5" />

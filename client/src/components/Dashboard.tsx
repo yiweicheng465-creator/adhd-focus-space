@@ -108,14 +108,14 @@ function getGreeting() {
 
 /* ── Dreamy SukiSketch Palette (aligned with index.css CSS vars) ── */
 const TC        = "var(--c-accent)";   // hot pink accent
-const CREAM     = "oklch(0.970 0.022 355)"; // soft pink card bg
+const CREAM     = "var(--c-pale-bg3)"; // soft pink card bg
 const BORDER    = "var(--c-mid-soft)";  // mauve border
 const INK       = "var(--c-shadow-ink2)";  // dark plum ink
 const MUTED     = "var(--c-accent-faint)";  // muted mauve text
 // AI panel: soft lavender
-const AI_BG     = "oklch(0.960 0.030 290)";  // soft lavender
-const AI_BORDER = "oklch(0.78 0.060 290)";   // lavender border
-const AI_MSG_BG = "oklch(0.940 0.040 355)";  // bubblegum pink for AI messages
+const AI_BG     = "var(--c-pale-bg)";  // panel bg
+const AI_BORDER = "var(--c-mid-border)";   // border
+const AI_MSG_BG = "var(--c-pale)";  // AI message bg
 const AI_ACCENT = "var(--c-accent)";    // hot pink for AI header/icons
 const TITLEBAR  = "var(--c-light-divider)";   // pink title bar bg
 const TITLEBAR_TEXT = "var(--c-ink-soft)"; // title bar text
@@ -133,10 +133,10 @@ function CornerMark() {
 const PRIORITY_ORDER: Record<string, number> = { urgent: 0, focus: 1, normal: 2, someday: 3 };
 const PRIORITY_DOTS: Record<string, { color: string; bg: string; label: string; labelBg: string }> = {
   // Muted ink-stamp palette — desaturated, dusty, lo-fi
-  urgent:  { color: "#C0306A", bg: "oklch(0.95 0.040 355)",  label: "urgent",  labelBg: "rgba(192, 48, 106, 0.10)" },
-  focus:   { color: "#7A50A0", bg: "oklch(0.95 0.030 290)",  label: "focus",   labelBg: "rgba(122, 80, 160, 0.10)" },
-  normal:  { color: "#7A50A0", bg: "oklch(0.95 0.025 290)",  label: "normal",  labelBg: "rgba(122, 80, 160, 0.08)" },
-  someday: { color: "#6070A0", bg: "oklch(0.95 0.020 240)",  label: "someday", labelBg: "rgba(96, 112, 160, 0.08)" },
+  urgent:  { color: "var(--c-deep)", bg: "var(--c-pale)",  label: "urgent",  labelBg: "var(--c-accent-bg-sm)" },
+  focus:   { color: "var(--c-accent-text)", bg: "var(--c-pale-bg)",  label: "focus",   labelBg: "var(--c-accent-bg-xs)" },
+  normal:  { color: "var(--c-accent-text)", bg: "var(--c-pale-bg)",  label: "normal",  labelBg: "var(--c-accent-bg-xs)" },
+  someday: { color: "var(--c-accent-faint)", bg: "var(--c-pale-bg)",  label: "someday", labelBg: "var(--c-accent-bg-xs)" },
 };
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
@@ -318,9 +318,9 @@ function AICommandPanel({
             fontSize: 8,
             fontFamily: "'DM Mono', monospace",
             letterSpacing: "0.04em",
-            color: aiProvider?.hasOwnKey ? "oklch(0.42 0.14 260)" : "oklch(0.42 0.12 168)",
-            background: aiProvider?.hasOwnKey ? "oklch(0.93 0.030 260)" : "oklch(0.93 0.030 168)",
-            border: `1px solid ${aiProvider?.hasOwnKey ? "oklch(0.72 0.10 260)" : "oklch(0.70 0.12 168)"}`,
+            color: "var(--c-deep-text)",
+            background: "var(--c-pale)",
+            border: `1px solid var(--c-mid)`,
             padding: "1px 5px",
             borderRadius: 3,
             cursor: "help",
@@ -350,7 +350,7 @@ function AICommandPanel({
                 style={{
                   textAlign: "left", fontSize: 11,
                   color: INK,
-                  background: "oklch(0.965 0.020 355 / 0.70)",
+                  background: "var(--c-pale-bg2)",
                   border: `1px solid ${AI_BORDER}`,
                   borderRadius: 6,
                   padding: "6px 11px", cursor: "pointer", lineHeight: 1.4,
@@ -395,7 +395,7 @@ function AICommandPanel({
         style={{
           display: "flex", alignItems: "center", gap: 6, marginTop: 8,
           border: `1px solid ${AI_BORDER}`,
-          background: "oklch(0.975 0.018 355 / 0.85)",
+          background: "var(--c-pale-bg3)",
           borderRadius: 8,
           padding: "6px 10px", flexShrink: 0,
         }}
@@ -534,31 +534,31 @@ export function Dashboard({
         <div className="absolute" style={{ bottom: 6, right: 22, opacity: 0.50 }}>
           <svg width="36" height="44" viewBox="0 0 36 44" fill="none">
             {/* pot */}
-            <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="oklch(0.62 0.12 300)" />
+            <path d="M10 30 Q9 38 8 40 L28 40 Q27 38 26 30 Z" fill="var(--c-accent)" />
             <rect x="8" y="28" width="20" height="4" rx="2" fill="var(--c-accent-muted)" />
             {/* stem */}
-            <line x1="18" y1="28" x2="18" y2="14" stroke="oklch(0.55 0.14 290)" strokeWidth="1.5" strokeLinecap="round" />
+            <line x1="18" y1="28" x2="18" y2="14" stroke="var(--c-accent-muted)" strokeWidth="1.5" strokeLinecap="round" />
             {/* leaves */}
-            <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="oklch(0.60 0.14 290)" />
+            <path d="M18 22 Q10 18 8 10 Q14 14 18 22Z" fill="var(--c-accent-dim)" />
             <path d="M18 18 Q26 14 28 6 Q22 10 18 18Z" fill="var(--c-accent-muted)" />
-            <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="oklch(0.58 0.13 292)" />
+            <path d="M18 26 Q12 22 11 16 Q16 20 18 26Z" fill="var(--c-accent)" />
           </svg>
         </div>
         {/* Sticky note moved under greeting — rendered inline below */}
         {/* Leaf sprig — slightly right of left pane edge, peeking under greeting */}
         <div className="absolute" style={{ top: 38, left: 172, opacity: 0.45, transform: "rotate(-15deg)", zIndex: 12 }}>
           <svg width="22" height="30" viewBox="0 0 22 30" fill="none">
-            <line x1="11" y1="28" x2="11" y2="4" stroke="oklch(0.55 0.14 290)" strokeWidth="1.2" strokeLinecap="round" />
-            <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="oklch(0.60 0.14 290)" />
+            <line x1="11" y1="28" x2="11" y2="4" stroke="var(--c-accent-muted)" strokeWidth="1.2" strokeLinecap="round" />
+            <path d="M11 20 Q4 16 3 8 Q9 12 11 20Z" fill="var(--c-accent-dim)" />
             <path d="M11 14 Q18 10 19 2 Q13 6 11 14Z" fill="var(--c-accent-muted)" />
           </svg>
         </div>
         {/* Cloud puff — far right, mid height */}
         <div className="absolute" style={{ top: 70, right: 8, opacity: 0.22 }}>
           <svg width="44" height="22" viewBox="0 0 44 22" fill="none">
-            <ellipse cx="22" cy="14" rx="18" ry="8" fill="oklch(0.82 0.06 290)" />
-            <ellipse cx="14" cy="12" rx="10" ry="7" fill="oklch(0.84 0.05 300)" />
-            <ellipse cx="30" cy="11" rx="9" ry="6" fill="oklch(0.84 0.05 300)" />
+            <ellipse cx="22" cy="14" rx="18" ry="8" fill="var(--c-light)" />
+            <ellipse cx="14" cy="12" rx="10" ry="7" fill="var(--c-light)" />
+            <ellipse cx="30" cy="11" rx="9" ry="6" fill="var(--c-light)" />
             <ellipse cx="22" cy="9" rx="8" ry="6" fill="var(--c-light-divider)" />
           </svg>
         </div>
@@ -589,7 +589,7 @@ export function Dashboard({
               {/* be kind to yourself sticker — sticky note with bottom-right corner curl */}
               <div style={{ marginTop: 5, display: "inline-block", transform: "rotate(-1.5deg)", opacity: 0.88, position: "relative" }}>
                 <div style={{
-                  background: "oklch(0.96 0.030 355)",
+                  background: "var(--c-pale)",
                   border: "1px solid var(--c-light-border)",
                   padding: "4px 22px 4px 9px",
                   fontSize: 8,
@@ -620,7 +620,7 @@ export function Dashboard({
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               {/* Quick capture */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.018 355 / 0.85)", padding: "5px 12px", flex: "1 1 160px", maxWidth: 280, borderRadius: 6 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "var(--c-pale-bg3)", padding: "5px 12px", flex: "1 1 160px", maxWidth: 280, borderRadius: 6 }}>
                 <Zap size={11} style={{ color: TC, flexShrink: 0 }} />
                 <input
                   ref={dumpInputRef}
@@ -678,8 +678,8 @@ export function Dashboard({
             <div style={{ display: "flex", alignItems: "center", gap: 5, marginLeft: "auto", marginRight: 6 }}>
               {/* leaf sticker */}
               <svg width="10" height="12" viewBox="0 0 10 12" fill="none" style={{ opacity: 0.55 }}>
-                <line x1="5" y1="11" x2="5" y2="2" stroke="oklch(0.55 0.14 290)" strokeWidth="1" strokeLinecap="round" />
-                <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="oklch(0.60 0.14 290)" />
+                <line x1="5" y1="11" x2="5" y2="2" stroke="var(--c-accent-muted)" strokeWidth="1" strokeLinecap="round" />
+                <path d="M5 8 Q1 6 1 2 Q4 4 5 8Z" fill="var(--c-accent-dim)" />
                 <path d="M5 6 Q9 4 9 0 Q6 2 5 6Z" fill="var(--c-accent-muted)" />
               </svg>
             </div>
@@ -765,13 +765,13 @@ export function Dashboard({
                         title="Mark done"
                         style={{
                           width: 18, height: 18, flexShrink: 0, borderRadius: 3,
-                          border: `2px solid ${isCompleting ? "oklch(0.60 0.08 290)" : "oklch(0.88 0.018 355)"}`,
-                          background: isCompleting ? "oklch(0.60 0.08 290 / 0.15)" : "transparent",
+                          border: `2px solid ${isCompleting ? "var(--c-accent-soft)" : "var(--c-light-divider)"}`,
+                          background: isCompleting ? "var(--c-accent-bg-md)" : "transparent",
                           display: "flex", alignItems: "center", justifyContent: "center",
                           transition: "all 0.2s",
                         }}
                       >
-                        {isCompleting && <Check size={10} style={{ color: "oklch(0.60 0.08 290)" }} />}
+                        {isCompleting && <Check size={10} style={{ color: "var(--c-accent-soft)" }} />}
                       </button>
                     </div>
                   );

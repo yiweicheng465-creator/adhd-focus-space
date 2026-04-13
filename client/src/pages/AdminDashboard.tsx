@@ -9,11 +9,11 @@ import { Loader2, ShieldAlert, Users, Zap, Calendar, Key, Bot, Cpu } from "lucid
 const INK    = "var(--c-shadow-ink2)";
 const MUTED  = "var(--c-accent-faint)";
 const BORDER = "var(--c-light-border)";
-const CREAM  = "oklch(0.970 0.022 355)";
+const CREAM  = "var(--c-pale-bg3)";
 const TC     = "var(--c-accent)";
-const BG     = "oklch(0.960 0.018 355)";
-const GREEN  = "oklch(0.40 0.14 168)";
-const BLUE   = "oklch(0.44 0.16 250)";
+const BG     = "var(--c-pale-bg)";
+const GREEN  = "var(--c-deep)";
+const BLUE   = "var(--c-deep)";
 
 function StatCard({ label, value, icon, accent }: { label: string; value: string | number; icon: React.ReactNode; accent?: string }) {
   return (
@@ -93,8 +93,8 @@ export default function AdminDashboard() {
           marginLeft: "auto",
           fontSize: 9,
           color: MUTED,
-          background: "oklch(0.93 0.030 168)",
-          border: "1px solid oklch(0.70 0.12 168)",
+          background: "var(--c-pale)",
+          border: "1px solid var(--c-mid)",
           padding: "1px 6px",
           borderRadius: 3,
         }}>
@@ -128,7 +128,7 @@ export default function AdminDashboard() {
             display: "grid",
             gridTemplateColumns: "2fr 2fr 70px 70px 70px 70px 70px 80px 110px",
             padding: "8px 14px",
-            background: "oklch(0.940 0.040 355)",
+            background: "var(--c-pale)",
             borderBottom: `1px solid ${BORDER}`,
             fontSize: 8,
             color: MUTED,
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
 
           {/* Error state */}
           {error && (
-            <div style={{ padding: "20px 14px", fontSize: 11, color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace" }}>
+            <div style={{ padding: "20px 14px", fontSize: 11, color: "var(--c-deep)", fontFamily: "'Space Mono', monospace" }}>
               Failed to load: {error.message}
             </div>
           )}
@@ -170,7 +170,7 @@ export default function AdminDashboard() {
                 gridTemplateColumns: "2fr 2fr 70px 70px 70px 70px 70px 80px 110px",
                 padding: "9px 14px",
                 borderBottom: i < rows.length - 1 ? `1px solid ${BORDER}` : "none",
-                background: i % 2 === 0 ? "transparent" : "oklch(0.975 0.012 355 / 0.5)",
+                background: i % 2 === 0 ? "transparent" : "var(--c-pale-bg2)",
                 fontSize: 10,
                 color: INK,
                 alignItems: "center",

@@ -22,12 +22,12 @@ const M = {
   ink:    "var(--c-shadow-ink2)",
   muted:  "var(--c-accent-faint)",
   border: "var(--c-light-soft)",
-  card:   "oklch(0.975 0.018 355)",
+  card:   "var(--c-pale-bg3)",
   coral:  "var(--c-accent)",
   sage:   "var(--c-accent-text)",
-  warn:   "oklch(0.60 0.15 60)",
-  warnBg: "oklch(0.97 0.025 60)",
-  warnBdr:"oklch(0.82 0.07 60)",
+  warn:   "var(--c-accent)",
+  warnBg: "var(--c-pale-bg3)",
+  warnBdr:"var(--c-light)",
 };
 
 /* ── Google Drive OAuth helpers (client-side only) ── */
@@ -354,7 +354,7 @@ export default function StorageBackup() {
         {/* Last backed up badge — always visible */}
         <div style={{
           display: "flex", gap: 8, alignItems: "center",
-          background: lastBackupRelative ? "var(--c-pale-bg)" : "oklch(0.97 0.025 60)",
+          background: lastBackupRelative ? "var(--c-pale-bg)" : "var(--c-pale-bg3)",
           border: `1px solid ${lastBackupRelative ? "var(--c-light-border)" : M.warnBdr}`,
           padding: "10px 14px", marginTop: 12, borderRadius: 2,
         }}>
@@ -466,10 +466,10 @@ export default function StorageBackup() {
             display: "flex", alignItems: "center", gap: 8,
           }}>
             {gdStatus === "success" && <CheckCircle2 size={12} style={{ color: M.sage, flexShrink: 0 }} />}
-            {gdStatus === "error" && <AlertTriangle size={12} style={{ color: "oklch(0.55 0.18 355)", flexShrink: 0 }} />}
+            {gdStatus === "error" && <AlertTriangle size={12} style={{ color: "var(--c-accent)", flexShrink: 0 }} />}
             <p style={{
               fontSize: 10, fontFamily: "'DM Mono', monospace",
-              color: gdStatus === "error" ? "oklch(0.45 0.18 355)" : gdStatus === "success" ? M.sage : M.muted,
+              color: gdStatus === "error" ? "var(--c-deep)" : gdStatus === "success" ? M.sage : M.muted,
             }}>
               {gdMessage}
             </p>

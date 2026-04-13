@@ -56,20 +56,20 @@ const M = {
   coral:    "var(--c-accent)",
   coralBg:  "var(--c-accent-bg-sm)",
   coralBdr: "var(--c-accent-bd-sm)",
-  sage:     "oklch(0.52 0.10 168)",
-  sageBg:   "oklch(0.52 0.10 168 / 0.08)",
-  sageBdr:  "oklch(0.52 0.10 168 / 0.25)",
+  sage:     "var(--c-accent-soft)",
+  sageBg:   "var(--c-accent-bg-md)",
+  sageBdr:  "var(--c-accent-bd-md)",
   slumber:  "var(--c-accent-faint)",
-  slumBg:   "oklch(0.72 0.040 290 / 0.15)",
-  slumBdr:  "oklch(0.72 0.040 290 / 0.40)",
-  rose:     "oklch(0.72 0.08 290)",
-  roseBg:   "oklch(0.72 0.08 290 / 0.08)",
-  roseBdr:  "oklch(0.72 0.08 290 / 0.25)",
+  slumBg:   "var(--c-pale-bg2)",
+  slumBdr:  "var(--c-mid-border)",
+  rose:     "var(--c-light)",
+  roseBg:   "var(--c-accent-bg-xs)",
+  roseBdr:  "var(--c-accent-bg-md)",
   ink:      "var(--c-shadow-ink2)",
   muted:    "var(--c-accent-faint)",
   border:   "var(--c-light-soft)",
-  card:     "oklch(0.975 0.018 355 / 0.85)",
-  surface:  "oklch(0.960 0.025 355 / 0.60)",
+  card:     "var(--c-pale-bg3)",
+  surface:  "var(--c-pale-bg2)",
 };
 
 /* ── Types ── */
@@ -381,7 +381,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
             value={name} onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && addAgent()}
             placeholder="Agent name (e.g. Manus, Claude)"
-            style={{ flex: 1, background: "oklch(0.997 0.003 355)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
+            style={{ flex: 1, background: "var(--c-pale-bg3)", border: `1px solid ${M.border}`, borderRadius: 8, fontFamily: "'DM Sans', sans-serif", fontSize: "0.85rem", color: M.ink, height: 42 }}
           />
           <select
             value={linkedTaskId}
@@ -394,7 +394,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 if (linked) setNewCtx(linked.context as ItemContext);
               }
             }}
-            style={{ minWidth: 160, maxWidth: 220, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "0 10px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 355)", color: linkedTaskId ? M.ink : M.muted, outline: "none", height: 42, cursor: "pointer" }}
+            style={{ minWidth: 160, maxWidth: 220, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "0 10px", borderRadius: 8, border: `1px solid ${M.border}`, background: "var(--c-pale-bg3)", color: linkedTaskId ? M.ink : M.muted, outline: "none", height: 42, cursor: "pointer" }}
           >
             <option value="">Link to task…</option>
             {activeTasks.map((t) => (
@@ -523,7 +523,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                           defaultValue={agent.linkedTaskId ?? ""}
                           onChange={(e) => updateLinkedTask(agent.id, e.target.value)}
                           autoFocus
-                          style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "5px 10px", borderRadius: 8, border: `1px solid ${M.coralBdr}`, background: "oklch(0.997 0.003 355)", color: M.ink, outline: "none", cursor: "pointer" }}
+                          style={{ flex: 1, fontFamily: "'DM Sans', sans-serif", fontSize: "0.78rem", padding: "5px 10px", borderRadius: 8, border: `1px solid ${M.coralBdr}`, background: "var(--c-pale-bg3)", color: M.ink, outline: "none", cursor: "pointer" }}
                         >
                           <option value="">— none —</option>
                           {activeTasks.map((t) => (
@@ -560,7 +560,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                       <textarea
                         value={noteEditing.value}
                         onChange={(e) => setNoteEditing({ id: agent.id, value: e.target.value })}
-                        style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", padding: "10px 12px", borderRadius: 8, border: `1px solid ${M.border}`, background: "oklch(0.997 0.003 355)", color: M.ink, resize: "vertical" as const, minHeight: 80, outline: "none" }}
+                        style={{ width: "100%", fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", padding: "10px 12px", borderRadius: 8, border: `1px solid ${M.border}`, background: "var(--c-pale-bg3)", color: M.ink, resize: "vertical" as const, minHeight: 80, outline: "none" }}
                         placeholder="What did this agent produce? Any key outputs?"
                       />
                       <div className="flex gap-2">
@@ -571,7 +571,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                   ) : (
                     <div
                       onClick={() => setNoteEditing({ id: agent.id, value: agent.notes ?? "" })}
-                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: agent.notes ? M.ink : M.muted, fontStyle: agent.notes ? "normal" : "italic", padding: "10px 12px", borderRadius: 8, border: `1px dashed ${M.border}`, background: "oklch(0.990 0.005 355 / 0.60)", cursor: "pointer", minHeight: 40 }}
+                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "0.82rem", color: agent.notes ? M.ink : M.muted, fontStyle: agent.notes ? "normal" : "italic", padding: "10px 12px", borderRadius: 8, border: `1px dashed ${M.border}`, background: "var(--c-pale-bg2)", cursor: "pointer", minHeight: 40 }}
                     >
                       {agent.notes ? agent.notes : <span className="italic opacity-60">Add a note, e.g. "Check if tests pass before merging" or paste output summary here…</span>}
                     </div>
@@ -642,7 +642,7 @@ export function AgentTracker({ agents, onAgentsChange, tasks, defaultContext = "
                 />
               </div>
               {createBriefMutation.isSuccess && (
-                <div className="flex items-center gap-1.5 text-xs" style={{ color: "oklch(0.55 0.14 290)", fontFamily: "'DM Sans', sans-serif" }}>
+                <div className="flex items-center gap-1.5 text-xs" style={{ color: "var(--c-accent)", fontFamily: "'DM Sans', sans-serif" }}>
                   <Sparkles className="w-3 h-3" />
                   AI-generated — edit freely before creating
                 </div>

@@ -11,23 +11,23 @@ import { toast } from "sonner";
 import { trpc } from "@/lib/trpc";
 
 const M = {
-  bg:       "oklch(0.975 0.012 355)",
-  card:     "oklch(0.970 0.018 355)",
+  bg:       "var(--c-pale-bg3)",
+  card:     "var(--c-pale-bg3)",
   border:   "var(--c-light-soft)",
   ink:      "var(--c-shadow-ink)",
   muted:    "var(--c-accent-faint)",
   accent:   "var(--c-accent)",
   accentBg: "var(--c-accent-bg-sm)",
   accentBdr:"var(--c-accent-bg-lg)",
-  sage:     "oklch(0.52 0.07 145)",
-  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
-  sageBdr:  "oklch(0.52 0.07 145 / 0.25)",
-  coral:    "oklch(0.55 0.09 35)",
-  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
-  coralBdr: "oklch(0.55 0.09 35 / 0.25)",
-  gold:     "oklch(0.65 0.10 75)",
-  goldBg:   "oklch(0.65 0.10 75 / 0.08)",
-  goldBdr:  "oklch(0.65 0.10 75 / 0.25)",
+  sage:     "var(--c-accent)",
+  sageBg:   "var(--c-accent-bg-sm)",
+  sageBdr:  "var(--c-accent-bg-md)",
+  coral:    "var(--c-deep)",
+  coralBg:  "var(--c-accent-bg-sm)",
+  coralBdr: "var(--c-accent-bg-md)",
+  gold:     "var(--c-light)",
+  goldBg:   "var(--c-accent-bg-xs)",
+  goldBdr:  "var(--c-accent-bg-md)",
 };
 
 /* ── Section accordion ── */

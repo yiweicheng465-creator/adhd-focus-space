@@ -14,7 +14,7 @@ interface NamePromptProps {
 const DARK   = "var(--c-shadow-ink2)";
 const ACCENT = "var(--c-accent)";
 const BORDER = "var(--c-mid-soft)";
-const BG     = "oklch(0.970 0.022 355)";
+const BG     = "var(--c-pale-bg3)";
 const PANEL  = "var(--c-pale-bg)";
 
 export function NamePrompt({ onSave, onSkip }: NamePromptProps) {

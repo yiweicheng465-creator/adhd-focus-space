@@ -1,7 +1,7 @@
 /* ============================================================
    ADHD FOCUS SPACE — Context Switcher v4.0 (Dynamic Categories)
-   Work  → sage green  oklch(0.48 0.07 145)
-   Personal → dusty mauve  oklch(0.52 0.06 20)
+   Work  → sage green  var(--c-accent-soft)
+   Personal → dusty mauve  var(--c-accent)
    Custom → auto-generated Morandi palette from label hash
    ============================================================ */
 
@@ -23,9 +23,9 @@ export const BUILTIN_CONTEXT_CONFIG: Record<string, {
   work: {
     label:  "Work",
     icon:   Briefcase,
-    color:  "oklch(0.48 0.14 290)",
-    bg:     "oklch(0.48 0.14 290 / 0.10)",
-    border: "oklch(0.48 0.14 290 / 0.28)",
+    color:  "var(--c-accent)",
+    bg:     "var(--c-accent-bg-sm)",
+    border: "var(--c-accent-bd-md)",
   },
   personal: {
     label:  "Personal",
@@ -114,7 +114,7 @@ export function ContextSwitcher({ active, onChange, counts, contexts, onDeleteCo
               onClick={() => onChange(id)}
               className="flex items-center gap-1.5 text-xs font-medium transition-all justify-center shrink-0"
               style={{
-                background:    isActive ? (cfg ? cfg.bg : "oklch(0.92 0.030 355)") : "transparent",
+                background:    isActive ? (cfg ? cfg.bg : "var(--c-pale)") : "transparent",
                 color:         isActive ? (cfg ? cfg.color : "var(--c-deep-text)") : "var(--c-accent-faint)",
                 border:        `1px solid ${isActive ? (cfg ? cfg.border : "var(--c-mid-soft)") : "var(--c-light-border)"}`,
                 fontFamily:    "'DM Sans', sans-serif",

@@ -26,7 +26,7 @@ export default function Monthly() {
         <header
           className="sticky top-0 z-30 px-8 py-4 flex items-center gap-4"
           style={{
-            background: "oklch(0.975 0.018 355 / 0.90)",
+            background: "var(--c-pale-bg3)",
             backdropFilter: "blur(8px)",
             borderBottom: "1px solid var(--c-light-divider)",
           }}

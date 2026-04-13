@@ -71,11 +71,11 @@ function PillFaceGlowing({ active }: { active: boolean }) {
 
 const PILL_FACES = [PillFaceDrained, PillFaceLow, PillFaceOkay, PillFaceGood, PillFaceGlowing];
 const MOOD_DATA = [
-  { value: 1, label: "Drained", color: "oklch(0.50 0.06 280)" },
-  { value: 2, label: "Low",     color: "oklch(0.48 0.08 290)" },
+  { value: 1, label: "Drained", color: "var(--c-accent-dim)" },
+  { value: 2, label: "Low",     color: "var(--c-accent-soft)" },
   { value: 3, label: "Okay",    color: "var(--c-accent)" },
   { value: 4, label: "Good",    color: "var(--c-accent-muted)" },
-  { value: 5, label: "Glowing", color: "oklch(0.58 0.18 355)" },
+  { value: 5, label: "Glowing", color: "var(--c-accent)" },
 ];
 
 function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (v: number) => void }) {
@@ -100,7 +100,7 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         className="flex items-center gap-1.5 px-2.5 py-1 transition-all"
         style={{
           border: "1px solid var(--c-light-divider)",
-          background: open ? "oklch(0.965 0.015 355)" : "transparent",
+          background: open ? "var(--c-pale-bg)" : "transparent",
           borderRadius: 20,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: "0.72rem",
@@ -119,7 +119,7 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
         <div
           className="absolute right-0 top-full mt-1 z-50 flex gap-1.5 p-2"
           style={{
-            background: "oklch(0.990 0.006 355)",
+            background: "var(--c-pale-bg3)",
             border: "1px solid var(--c-light-divider)",
             borderRadius: 12,
             boxShadow: "0 4px 16px var(--c-shadow-ink3)",
@@ -135,7 +135,7 @@ function MoodPill({ mood, onMoodChange }: { mood: number | null; onMoodChange: (
                 className="flex flex-col items-center gap-1 px-2 py-1.5 transition-all"
                 style={{
                   borderRadius: 8,
-                  background: mood === m.value ? "oklch(0.965 0.015 355)" : "transparent",
+                  background: mood === m.value ? "var(--c-pale-bg)" : "transparent",
                   border: mood === m.value ? `1px solid ${m.color}60` : "1px solid transparent",
                 }}
               >
@@ -719,12 +719,12 @@ export default function Home() {
                   userSelect: "none",
                 }}>
                   {/* Stars */}
-                  <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "oklch(0.62 0.18 355)" }}>✦</div>
-                  <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "oklch(0.62 0.18 355)" }}>✦</div>
+                  <div style={{ position: "absolute", top: -14, left: 8, fontSize: 11, color: "var(--c-accent)" }}>✦</div>
+                  <div style={{ position: "absolute", top: -6, left: 28, fontSize: 8, color: "var(--c-accent)" }}>✦</div>
                   <div style={{ position: "absolute", bottom: -8, left: 4, fontSize: 14, color: "var(--c-accent)" }}>★</div>
                   {/* Bubble */}
                   <div style={{
-                    background: "oklch(0.985 0.010 355)",
+                    background: "var(--c-pale-bg3)",
                     border: "1.5px solid var(--c-mid-soft)",
                     borderRadius: 8,
                     padding: "10px 14px",
@@ -760,7 +760,7 @@ export default function Home() {
                       height: 0,
                       borderLeft: "7px solid transparent",
                       borderRight: "0px solid transparent",
-                      borderTop: "9px solid oklch(0.985 0.010 355)",
+                      borderTop: "9px solid var(--c-pale-bg3)",
                     }} />
                   </div>
                 </div>

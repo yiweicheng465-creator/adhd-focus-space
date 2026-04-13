@@ -17,14 +17,14 @@ import { Streamdown } from "streamdown";
 
 // ── Win category colours (must match DailyWins WIN_ICONS order) ──
 const WIN_CAT_COLORS = [
-  "oklch(0.62 0.18 355)",   // health
-  "oklch(0.52 0.08 230)",  // study
-  "oklch(0.55 0.14 290)",  // work
+  "var(--c-accent)",   // health
+  "var(--c-accent-soft)",  // study
+  "var(--c-accent)",  // work
   "var(--c-accent-dim)",   // social
-  "oklch(0.55 0.10 300)",  // creative
-  "oklch(0.55 0.07 250)",  // mindful
+  "var(--c-accent)",  // creative
+  "var(--c-accent-dim)",  // mindful
   "var(--c-accent)",   // fitness
-  "oklch(0.55 0.12 270)",  // nutrition
+  "var(--c-accent-dim)",  // nutrition
 ];
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
 
@@ -246,7 +246,7 @@ function WinsRing({ wins }: { wins: Win[] }) {
                   bottom: "calc(100% + 8px)",
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "oklch(0.970 0.022 355)",
+                  background: "var(--c-pale-bg3)",
                   color: "var(--c-shadow-ink2)",
                   border: "2px solid var(--c-accent)",
                   boxShadow: "3px 3px 0px var(--c-ink-soft)",

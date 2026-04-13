@@ -33,11 +33,11 @@ const M = {
   ink:     "var(--c-shadow-ink)",
   muted:   "var(--c-accent-faint)",
   border:  "var(--c-light-soft)",
-  card:    "oklch(0.975 0.018 355)",
+  card:    "var(--c-pale-bg3)",
   coral:   "var(--c-accent)",
   coralBg: "var(--c-accent-bg-sm)",
   sage:    "var(--c-accent-faint)",
-  sageBg:  "oklch(0.55 0.14 290 / 0.08)",
+  sageBg:  "var(--c-accent-bg-md)",
   gold:    "var(--c-accent-dim)",
   goldBg:  "var(--c-accent-bg-sm)",
   pink:    "var(--c-accent-dim)",
@@ -187,8 +187,8 @@ function DayCell({
           ? M.coralBg
           : hasActivity
           ? log?.wrapUpDone
-            ? "oklch(0.97 0.015 355)"
-            : "oklch(0.98 0.010 355)"
+            ? "var(--c-pale-bg)"
+            : "var(--c-pale-bg3)"
           : "transparent",
         cursor: "pointer",
         display: "flex",
@@ -263,14 +263,14 @@ function DayCell({
 
 /* ── Win category colours/labels (must match DailyWins WIN_ICONS order) ── */
 const WIN_CAT_COLORS = [
-  "oklch(0.62 0.18 355)",  // health
-  "oklch(0.52 0.08 230)", // study
-  "oklch(0.55 0.14 290)", // work
+  "var(--c-accent)",  // health
+  "var(--c-accent-soft)", // study
+  "var(--c-accent)", // work
   "var(--c-accent-dim)",  // social
-  "oklch(0.55 0.10 300)", // creative
-  "oklch(0.55 0.07 185)", // mindful
+  "var(--c-accent)", // creative
+  "var(--c-accent-soft)", // mindful
   "var(--c-accent)",  // fitness
-  "oklch(0.55 0.12 270)", // nutrition
+  "var(--c-accent-dim)", // nutrition
 ];
 const WIN_CAT_LABELS = ["Health","Study","Work","Social","Creative","Mindful","Fitness","Nutrition"];
 
@@ -338,7 +338,7 @@ function DayDetail({ log, dateStr, dateKey: dk, onClose, isPast }: { log?: Daily
         <div style={{ display: "flex", gap: 4 }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-accent-dim)", boxShadow: "0 1px 0 var(--c-deep), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent-muted), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "oklch(0.78 0.10 290)", boxShadow: "0 1px 0 oklch(0.55 0.10 290), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
         </div>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8A3060", marginLeft: 4 }}>day_summary.txt</span>
       </div>
@@ -658,7 +658,7 @@ export function MonthlyProgress({ wins, tasks, blockHistory = {}, blockStreak = 
           <div style={{ display: "flex", gap: 4 }}>
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-accent-dim)", boxShadow: "0 1px 0 var(--c-deep), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
             <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent-muted), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
-            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "oklch(0.78 0.10 290)", boxShadow: "0 1px 0 oklch(0.55 0.10 290), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
+            <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
           </div>
           <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8A3060", marginLeft: 4 }}>calendar.exe</span>
         </div>
@@ -826,7 +826,7 @@ function MonthlyAIReview({
     ink:     "var(--c-shadow-ink)",
     muted:   "var(--c-accent-faint)",
     border:  "var(--c-light-divider)",
-    card:    "oklch(0.975 0.018 355)",
+    card:    "var(--c-pale-bg3)",
   };
 
   return (
@@ -836,7 +836,7 @@ function MonthlyAIReview({
         <div style={{ display: "flex", gap: 4 }}>
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-accent-dim)", boxShadow: "0 1px 0 var(--c-deep), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
           <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent-muted), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
-          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "oklch(0.78 0.10 290)", boxShadow: "0 1px 0 oklch(0.55 0.10 290), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: "var(--c-mid)", boxShadow: "0 1px 0 var(--c-accent), inset 0 1px 1px rgba(255,255,255,0.55)", position: "relative" }} />
         </div>
         <span style={{ fontFamily: "'Space Mono', monospace", fontSize: 10, color: "#8A3060", marginLeft: 4 }}>ai_review.exe</span>
       </div>

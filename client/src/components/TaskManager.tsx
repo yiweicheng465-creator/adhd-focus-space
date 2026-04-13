@@ -37,15 +37,15 @@ const PRIORITY_CONFIG: Record<TaskPriority, {
 }> = {
   urgent: {
     label: "Urgent", icon: Flame,
-    color:  "oklch(0.55 0.09 35)",
-    bg:     "oklch(0.55 0.09 35 / 0.08)",
-    border: "oklch(0.55 0.09 35 / 0.28)",
+    color:  "var(--c-deep)",
+    bg:     "var(--c-accent-bg-sm)",
+    border: "var(--c-accent-bd-sm)",
   },
   focus: {
     label: "Focus", icon: Zap,
-    color:  "oklch(0.52 0.14 290)",
-    bg:     "oklch(0.52 0.14 290 / 0.08)",
-    border: "oklch(0.52 0.14 290 / 0.28)",
+    color:  "var(--c-accent)",
+    bg:     "var(--c-accent-bg-md)",
+    border: "var(--c-accent-bd-md)",
   },
   normal: {
     label: "Normal", icon: Star,
@@ -59,8 +59,8 @@ const M = {
   ink:    "var(--c-shadow-ink2)",
   muted:  "var(--c-accent-faint)",
   border: "var(--c-light-soft)",
-  card:   "oklch(0.975 0.018 355)",
-  bg:     "oklch(0.960 0.030 355)",
+  card:   "var(--c-pale-bg3)",
+  bg:     "var(--c-pale)",
   coral:  "var(--c-accent)",
 };
 
@@ -245,7 +245,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
               letterSpacing: "0.01em",
               paddingTop: "0.55rem",
               paddingBottom: "0.55rem",
-              color: "oklch(0.35 0.02 70)",
+              color: "var(--c-ink-soft)",
             }}
           />
           <button
@@ -305,9 +305,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
               value={newTaskGoalId ?? ""}
               onChange={(e) => setNewTaskGoalId(e.target.value || null)}
               style={{
-                background: newTaskGoalId ? "oklch(0.52 0.14 290 / 0.10)" : "transparent",
-                color: newTaskGoalId ? "oklch(0.40 0.14 290)" : M.muted,
-                border: `1px solid ${newTaskGoalId ? "oklch(0.52 0.14 290 / 0.40)" : M.border}`,
+                background: newTaskGoalId ? "var(--c-accent-bg-sm)" : "transparent",
+                color: newTaskGoalId ? "var(--c-deep)" : M.muted,
+                border: `1px solid ${newTaskGoalId ? "var(--c-accent-bd-md)" : M.border}`,
                 fontFamily: "'DM Sans', sans-serif",
                 fontSize: "0.62rem",
                 fontWeight: newTaskGoalId ? 600 : 400,
@@ -431,7 +431,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                     <span style={{
                       display: "block",
                       fontSize: "0.62rem",
-                      color: task.done ? M.muted : "oklch(0.40 0.09 145)",
+                      color: task.done ? M.muted : "var(--c-deep)",
                       fontFamily: "'DM Sans', sans-serif",
                       letterSpacing: "0.06em",
                       marginTop: 1,
@@ -527,9 +527,9 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                           onChange={(e) => setEditGoalId(e.target.value || null)}
                           style={{
                             flex: 1,
-                            background: editGoalId ? "oklch(0.52 0.14 290 / 0.10)" : "transparent",
-                            color: editGoalId ? "oklch(0.40 0.14 290)" : M.muted,
-                            border: `1px solid ${editGoalId ? "oklch(0.52 0.14 290 / 0.40)" : M.border}`,
+                            background: editGoalId ? "var(--c-accent-bg-sm)" : "transparent",
+                            color: editGoalId ? "var(--c-deep)" : M.muted,
+                            border: `1px solid ${editGoalId ? "var(--c-accent-bd-md)" : M.border}`,
                             fontFamily: "'DM Sans', sans-serif",
                             fontSize: "0.62rem",
                             letterSpacing: "0.08em",
@@ -610,7 +610,7 @@ export function TaskManager({ tasks, onTasksChange, defaultContext = "all", allC
                 <button
                   onClick={() => toggleTask(task.id)}
                   className="flex-shrink-0 transition-all hover:scale-110"
-                  style={{ color: task.done ? pcfg.color : "oklch(0.82 0.012 72)" }}
+                  style={{ color: task.done ? pcfg.color : "var(--c-light)" }}
                 >
                   {task.done
                     ? <CheckCircle2 className="w-4 h-4" />

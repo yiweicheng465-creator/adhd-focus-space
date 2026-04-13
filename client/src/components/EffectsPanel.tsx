@@ -73,9 +73,9 @@ function HSlider({
 /* ─── 3D glossy traffic-light dots ─────────────────────────── */
 function TitleDots() {
   const dots = [
-    { base: "oklch(0.72 0.18 25)",  hi: "oklch(0.88 0.12 25)",  sh: "oklch(0.52 0.20 25)" },
-    { base: "oklch(0.78 0.14 85)",  hi: "oklch(0.92 0.10 85)",  sh: "oklch(0.58 0.16 85)" },
-    { base: "oklch(0.72 0.14 160)", hi: "oklch(0.88 0.10 160)", sh: "oklch(0.52 0.16 160)" },
+    { base: "var(--c-light)",  hi: "var(--c-light)",  sh: "var(--c-deep)" },
+    { base: "var(--c-light)",  hi: "var(--c-pale)",  sh: "var(--c-accent)" },
+    { base: "var(--c-light)", hi: "var(--c-pale)", sh: "var(--c-accent)" },
   ];
   return (
     <div style={{ display: "flex", gap: 5, alignItems: "center" }}>
@@ -284,10 +284,10 @@ export function EffectsPanel() {
             width: 6,
             height: 6,
             borderRadius: "50%",
-            background: aiAvailable ? "oklch(0.60 0.18 145)" : "oklch(0.60 0.22 25)",
+            background: aiAvailable ? "var(--c-accent)" : "var(--c-accent)",
             boxShadow: aiAvailable
-              ? "0 0 4px oklch(0.60 0.18 145 / 0.6)"
-              : "0 0 4px oklch(0.60 0.22 25 / 0.6)",
+              ? "0 0 4px var(--c-accent-bd-md)"
+              : "0 0 4px var(--c-accent-bd-md)",
             flexShrink: 0,
             cursor: "help",
           }}
@@ -475,7 +475,7 @@ export function EffectsPanel() {
                           borderRadius: "50%",
                           background: p.color,
                           border: Math.abs(hue - p.hue) < 10
-                            ? "2.5px solid oklch(0.30 0 0)"
+                            ? "2.5px solid var(--c-ink-soft)"
                             : "2px solid transparent",
                           cursor: "pointer",
                           flexShrink: 0,
@@ -540,8 +540,8 @@ export function EffectsPanel() {
                       style={{
                         width: 36, height: 20,
                         borderRadius: 10,
-                        border: `1.5px solid ${workMode ? "oklch(0.30 0 0)" : "var(--c-mid)"}`,
-                        background: workMode ? "oklch(0.25 0 0)" : "var(--c-pale)",
+                        border: `1.5px solid ${workMode ? "var(--c-ink-soft)" : "var(--c-mid)"}`,
+                        background: workMode ? "var(--c-ink)" : "var(--c-pale)",
                         cursor: "pointer",
                         position: "relative",
                         transition: "background 0.2s, border-color 0.2s",
@@ -572,11 +572,11 @@ export function EffectsPanel() {
 
                 {/* AI status notice — changes based on whether user has a key saved */}
                 <div style={{
-                  background: savedKeyData?.hasKey ? "oklch(0.95 0.025 260)" : "oklch(0.95 0.030 168)",
-                  border: `1px solid ${savedKeyData?.hasKey ? "oklch(0.70 0.10 260)" : "oklch(0.70 0.12 168)"}`,
+                  background: savedKeyData?.hasKey ? "var(--c-pale)" : "var(--c-pale)",
+                  border: `1px solid ${savedKeyData?.hasKey ? "var(--c-mid)" : "var(--c-mid)"}`,
                   padding: "5px 7px",
                   fontSize: "0.40rem",
-                  color: savedKeyData?.hasKey ? "oklch(0.30 0.12 260)" : "oklch(0.35 0.12 168)",
+                  color: savedKeyData?.hasKey ? "var(--c-ink)" : "var(--c-deep)",
                   letterSpacing: "0.03em",
                   lineHeight: 1.6,
                   fontFamily: "'Space Mono', monospace",
@@ -620,7 +620,7 @@ export function EffectsPanel() {
                       fontFamily: "'Space Mono', monospace",
                       padding: "4px 6px",
                       borderRadius: 3,
-                      border: `1px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-mid-border)"}`,
+                      border: `1px solid ${apiKeyError ? "var(--c-deep)" : "var(--c-mid-border)"}`,
                       background: "var(--c-pale-bg)",
                       color: "var(--c-deep-text)",
                       outline: "none",
@@ -636,7 +636,7 @@ export function EffectsPanel() {
                 </div>
 
                 {apiKeyError && (
-                  <p style={{ fontSize: "0.42rem", color: "oklch(0.52 0.20 25)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
+                  <p style={{ fontSize: "0.42rem", color: "var(--c-deep)", fontFamily: "'Space Mono', monospace", margin: 0, lineHeight: 1.4 }}>
                     ⚠ {apiKeyError}
                   </p>
                 )}
@@ -646,7 +646,7 @@ export function EffectsPanel() {
                   <p style={{
                     fontSize: "0.40rem",
                     fontFamily: "'Space Mono', monospace",
-                    color: "oklch(0.50 0.08 260)",
+                    color: "var(--c-accent-dim)",
                     margin: 0,
                     lineHeight: 1.5,
                     letterSpacing: "0.04em",
@@ -659,7 +659,7 @@ export function EffectsPanel() {
                     <p style={{
                       fontSize: "0.40rem",
                       fontFamily: "'Space Mono', monospace",
-                      color: "oklch(0.52 0.10 50)",
+                      color: "var(--c-accent)",
                       margin: 0,
                       lineHeight: 1.5,
                       letterSpacing: "0.02em",
@@ -700,8 +700,8 @@ export function EffectsPanel() {
                       letterSpacing: "0.08em",
                       padding: "5px 0",
                       borderRadius: 3,
-                      border: `1.5px solid ${apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-accent)"}`,
-                      background: apiKeyError ? "oklch(0.52 0.20 25)" : "var(--c-accent)",
+                      border: `1.5px solid ${apiKeyError ? "var(--c-deep)" : "var(--c-accent)"}`,
+                      background: apiKeyError ? "var(--c-deep)" : "var(--c-accent)",
                       color: "white",
                       cursor: (apiKeyInput.trim() && !isSaving) ? "pointer" : "not-allowed",
                       opacity: (apiKeyInput.trim() && !isSaving) ? 1 : 0.5,
@@ -716,7 +716,7 @@ export function EffectsPanel() {
                     style={{
                       fontSize: "0.55rem",
                       fontFamily: "'Space Mono', monospace",
-                      color: "oklch(0.52 0.16 145)",
+                      color: "var(--c-accent)",
                       opacity: showSavedTick ? 1 : 0,
                       transition: "opacity 0.3s ease",
                       flexShrink: 0,
@@ -737,7 +737,7 @@ export function EffectsPanel() {
                       padding: 0,
                       fontSize: "0.40rem",
                       fontFamily: "'Space Mono', monospace",
-                      color: "oklch(0.55 0.08 25)",
+                      color: "var(--c-accent)",
                       textDecoration: "underline",
                       cursor: "pointer",
                       letterSpacing: "0.04em",

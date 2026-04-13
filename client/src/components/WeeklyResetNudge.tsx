@@ -15,16 +15,16 @@ const RESET_CHECKLIST = [
 ];
 
 const M = {
-  coral:    "oklch(0.55 0.09 35)",
-  coralBg:  "oklch(0.55 0.09 35 / 0.08)",
-  coralBdr: "oklch(0.55 0.09 35 / 0.28)",
-  sage:     "oklch(0.52 0.07 145)",
-  sageBg:   "oklch(0.52 0.07 145 / 0.08)",
-  sageBdr:  "oklch(0.52 0.07 145 / 0.28)",
-  ink:      "oklch(0.28 0.018 65)",
-  muted:    "oklch(0.55 0.018 70)",
-  border:   "oklch(0.88 0.014 75)",
-  card:     "oklch(0.985 0.007 80)",
+  coral:    "var(--c-deep)",
+  coralBg:  "var(--c-accent-bg-sm)",
+  coralBdr: "var(--c-accent-bd-sm)",
+  sage:     "var(--c-accent)",
+  sageBg:   "var(--c-accent-bg-sm)",
+  sageBdr:  "var(--c-accent-bd-sm)",
+  ink:      "var(--c-ink)",
+  muted:    "var(--c-muted-text)",
+  border:   "var(--c-light-border)",
+  card:     "var(--c-pale-bg3)",
 };
 
 export function WeeklyResetNudge() {
@@ -61,18 +61,18 @@ export function WeeklyResetNudge() {
       <div className="relative z-10" style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "4px 10px",
-        background: allDone ? M.sageBg : "oklch(0.940 0.020 70)",
+        background: allDone ? M.sageBg : "var(--c-pale-bg)",
         borderBottom: `1px solid ${allDone ? M.sageBdr : M.coralBdr}`,
         fontFamily: "'Space Mono', monospace",
         fontSize: 9,
-        color: "oklch(0.45 0.020 62)",
+        color: "var(--c-muted-text)",
       }}>
         <span>weekly_reset.exe</span>
         <button
           onClick={() => setDismissed(true)}
           style={{ fontSize: 8, padding: "1px 5px", cursor: "pointer",
-            background: "oklch(0.88 0.022 68)", border: `1px solid ${M.border}`,
-            color: "oklch(0.45 0.020 62)", fontFamily: "'Space Mono', monospace",
+            background: "var(--c-light-border)", border: `1px solid ${M.border}`,
+            color: "var(--c-muted-text)", fontFamily: "'Space Mono', monospace",
             lineHeight: 1.4,
           }}
         >✕</button>
@@ -128,7 +128,7 @@ export function WeeklyResetNudge() {
         <button
           onClick={() => setDismissed(true)}
           className="mt-3 w-full py-2 text-sm font-medium transition-all hover:opacity-90"
-          style={{ background: M.sage, color: "oklch(0.97 0.005 80)", fontFamily: "'DM Sans', sans-serif" }}
+          style={{ background: M.sage, color: "var(--c-pale-bg3)", fontFamily: "'DM Sans', sans-serif" }}
         >
           Done — dismiss reminder
         </button>

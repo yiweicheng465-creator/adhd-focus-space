@@ -35,12 +35,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "urgent",
     urgent: true,
     important: true,
-    color:      "oklch(0.50 0.09 35)",
-    bg:         "oklch(0.975 0.010 38)",
-    border:     "oklch(0.50 0.09 35 / 0.55)",
-    shadow:     "oklch(0.50 0.09 35 / 0.18)",
+    color:      "var(--c-accent)",
+    bg:         "var(--c-pale-bg3)",
+    border:     "var(--c-accent-bd-md)",
+    shadow:     "var(--c-accent-bg-sm)",
     numeral:    "I",
-    ruledColor: "oklch(0.50 0.09 35 / 0.07)",
+    ruledColor: "var(--c-accent-bg-xs)",
   },
   {
     id: "q2",
@@ -50,12 +50,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "focus",
     urgent: false,
     important: true,
-    color:      "oklch(0.44 0.10 295)",
-    bg:         "oklch(0.975 0.012 295)",
-    border:     "oklch(0.44 0.10 295 / 0.50)",
-    shadow:     "oklch(0.44 0.10 295 / 0.16)",
+    color:      "var(--c-accent)",
+    bg:         "var(--c-pale-bg3)",
+    border:     "var(--c-accent-bd-md)",
+    shadow:     "var(--c-accent-bg-sm)",
     numeral:    "II",
-    ruledColor: "oklch(0.44 0.10 295 / 0.07)",
+    ruledColor: "var(--c-accent-bg-xs)",
   },
   {
     id: "q3",
@@ -65,12 +65,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "normal",
     urgent: true,
     important: false,
-    color:      "oklch(0.52 0.06 55)",
-    bg:         "oklch(0.975 0.010 65)",
-    border:     "oklch(0.52 0.06 55 / 0.45)",
-    shadow:     "oklch(0.52 0.06 55 / 0.14)",
+    color:      "var(--c-accent)",
+    bg:         "var(--c-pale-bg3)",
+    border:     "var(--c-accent-bd-sm)",
+    shadow:     "var(--c-accent-bg-sm)",
     numeral:    "III",
-    ruledColor: "oklch(0.52 0.06 55 / 0.07)",
+    ruledColor: "var(--c-accent-bg-xs)",
   },
   {
     id: "q4",
@@ -80,12 +80,12 @@ const QUADRANTS: QuadrantDef[] = [
     priority: "normal",
     urgent: false,
     important: false,
-    color:      "oklch(0.52 0.018 70)",
-    bg:         "oklch(0.972 0.008 75)",
-    border:     "oklch(0.68 0.018 72 / 0.45)",
-    shadow:     "oklch(0.68 0.018 72 / 0.14)",
+    color:      "var(--c-muted-text)",
+    bg:         "var(--c-pale-bg3)",
+    border:     "var(--c-mid-border)",
+    shadow:     "var(--c-pale-bg2)",
     numeral:    "IV",
-    ruledColor: "oklch(0.68 0.018 72 / 0.07)",
+    ruledColor: "var(--c-pale-bg2)",
   },
 ];
 
@@ -164,13 +164,13 @@ export function EisenhowerMatrix({
       <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
         <div style={{
           width: 3, height: 18,
-          background: "oklch(0.50 0.09 35)",
+          background: "var(--c-accent)",
           borderRadius: 2, flexShrink: 0,
         }} />
         <span style={{
           fontFamily: "'Playfair Display', serif",
           fontSize: 15, fontWeight: 700,
-          color: "oklch(0.28 0.018 65)",
+          color: "var(--c-ink)",
           fontStyle: "italic",
         }}>
           Priority Matrix
@@ -178,7 +178,7 @@ export function EisenhowerMatrix({
         <span style={{
           fontFamily: "'Space Mono', monospace",
           fontSize: 9,
-          color: "oklch(0.62 0.018 70)",
+          color: "var(--c-muted-text)",
           letterSpacing: "0.08em",
           textTransform: "uppercase",
           marginLeft: 2,
@@ -201,7 +201,7 @@ export function EisenhowerMatrix({
           fontSize: 8,
           letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: "oklch(0.62 0.018 70)",
+          color: "var(--c-muted-text)",
           whiteSpace: "nowrap",
           textAlign: "center",
         }}>
@@ -343,7 +343,7 @@ export function EisenhowerMatrix({
                       justifyContent: "center",
                       fontFamily: "'Space Mono', monospace",
                       fontSize: 9,
-                      color: "oklch(0.72 0.014 75)",
+                      color: "var(--c-light-neutral)",
                       letterSpacing: "0.04em",
                       fontStyle: "italic",
                       opacity: isOver ? 0.9 : 0.45,
@@ -376,7 +376,7 @@ export function EisenhowerMatrix({
           fontSize: 8,
           letterSpacing: "0.14em",
           textTransform: "uppercase",
-          color: "oklch(0.62 0.018 70)",
+          color: "var(--c-muted-text)",
         }}>
           urgency →
         </div>
@@ -406,7 +406,7 @@ function TaskChip({
       onDragEnd={onDragEnd}
       title={task.text}
       style={{
-        background: "oklch(1 0 0 / 0.80)",
+        background: "rgba(255,255,255,0.80)",
         border: `1.5px solid ${quadrantBorder}`,
         borderLeft: `3px solid ${quadrantColor}`,
         borderRadius: 2,
@@ -451,7 +451,7 @@ function TaskChip({
       <span style={{
         fontFamily: "'DM Sans', sans-serif",
         fontSize: 11,
-        color: "oklch(0.30 0.018 65)",
+        color: "var(--c-ink-soft)",
         lineHeight: 1.35,
         flex: 1,
         overflow: "hidden",

@@ -12,9 +12,9 @@ import { X, Key, Loader2, AlertCircle } from "lucide-react";
 const DARK   = "var(--c-shadow-ink2)";
 const ACCENT = "var(--c-accent)";
 const BORDER = "var(--c-mid-soft)";
-const BG     = "oklch(0.970 0.022 355)";
+const BG     = "var(--c-pale-bg3)";
 const MUTED  = "var(--c-accent-icon)";
-const RED    = "oklch(0.52 0.20 25)";
+const RED    = "var(--c-deep)";
 
 export function ApiKeyDialog() {
   const [open, setOpen] = useState(false);
@@ -136,11 +136,11 @@ export function ApiKeyDialog() {
 
           {/* Payment warning */}
           <div style={{
-            background: "oklch(0.96 0.030 60)",
+            background: "var(--c-pale)",
             border: `1.5px solid oklch(0.75 0.12 60)`,
             padding: "9px 11px",
             fontSize: 8,
-            color: "oklch(0.38 0.10 60)",
+            color: "var(--c-deep)",
             letterSpacing: "0.04em",
             lineHeight: 1.65,
           }}>

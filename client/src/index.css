@@ -250,7 +250,7 @@
   textarea::placeholder {
     font-weight: 300;
     font-size: 0.72rem;
-    color: oklch(0.80 0.018 340);
+    color: var(--c-light);
     letter-spacing: 0.01em;
   }
 }
@@ -276,12 +276,12 @@
      Mimics the vintage desktop window aesthetic from the reference image:
      cream/parchment fill, thin pencil-stroke border, subtle shadow */
   .retro-window {
-    background: oklch(0.975 0.012 355);
-    border: 1.5px solid oklch(0.86 0.030 340);
+    background: var(--c-pale-bg3);
+    border: 1.5px solid var(--c-light-border);
     border-radius: 4px;
     box-shadow:
-      2px 3px 0px oklch(0.84 0.030 340 / 0.40),
-      0 1px 8px oklch(0.58 0.12 340 / 0.06);
+      2px 3px 0px var(--c-mid-border),
+      0 1px 8px var(--c-accent-bg-sm);
     position: relative;
     overflow: hidden;
   }
@@ -292,12 +292,12 @@
     align-items: center;
     justify-content: space-between;
     padding: 4px 8px;
-    background: oklch(0.90 0.040 340);
-    border-bottom: 1px solid oklch(0.86 0.030 340);
+    background: var(--c-pale);
+    border-bottom: 1px solid var(--c-light-border);
     font-family: 'Space Mono', monospace;
     font-size: 0.60rem;
     letter-spacing: 0.08em;
-    color: oklch(0.35 0.040 320);
+    color: var(--c-ink-soft);
     user-select: none;
   }
 
@@ -310,21 +310,21 @@
   .retro-titlebar-btn {
     width: 10px;
     height: 10px;
-    border: 1px solid oklch(0.78 0.040 340);
-    background: oklch(0.975 0.012 355);
+    border: 1px solid var(--c-mid-border);
+    background: var(--c-pale-bg3);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 7px;
-    color: oklch(0.50 0.040 330);
+    color: var(--c-accent);
     cursor: default;
     border-radius: 1px;
   }
 
   /* Morandi card base (backward compat) */
   .m-card {
-    background: oklch(0.975 0.012 355);
-    border: 1.5px solid oklch(0.86 0.030 340);
+    background: var(--c-pale-bg3);
+    border: 1.5px solid var(--c-light-border);
     border-radius: 4px;
   }
 
@@ -340,9 +340,8 @@
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: oklch(0.50 0.060 330);
+     color: var(--c-accent);
   }
-
   /* Small caps editorial label (kept for compat) */
   .editorial-label {
     font-family: 'Space Mono', monospace;
@@ -350,7 +349,7 @@
     font-weight: 400;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.50 0.060 330);
+    color: var(--c-accent);
   }
 
   /* ── Retro Button System ──
@@ -359,9 +358,9 @@
 
   /* Primary: hot pink fill — the main CTA button */
   .m-btn-primary {
-    background: oklch(0.58 0.12 340);
-    color: oklch(0.98 0.005 355);
-    border: 2.5px solid oklch(0.42 0.10 330);
+    background: var(--c-accent);
+    color: var(--c-pale-bg3);
+    border: 2.5px solid var(--c-deep);
     border-radius: 3px;
     padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
@@ -370,7 +369,7 @@
     letter-spacing: 0.10em;
     text-transform: uppercase;
     /* 3D offset shadow — the key retro effect */
-    box-shadow: 3px 3px 0px oklch(0.42 0.10 330);
+    box-shadow: 3px 3px 0px var(--c-deep);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -378,20 +377,20 @@
     cursor: pointer;
   }
   .m-btn-primary:hover {
-    background: oklch(0.54 0.14 340);
-    box-shadow: 4px 4px 0px oklch(0.38 0.10 330);
+    background: var(--c-accent-hover);
+    box-shadow: 4px 4px 0px var(--c-deep);
     transform: translate(-1px, -1px);
   }
   .m-btn-primary:active {
-    box-shadow: 1px 1px 0px oklch(0.42 0.10 330);
+    box-shadow: 1px 1px 0px var(--c-deep);
     transform: translate(2px, 2px);
   }
 
   /* Dark: charcoal fill */
   .m-btn-dark {
-    background: oklch(0.30 0.020 60);
-    color: oklch(0.97 0.005 75);
-    border: 2.5px solid oklch(0.16 0.012 60);
+    background: var(--c-ink-soft);
+    color: var(--c-pale-bg3);
+    border: 2.5px solid var(--c-ink);
     border-radius: 3px;
     padding: 0.42rem 1.1rem;
     font-family: 'Space Mono', monospace;
@@ -399,7 +398,7 @@
     font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0px oklch(0.16 0.012 60);
+    box-shadow: 3px 3px 0px var(--c-ink);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -407,20 +406,20 @@
     cursor: pointer;
   }
   .m-btn-dark:hover {
-    background: oklch(0.24 0.018 60);
-    box-shadow: 4px 4px 0px oklch(0.12 0.010 60);
+    background: var(--c-ink);
+    box-shadow: 4px 4px 0px var(--c-ink);
     transform: translate(-1px, -1px);
   }
   .m-btn-dark:active {
-    box-shadow: 1px 1px 0px oklch(0.16 0.012 60);
+    box-shadow: 1px 1px 0px var(--c-ink);
     transform: translate(2px, 2px);
   }
 
   /* Ghost: soft pink fill, mauve border — secondary action */
   .m-btn-ghost {
-    background: oklch(0.975 0.012 355);
-    border: 2.5px solid oklch(0.74 0.050 340);
-    color: oklch(0.46 0.055 330);
+    background: var(--c-pale-bg3);
+    border: 2.5px solid var(--c-mid);
+    color: var(--c-accent);
     border-radius: 3px;
     padding: 0.40rem 1.0rem;
     font-family: 'Space Mono', monospace;
@@ -428,7 +427,7 @@
     font-weight: 700;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    box-shadow: 3px 3px 0px oklch(0.74 0.050 340);
+    box-shadow: 3px 3px 0px var(--c-mid);
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
@@ -436,13 +435,13 @@
     cursor: pointer;
   }
   .m-btn-ghost:hover {
-    border-color: oklch(0.58 0.12 340);
-    color: oklch(0.58 0.12 340);
-    box-shadow: 4px 4px 0px oklch(0.58 0.12 340 / 0.55);
+    border-color: var(--c-accent);
+    color: var(--c-accent);
+    box-shadow: 4px 4px 0px var(--c-accent-bg-lg);
     transform: translate(-1px, -1px);
   }
   .m-btn-ghost:active {
-    box-shadow: 1px 1px 0px oklch(0.74 0.050 340);
+    box-shadow: 1px 1px 0px var(--c-mid);
     transform: translate(2px, 2px);
   }
 
@@ -450,7 +449,7 @@
   .m-btn-link {
     background: transparent;
     border: none;
-    border-bottom: 2px solid oklch(0.58 0.018 68);
+    border-bottom: 2px solid var(--c-mid-border);
     border-radius: 0;
     padding: 0 0 0.1rem 0;
     font-family: 'Space Mono', monospace;
@@ -458,7 +457,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: oklch(0.40 0.020 62);
+    color: var(--c-muted-text);
     transition: border-color 0.12s, color 0.12s;
     box-shadow: none;
     display: inline-flex;
@@ -467,38 +466,38 @@
     cursor: pointer;
   }
   .m-btn-link:hover {
-    border-color: oklch(0.52 0.10 32);
-    color: oklch(0.52 0.10 32);
+    border-color: var(--c-accent);
+    color: var(--c-accent);
   }
 
   /* Chip/tag */
   .m-chip {
-    background: oklch(0.975 0.012 355);
-    border: 1.5px solid oklch(0.84 0.035 340);
+    background: var(--c-pale-bg3);
+    border: 1.5px solid var(--c-light-border);
     border-radius: 2px;
-    padding: 0.22rem 0.60rem;
+    padding: 0.15rem 0.5rem;
     font-family: 'Space Mono', monospace;
-    font-size: 0.58rem;
+    font-size: 0.60rem;
     font-weight: 400;
     letter-spacing: 0.10em;
     text-transform: uppercase;
-    color: oklch(0.50 0.040 330);
+    color: var(--c-accent);
     transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    box-shadow: 1px 1px 0px oklch(0.84 0.035 340 / 0.40);
+    box-shadow: 1px 1px 0px var(--c-mid-border);
   }
   .m-chip:hover, .m-chip.active {
-    background: oklch(0.58 0.12 340);
-    border-color: oklch(0.50 0.10 330);
-    color: oklch(0.98 0.005 355);
-    box-shadow: 1px 1px 0px oklch(0.50 0.10 330 / 0.40);
+    background: var(--c-accent);
+    border-color: var(--c-deep);
+    color: var(--c-pale-bg3);
+    box-shadow: 1px 1px 0px var(--c-deep);
   }
   .m-chip.active-sage {
-    background: oklch(0.74 0.07 168);
-    border-color: oklch(0.62 0.07 168);
-    color: oklch(0.98 0.005 355);
+    background: var(--c-light);
+    border-color: var(--c-mid);
+    color: var(--c-pale-bg3);
   }
 }
 
@@ -538,12 +537,12 @@
 
 /* ── Retro scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: oklch(0.94 0.018 355); }
+::-webkit-scrollbar-track { background: var(--c-pale); }
 ::-webkit-scrollbar-thumb {
-  background: oklch(0.82 0.050 340);
+  background: var(--c-mid);
   border-radius: 2px;
 }
-::-webkit-scrollbar-thumb:hover { background: oklch(0.70 0.08 340); }
+::-webkit-scrollbar-thumb:hover { background: var(--c-accent); }
 
 /* ── Pixel-art hand cursor ──
    A classic pointing hand for all interactive elements */
@@ -574,8 +573,8 @@ input[type="radio"]:not(:disabled) {
   align-items: center;
   gap: 10px;
   padding: 8px 10px 8px 10px;
-  background: oklch(0.978 0.008 76 / 0.55);
-  border: 1.5px solid oklch(0.82 0.018 68 / 0.6);
+  background: var(--c-pale-bg2);
+  border: 1.5px solid var(--c-light-border);
   border-radius: 4px;
   position: relative;
   transition: box-shadow 0.08s, transform 0.08s;
@@ -589,28 +588,28 @@ input[type="radio"]:not(:disabled) {
   bottom: -6px;
   width: 1px;
   height: 6px;
-  border-left: 1px dashed oklch(0.72 0.018 68 / 0.55);
+  border-left: 1px dashed var(--c-mid-border);
 }
 .retro-task-row:hover {
-  box-shadow: 2px 2px 0px oklch(0.72 0.022 68);
+  box-shadow: 2px 2px 0px var(--c-mid-border);
   transform: translate(-1px, -1px);
 }
 .retro-task-row.done {
   opacity: 0.50;
-  background: oklch(0.970 0.006 76);
+  background: var(--c-pale-bg3);
 }
 /* Priority: all same neutral transparent background — no color differentiation */
 .retro-task-row.urgent {
-  background: oklch(0.978 0.008 76 / 0.55);
+  background: var(--c-pale-bg2);
 }
 .retro-task-row.focus {
-  background: oklch(0.978 0.008 76 / 0.55);
+  background: var(--c-pale-bg2);
 }
 .retro-task-row.normal {
-  background: oklch(0.978 0.008 76 / 0.55);
+  background: var(--c-pale-bg2);
 }
 .retro-task-row.someday {
-  background: oklch(0.978 0.008 76 / 0.55);
+  background: var(--c-pale-bg2);
 }
 /* Hide icon box — no longer used */
 .retro-task-icon-box { display: none; }
