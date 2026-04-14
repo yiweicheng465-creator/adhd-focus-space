@@ -613,9 +613,10 @@ export function Dashboard({
                 }} />
               </div>
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              {/* Quick capture */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.018 355 / 0.85)", padding: "5px 12px", flex: "1 1 160px", maxWidth: 280, borderRadius: 6 }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+              {/* Quick capture + hint stacked */}
+              <div style={{ display: "flex", flexDirection: "column", flex: "1 1 160px", maxWidth: 280, gap: 3 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, border: `1px solid ${BORDER}`, background: "oklch(0.975 0.018 355 / 0.85)", padding: "5px 12px", borderRadius: 6 }}>
                 <Zap size={11} style={{ color: TC, flexShrink: 0 }} />
                 <input
                   ref={dumpInputRef}
@@ -635,15 +636,17 @@ export function Dashboard({
                 />
                 <span style={{ fontSize: 10, color: MUTED, opacity: 0.65, fontFamily: "'Space Mono', monospace", flexShrink: 0 }}>↵</span>
               </div>
+              {/* press D hint — directly below input bar */}
+              <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, paddingLeft: 2 }}>
+                press D to focus
+              </div>
+              </div>{/* /capture+hint column */}
               {/* Context switcher */}
               <div style={{ flex: "1 1 auto", minWidth: 0 }}>
                 <ContextSwitcher active={activeContext} onChange={setActiveContext} counts={ctxCounts} contexts={allContexts} label="FILTER BY TAG" />
               </div>
             </div>
-            {/* Enter hint — always visible */}
-            <div style={{ fontSize: 9, color: MUTED, fontFamily: "'Space Mono', monospace", letterSpacing: "0.04em", opacity: 0.55, marginTop: 2, paddingLeft: 2 }}>
-              press D to focus
-            </div>
+
           </div>
           {/* Right: motivational micro-text */}
           <div className="hidden lg:flex shrink-0 flex-col items-end justify-end" style={{ width: 80, padding: "10px 14px 10px 0", position: "relative" }}>
